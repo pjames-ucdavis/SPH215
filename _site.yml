@@ -2,14 +2,10 @@ name: "SPH 215: GIS and Public Health Spring 2025"
 navbar:
   title: "SPH 215: GIS and Public Health Spring 2025"
   left:
-    - text: "Home"
-      href: index.html
     - text: "About"
       href: about.html
     - text: "Syllabus"
       href: Syllabus.html
-    - text: "Help with R"
-      href: R_help.html
     - text: "Labs"
       href: Labs.html
       menu:
@@ -33,5 +29,9 @@ navbar:
           href: lab9.html
     - text: "Other"
       href: Other.html
-      
+    - text: "Help with R"
+      href: R_help.html
 output_dir: docs
+output:
+  html_document:
+    theme: default

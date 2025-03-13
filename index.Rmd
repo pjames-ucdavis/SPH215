@@ -1,5 +1,5 @@
 ---
-title: "My Website"
+title: "SPH 215: GIS and Public Health"
 ---
 
 Hello, Website!
