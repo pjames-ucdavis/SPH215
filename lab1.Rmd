@@ -129,11 +129,6 @@ Open up RStudio. You should see the interface shown in the figure below which ha
 
 /
 
-## - **Editor** (top left) - Running R code using the console (bottom left in figure below) is a great place to start, but has its limitations. Each time you want to execute a set of commands, you have to re-enter them at the command line. Complex commands are potentially subject to typographical errors, necessitating that they be re-entered correctly. Repeating a set of operations requires re-entering the code stream. To give yourself more room to work, it’s a great idea to use the R script editor.
-
-## A script is simply a text file containing a set of commands and comments. The script can be saved and used later to re-execute the saved commands. The script can also be edited so you can execute a modified version of the commands.
-
-## You can open a new empty script by clicking the New File icon in the upper left of the main RStudio toolbar. This icon looks like a white square with a white plus sign in a green circle. Clicking the icon opens the New File Menu. Click the “R Script” option and the script editor will open with an empty script. Your R Studio should look similar to below (image source: R for Data Science)
 
 - **Console** (bottom left) - The way R works is you write a line of code to execute some kind of task on a data object. - The R Console allows you to run code interactively. The screen prompt `>` is an invitation from R to enter its - world. This is where you type code in, press enter to execute the code, and see the results.
 - **Environment, History, and Connections tabs** (upper-right)
@@ -147,5 +142,49 @@ Open up RStudio. You should see the interface shown in the figure below which ha
   - **Help** - shows help documentation for R commands that you’ve called up.
   - **Viewer** - allows you to view local web content (won’t be using this much).
 
-There is actually fourth window. But, we’ll get to this window a little later.
+There is also a fourth window. But, we’ll get to this window a little later. The [assignment guidelines](Assignments.html) also have more on this window!
+
+### Setting RStudio Defaults
+
+While not required, I strongly suggest that you change preferences in RStudio to never save the workspace so you always open with a clean environment. See [Ch. 8.1](https://r4ds.had.co.nz/workflow-projects.html#what-is-real) of R4DS for some more background
+
+1. From the Tools menu on RStudio, open the Tools menu and then select Global Options.
+1. If not already highlighted, click on the General button from the left panel.
+1. Uncheck the following Restore boxes
+  - Restore most recently opened project at startup
+  - Restore previously open source documents at startup
+  - Restore .RData into workspace at startup
+1. Set Save Workspace to .RData on exit to Never
+1. Click OK at the bottom to save the changes and close the preferences window. You may need to restart RStudio.
+
+The reason for making these changes is that it is preferable for reproducibility to start each R session with a clean environment. You can restore a previous environment either by rerunning code or by manually loading a previously saved session.
+
+The R Studio environment is modified when you execute code from files or from the console. If you always start fresh, you do not need to be concerned about things not working because of something you typed in the console, but did not save in a file.
+
+You only need to set these preferences once.
+
+## R Data Types
+
+Let’s now explore what R can do. R is really just a big fancy calculator. For example, type in the following mathematical expression in the R console (left window)
+```{r r1}
+1+1
+```
+Note that spacing does not matter: `1+1` will generate the same answer as `1      +       1`. Can you say hello to the world?
+```{r r2}
+"hello world"
+```
+Looks great! **Note, we need to put quotes around it.** “hello world” is a character and R recognizes characters only if there are quotes around it. This brings us to the topic of basic data types in R. There are four basic data types in R: character, logical, numeric, and factors (there are two others - complex and raw - but we won’t cover them because they are rarely used in practice).
+
+## Characters
+Characters are used to represent words or letters in R. We saw this above with “hello world”. Character values are also known as strings. You might think that the value `"1"` is a number. Well, if you put quotes around, it isn’t! Anything with quotes will be interpreted as a character. No ifs, ands or buts about it.
+
+## Logicals
+
+A logical takes on two values: FALSE or TRUE. Logicals are usually constructed with comparison operators, which we’ll go through more carefully in Lab 2. Think of a logical as the answer to a question like “Is this value greater than (lower than/equal to) this other value?” The answer will be either TRUE or FALSE. TRUE and FALSE are logical values in R. For example, typing in the following
+
+```{r r3}
+3 > 2
+```
+
+
 

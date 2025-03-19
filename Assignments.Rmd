@@ -60,7 +60,7 @@ To open an `.Rmd` file in RStudio, select File -> Open File and navigate to the 
 
 /
 
-##Authoring an R Markdown document
+## Authoring an R Markdown document
 
 R Markdown documents contain 3 major components:
 
@@ -86,3 +86,108 @@ output:
 ---
 
 ```
+
+### R Code Chunks
+
+When answering an assignment question, you’ll have the following sequence of components in your R Markdown document: Question, R code answering the question, comment describing what the code is doing, and your text to explain the results. Let’s say you have the following question in one of your assignments.
+
+```{q1}
+Question 1
+
+1+1
+
+1. What is the result of the operation above?
+```
+
+Assignments will ask you to write R code to accomplish a data analysis task. You present and execute your R code inside R code chunks. R chunks start with ```{r} and end with ```, and you insert your R code in between. To designate `1+1` as R code, it will look like the following in your R Markdown document.
+
+
+```{rexample}
+> ```{r}  
+> 1+1 
+> ``` 
+```
+
+
+All code inside a chunk will be executed when knitting the markdown file (i.e. the html file will show your code and its result). This means that your R code must reside inside an R code chunk in order for it to be processed as R code (otherwise R Markdown will think it is text). This also means that nothing but executable code (or comments, which we’ll get to next) should be inside a chunk.
+
+We will ask you to annotate your R code so that we (and you) know what is being done in that line of code. You designate annotations or comments in R code using the `#` symbol. In programming, comments are bits of text that are not interpreted as computer instructions—they aren’t code, they’re just notes about the code! Since computer code can be opaque and difficult to understand, we use comments to help write down the meaning and purpose of our code. While a computer is able to understand the code, comments are there to help people understand it. This is particularly important when someone else will be looking at your work—whether that person is a collaborator, or is simply a future version of you (e.g., when you need to come back and fix something and so need to remember what you were even thinking).
+
+Comments should be clear, concise, and helpful—they should provide information that is not otherwise present or “obvious” in the code itself. So, to annotate the above line of code `1+1`, you add in your R code chunk:
+
+```{rexample}
+> ```{r}  
+> #this adds one plus one
+> 1+1 
+> ``` 
+```
+
+You put your comments after the `#`.
+
+The first line of the chunk has `{r}` which basically states that everything inside the chunk will be in R code. Next to the `r`, we can give the chunk a name, such as:
+
+```{rexample}
+> ```{r q1chunk1}  
+> #this adds one plus one
+> 1+1 
+> ``` 
+```
+
+Here, we named the chunk `q1chunk1` which indicates this is question 1, chunk 1. You can name the chunk whatever you like (jimbo, samantha, tony). The chunk name is not required; however, it is good practice to give each chunk a unique name (we’ll see its value later when we talk about knitting).
+
+In the R Markdown you created and saved, you will notice the following R code chunk after the YAML.
+```{rexample}
+> ```{r}
+> knitr::opts_chunk$set(echo = TRUE)
+> ```
+```
+
+The above code establishes global options for every R chunk code in your R Markdown file. These options alter the way R results are spit out in your formatted knitted document. I suggest adding the following global options in every R Markdown assignment file.
+
+```{rexample}
+> ```{r}
+> knitr::opts_chunk$set(warning=FALSE, message = FALSE)
+> ```
+```
+
+The above code hides non error messages for every single R code chunk in your file. These non error messages are unnecessary for the purposes of this class. Other chunk options can be found [here](https://r4ds.had.co.nz/r-markdown.html#chunk-options). 
+
+You can also set options for individual chunks. These are local options - local to that chunk - and won’t be applied to other chunks in your file. For example, you can add the options `warning=TRUE` and `message=TRUE` to an individual R code chunk as follows to show the messages for the R code in that chunk. Notice that each argument is separated by a comma.
+
+```{rexample}
+> ```{r q1chunk1, warning = TRUE, message = TRUE}
+> 1+1
+> ```
+```
+
+### Text 
+
+In addition to R code, assignments will ask you to write text to explain results. Going back to our example question from above:
+```{q1}
+Question 1
+
+1+1
+
+1. What is the result of the operation above?
+```
+
+You would type in your R Markdown document the following:
+```{rexample}
+> Question 1
+> ```{r q1chunk1}
+> #this code adds one plus one
+>  1+1
+> ```
+>
+> My analysis yields the number 2.
+```
+
+```
+cat("````{r}\n",
+    "# This code adds one plus one\n",
+    "1+1\n",
+    "````", sep = "")
+```
+
+
+
