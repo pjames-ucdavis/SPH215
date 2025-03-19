@@ -144,6 +144,8 @@ Open up RStudio. You should see the interface shown in the figure below which ha
 
 There is also a fourth window. But, we’ll get to this window a little later. The [assignment guidelines](Assignments.html) also have more on this window!
 
+\
+
 ### Setting RStudio Defaults
 
 While not required, I strongly suggest that you change preferences in RStudio to never save the workspace so you always open with a clean environment. See [Ch. 8.1](https://r4ds.had.co.nz/workflow-projects.html#what-is-real) of R4DS for some more background
@@ -163,6 +165,8 @@ The R Studio environment is modified when you execute code from files or from th
 
 You only need to set these preferences once.
 
+\
+
 ## R Data Types
 
 Let’s now explore what R can do. R is really just a big fancy calculator. For example, type in the following mathematical expression in the R console (left window)
@@ -175,8 +179,12 @@ Note that spacing does not matter: `1+1` will generate the same answer as `1    
 ```
 Looks great! **Note, we need to put quotes around it.** “hello world” is a character and R recognizes characters only if there are quotes around it. This brings us to the topic of basic data types in R. There are four basic data types in R: character, logical, numeric, and factors (there are two others - complex and raw - but we won’t cover them because they are rarely used in practice).
 
+\
+
 ## Characters
 Characters are used to represent words or letters in R. We saw this above with “hello world”. Character values are also known as strings. You might think that the value `"1"` is a number. Well, if you put quotes around, it isn’t! Anything with quotes will be interpreted as a character. No ifs, ands or buts about it.
+
+\
 
 ## Logicals
 
@@ -186,5 +194,26 @@ A logical takes on two values: FALSE or TRUE. Logicals are usually constructed w
 3 > 2
 ```
 
+\
 
+This gives you a true. What about the following?
+```{r r4}
+"jacob" == "catherine"
+```
+
+\
+
+## Numeric
+Numerics are separated into two types: integer and double. The distinction between integers and doubles is usually not important. R treats numerics as doubles by default because it is a less restrictive data type. You can do any mathematical operation on numeric values. We added one and one above. We can also multiply using the `*` operator.
+
+```{r r5}
+2*3
+```
+
+\
+
+And divide
+```{r r6}
+2*3
+```
 
