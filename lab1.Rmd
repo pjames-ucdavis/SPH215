@@ -1,0 +1,151 @@
+---
+title: "Lab 1: Intro to R for GIS and Making Maps"
+---
+
+
+In this course, we will be using R for all our GIS needs. If you've never used R before, no worries! We will move at a slow and steady pace and will provide support along the way. If you're an R pro, feel free to flex your R skills and (hopefully) build on them! 
+
+The objectives of the guide are as follows
+
+- Install and set up R and RStudio.
+- Understand R data types
+- Understand R data structures
+- Understand R functions
+- Introduction to tidyverse and its suite of data wrangling functions
+- Understand R Markdown
+- This lab guide follows closely and supplements the material presented in Chapters 2, 4, 5, 7 and 21 in the textbook [R for Data Science (RDS)](http://r4ds.had.co.nz/index.html).
+
+\
+
+## What is R?
+
+R is a free, open source statistical programming language. It is useful for data cleaning, analysis, and visualization. R is an interpreted language, not a compiled one. This means that you type something into R and it does what you tell it. It is both a command line software and a programming environment. It is an extensible, open-source language and computing environment for Windows, Macintosh, UNIX, and Linux platforms, which allows for the user to freely distribute, study, change, and improve the software. It is basically a free, super big, and complex calculator. You will be using R to accomplish all data analysis tasks in this class. You might be wondering “Why in the world do we need to know how to use a statistical software program?” Here are the main reasons:
+
+1. You will be learning about new concepts in lecture and the readings. Applying these concepts using real data is an important form of learning. A statistical software program is the most efficient (and in many cases the only) means of running data analyses, not just in the cloistered setting of a university classroom, but especially in the real world. Applied data analysis will be the way we bridge statistical theory to the “real world.” And R is the vehicle for accomplishing this.
+
+2. In order to do applied data analysis outside of the classroom, you need to know how to use a statistical program. There is no way around it. If you want to collect data on health, you need a program to store and analyze that data. 
+
+The next question you may have is “I love Excel [or insert your favorite program]. Why can’t I use that and forget your stupid R?” Here are some reasons:
+
+1. R is free. Most programs are not;
+2. R is open source. Which means the software is community supported. This allows you to get help not from some big corporation (e.g. Microsoft with Excel), but people all around the world who are using R. And R has **a lot** of users, which means that if you have a problem, and you pose it to the user community, someone will help you;
+3. R is powerful and extensible (meaning that procedures for analyzing data that don’t currently exist can be readily developed);
+4. R has the capability for mapping data, an asset not generally available in other statistical software;
+5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields
+
+R is different from Excel in that it is generally not a point-and-click program. You will be primarily writing code to clean and analyze data. What does *writing* or *sourcing* code mean? A basic example will help clarify. Let’s say you are given a dataset with cancer cases across CA. You have a variable in the dataset representing age Let’s say this variable is named **AGE**. To get the mean age of the people in your dataset, you would write code that would look something like this
+
+```{r cancer}
+#Read in Cancer Dataset
+cancer <- readRDS("CA_Cancer_Data.rds")
+
+#Get names of columns or variables
+head(cancer)
+
+#Get mean of AGE variable
+mean(cancer$AGE)
+```
+
+The command tells the program to get the mean of the variable **AGE**. If you wanted the sum, you write the command `sum(cancer$AGE)`.
+
+Now, where do you write this command? You write it in a script. A script is basically a text file. Think of writing code as something similar to writing an essay in a word document. Instead of sentences to produce an essay, in a programming script you are writing lines of code to run a data analysis. We’ll go through scripting in more detail later in this lab, but the basic process of sourcing code to run a data analysis task is as follows.
+
+1. Write code. First, you open your script file, and write code or various commands (like `mean(cancer$AGE)`) that will execute data analysis tasks in this file.
+2. Send code to the software program to run (R in our case).
+3. Program produces results based on code. The program reads in your commands from the script and executes them, spitting out results in its console screen.
+
+\
+
+I am skipping over many details, but the above steps outline the general work flow. You might now be thinking that you’re perfectly happy pointing and clicking your mouse in Excel (or wherever) to do your data analysis tasks. So, why should you adopt the statistical programming approach to conducting a data analysis?
+
+1. Your script documents the decisions you made during the data analysis process. This is beneficial for many reasons.
+- It allows you to recreate your steps if you need to rerun or alter your analysis many weeks, months, or even years in the future.
+- It allows you to share your steps with other people. If someone asks you what were the decisions made in the data analysis process, - just hand them the script.
+- Related to the above points, a script promotes **transparency** (here is what I did) and **reproducibility** (you can do it too). When you write code, you are forced to explicitly state the steps you took to do your research. When you do research by clicking through drop-down menus, your steps are lost, or at least documenting them requires considerable extra effort.
+2. If you make a mistake in a data analysis step, you can go back, change a few lines of code, and **poof**, you’ve fixed your problem.
+3. It is more efficient. In particular, cleaning data can encompass a lot of tedious work that can be streamlined using statistical programming.
+
+
+Hopefully, I’ve convinced you that statistical programming and R are worthwhile to learn. Now let's talk about getting R on your computer!
+
+\
+
+## Getting R
+
+R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network) sites. In the US, the main site is at http://cran.us.r-project.org/. Look in the “Download and Install R” area at the top. Click on the appropriate link based on your operating system.
+
+**If you already have R on your computer, make sure you have the most updated version of R on your personal computer (4.4.2 “Trophy Case”).**
+
+\
+
+### Mac OS X
+1. On the “R for Mac OS” page, there are multiple packages that could be downloaded. Depending on the model of your Mac, pick the appropriate .pkg file. *Note the details for some operating systems. If you are using an older operating system, please follow instructions.*
+2. After the package finishes downloading, locate the installer on your hard drive, double-click on the installer package, and after a few screens, select a destination for the installation of the R framework (the program) and the R.app GUI. Note that you will have to supply the Administrator’s password. Close the window when the installation is done.
+
+3. An application will appear in the Applications folder: R.app.
+
+4. Browse to the [XQuartz](https://www.xquartz.org/) download page. Click on the most recent version of XQuartz to download the application.
+ 
+5. Run the XQuartz installer. XQuartz is needed to create windows to display many types of R graphics: this used to be included in MacOS until version 10.8 but now must be downloaded separately.
+
+\
+
+### Windows
+1. On the “R for Windows” page, click on the “base” link, which should take you to the “R-4.4.3 for Windows” page
+
+2. On this page, click “Download R 4.4.3 for Windows”, and save the .exe file to your hard disk when prompted. Saving to the desktop is fine.
+
+3. To begin the installation, double-click on the downloaded file. Don’t be alarmed if you get unknown publisher type warnings. Window’s User Account Control will also worry about an unidentified program wanting access to your computer. Click on “Run”.
+
+4. Select the proposed options in each part of the install dialog. When the “Select Components” screen appears, just accept the standard choices
+
+\
+
+## What is R Studio?
+If you click on the R program you just downloaded, you will find a very basic user interface. For example, below is what I get on a Mac:
+
+![The Basic R Console](R_basic.png)
+/
+
+We will not use R’s direct interface to run analyses in this class. Instead, we will use the program **RStudio**, which is much easier to interact with! RStudio gives you a true integrated development environment (IDE), where you can write code in a window, see results in other windows, see locations of files, see objects you’ve created, and so on. To clarify which is which: R is the name of the programming language itself and RStudio is an interface that makes writing code, running analyses, and visualizing data in R so much easier.
+
+\
+
+## Getting R Studio
+
+To download and install RStudio, follow the directions below
+
+1. Navigate to [RStudio’s download site](https://posit.co/download/rstudio-desktop/)
+2. We've already downloaded R, so click on the appropriate link to Install RStudio based on your OS (Windows, Mac, Linux and many others). Do not download anything from the “All Installers and Tarballs” section.
+3. Click on the installer that you downloaded. Follow the installation directions, making sure to keep all defaults intact. After installation, RStudio should pop up in your Applications or Programs folder/menu.
+
+\
+
+## The RStudio Interface
+
+Open up RStudio. You should see the interface shown in the figure below which has three windows.
+
+![The RStudio Console](RStudio_image.png)
+
+/
+
+## - **Editor** (top left) - Running R code using the console (bottom left in figure below) is a great place to start, but has its limitations. Each time you want to execute a set of commands, you have to re-enter them at the command line. Complex commands are potentially subject to typographical errors, necessitating that they be re-entered correctly. Repeating a set of operations requires re-entering the code stream. To give yourself more room to work, it’s a great idea to use the R script editor.
+
+## A script is simply a text file containing a set of commands and comments. The script can be saved and used later to re-execute the saved commands. The script can also be edited so you can execute a modified version of the commands.
+
+## You can open a new empty script by clicking the New File icon in the upper left of the main RStudio toolbar. This icon looks like a white square with a white plus sign in a green circle. Clicking the icon opens the New File Menu. Click the “R Script” option and the script editor will open with an empty script. Your R Studio should look similar to below (image source: R for Data Science)
+
+- **Console** (bottom left) - The way R works is you write a line of code to execute some kind of task on a data object. - The R Console allows you to run code interactively. The screen prompt `>` is an invitation from R to enter its - world. This is where you type code in, press enter to execute the code, and see the results.
+- **Environment, History, and Connections tabs** (upper-right)
+  - **Environment** - shows all the R objects that are currently open in your workspace. This is the place, for example, where you will see any data you’ve loaded into R. When you exit RStudio, R will clear all objects in this window. You can also click on ![broom](broom.png) to clear out all the objects loaded and created in your current session.
+  - **History** - shows a list of executed commands in the current session.
+  - **Connections** - you can connect to a variety of data sources, and explore the objects and data inside the -   connection. I typically don’t use this window, but you [can](https://support.rstudio.com/hc/en-us/articles/115010915687-Using-RStudio-Connections.
+- **Files, Plots, Packages, Help and Viewer tabs** (lower-right)
+  - **Files - shows all the files and folders in your current working directory (more on what this means later).
+  - **Plots** - shows any charts, graphs, maps and plots you’ve successfully executed.
+  - **Packages** - tells you all the R packages that you have access to (more on this later).
+  - **Help** - shows help documentation for R commands that you’ve called up.
+  - **Viewer** - allows you to view local web content (won’t be using this much).
+
+There is actually fourth window. But, we’ll get to this window a little later.
+

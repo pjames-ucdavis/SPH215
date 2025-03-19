@@ -9,16 +9,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Peter James" />
 
-<meta name="date" content="2025-03-13" />
 
 <title>Syllabus</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -31,7 +29,12 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
@@ -58,6 +61,11 @@ if (window.hljs) {
 
 
 
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
 
 
 
@@ -218,7 +226,73 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
 
 
 
@@ -228,6 +302,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -258,7 +342,7 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="lab1.html">Lab 1: </a>
+      <a href="lab1.html">Lab 1: Intro to R for GIS and Making Maps</a>
     </li>
     <li>
       <a href="lab2.html">Lab 2: </a>
@@ -287,7 +371,10 @@ $(document).ready(function () {
   </ul>
 </li>
 <li>
-  <a href="Other.html">Other</a>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
 </li>
 <li>
   <a href="R_help.html">Help with R</a>
@@ -302,45 +389,153 @@ $(document).ready(function () {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">Syllabus</h1>
-<h4 class="author">Peter James</h4>
-<h4 class="date">2025-03-13</h4>
 
 </div>
 
 
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting
-syntax for authoring HTML, PDF, and MS Word documents. For more details
-on using R Markdown see <a href="http://rmarkdown.rstudio.com"
-class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be
-generated that includes both content as well as the output of any
-embedded R code chunks within the document. You can embed an R code
-chunk like this:</p>
-<pre class="r"><code>summary(cars)</code></pre>
-<pre><code>##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00</code></pre>
+<div id="sph-215-gis-and-public-health" class="section level3">
+<h3>SPH 215: GIS and Public Health</h3>
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
-<p><img src="Syllabus_files/figure-html/pressure-1.png" width="672" /></p>
-<p>Note that the <code>echo = FALSE</code> parameter was added to the
-code chunk to prevent printing of the R code that generated the
-plot.</p>
+<div id="professor-peter-james" class="section level3">
+<h3>Professor Peter James</h3>
+<p>The following is an abridged version of the course syllabus. A full
+course syllabus can be found on the <a
+href="https://canvas.ucdavis.edu/courses/996070">Canvas class
+website</a>.</p>
+<p>Lecture and Lab Lecture: Thursdays 8a-8:55a Lab: Thursdays 9-11a
+Lecture and Lab are held in person.</p>
+<p>Instructor Dr. Peter James</p>
+<p>Contact: pjames.at.ucdavis.edu Office: Medical Sciences 1C Room 138
+Office hours: By appointment over Zoom. Please email any time to set up
+a meeting!</p>
+</div>
+<div id="course-objectives" class="section level3">
+<h3>Course Objectives</h3>
+<p>In this course, students will gain</p>
+<ul>
+<li>A theoretical understanding of the role of space and place in
+community-level phenomenon</li>
+<li>An understanding of what kinds of spatial data are available and
+where to find them</li>
+<li>Proficiency in spatial analytic tools (R) to</li>
+<li>Manage and process spatial data</li>
+<li>Descriptively examine spatial data</li>
+<li>Run spatial models for statistical inference</li>
+<li>An understanding of how these methods are employed in community
+research-</li>
+</ul>
+</div>
+<div id="course-format" class="section level3">
+<h3>Course Format</h3>
+<p>Most classes will adhere to the following format: (1) An hour or so
+lecture / discussion about that week’s topic and (2) an hour or so walk
+through of a lab, and (3) a lab where we apply the methods learned in
+lecture/discussion/lab using real data in R. All students are expected
+to actively participate, which means not only being present, but reading
+all material and engaging in class discussions.</p>
+</div>
+<div id="required-readings" class="section level3">
+<h3>Required Readings</h3>
+<p>Required reading material is composed of a combination of the
+following</p>
+<p>Journal articles and research reports. There is no single official
+textbook for the course. Instead, I’ve selected journal articles and
+research reports.</p>
+</div>
+<div id="my-handouts" class="section level3">
+<h3>My handouts</h3>
+<p>For most topics, in lieu of an article or book chapter, I will
+provide lecture handouts on Canvas in advance of the assigned class.</p>
+<p>There are also a set of weekly optional readings listed at the end of
+the syllabus that provide applications of the methods.</p>
+</div>
+<div id="additional-readings" class="section level3">
+<h3>Additional Readings</h3>
+<p>The other major course material are lab guides, which will be
+released at the beginning of Thursday’s lecture on the class website.
+Many of the R lab guides will closely follow two textbooks. These
+textbooks are not required, but are great resources.</p>
+<p>The first textbook provides the foundation for using R</p>
+<p>(RDS) Wickham, Hadley &amp; Garret Grolemund. (2017). R for Data
+Science. Sebastopol, CA: O’Reilly Media. The textbook is free online at:
+<a href="http://r4ds.had.co.nz/introduction.html"
+class="uri">http://r4ds.had.co.nz/introduction.html</a></p>
+<p>The second textbook covers spatial data in R</p>
+<p>(GWR) Lovelace, Robin, Jakub Nowosad &amp; Jannes Muenchow.
+Geocomputation with R. CRC Press. The textbook is free online at: <a
+href="https://geocompr.robinlovelace.net/"
+class="uri">https://geocompr.robinlovelace.net/</a></p>
+</div>
+<div id="course-software" class="section level3">
+<h3>Course Software</h3>
+<p>R is the only statistical language used in this course, as it has
+become an increasingly popular program for data analysis in the social
+sciences. We will use RStudio as a user friendly interface for R. R is
+freeware and you can download it on your personal laptop and desktop
+computers (along with RStudio, which is a user friendly interface for
+R). Note that although the course does not require students to have
+experience with R, this class does not devote too much time introducing
+students to the program. In other words, this is a not an introduction
+to R programming. The lab guides will provide as much detail as possible
+to execute tasks and functions, but you will likely run into tasks that
+will require you to go beyond the guides. My suggestion is to (1) look
+up RDS or GWR as they are excellent resources and (2) if (1) fails
+search online. As such, you are expected to do as much independent
+learning of the software as I teach in the labs.</p>
+</div>
+<div id="course-requirements" class="section level3">
+<h3>Course Requirements</h3>
+<div id="assignments-4-x-15-60" class="section level4">
+<h4>Assignments (4 x 15%: 60%)</h4>
+<p>Students are required to complete four homework assignments during
+the quarter which are due approximately every 2 weeks. The assignments
+will largely correspond to the material covered in lectures and labs.
+Each assignment will ask students to apply methods in R. Collaboration
+of ideas among participants is encouraged, but the assignments must be
+completed independently. For each assignment, you will need to submit an
+R Markdown Rmd and its knitted file on Canvas. Complete assignment
+guidelines can be found here: <a
+href="https://crd230.github.io/hw_guidelines.html"
+class="uri">https://crd230.github.io/hw_guidelines.html</a>.</p>
+<p>Late submissions will be deducted 10% per 24 hours until 72 hours
+after the submission due time. After 72 hours your submission will not
+be graded. No exception unless you provide documentation of your illness
+or bereavement before the due date. If you cannot upload the assignment
+on Canvas due to technical issues, you must email it as an attachment to
+me by the submission due time.</p>
+</div>
+<div id="course-project-40" class="section level4">
+<h4>Course project (40%)</h4>
+<p>Students will conduct a research project using methods discussed in
+class on a topic of their choosing. A full description of the project
+can be found in the file final_project_description.pdf located on
+Canvas. All students must submit a Prospectus. Students have two final
+project options: (1) StoryMap presentation and a Policy Brief; (2) Final
+paper and a presentation of any format. Students will present their
+projects in person during a time/day TBD.</p>
+</div>
+</div>
+<div id="course-agenda" class="section level3">
+<h3>Course Agenda</h3>
+<p>The schedule is subject to revision throughout the quarter. Please
+see the full syllabus for a more detailed version of the agenda</p>
 </div>
 
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiU3lsbGFidXMiCm91dHB1dDogaHRtbF9kb2N1bWVudAotLS0KCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUpCmBgYAoKIyMjIFNQSCAyMTU6IEdJUyBhbmQgUHVibGljIEhlYWx0aAojIyMgUHJvZmVzc29yIFBldGVyIEphbWVzCgoKVGhlIGZvbGxvd2luZyBpcyBhbiBhYnJpZGdlZCB2ZXJzaW9uIG9mIHRoZSBjb3Vyc2Ugc3lsbGFidXMuIEEgZnVsbCBjb3Vyc2Ugc3lsbGFidXMgY2FuIGJlIGZvdW5kIG9uIHRoZSBbQ2FudmFzIGNsYXNzIHdlYnNpdGVdKGh0dHBzOi8vY2FudmFzLnVjZGF2aXMuZWR1L2NvdXJzZXMvOTk2MDcwKS4KCkxlY3R1cmUgYW5kIExhYgpMZWN0dXJlOiBUaHVyc2RheXMgOGEtODo1NWEKTGFiOiBUaHVyc2RheXMgOS0xMWEKTGVjdHVyZSBhbmQgTGFiIGFyZSBoZWxkIGluIHBlcnNvbi4KCkluc3RydWN0b3IKRHIuIFBldGVyIEphbWVzCgpDb250YWN0OiBwamFtZXMuYXQudWNkYXZpcy5lZHUKT2ZmaWNlOiBNZWRpY2FsIFNjaWVuY2VzIDFDIFJvb20gMTM4Ck9mZmljZSBob3VyczogQnkgYXBwb2ludG1lbnQgb3ZlciBab29tLiBQbGVhc2UgZW1haWwgYW55IHRpbWUgdG8gc2V0IHVwIGEgbWVldGluZyEKCiMjIyBDb3Vyc2UgT2JqZWN0aXZlcwpJbiB0aGlzIGNvdXJzZSwgc3R1ZGVudHMgd2lsbCBnYWluCgotIEEgdGhlb3JldGljYWwgdW5kZXJzdGFuZGluZyBvZiB0aGUgcm9sZSBvZiBzcGFjZSBhbmQgcGxhY2UgaW4gY29tbXVuaXR5LWxldmVsIHBoZW5vbWVub24KLSBBbiB1bmRlcnN0YW5kaW5nIG9mIHdoYXQga2luZHMgb2Ygc3BhdGlhbCBkYXRhIGFyZSBhdmFpbGFibGUgYW5kIHdoZXJlIHRvIGZpbmQgdGhlbQotIFByb2ZpY2llbmN5IGluIHNwYXRpYWwgYW5hbHl0aWMgdG9vbHMgKFIpIHRvCi0gTWFuYWdlIGFuZCBwcm9jZXNzIHNwYXRpYWwgZGF0YQotIERlc2NyaXB0aXZlbHkgZXhhbWluZSBzcGF0aWFsIGRhdGEKLSBSdW4gc3BhdGlhbCBtb2RlbHMgZm9yIHN0YXRpc3RpY2FsIGluZmVyZW5jZQotIEFuIHVuZGVyc3RhbmRpbmcgb2YgaG93IHRoZXNlIG1ldGhvZHMgYXJlIGVtcGxveWVkIGluIGNvbW11bml0eSByZXNlYXJjaC0gCgojIyMgQ291cnNlIEZvcm1hdApNb3N0IGNsYXNzZXMgd2lsbCBhZGhlcmUgdG8gdGhlIGZvbGxvd2luZyBmb3JtYXQ6ICgxKSBBbiBob3VyIG9yIHNvIGxlY3R1cmUgLyBkaXNjdXNzaW9uIGFib3V0IHRoYXQgd2VlaydzIHRvcGljIGFuZCAoMikgYW4gaG91ciBvciBzbyB3YWxrIHRocm91Z2ggb2YgYSBsYWIsIGFuZCAoMykgYSBsYWIgd2hlcmUgd2UgYXBwbHkgdGhlIG1ldGhvZHMgbGVhcm5lZCBpbiBsZWN0dXJlL2Rpc2N1c3Npb24vbGFiIHVzaW5nIHJlYWwgZGF0YSBpbiBSLiBBbGwgc3R1ZGVudHMgYXJlIGV4cGVjdGVkIHRvIGFjdGl2ZWx5IHBhcnRpY2lwYXRlLCB3aGljaCBtZWFucyBub3Qgb25seSBiZWluZyBwcmVzZW50LCBidXQgcmVhZGluZyBhbGwgbWF0ZXJpYWwgYW5kIGVuZ2FnaW5nIGluIGNsYXNzIGRpc2N1c3Npb25zLiAKCiMjIyBSZXF1aXJlZCBSZWFkaW5ncwpSZXF1aXJlZCByZWFkaW5nIG1hdGVyaWFsIGlzIGNvbXBvc2VkIG9mIGEgY29tYmluYXRpb24gb2YgdGhlIGZvbGxvd2luZwoKSm91cm5hbCBhcnRpY2xlcyBhbmQgcmVzZWFyY2ggcmVwb3J0cy4KVGhlcmUgaXMgbm8gc2luZ2xlIG9mZmljaWFsIHRleHRib29rIGZvciB0aGUgY291cnNlLiBJbnN0ZWFkLCBJ4oCZdmUgc2VsZWN0ZWQgam91cm5hbCBhcnRpY2xlcyBhbmQgcmVzZWFyY2ggcmVwb3J0cy4KCiMjIyBNeSBoYW5kb3V0cwpGb3IgbW9zdCB0b3BpY3MsIGluIGxpZXUgb2YgYW4gYXJ0aWNsZSBvciBib29rIGNoYXB0ZXIsIEkgd2lsbCBwcm92aWRlIGxlY3R1cmUgaGFuZG91dHMgb24gQ2FudmFzIGluIGFkdmFuY2Ugb2YgdGhlIGFzc2lnbmVkIGNsYXNzLgoKVGhlcmUgYXJlIGFsc28gYSBzZXQgb2Ygd2Vla2x5IG9wdGlvbmFsIHJlYWRpbmdzIGxpc3RlZCBhdCB0aGUgZW5kIG9mIHRoZSBzeWxsYWJ1cyB0aGF0IHByb3ZpZGUgYXBwbGljYXRpb25zIG9mIHRoZSBtZXRob2RzLgoKIyMjIEFkZGl0aW9uYWwgUmVhZGluZ3MKVGhlIG90aGVyIG1ham9yIGNvdXJzZSBtYXRlcmlhbCBhcmUgbGFiIGd1aWRlcywgd2hpY2ggd2lsbCBiZSByZWxlYXNlZCBhdCB0aGUgYmVnaW5uaW5nIG9mIFRodXJzZGF54oCZcyBsZWN0dXJlIG9uIHRoZSBjbGFzcyB3ZWJzaXRlLiBNYW55IG9mIHRoZSBSIGxhYiBndWlkZXMgd2lsbCBjbG9zZWx5IGZvbGxvdyB0d28gdGV4dGJvb2tzLiBUaGVzZSB0ZXh0Ym9va3MgYXJlIG5vdCByZXF1aXJlZCwgYnV0IGFyZSBncmVhdCByZXNvdXJjZXMuCgpUaGUgZmlyc3QgdGV4dGJvb2sgcHJvdmlkZXMgdGhlIGZvdW5kYXRpb24gZm9yIHVzaW5nIFIKCihSRFMpIFdpY2toYW0sIEhhZGxleSAmIEdhcnJldCBHcm9sZW11bmQuICgyMDE3KS4gUiBmb3IgRGF0YSBTY2llbmNlLiBTZWJhc3RvcG9sLCBDQTogT+KAmVJlaWxseSBNZWRpYS4KVGhlIHRleHRib29rIGlzIGZyZWUgb25saW5lIGF0OiBodHRwOi8vcjRkcy5oYWQuY28ubnovaW50cm9kdWN0aW9uLmh0bWwKClRoZSBzZWNvbmQgdGV4dGJvb2sgY292ZXJzIHNwYXRpYWwgZGF0YSBpbiBSCgooR1dSKSBMb3ZlbGFjZSwgUm9iaW4sIEpha3ViIE5vd29zYWQgJiBKYW5uZXMgTXVlbmNob3cuIEdlb2NvbXB1dGF0aW9uIHdpdGggUi4gQ1JDIFByZXNzLgpUaGUgdGV4dGJvb2sgaXMgZnJlZSBvbmxpbmUgYXQ6IGh0dHBzOi8vZ2VvY29tcHIucm9iaW5sb3ZlbGFjZS5uZXQvCgojIyMgQ291cnNlIFNvZnR3YXJlClIgaXMgdGhlIG9ubHkgc3RhdGlzdGljYWwgbGFuZ3VhZ2UgdXNlZCBpbiB0aGlzIGNvdXJzZSwgYXMgaXQgaGFzIGJlY29tZSBhbiBpbmNyZWFzaW5nbHkgcG9wdWxhciBwcm9ncmFtIGZvciBkYXRhIGFuYWx5c2lzIGluIHRoZSBzb2NpYWwgc2NpZW5jZXMuIFdlIHdpbGwgdXNlIFJTdHVkaW8gYXMgYSB1c2VyIGZyaWVuZGx5IGludGVyZmFjZSBmb3IgUi4gUiBpcyBmcmVld2FyZSBhbmQgeW91IGNhbiBkb3dubG9hZCBpdCBvbiB5b3VyIHBlcnNvbmFsIGxhcHRvcCBhbmQgZGVza3RvcCBjb21wdXRlcnMgKGFsb25nIHdpdGggUlN0dWRpbywgd2hpY2ggaXMgYSB1c2VyIGZyaWVuZGx5IGludGVyZmFjZSBmb3IgUikuIE5vdGUgdGhhdCBhbHRob3VnaCB0aGUgY291cnNlIGRvZXMgbm90IHJlcXVpcmUgc3R1ZGVudHMgdG8gaGF2ZSBleHBlcmllbmNlIHdpdGggUiwgdGhpcyBjbGFzcyBkb2VzIG5vdCBkZXZvdGUgdG9vIG11Y2ggdGltZSBpbnRyb2R1Y2luZyBzdHVkZW50cyB0byB0aGUgcHJvZ3JhbS4gSW4gb3RoZXIgd29yZHMsIHRoaXMgaXMgYSBub3QgYW4gaW50cm9kdWN0aW9uIHRvIFIgcHJvZ3JhbW1pbmcuIFRoZSBsYWIgZ3VpZGVzIHdpbGwgcHJvdmlkZSBhcyBtdWNoIGRldGFpbCBhcyBwb3NzaWJsZSB0byBleGVjdXRlIHRhc2tzIGFuZCBmdW5jdGlvbnMsIGJ1dCB5b3Ugd2lsbCBsaWtlbHkgcnVuIGludG8gdGFza3MgdGhhdCB3aWxsIHJlcXVpcmUgeW91IHRvIGdvIGJleW9uZCB0aGUgZ3VpZGVzLiBNeSBzdWdnZXN0aW9uIGlzIHRvICgxKSBsb29rIHVwIFJEUyBvciBHV1IgYXMgdGhleSBhcmUgZXhjZWxsZW50IHJlc291cmNlcyBhbmQgKDIpIGlmICgxKSBmYWlscyBzZWFyY2ggb25saW5lLiBBcyBzdWNoLCB5b3UgYXJlIGV4cGVjdGVkIHRvIGRvIGFzIG11Y2ggaW5kZXBlbmRlbnQgbGVhcm5pbmcgb2YgdGhlIHNvZnR3YXJlIGFzIEkgdGVhY2ggaW4gdGhlIGxhYnMuCgojIyMgQ291cnNlIFJlcXVpcmVtZW50cwojIyMjIEFzc2lnbm1lbnRzICg0IHggMTUlOiA2MCUpClN0dWRlbnRzIGFyZSByZXF1aXJlZCB0byBjb21wbGV0ZSBmb3VyIGhvbWV3b3JrIGFzc2lnbm1lbnRzIGR1cmluZyB0aGUgcXVhcnRlciB3aGljaCBhcmUgZHVlIGFwcHJveGltYXRlbHkgZXZlcnkgMiB3ZWVrcy4gVGhlIGFzc2lnbm1lbnRzIHdpbGwgbGFyZ2VseSBjb3JyZXNwb25kIHRvIHRoZSBtYXRlcmlhbCBjb3ZlcmVkIGluIGxlY3R1cmVzIGFuZCBsYWJzLiBFYWNoIGFzc2lnbm1lbnQgd2lsbCBhc2sgc3R1ZGVudHMgdG8gYXBwbHkgbWV0aG9kcyBpbiBSLiBDb2xsYWJvcmF0aW9uIG9mIGlkZWFzIGFtb25nIHBhcnRpY2lwYW50cyBpcyBlbmNvdXJhZ2VkLCBidXQgdGhlIGFzc2lnbm1lbnRzIG11c3QgYmUgY29tcGxldGVkIGluZGVwZW5kZW50bHkuIEZvciBlYWNoIGFzc2lnbm1lbnQsIHlvdSB3aWxsIG5lZWQgdG8gc3VibWl0IGFuIFIgTWFya2Rvd24gUm1kIGFuZCBpdHMga25pdHRlZCBmaWxlIG9uIENhbnZhcy4gQ29tcGxldGUgYXNzaWdubWVudCBndWlkZWxpbmVzIGNhbiBiZSBmb3VuZCBoZXJlOiBodHRwczovL2NyZDIzMC5naXRodWIuaW8vaHdfZ3VpZGVsaW5lcy5odG1sLgoKTGF0ZSBzdWJtaXNzaW9ucyB3aWxsIGJlIGRlZHVjdGVkIDEwJSBwZXIgMjQgaG91cnMgdW50aWwgNzIgaG91cnMgYWZ0ZXIgdGhlIHN1Ym1pc3Npb24gZHVlIHRpbWUuIEFmdGVyIDcyIGhvdXJzIHlvdXIgc3VibWlzc2lvbiB3aWxsIG5vdCBiZSBncmFkZWQuIE5vIGV4Y2VwdGlvbiB1bmxlc3MgeW91IHByb3ZpZGUgZG9jdW1lbnRhdGlvbiBvZiB5b3VyIGlsbG5lc3Mgb3IgYmVyZWF2ZW1lbnQgYmVmb3JlIHRoZSBkdWUgZGF0ZS4gSWYgeW91IGNhbm5vdCB1cGxvYWQgdGhlIGFzc2lnbm1lbnQgb24gQ2FudmFzIGR1ZSB0byB0ZWNobmljYWwgaXNzdWVzLCB5b3UgbXVzdCBlbWFpbCBpdCBhcyBhbiBhdHRhY2htZW50IHRvIG1lIGJ5IHRoZSBzdWJtaXNzaW9uIGR1ZSB0aW1lLgoKIyMjIyBDb3Vyc2UgcHJvamVjdCAoNDAlKQpTdHVkZW50cyB3aWxsIGNvbmR1Y3QgYSByZXNlYXJjaCBwcm9qZWN0IHVzaW5nIG1ldGhvZHMgZGlzY3Vzc2VkIGluIGNsYXNzIG9uIGEgdG9waWMgb2YgdGhlaXIgY2hvb3NpbmcuIEEgZnVsbCBkZXNjcmlwdGlvbiBvZiB0aGUgcHJvamVjdCBjYW4gYmUgZm91bmQgaW4gdGhlIGZpbGUgZmluYWxfcHJvamVjdF9kZXNjcmlwdGlvbi5wZGYgbG9jYXRlZCBvbiBDYW52YXMuIEFsbCBzdHVkZW50cyBtdXN0IHN1Ym1pdCBhIFByb3NwZWN0dXMuIFN0dWRlbnRzIGhhdmUgdHdvIGZpbmFsIHByb2plY3Qgb3B0aW9uczogKDEpIFN0b3J5TWFwIHByZXNlbnRhdGlvbiBhbmQgYSBQb2xpY3kgQnJpZWY7ICgyKSBGaW5hbCBwYXBlciBhbmQgYSBwcmVzZW50YXRpb24gb2YgYW55IGZvcm1hdC4gU3R1ZGVudHMgd2lsbCBwcmVzZW50IHRoZWlyIHByb2plY3RzIGluIHBlcnNvbiBkdXJpbmcgYSB0aW1lL2RheSBUQkQuCgojIyMgQ291cnNlIEFnZW5kYQoKVGhlIHNjaGVkdWxlIGlzIHN1YmplY3QgdG8gcmV2aXNpb24gdGhyb3VnaG91dCB0aGUgcXVhcnRlci4gUGxlYXNlIHNlZSB0aGUgZnVsbCBzeWxsYWJ1cyBmb3IgYSBtb3JlIGRldGFpbGVkIHZlcnNpb24gb2YgdGhlIGFnZW5kYQo=</div>
 
 
+</div>
+</div>
 
 </div>
 
@@ -372,7 +567,41 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Syllabus.Rmd");
+});
+</script>
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

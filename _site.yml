@@ -9,7 +9,7 @@ navbar:
     - text: "Labs"
       href: Labs.html
       menu:
-        - text: "Lab 1: "
+        - text: "Lab 1: Intro to R for GIS and Making Maps"
           href: lab1.html
         - text: "Lab 2: "
           href: lab2.html
@@ -27,11 +27,16 @@ navbar:
           href: lab8.html
         - text: "Lab 9: "
           href: lab9.html
-    - text: "Other"
+    - text: "Assignment Guide"
+      href: Assignments.html
+    - text: "Data Sources"
       href: Other.html
     - text: "Help with R"
       href: R_help.html
 output_dir: docs
 output:
   html_document:
-    theme: default
+    theme: spacelab
+    toc: true
+    toc_float: true
+    code_download: true

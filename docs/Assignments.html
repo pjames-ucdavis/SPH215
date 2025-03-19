@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Assignments</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="Syllabus.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Lab 1: Intro to R for GIS and Making Maps</a>
+    </li>
+    <li>
+      <a href="lab2.html">Lab 2: </a>
+    </li>
+    <li>
+      <a href="lab3.html">Lab 3: </a>
+    </li>
+    <li>
+      <a href="lab4.html">Lab 4: </a>
+    </li>
+    <li>
+      <a href="lab5.html">Lab 5: </a>
+    </li>
+    <li>
+      <a href="lab6.html">Lab 6: </a>
+    </li>
+    <li>
+      <a href="lab7.html">Lab 7: </a>
+    </li>
+    <li>
+      <a href="lab8.html">Lab 8: </a>
+    </li>
+    <li>
+      <a href="lab9.html">Lab 9: </a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Assignments</h1>
+
+</div>
+
+
+<div
+id="all-credit-goes-to-noli-brazil-and-his-crd-230-website-for-this-section"
+class="section level4">
+<h4>All credit goes to Noli Brazil and his <a
+href="https://crd230.github.io/index.html">CRD 230 website</a> for this
+section</h4>
+</div>
+<div id="r-scripts" class="section level2">
+<h2>R Scripts</h2>
+<p>Running R code using the console (bottom left in figure below) is a
+great place to start, but has its limitations. Each time you want to
+execute a set of commands, you have to re-enter them at the command
+line. Complex commands are potentially subject to typographical errors,
+necessitating that they be re-entered correctly. Repeating a set of
+operations requires re-entering the code stream. To give yourself more
+room to work, it’s a great idea to use the R script editor.</p>
+<p>A script is simply a text file containing a set of commands and
+comments. The script can be saved and used later to re-execute the saved
+commands. The script can also be edited so you can execute a modified
+version of the commands.</p>
+<p>You can open a new empty script by clicking the New File icon in the
+upper left of the main RStudio toolbar. This icon looks like a white
+square with a white plus sign in a green circle. Clicking the icon opens
+the New File Menu. Click the “R Script” option and the script editor
+will open with an empty script. Your R Studio should look similar to
+below (image source: <a
+href="https://r4ds.had.co.nz/workflow-scripts.html">R for Data
+Science</a>)</p>
+<p>/</p>
+<div class="float">
+<img src="rstudioeditor.png" alt="RStudio" />
+<div class="figcaption">RStudio</div>
+</div>
+<p>/</p>
+<p>R Scripts are basically text files with a .R extension that houses
+your code and comments. You write your code. Execute that code from your
+R script. Results are produced in your R console window. In this class,
+we won’t be using regular R Scripts for homework assignments. Instead,
+we’ll be using <a href="https://rmarkdown.rstudio.com/">R
+Markdown</a>.</p>
+<p>R Markdown documents take script files to a new level by allowing you
+to mix R commands with explanatory text. Think of an R Markdown document
+as an R script on steroids. Your R Markdown source document is compiled
+into an output report evaluating the R commands in the source document
+to produce easily reproducible results in an aesthetically pleasing
+form. It combines code, results from the code, and narrative text
+explaining the results to produce beautiful documents and academic
+reports.</p>
+<p>Still not convinced that R Markdown is useful? Check out Nikhil
+Kaza’s thorough description of <a
+href="https://nkaza.github.io/intro2Rbook/why-use-r-markdown.html">why
+we should use R Markdown</a>.</p>
+</div>
+<div id="r-markdown" class="section level2">
+<h2>R Markdown</h2>
+<p>R Markdown is a simple formatting syntax for authoring html, pdf, and
+Microsoft Word documents in RStudio. For each R related assignment, you
+will upload onto Canvas two documents:</p>
+<ol style="list-style-type: decimal">
+<li>An R Markdown document, which has an .Rmd extension</li>
+<li>A knitted <code>.html</code>, <code>.pdf</code> or
+<code>.docx</code> file</li>
+</ol>
+<p>These documents will provide us an easy-to-read document to grade;
+more importantly, you will get to practice (1) writing scripts, (2)
+keeping track of the analyses you run, and (3) organizing your output in
+a reader-friendly manner. When you submit these documents on Canvas,
+<strong>do not combine them into a zipped compressed folder</strong>.
+They should be two separate files.</p>
+<p>To be clear, R is a programming language. RStudio is an application.
+R Markdown is a markup syntax to convert R script and text into a pdf or
+html document. It allows for presentation-ready documents that show
+commands and results in a seamless flow. When you write R code and embed
+it in presentation documents created using R Markdown, you are forced to
+explicitly state the steps you took to do your research.</p>
+<p>In RStudio, install the packages <strong>knitr</strong> and
+<strong>rmarkdown</strong> using the <code>install.packages()</code>
+command. Type the following in your RConsole window after
+<code>&gt;</code></p>
+<pre class="r"><code>install.packages(&quot;knitr&quot;)</code></pre>
+<pre><code>## 
+## The downloaded binary packages are in
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmptqMwUE/downloaded_packages</code></pre>
+<pre class="r"><code>install.packages(&quot;rmarkdown&quot;)</code></pre>
+<pre><code>## 
+## The downloaded binary packages are in
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmptqMwUE/downloaded_packages</code></pre>
+<p>Once you’ve installed these packages, you don’t need to install them
+any more in the future. You also do not need to load them in at any time
+using <code>library()</code>.</p>
+</div>
+<div id="creating-and-saving-an-r-markdown" class="section level2">
+<h2>Creating and saving an R Markdown</h2>
+<p>To create a new <code>.Rmd</code> file in RStudio, select File -&gt;
+New File -&gt; R Markdown. A window should pop up. Type in “Assignment
+1” next to <em>Title</em> and your name next to <em>Author</em>r. Leave
+everything else alone and click OK. A new window in the top left of your
+RStudio console should pop up containing your new R Markdown file.</p>
+<div class="float">
+<img src="rstudiointerface.png" alt="RStudio Interface" />
+<div class="figcaption">RStudio Interface</div>
+</div>
+<p>If you are using your personal computer for this guide, it’s best to
+set up a clean and efficient file management structure. File management
+is key to preventing R programming frustration. Here are some tips.</p>
+<p>-Set up a clear and understandable hierarchical file system for this
+class on your hard drive. For example, create a class folder (SPH 215).
+Within this class folder, create the folder Assignments. Within the
+Assignments folder, create separate folders for each Assignment
+(e.g. Assignment 1, Assignment 2, …). Don’t work from your Desktop. Or
+from the Downloads folder. Or some randomly named folder that you will
+have a hard time finding a month, week or day from now. -Keep all your
+files that are related to a lab or assignment in one folder. That is,
+don’t have an Assignment 3 folder that contains data files specific to
+Assignment 1. Keep everything in one folder, including the R Markdown
+for that assignment or lab.</p>
+<p>Using the basic guidelines above, save your R Markdown file into an
+appropriate folder on your hard drive by clicking on File and then Save
+from the RStudio menu.</p>
+<p>To open an <code>.Rmd</code> file in RStudio, select File -&gt; Open
+File and navigate to the folder you saved the assignment template in and
+select the file. You should see the R Markdown file pop up on the top
+left portion of your RStudio interface</p>
+<p>/</p>
+<p>##Authoring an R Markdown document</p>
+<p>R Markdown documents contain 3 major components:</p>
+<ol style="list-style-type: decimal">
+<li>A YAML header surrounded by - - -</li>
+<li>Chunks of R code surrounded by ```</li>
+<li>Text mixed with simple text formatting using the Markdown
+syntax</li>
+</ol>
+<div id="yaml-header" class="section level3">
+<h3>YAML header</h3>
+<p>The YAML header controls how R Markdown renders your
+<code>.Rmd</code> file. A YAML header is a section of key:value pairs
+surrounded by - - - marks and is always located at the top of your Rmd
+file.</p>
+<p>In the assignment’s YAML, add your name, assignment number, and the
+date. These are the only necessary items, but you can change other
+options, most of which are detailed <a
+href="https://bookdown.org/yihui/rmarkdown/html-document.html">here</a>.
+Your YAML will generally look like the following.</p>
+<pre class="yaml"><code>---
+title: &quot;Assignment [insert number here]&quot;
+subtitle: SPH 215
+author: Your full name here
+date: Assignment due date
+output: 
+  html_document:
+    theme: cosmo
+---
+</code></pre>
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiQXNzaWdubWVudHMiCi0tLQoKIyMjIyBBbGwgY3JlZGl0IGdvZXMgdG8gTm9saSBCcmF6aWwgYW5kIGhpcyBbQ1JEIDIzMCB3ZWJzaXRlXShodHRwczovL2NyZDIzMC5naXRodWIuaW8vaW5kZXguaHRtbCkgZm9yIHRoaXMgc2VjdGlvbgoKIyMgUiBTY3JpcHRzClJ1bm5pbmcgUiBjb2RlIHVzaW5nIHRoZSBjb25zb2xlIChib3R0b20gbGVmdCBpbiBmaWd1cmUgYmVsb3cpIGlzIGEgZ3JlYXQgcGxhY2UgdG8gc3RhcnQsIGJ1dCBoYXMgaXRzIGxpbWl0YXRpb25zLiBFYWNoIHRpbWUgeW91IHdhbnQgdG8gZXhlY3V0ZSBhIHNldCBvZiBjb21tYW5kcywgeW91IGhhdmUgdG8gcmUtZW50ZXIgdGhlbSBhdCB0aGUgY29tbWFuZCBsaW5lLiBDb21wbGV4IGNvbW1hbmRzIGFyZSBwb3RlbnRpYWxseSBzdWJqZWN0IHRvIHR5cG9ncmFwaGljYWwgZXJyb3JzLCBuZWNlc3NpdGF0aW5nIHRoYXQgdGhleSBiZSByZS1lbnRlcmVkIGNvcnJlY3RseS4gUmVwZWF0aW5nIGEgc2V0IG9mIG9wZXJhdGlvbnMgcmVxdWlyZXMgcmUtZW50ZXJpbmcgdGhlIGNvZGUgc3RyZWFtLiBUbyBnaXZlIHlvdXJzZWxmIG1vcmUgcm9vbSB0byB3b3JrLCBpdOKAmXMgYSBncmVhdCBpZGVhIHRvIHVzZSB0aGUgUiBzY3JpcHQgZWRpdG9yLgoKQSBzY3JpcHQgaXMgc2ltcGx5IGEgdGV4dCBmaWxlIGNvbnRhaW5pbmcgYSBzZXQgb2YgY29tbWFuZHMgYW5kIGNvbW1lbnRzLiBUaGUgc2NyaXB0IGNhbiBiZSBzYXZlZCBhbmQgdXNlZCBsYXRlciB0byByZS1leGVjdXRlIHRoZSBzYXZlZCBjb21tYW5kcy4gVGhlIHNjcmlwdCBjYW4gYWxzbyBiZSBlZGl0ZWQgc28geW91IGNhbiBleGVjdXRlIGEgbW9kaWZpZWQgdmVyc2lvbiBvZiB0aGUgY29tbWFuZHMuCgpZb3UgY2FuIG9wZW4gYSBuZXcgZW1wdHkgc2NyaXB0IGJ5IGNsaWNraW5nIHRoZSBOZXcgRmlsZSBpY29uIGluIHRoZSB1cHBlciBsZWZ0IG9mIHRoZSBtYWluIFJTdHVkaW8gdG9vbGJhci4gVGhpcyBpY29uIGxvb2tzIGxpa2UgYSB3aGl0ZSBzcXVhcmUgd2l0aCBhIHdoaXRlIHBsdXMgc2lnbiBpbiBhIGdyZWVuIGNpcmNsZS4gQ2xpY2tpbmcgdGhlIGljb24gb3BlbnMgdGhlIE5ldyBGaWxlIE1lbnUuIENsaWNrIHRoZSDigJxSIFNjcmlwdOKAnSBvcHRpb24gYW5kIHRoZSBzY3JpcHQgZWRpdG9yIHdpbGwgb3BlbiB3aXRoIGFuIGVtcHR5IHNjcmlwdC4gWW91ciBSIFN0dWRpbyBzaG91bGQgbG9vayBzaW1pbGFyIHRvIGJlbG93IChpbWFnZSBzb3VyY2U6IFtSIGZvciBEYXRhIFNjaWVuY2VdKGh0dHBzOi8vcjRkcy5oYWQuY28ubnovd29ya2Zsb3ctc2NyaXB0cy5odG1sKSkKCi8KCiFbUlN0dWRpb10ocnN0dWRpb2VkaXRvci5wbmcpCgovCgpSIFNjcmlwdHMgYXJlIGJhc2ljYWxseSB0ZXh0IGZpbGVzIHdpdGggYSAuUiBleHRlbnNpb24gdGhhdCBob3VzZXMgeW91ciBjb2RlIGFuZCBjb21tZW50cy4gWW91IHdyaXRlIHlvdXIgY29kZS4gRXhlY3V0ZSB0aGF0IGNvZGUgZnJvbSB5b3VyIFIgc2NyaXB0LiBSZXN1bHRzIGFyZSBwcm9kdWNlZCBpbiB5b3VyIFIgY29uc29sZSB3aW5kb3cuIEluIHRoaXMgY2xhc3MsIHdlIHdvbuKAmXQgYmUgdXNpbmcgcmVndWxhciBSIFNjcmlwdHMgZm9yIGhvbWV3b3JrIGFzc2lnbm1lbnRzLiBJbnN0ZWFkLCB3ZeKAmWxsIGJlIHVzaW5nIFtSIE1hcmtkb3duXShodHRwczovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbS8pLgoKUiBNYXJrZG93biBkb2N1bWVudHMgdGFrZSBzY3JpcHQgZmlsZXMgdG8gYSBuZXcgbGV2ZWwgYnkgYWxsb3dpbmcgeW91IHRvIG1peCBSIGNvbW1hbmRzIHdpdGggZXhwbGFuYXRvcnkgdGV4dC4gVGhpbmsgb2YgYW4gUiBNYXJrZG93biBkb2N1bWVudCBhcyBhbiBSIHNjcmlwdCBvbiBzdGVyb2lkcy4gWW91ciBSIE1hcmtkb3duIHNvdXJjZSBkb2N1bWVudCBpcyBjb21waWxlZCBpbnRvIGFuIG91dHB1dCByZXBvcnQgZXZhbHVhdGluZyB0aGUgUiBjb21tYW5kcyBpbiB0aGUgc291cmNlIGRvY3VtZW50IHRvIHByb2R1Y2UgZWFzaWx5IHJlcHJvZHVjaWJsZSByZXN1bHRzIGluIGFuIGFlc3RoZXRpY2FsbHkgcGxlYXNpbmcgZm9ybS4gSXQgY29tYmluZXMgY29kZSwgcmVzdWx0cyBmcm9tIHRoZSBjb2RlLCBhbmQgbmFycmF0aXZlIHRleHQgZXhwbGFpbmluZyB0aGUgcmVzdWx0cyB0byBwcm9kdWNlIGJlYXV0aWZ1bCBkb2N1bWVudHMgYW5kIGFjYWRlbWljIHJlcG9ydHMuCgpTdGlsbCBub3QgY29udmluY2VkIHRoYXQgUiBNYXJrZG93biBpcyB1c2VmdWw/IENoZWNrIG91dCBOaWtoaWwgS2F6YeKAmXMgdGhvcm91Z2ggZGVzY3JpcHRpb24gb2YgW3doeSB3ZSBzaG91bGQgdXNlIFIgTWFya2Rvd25dKGh0dHBzOi8vbmthemEuZ2l0aHViLmlvL2ludHJvMlJib29rL3doeS11c2Utci1tYXJrZG93bi5odG1sKS4KCiMjIFIgTWFya2Rvd24KClIgTWFya2Rvd24gaXMgYSBzaW1wbGUgZm9ybWF0dGluZyBzeW50YXggZm9yIGF1dGhvcmluZyBodG1sLCBwZGYsIGFuZCBNaWNyb3NvZnQgV29yZCBkb2N1bWVudHMgaW4gUlN0dWRpby4gRm9yIGVhY2ggUiByZWxhdGVkIGFzc2lnbm1lbnQsIHlvdSB3aWxsIHVwbG9hZCBvbnRvIENhbnZhcyB0d28gZG9jdW1lbnRzOgoKMS4gQW4gUiBNYXJrZG93biBkb2N1bWVudCwgd2hpY2ggaGFzIGFuIC5SbWQgZXh0ZW5zaW9uCjEuIEEga25pdHRlZCBgLmh0bWxgLCBgLnBkZmAgb3IgYC5kb2N4YCBmaWxlCgpUaGVzZSBkb2N1bWVudHMgd2lsbCBwcm92aWRlIHVzIGFuIGVhc3ktdG8tcmVhZCBkb2N1bWVudCB0byBncmFkZTsgbW9yZSBpbXBvcnRhbnRseSwgeW91IHdpbGwgZ2V0IHRvIHByYWN0aWNlICgxKSB3cml0aW5nIHNjcmlwdHMsICgyKSBrZWVwaW5nIHRyYWNrIG9mIHRoZSBhbmFseXNlcyB5b3UgcnVuLCBhbmQgKDMpIG9yZ2FuaXppbmcgeW91ciBvdXRwdXQgaW4gYSByZWFkZXItZnJpZW5kbHkgbWFubmVyLiBXaGVuIHlvdSBzdWJtaXQgdGhlc2UgZG9jdW1lbnRzIG9uIENhbnZhcywgKipkbyBub3QgY29tYmluZSB0aGVtIGludG8gYSB6aXBwZWQgY29tcHJlc3NlZCBmb2xkZXIqKi4gVGhleSBzaG91bGQgYmUgdHdvIHNlcGFyYXRlIGZpbGVzLgoKVG8gYmUgY2xlYXIsIFIgaXMgYSBwcm9ncmFtbWluZyBsYW5ndWFnZS4gUlN0dWRpbyBpcyBhbiBhcHBsaWNhdGlvbi4gUiBNYXJrZG93biBpcyBhIG1hcmt1cCBzeW50YXggdG8gY29udmVydCBSIHNjcmlwdCBhbmQgdGV4dCBpbnRvIGEgcGRmIG9yIGh0bWwgZG9jdW1lbnQuIEl0IGFsbG93cyBmb3IgcHJlc2VudGF0aW9uLXJlYWR5IGRvY3VtZW50cyB0aGF0IHNob3cgY29tbWFuZHMgYW5kIHJlc3VsdHMgaW4gYSBzZWFtbGVzcyBmbG93LiBXaGVuIHlvdSB3cml0ZSBSIGNvZGUgYW5kIGVtYmVkIGl0IGluIHByZXNlbnRhdGlvbiBkb2N1bWVudHMgY3JlYXRlZCB1c2luZyBSIE1hcmtkb3duLCB5b3UgYXJlIGZvcmNlZCB0byBleHBsaWNpdGx5IHN0YXRlIHRoZSBzdGVwcyB5b3UgdG9vayB0byBkbyB5b3VyIHJlc2VhcmNoLgoKSW4gUlN0dWRpbywgaW5zdGFsbCB0aGUgcGFja2FnZXMgKiprbml0cioqIGFuZCAqKnJtYXJrZG93bioqIHVzaW5nIHRoZSBgaW5zdGFsbC5wYWNrYWdlcygpYCBjb21tYW5kLiBUeXBlIHRoZSBmb2xsb3dpbmcgaW4geW91ciBSQ29uc29sZSB3aW5kb3cgYWZ0ZXIgYD5gCgpgYGB7ciBpbnN0YWxscGFja2FnZXN9Cmluc3RhbGwucGFja2FnZXMoImtuaXRyIikKaW5zdGFsbC5wYWNrYWdlcygicm1hcmtkb3duIikKYGBgCgpPbmNlIHlvdeKAmXZlIGluc3RhbGxlZCB0aGVzZSBwYWNrYWdlcywgeW91IGRvbuKAmXQgbmVlZCB0byBpbnN0YWxsIHRoZW0gYW55IG1vcmUgaW4gdGhlIGZ1dHVyZS4gWW91IGFsc28gZG8gbm90IG5lZWQgdG8gbG9hZCB0aGVtIGluIGF0IGFueSB0aW1lIHVzaW5nIGBsaWJyYXJ5KClgLgoKIyMgQ3JlYXRpbmcgYW5kIHNhdmluZyBhbiBSIE1hcmtkb3duCgpUbyBjcmVhdGUgYSBuZXcgYC5SbWRgIGZpbGUgaW4gUlN0dWRpbywgc2VsZWN0IEZpbGUgLT4gTmV3IEZpbGUgLT4gUiBNYXJrZG93bi4gQSB3aW5kb3cgc2hvdWxkIHBvcCB1cC4gVHlwZSBpbiDigJxBc3NpZ25tZW50IDHigJ0gbmV4dCB0byAqVGl0bGUqIGFuZCB5b3VyIG5hbWUgbmV4dCB0byAqQXV0aG9yKnIuIExlYXZlIGV2ZXJ5dGhpbmcgZWxzZSBhbG9uZSBhbmQgY2xpY2sgT0suIEEgbmV3IHdpbmRvdyBpbiB0aGUgdG9wIGxlZnQgb2YgeW91ciBSU3R1ZGlvIGNvbnNvbGUgc2hvdWxkIHBvcCB1cCBjb250YWluaW5nIHlvdXIgbmV3IFIgTWFya2Rvd24gZmlsZS4KCiFbUlN0dWRpbyBJbnRlcmZhY2VdKHJzdHVkaW9pbnRlcmZhY2UucG5nKQoKSWYgeW91IGFyZSB1c2luZyB5b3VyIHBlcnNvbmFsIGNvbXB1dGVyIGZvciB0aGlzIGd1aWRlLCBpdOKAmXMgYmVzdCB0byBzZXQgdXAgYSBjbGVhbiBhbmQgZWZmaWNpZW50IGZpbGUgbWFuYWdlbWVudCBzdHJ1Y3R1cmUuIEZpbGUgbWFuYWdlbWVudCBpcyBrZXkgdG8gcHJldmVudGluZyBSIHByb2dyYW1taW5nIGZydXN0cmF0aW9uLiBIZXJlIGFyZSBzb21lIHRpcHMuCgotU2V0IHVwIGEgY2xlYXIgYW5kIHVuZGVyc3RhbmRhYmxlIGhpZXJhcmNoaWNhbCBmaWxlIHN5c3RlbSBmb3IgdGhpcyBjbGFzcyBvbiB5b3VyIGhhcmQgZHJpdmUuIEZvciBleGFtcGxlLCBjcmVhdGUgYSBjbGFzcyBmb2xkZXIgKFNQSCAyMTUpLiBXaXRoaW4gdGhpcyBjbGFzcyBmb2xkZXIsIGNyZWF0ZSB0aGUgZm9sZGVyIEFzc2lnbm1lbnRzLiBXaXRoaW4gdGhlIEFzc2lnbm1lbnRzIGZvbGRlciwgY3JlYXRlIHNlcGFyYXRlIGZvbGRlcnMgZm9yIGVhY2ggQXNzaWdubWVudCAoZS5nLiBBc3NpZ25tZW50IDEsIEFzc2lnbm1lbnQgMiwg4oCmKS4gRG9u4oCZdCB3b3JrIGZyb20geW91ciBEZXNrdG9wLiBPciBmcm9tIHRoZSBEb3dubG9hZHMgZm9sZGVyLiBPciBzb21lIHJhbmRvbWx5IG5hbWVkIGZvbGRlciB0aGF0IHlvdSB3aWxsIGhhdmUgYSBoYXJkIHRpbWUgZmluZGluZyBhIG1vbnRoLCB3ZWVrIG9yIGRheSBmcm9tIG5vdy4gCi1LZWVwIGFsbCB5b3VyIGZpbGVzIHRoYXQgYXJlIHJlbGF0ZWQgdG8gYSBsYWIgb3IgYXNzaWdubWVudCBpbiBvbmUgZm9sZGVyLiBUaGF0IGlzLCBkb27igJl0IGhhdmUgYW4gQXNzaWdubWVudCAzIGZvbGRlciB0aGF0IGNvbnRhaW5zIGRhdGEgZmlsZXMgc3BlY2lmaWMgdG8gQXNzaWdubWVudCAxLiBLZWVwIGV2ZXJ5dGhpbmcgaW4gb25lIGZvbGRlciwgaW5jbHVkaW5nIHRoZSBSIE1hcmtkb3duIGZvciB0aGF0IGFzc2lnbm1lbnQgb3IgbGFiLgoKVXNpbmcgdGhlIGJhc2ljIGd1aWRlbGluZXMgYWJvdmUsIHNhdmUgeW91ciBSIE1hcmtkb3duIGZpbGUgaW50byBhbiBhcHByb3ByaWF0ZSBmb2xkZXIgb24geW91ciBoYXJkIGRyaXZlIGJ5IGNsaWNraW5nIG9uIEZpbGUgYW5kIHRoZW4gU2F2ZSBmcm9tIHRoZSBSU3R1ZGlvIG1lbnUuCgpUbyBvcGVuIGFuIGAuUm1kYCBmaWxlIGluIFJTdHVkaW8sIHNlbGVjdCBGaWxlIC0+IE9wZW4gRmlsZSBhbmQgbmF2aWdhdGUgdG8gdGhlIGZvbGRlciB5b3Ugc2F2ZWQgdGhlIGFzc2lnbm1lbnQgdGVtcGxhdGUgaW4gYW5kIHNlbGVjdCB0aGUgZmlsZS4gWW91IHNob3VsZCBzZWUgdGhlIFIgTWFya2Rvd24gZmlsZSBwb3AgdXAgb24gdGhlIHRvcCBsZWZ0IHBvcnRpb24gb2YgeW91ciBSU3R1ZGlvIGludGVyZmFjZQoKLwoKIyNBdXRob3JpbmcgYW4gUiBNYXJrZG93biBkb2N1bWVudAoKUiBNYXJrZG93biBkb2N1bWVudHMgY29udGFpbiAzIG1ham9yIGNvbXBvbmVudHM6CgoxLiBBIFlBTUwgaGVhZGVyIHN1cnJvdW5kZWQgYnkgLSAtIC0KMS4gQ2h1bmtzIG9mIFIgY29kZSBzdXJyb3VuZGVkIGJ5IGBgYAoxLiBUZXh0IG1peGVkIHdpdGggc2ltcGxlIHRleHQgZm9ybWF0dGluZyB1c2luZyB0aGUgTWFya2Rvd24gc3ludGF4CgojIyMgWUFNTCBoZWFkZXIKClRoZSBZQU1MIGhlYWRlciBjb250cm9scyBob3cgUiBNYXJrZG93biByZW5kZXJzIHlvdXIgYC5SbWRgIGZpbGUuIEEgWUFNTCBoZWFkZXIgaXMgYSBzZWN0aW9uIG9mIGtleTp2YWx1ZSBwYWlycyBzdXJyb3VuZGVkIGJ5IC0gLSAtIG1hcmtzIGFuZCBpcyBhbHdheXMgbG9jYXRlZCBhdCB0aGUgdG9wIG9mIHlvdXIgUm1kIGZpbGUuCgpJbiB0aGUgYXNzaWdubWVudOKAmXMgWUFNTCwgYWRkIHlvdXIgbmFtZSwgYXNzaWdubWVudCBudW1iZXIsIGFuZCB0aGUgZGF0ZS4gVGhlc2UgYXJlIHRoZSBvbmx5IG5lY2Vzc2FyeSBpdGVtcywgYnV0IHlvdSBjYW4gY2hhbmdlIG90aGVyIG9wdGlvbnMsIG1vc3Qgb2Ygd2hpY2ggYXJlIGRldGFpbGVkIFtoZXJlXShodHRwczovL2Jvb2tkb3duLm9yZy95aWh1aS9ybWFya2Rvd24vaHRtbC1kb2N1bWVudC5odG1sKS4gWW91ciBZQU1MIHdpbGwgZ2VuZXJhbGx5IGxvb2sgbGlrZSB0aGUgZm9sbG93aW5nLgoKYGBge3lhbWx9Ci0tLQp0aXRsZTogIkFzc2lnbm1lbnQgW2luc2VydCBudW1iZXIgaGVyZV0iCnN1YnRpdGxlOiBTUEggMjE1CmF1dGhvcjogWW91ciBmdWxsIG5hbWUgaGVyZQpkYXRlOiBBc3NpZ25tZW50IGR1ZSBkYXRlCm91dHB1dDogCiAgaHRtbF9kb2N1bWVudDoKICAgIHRoZW1lOiBjb3NtbwotLS0KCmBgYAo=</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Assignments.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

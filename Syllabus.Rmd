@@ -1,7 +1,5 @@
 ---
 title: "Syllabus"
-author: "Peter James"
-date: "2025-03-13"
 output: html_document
 ---
 
@@ -9,22 +7,77 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+### SPH 215: GIS and Public Health
+### Professor Peter James
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+The following is an abridged version of the course syllabus. A full course syllabus can be found on the [Canvas class website](https://canvas.ucdavis.edu/courses/996070).
 
-```{r cars}
-summary(cars)
-```
+Lecture and Lab
+Lecture: Thursdays 8a-8:55a
+Lab: Thursdays 9-11a
+Lecture and Lab are held in person.
 
-## Including Plots
+Instructor
+Dr. Peter James
 
-You can also embed plots, for example:
+Contact: pjames.at.ucdavis.edu
+Office: Medical Sciences 1C Room 138
+Office hours: By appointment over Zoom. Please email any time to set up a meeting!
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+### Course Objectives
+In this course, students will gain
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+- A theoretical understanding of the role of space and place in community-level phenomenon
+- An understanding of what kinds of spatial data are available and where to find them
+- Proficiency in spatial analytic tools (R) to
+- Manage and process spatial data
+- Descriptively examine spatial data
+- Run spatial models for statistical inference
+- An understanding of how these methods are employed in community research- 
+
+### Course Format
+Most classes will adhere to the following format: (1) An hour or so lecture / discussion about that week's topic and (2) an hour or so walk through of a lab, and (3) a lab where we apply the methods learned in lecture/discussion/lab using real data in R. All students are expected to actively participate, which means not only being present, but reading all material and engaging in class discussions. 
+
+### Required Readings
+Required reading material is composed of a combination of the following
+
+Journal articles and research reports.
+There is no single official textbook for the course. Instead, I’ve selected journal articles and research reports.
+
+### My handouts
+For most topics, in lieu of an article or book chapter, I will provide lecture handouts on Canvas in advance of the assigned class.
+
+There are also a set of weekly optional readings listed at the end of the syllabus that provide applications of the methods.
+
+### Additional Readings
+The other major course material are lab guides, which will be released at the beginning of Thursday’s lecture on the class website. Many of the R lab guides will closely follow two textbooks. These textbooks are not required, but are great resources.
+
+The first textbook provides the foundation for using R
+
+(RDS) Wickham, Hadley & Garret Grolemund. (2017). R for Data Science. Sebastopol, CA: O’Reilly Media.
+The textbook is free online at: http://r4ds.had.co.nz/introduction.html
+
+The second textbook covers spatial data in R
+
+(GWR) Lovelace, Robin, Jakub Nowosad & Jannes Muenchow. Geocomputation with R. CRC Press.
+The textbook is free online at: https://geocompr.robinlovelace.net/
+
+### Course Software
+R is the only statistical language used in this course, as it has become an increasingly popular program for data analysis in the social sciences. We will use RStudio as a user friendly interface for R. R is freeware and you can download it on your personal laptop and desktop computers (along with RStudio, which is a user friendly interface for R). Note that although the course does not require students to have experience with R, this class does not devote too much time introducing students to the program. In other words, this is a not an introduction to R programming. The lab guides will provide as much detail as possible to execute tasks and functions, but you will likely run into tasks that will require you to go beyond the guides. My suggestion is to (1) look up RDS or GWR as they are excellent resources and (2) if (1) fails search online. As such, you are expected to do as much independent learning of the software as I teach in the labs.
+
+### Course Requirements
+ 
+#### Lab Assignments (4 x 10%: 40%):
+Students will be expected to submit their completed GIS lab assignments. These assignments will be posted Thursday morning and due the following Tuesday 11:59p. Each assignment will be 10% of the final grade, with four lab assignments making up a total of 40% of the final grade.
+
+#### Mid-Term Case Study (20%): 
+Students will be given a case study based on the use of GIS within a specific public health situation.  The students will write a response to the way they would utilize GIS to aid in the resolution of the case presented.  This will include the policy, procedures, technical aspects and other knowledge gained throughout the course. The mid-term case study will be 20% of the final grade.
+
+#### Final Project (30% Final Paper + 10% Final Presentation):
+The course will end with a final project where the students will be able to apply the skills they have learned in the course to a project that involves either creating a map relevant to public health (e.g., a choropleth map of asthma rates across counties in California) or conducting an analysis with spatial data (e.g., examining the correlation between air pollution levels and cardiovascular disease rates across counties in California). All projects will have to contain at least one map. Each student will propose their own project midway through the course, and they will have to identify datasets (public or privately-owned) to visualize in their project. Students will prepare a final paper (6-8 pages double-spaced) that will be in the format of a manuscript. This manuscript could be a preliminary analysis of secondary data, a preliminary analysis of primary data, or a commentary / public opinion piece translating research to the public. The final paper will be 30% of the final grade. Participants will also present on their topic during the last week of class. The final presentation will be 10% of the final grade.
+
+
+### Course Agenda
+
+The schedule is subject to revision throughout the quarter. Please see the full syllabus for a more detailed version of the agenda.
