@@ -2,8 +2,6 @@ name: "SPH 215: GIS and Public Health Spring 2025"
 navbar:
   title: "SPH 215: GIS and Public Health Spring 2025"
   left:
-    - text: "About"
-      href: about.html
     - text: "Syllabus"
       href: Syllabus.html
     - text: "Labs"

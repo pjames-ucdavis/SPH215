@@ -4,11 +4,10 @@ title: "SPH 215: Geographic Information Systems and Public Health"
 
 \
 
-#### SPH 215: GIS and Public Health
-#### Professor Peter James
-##### University of California, Davis
-##### School of Medicine
-##### Department of Public Health Sciences
+### Professor Peter James
+### University of California, Davis
+### School of Medicine
+### Department of Public Health Sciences
 
 \
 
@@ -32,12 +31,12 @@ On Canvas you will find:
 
 \
 
-### About the Class
+# About the Class
 This 3-unit course introduces the concepts and components of a geographic information system (GIS) for public health. It also teaches the essential skills of operating a functional GIS through the use of R, which is free and open-source software. By completing this course, students will understand the operational processes of spatial data acquisition, editing and QA/QC, spatial data visualization, geocoding, spatial joins and extractions to create exposure metrics, network analysis, spatial clustering analyses, and geographically weighted regression.
 
 \
 
-### Acknowledgements 
+# Acknowledgements 
 The following websites were used in the construction of this course website. My immense thanks go out to the people who invested their time and effort in developing and offering these valuable resources to the public.
 
 - Noli Brazil's [CRD 230: Spatial Methods in Community Research Course](https://crd230.github.io/index.html) (which this website relies **heavily** upon! *Thank you Noli!*)
