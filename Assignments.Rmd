@@ -4,6 +4,8 @@ title: "Assignments"
 
 #### All credit goes to Noli Brazil and his [CRD 230 website](https://crd230.github.io/index.html) for this section
 
+\
+
 # R Scripts
 Running R code using the console (bottom left in figure below) is a great place to start, but has its limitations. Each time you want to execute a set of commands, you have to re-enter them at the command line. Complex commands are potentially subject to typographical errors, necessitating that they be re-entered correctly. Repeating a set of operations requires re-entering the code stream. To give yourself more room to work, it’s a great idea to use the R script editor.
 
@@ -11,17 +13,17 @@ A script is simply a text file containing a set of commands and comments. The sc
 
 You can open a new empty script by clicking the New File icon in the upper left of the main RStudio toolbar. This icon looks like a white square with a white plus sign in a green circle. Clicking the icon opens the New File Menu. Click the “R Script” option and the script editor will open with an empty script. Your R Studio should look similar to below (image source: [R for Data Science](https://r4ds.had.co.nz/workflow-scripts.html))
 
-/
-
 ![RStudio](rstudioeditor.png)
 
-/
+\
 
 R Scripts are basically text files with a .R extension that houses your code and comments. You write your code. Execute that code from your R script. Results are produced in your R console window. In this class, we won’t be using regular R Scripts for homework assignments. Instead, we’ll be using [R Markdown](https://rmarkdown.rstudio.com/).
 
 R Markdown documents take script files to a new level by allowing you to mix R commands with explanatory text. Think of an R Markdown document as an R script on steroids. Your R Markdown source document is compiled into an output report evaluating the R commands in the source document to produce easily reproducible results in an aesthetically pleasing form. It combines code, results from the code, and narrative text explaining the results to produce beautiful documents and academic reports.
 
 Still not convinced that R Markdown is useful? Check out Nikhil Kaza’s thorough description of [why we should use R Markdown](https://nkaza.github.io/intro2Rbook/why-use-r-markdown.html).
+
+\
 
 # R Markdown
 
@@ -41,13 +43,19 @@ install.packages("knitr")
 install.packages("rmarkdown")
 ```
 
+\
+
 Once you’ve installed these packages, you don’t need to install them any more in the future. You also do not need to load them in at any time using `library()`.
+
+\
 
 # Creating and saving an R Markdown
 
-To create a new `.Rmd` file in RStudio, select File -> New File -> R Markdown. A window should pop up. Type in “Assignment 1” next to *Title* and your name next to *Author*r. Leave everything else alone and click OK. A new window in the top left of your RStudio console should pop up containing your new R Markdown file.
+To create a new `.Rmd` file in RStudio, select File -> New File -> R Markdown. A window should pop up. Type in “Assignment 1” next to *Title* and your name next to *Author*. Leave everything else alone and click OK. A new window in the top left of your RStudio console should pop up containing your new R Markdown file.
 
 ![RStudio Interface](rstudiointerface.png)
+
+\
 
 If you are using your personal computer for this guide, it’s best to set up a clean and efficient file management structure. File management is key to preventing R programming frustration. Here are some tips.
 
@@ -58,7 +66,7 @@ Using the basic guidelines above, save your R Markdown file into an appropriate 
 
 To open an `.Rmd` file in RStudio, select File -> Open File and navigate to the folder you saved the assignment template in and select the file. You should see the R Markdown file pop up on the top left portion of your RStudio interface
 
-/
+\
 
 # Authoring an R Markdown document
 
@@ -67,6 +75,8 @@ R Markdown documents contain 3 major components:
 1. A YAML header surrounded by - - -
 1. Chunks of R code surrounded by ```
 1. Text mixed with simple text formatting using the Markdown syntax
+
+\
 
 ## YAML header
 
@@ -87,6 +97,8 @@ output:
 
 ```
 
+\
+
 ## R Code Chunks
 
 When answering an assignment question, you’ll have the following sequence of components in your R Markdown document: Question, R code answering the question, comment describing what the code is doing, and your text to explain the results. Let’s say you have the following question in one of your assignments.
@@ -99,8 +111,9 @@ Question 1
 1. What is the result of the operation above?
 ```
 
-Assignments will ask you to write R code to accomplish a data analysis task. You present and execute your R code inside R code chunks. R chunks start with ```{r} and end with ```, and you insert your R code in between. To designate `1+1` as R code, it will look like the following in your R Markdown document.
+\
 
+Assignments will ask you to write R code to accomplish a data analysis task. You present and execute your R code inside R code chunks. R chunks start with ```{r} and end with ```, and you insert your R code in between. To designate `1+1` as R code, it will look like the following in your R Markdown document.
 
 ```{r q2, results='asis', echo=FALSE}
 cat("````markdown\n",
@@ -110,6 +123,7 @@ cat("````markdown\n",
     "````", sep = "")
 ```
 
+\
 
 All code inside a chunk will be executed when knitting the markdown file (i.e. the html file will show your code and its result). This means that your R code must reside inside an R code chunk in order for it to be processed as R code (otherwise R Markdown will think it is text). This also means that nothing but executable code (or comments, which we’ll get to next) should be inside a chunk.
 
@@ -166,6 +180,8 @@ cat("````markdown\n",
     "````", sep = "")
 ```
 
+\
+
 The above code hides non error messages for every single R code chunk in your file. These non error messages are unnecessary for the purposes of this class. Other chunk options can be found [here](https://r4ds.had.co.nz/r-markdown.html#chunk-options). 
 
 You can also set options for individual chunks. These are local options - local to that chunk - and won’t be applied to other chunks in your file. For example, you can add the options `warning=TRUE` and `message=TRUE` to an individual R code chunk as follows to show the messages for the R code in that chunk. Notice that each argument is separated by a comma.
@@ -178,6 +194,8 @@ cat("````markdown\n",
     "````", sep = "")
 ```
 
+\
+
 ## Text 
 
 In addition to R code, assignments will ask you to write text to explain results. Going back to our example question from above:
@@ -188,6 +206,8 @@ Question 1
 
 1. What is the result of the operation above?
 ```
+
+\
 
 You would type in your R Markdown document the following:
 ```{r q9, results='asis', echo=FALSE}
@@ -221,6 +241,8 @@ Question 1
 Run each line of code above.  What are the results?
 ```
 
+\
+
 Instead of including both lines of code in one chunk like as follows
 ```{r q11, results='asis', echo=FALSE}
 cat("````markdown\n",
@@ -237,6 +259,8 @@ cat("````markdown\n",
     "One plus one equals 2. Two plus two equals 4\n",
     "````", sep = "")
 ```
+
+\
 
 Break it up and add text after each to explain the result.
 ```{r q12, results='asis', echo=FALSE}
@@ -259,6 +283,8 @@ cat("````markdown\n",
     "````", sep = "")
 ```
 
+\
+
 Think of writing a script as similar to writing an essay. You don’t write an essay in one single paragraph. You break it up into several paragraphs, where paragraph breaks are used to separate major points and ideas. On the other end of the spectrum, do not break up every single line of code like you would not break up every single sentence into their own paragraphs in an essay. Break up your code where it makes sense.
 
 \
@@ -277,14 +303,16 @@ cat("````markdown\n",
     "````", sep = "")
 ```
 
+\
+
 Run that code chunk to make sure it works (you should get 2!). *Then* proceed to the next question. Let me emphasize: **Do not write all of your code answering every question in the assignment and run it at the very end.** Routinely TEST, Test, and test your code to make sure it runs properly.
 
 There are a number of ways to run code in R Markdown. First, you can click your mouse in the R code chunk you want to run and click on ![run](run.png) located at the top of the R Markdown window and select *Run Current Chunk.*
 
 Second, you can place your mouse cursor in the R code chunk and click on ![runbutton](runbutton.png) located on the right corner of the chunk. See Figure below.
 
-\
 ![Running Chunks](chunk2.png)
+
 \
 
 In each R chunk, pressing the button ![rchunkbutton](rchunkbutton.png) will run all previous R chunks. See Figure below.
