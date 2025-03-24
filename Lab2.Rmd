@@ -1,9 +1,8 @@
 ---
-title: "Lab2"
-author: "Peter James"
-date: "2025-03-24"
-output: html_document
+title: "Lab 2: Vector Data"
 ---
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

@@ -17,7 +17,7 @@ The objectives of the guide are as follows
 
 \
 
-## What is R?
+# What is R?
 
 R is a free, open source statistical programming language. It is useful for data cleaning, analysis, and visualization. R is an interpreted language, not a compiled one. This means that you type something into R and it does what you tell it. It is both a command line software and a programming environment. It is an extensible, open-source language and computing environment for Windows, Macintosh, UNIX, and Linux platforms, which allows for the user to freely distribute, study, change, and improve the software. It is basically a free, super big, and complex calculator. You will be using R to accomplish all data analysis tasks in this class. You might be wondering “Why in the world do we need to know how to use a statistical software program?” Here are the main reasons:
 
@@ -81,7 +81,7 @@ Hopefully, I’ve convinced you that statistical programming and R are worthwhil
 
 \
 
-## Getting R
+# Getting R
 
 R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network) sites. In the US, the main site is at http://cran.us.r-project.org/. Look in the “Download and Install R” area at the top. Click on the appropriate link based on your operating system.
 
@@ -89,7 +89,7 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 
 \
 
-### Mac OS X
+## Mac OS X
 1. On the “R for Mac OS” page, there are multiple packages that could be downloaded. Depending on the model of your Mac, pick the appropriate .pkg file. *Note the details for some operating systems. If you are using an older operating system, please follow instructions.*
 2. After the package finishes downloading, locate the installer on your hard drive, double-click on the installer package, and after a few screens, select a destination for the installation of the R framework (the program) and the R.app GUI. Note that you will have to supply the Administrator’s password. Close the window when the installation is done.
 
@@ -101,7 +101,7 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 
 \
 
-### Windows
+## Windows
 1. On the “R for Windows” page, click on the “base” link, which should take you to the “R-4.4.3 for Windows” page
 
 2. On this page, click “Download R 4.4.3 for Windows”, and save the .exe file to your hard disk when prompted. Saving to the desktop is fine.
@@ -112,7 +112,7 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 
 \
 
-## What is R Studio?
+# What is R Studio?
 If you click on the R program you just downloaded, you will find a very basic user interface. For example, below is what I get on a Mac:
 
 ![The Basic R Console](R_basic.png)
@@ -122,7 +122,7 @@ We will not use R’s direct interface to run analyses in this class. Instead, w
 
 \
 
-## Getting R Studio
+# Getting R Studio
 
 To download and install RStudio, follow the directions below
 
@@ -157,7 +157,7 @@ There is also a fourth window. But, we’ll get to this window a little later. T
 
 \
 
-### Setting RStudio Defaults
+## Setting RStudio Defaults
 
 While not required, I strongly suggest that you change preferences in RStudio to never save the workspace so you always open with a clean environment. See [Ch. 8.1](https://r4ds.had.co.nz/workflow-projects.html#what-is-real) of R4DS for some more background
 
@@ -178,7 +178,7 @@ You only need to set these preferences once.
 
 \
 
-## R Data Types
+# R Data Types
 
 Let’s now explore what R can do. R is really just a big fancy calculator. For example, type in the following mathematical expression in the R console (left window)
 ```{r r1}
