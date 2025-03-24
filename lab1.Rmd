@@ -2,6 +2,7 @@
 title: "Lab 1: Intro to R"
 ---
 
+# Using R for GIS
 
 In this course, we will be using R for all our GIS needs. If you've never used R before, no worries! We will move at a slow and steady pace and will provide support along the way. If you're an R pro, feel free to flex your R skills and (hopefully) build on them! 
 
