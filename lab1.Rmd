@@ -42,7 +42,7 @@ The next question you may have is “I love Excel [or insert your favorite progr
 
 R is different from Excel in that it is generally not a point-and-click program. You will be primarily writing code to clean and analyze data. What does *writing* or *sourcing* code mean? A basic example will help clarify. Let’s say you are given a dataset with cancer cases across CA. You have a variable in the dataset representing age Let’s say this variable is named **AGE**. To get the mean age of the people in your dataset, you would write code that would look something like this
 
-```{r echo=FALSE}
+```{r, echo=FALSE}
 download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
 ```
 

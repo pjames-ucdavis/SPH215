@@ -10,7 +10,7 @@ navbar:
         - text: "Lab 1: Intro to R"
           href: lab1.html
         - text: "Lab 2: Geocoding, Vector Data, and Census Data "
-          href: lab2.html
+          href: Lab2.html
         - text: "Lab 3: Polygons and Rasters"
           href: lab3.html
         - text: "Lab 4: Spatial Data Processing with Vector Data"

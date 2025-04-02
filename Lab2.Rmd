@@ -49,7 +49,9 @@ library(crsuggest)
 So, let's say we wanted to map all of the marijuana dispensaries across San Francisco. Let's download a .csv of these from the Github site, then take a look at the dataset.
 
 ```{r}
-sf_mj <- read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/san_francisco_active_marijuana_retailers.csv")
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/san_francisco_active_marijuana_retailers.csv", "san_francisco_active_marijuana_retailers.csv", mode = "wb")
+
+sf_mj <- read_csv("san_francisco_active_marijuana_retailers.csv")
 
 head(sf_mj)                  
 
@@ -310,6 +312,9 @@ head(ca)
 The tibble contains counties with their estimates for race/ethnicity. These variables end with the letter “E”. It also contains the [margins of error](https://walker-data.com/tidycensus/articles/margins-of-error.html) for each estimate. These variables end with the letter “M”.
 
 **tidycensus** is a game changer in being able to bring in Census data into R in a convenient, fast, efficient and tidy friendly way. We’ll be using this package in the next lab to bring in Census spatial data. And congratulations! You’ve just earned another badge. Fantastic!
+
+\
+
 ![tidycensus Badge](tidycensus_sticker.png)
 
 \
@@ -317,7 +322,7 @@ The tibble contains counties with their estimates for race/ethnicity. These vari
 # Reading in data
 ## PolicyMap
 
-To save us time, I’ve uploaded PolicyMap (csv) on the Github for you to use in this lab. Save this file in the same folder where your Lab 2 R Markdown file resides.To read in a csv file, first make sure that R is pointed to the folder you saved your data into. Type in `getwd()` to find out the current directory and `setwd("directory name")` to set the directory to the folder containing the data. 
+To save us time, I’ve uploaded a PolicyMap ([link to .csv](https://github.com/pjames-ucdavis/SPH215/blob/main/PolicyMap%20Data%202025-03-27%20192555%20UTC.csv)) on the Github for you to use in this lab. Save this file in the same folder where your Lab 2 R Markdown file resides.To read in a .csv file, first make sure that R is pointed to the folder you saved your data into. Type in `getwd()` to find out the current directory and `setwd("directory name")` to set the directory to the folder containing the data. 
 
 From a Mac laptop, I type in the following command to set the directory to the folder containing my data.
 
@@ -395,8 +400,12 @@ glimpse(cacounty)
 
 Let’s break down what the pipe is doing here. First, you start out with your dataset ca. You “pipe” that into the command `left_join()`. Notice that you didn’t have to type in ca inside that command - `%>%` pipes that in for you. The command joins the data object *ca.pm* to *ca*. The result of this function gets piped into the `mutate()` function, which creates the percent race/ethnicity (from the Census API), and majority Hispanic variables. This gets piped into the `rename()` function, which renames the ambiguous variable name *GeoID_Name* to the more descriptive name *County*. This then gets piped into the final function, `select()`, which keeps the necessary variables. Finally, the code saves the result into cacounty which we designated at the beginning with the arrow operator.
 
-Piping makes code clearer, and simultaneously gets rid of the need to define any intermediate objects that you would have needed to keep track of while reading the code. PIPE, Pipe, and pipe whenever you can. Badge it!
+Piping makes code clearer, and simultaneously gets rid of the need to define any intermediate objects that you would have needed to keep track of while reading the code. PIPE, Pipe, and pipe whenever you can. We need some stinkin badges!
+
+\
+
 ![pipe Badge!](pipe.png)
+
 /
 
 ## Saving data
@@ -605,7 +614,7 @@ ggplot(data = <DATA>) +
       <OPTIONS>()
 
 
-1. ggplot() is the base function where you specify your dataset using the data = <DATA> argument.
+1. `ggplot()` is the base function where you specify your dataset using the data = <DATA> argument.
 2. You then need to build on this base by using the plus operator + and <GEOM_FUNCTION>() where <GEOM_FUNCTION>() is a unique geom function indicating the type of graph you want to plot. Each unique function has its unique set of mapping arguments which you specify using the mapping = aes() argument. Charts and graphs have an x-axis, y-axis, or both. Check this ggplot cheat sheet for all possible geoms.
 3. `<OPTIONS>()` are a set of functions you can specify to change the look of the graph, for example relabeling the axes or adding a title.
 
@@ -729,6 +738,9 @@ cacounty %>%
 ggplot() is a powerful function, and you can make a lot of visually captivating graphs. We have just scratched the surface of its functions and features. You can also make your graphs really “pretty” and professional looking by altering graphing features, including colors, labels, titles and axes. For a list of ggplot() functions that alter various features of a graph, check out Chapter 28 in RDS.
 
 Here’s your ggplot2 badge. Wear it with pride!
+
+\
+
 ![ggplot2 Badge](ggplot2.png)
 
 
