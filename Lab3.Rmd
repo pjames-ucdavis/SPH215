@@ -1,0 +1,13 @@
+---
+title: "Lab 3: Polygons and Rasters"
+---
+
+\
+
+Please check back here for more soon!
+
+\
+
+# Choropleth Maps
+
+# Rasters

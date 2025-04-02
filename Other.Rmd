@@ -1,30 +1,101 @@
 ---
-title: "Other"
-author: "Peter James"
-date: "2025-03-13"
-output: html_document
+title: "Data Sources"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+Below you will find links to data sources that contain spatial data and health data, and often both! **We will continue to build out this list, so please check back often.** Especially when thinking about your Final Project!
+
+\
+
+# Health Datasets
+
+- [CDC Places](https://www.cdc.gov/places/index.html) PLACES provides health and health-related data using small-area estimation for counties, incorporated and census designated places, census tracts, and ZIP Code Tabulation Areas (ZCTAs) across the United States. This project, which started in 2015, is a partnership between CDC, the Robert Wood Johnson Foundation (RWJF), and CDC Foundation.
+
+- [CDC Wonder](https://wonder.cdc.gov/) CDC WONDER -- Wide-ranging ONline Data for Epidemiologic Research -- is an easy-to-use, menu-driven system that makes the information resources of the Centers for Disease Control and Prevention (CDC) available to public health professionals and the public at large. It provides access to a wide array of public health information. There's environmental data here, lots of health data at varying spatial resolutions.
+
+- [Archived CDC GIS Website](https://archive.cdc.gov/www_cdc_gov/dhdsp/maps/gisx/resources/geo-spatial-data.html) Although this website is archived, there are lot of active links to various health-related datasets that contain spatial data. 
+- [Dartmouth Atlas](http://www.dartmouthatlas.org/) For more than 25 years, The Dartmouth Atlas Project documented striking variations in how medical resources were distributed and used in the United States. The project used Medicare and Medicaid data to provide information and analysis about national, regional, and local markets, as well as hospitals and their affiliated physicians. Although the website will no longer update Dartmouth Atlas tools or calculate new annual rates, this website will continue to provide historical Dartmouth Atlas rates (through 2019) and associated documentation.
+
+- [Cancer Data](https://gis.cancer.gov/) The NCI GIS Portal for Cancer Research provides tools for mapping and download of cancer statistics, risk factors, cancer related tobacco policy data, and the information related to geographic patterns of cancer. It is intended for researchers, cancer control planners, cancer advocacy groups, and general public to inform and inspire our efforts to reduce cancer burden in the United States.
+
+- [SEER*Stat Cancer Data](https://seer.cancer.gov/seerstat/) The SEER*Stat statistical software provides a convenient, intuitive mechanism for the analysis of SEER and other cancer-related databases. It is a powerful tool to view individual cancer records and to produce statistics for studying the impact of cancer on a population. 
+
+-	[NCI Small Area Estimates](https://sae.cancer.gov/nhis-brfss/) Model-based small area estimates from NCI are created by combining information from NHIS, BRFSS and auxiliary variables obtained from relevant sources (Census, American Community Survey, Administrative information) through novel statistical models. Outcomes include smoking, mammography, pap smear and colorectal screening. Estimates are for counties, health service areas, and states.
+
+- [RWJ County Health Rankings](https://www.countyhealthrankings.org/) County Health Rankings & Roadmaps (CHR&R), a program of the University of Wisconsin Population Health Institute, draws attention to why there are differences in health within and across communities. The program highlights policies and practices that can help everyone be as healthy as possible. CHR&R aims to grow a shared understanding of health, equity and the power of communities to improve health for all. This work is rooted in a long-term vision where all people and places have what they need to thrive.
+
+- [Institute for Health Metrics and Evaluation](https://www.healthdata.org/data-tools-practices/data-sources) An independent population health research organization based at the University of Washington School of Medicine, the Institute for Health Metrics and Evaluation (IHME) works with collaborators around the world to develop timely, relevant, and scientifically valid evidence that illuminates the state of health everywhere. They develop numerous metrics, including the Global Burden of Disease metrics.
+
+\
+
+# Other Types of Health-Adjacent Data
+
+- [PolicyMap](https://ucdavis.policymap.com/) PolicyMap is a fully web-based online data and mapping application that gives you access to over 15,000 indicators related to demographics, housing, crime, mortgages, health, jobs and more. Data is available at all common geographies (address, block group, census tract, zip code, county, city, state, MSA) as well as unique geographies like school districts and political boundaries. Data comes from both public and proprietary sources.
+
+- [ICPSR](https://www.icpsr.umich.edu/web/pages/) ICPSR maintains a data archive of more than 350,000 files of research in the social and behavioral sciences. It hosts 23 specialized collections of data in education, aging, criminal justice, substance abuse, terrorism, and other fields.
+
+\
+
+# Census Data \ US Government Data Packages in R
+
+- **censusAPI** package: See [Lab 2](lab2.html)!
+
+- **lehdr** package
+
+A useful package for working with Census Bureau data is the lehdr R package, which accesses the [Longitudinal and Employer-Household Dynamics (LEHD)](https://lehd.ces.census.gov/) [Origin-Destination Employment Statistics (LODES)](https://lehd.ces.census.gov/data/#lodes) data. LODES is not available from the Census API, meriting an alternative package and approach. LODES includes synthetic estimates of residential, workplace, and residential-workplace links at the Census block level, allowing for highly detailed geographic analysis of jobs and commuter patterns over time. The core function implemented in **lehdr** is `grab_lodes()`, which downloads a LODES file of a specified `lodes_type` (either *rac* for residential, *wac* for workplace, or *od* for origin-destination) for a given state and year. While the raw LODES data are available at the Census block level, the *agg_geo* parameter offers a convenient way to roll up estimates to higher levels of aggregation. For origin-destination data, the `state_part = "main"` argument below captures within-state commuters; use `state_part = "aux"` to get commuters from out-of-state. The optional argument `use_cache = TRUE` stores downloaded LODES data in a cache directory on the user’s computer; this is recommended to avoid having to re-download data for future analyses.
+
+Let’s grab a dataset that contains 2018 tract-to-tract commute flows broken down by a variety of characteristics in Nevada, referenced in the LODES documentation.
+
+```{r}
+library(lehdr)
+nv_lodes_od <- grab_lodes(
+  state = "nv",
+  year = 2018,
+  lodes_type = "od",
+  agg_geo = "tract",
+  state_part = "main",
+  use_cache = TRUE
+)
+glimpse(nv_lodes_od)
+
+```
+\
+
+
+
+
+- **tidyUSDA** package
+
+Agriculture can be a difficult sector on which to collect statistics, as it is not available in many data sources such as LODES. Fortunately, dedicated statistics on US agriculture can be acquired with the tidyUSDA package. You’ll need to get an API key at https://quickstats.nass.usda.gov/api and use that to request data from the USDA QuickStats API.
+
+Let’s see which California counties produce have the most acres devoted to [peaches](https://youtu.be/3GCrzjVdmSg?si=bUHZfVD1uq8xYII2). The core function implemented is g`etQuickstat()`. To use it effectively, it is helpful to construct a query first at https://quickstats.nass.usda.gov/ and see what options are available, then bring those options as arguments into R.
+
+```{r, eval = FALSE}
+CA_asp <- getQuickstat(
+  key = "ENTER YOUR KEY HERE",
+  program = "CENSUS",
+  data_item = "PEACHES - ACRES BEARING",
+  sector = "CROPS",
+  commodity = "PEACHES",
+  category = "AREA BEARING",
+  domain = "TOTAL",
+  geographic_level = "COUNTY",
+  state = "CALIFORNIA",
+  year = "2017"
+)
 ```
 
-## R Markdown
+\
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+The Census and other U.S. government agencies offer a bevy of other data products at various levels of aggregation. This also includes individual level data, also known as microdata. In many cases, microdata reflect responses to surveys that are de-identified and anonymized, then prepared in datasets that include rich detail about survey responses. US Census microdata are available for both the decennial Census and the ACS; these datasets, named the [Public Use Microdata Series](https://www.census.gov/programs-surveys/acs/microdata.html) (PUMS), allow for detailed cross-tabulations not available in aggregated data. For information on the ecosystem of Census and Government related R packages, check out Kyle Walker’s indispensable [book](https://walker-data.com/census-r/index.html) on using R to access census data. If you are interested in accessing Census data outside of the United States, check out his [Chapter 12](https://walker-data.com/census-r/working-with-census-data-outside-the-united-states.html).
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+\
 
-```{r cars}
-summary(cars)
-```
+# Resources for multiple types of data
 
-## Including Plots
+- [Google Earth Engine](https://earthengine.google.com/) Google Earth Engine combines a multi-petabyte catalog of satellite imagery and geospatial datasets with planetary-scale analysis capabilities. Scientists, researchers, and developers use Earth Engine to detect changes, map trends, and quantify differences on the Earth's surface. Earth Engine is free for academic and research use, but you will need to create a Cloud Project.
 
-You can also embed plots, for example:
+- [Harvard Dataverse](https://dataverse.harvard.edu/) The Harvard Dataverse Repository is a free data repository open to all researchers from any discipline, both inside and outside of the Harvard community, where you can share, archive, cite, access, and explore research data. Each individual Dataverse collection is a customizable collection of datasets (or a virtual repository) for organizing, managing, and showcasing datasets. There is TONS of spatial data there, especially after the [Climate Cafe](https://climatehealthcafe.org/) started hosting data there.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+- And don't forget the UC Davis Library! So many resources here! Specifically, check out: https://guides.library.ucdavis.edu/geography or https://guides.library.ucdavis.edu/social-science-data  
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+

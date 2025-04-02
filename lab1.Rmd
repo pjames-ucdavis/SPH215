@@ -2,6 +2,8 @@
 title: "Lab 1: Intro to R"
 ---
 
+\
+
 # Using R for GIS
 
 In this course, we will be using R for all our GIS needs. If you've never used R before, no worries! We will move at a slow and steady pace and will provide support along the way. If you're an R pro, feel free to flex your R skills and (hopefully) build on them! 
@@ -30,11 +32,11 @@ R is a free, open source statistical programming language. It is useful for data
 
 The next question you may have is “I love Excel [or insert your favorite program]. Why can’t I use that and forget your stupid R?” Here are some reasons:
 
-1. R is free. Most programs are not;
-2. R is open source. Which means the software is community supported. This allows you to get help not from some big corporation (e.g. Microsoft with Excel), but people all around the world who are using R. And R has **a lot** of users, which means that if you have a problem, and you pose it to the user community, someone will help you;
+1. R is free. Most programs are not.
+2. R is open source. Which means the software is community supported. This allows you to get help not from some big corporation (e.g. Microsoft with Excel), but people all around the world who are using R. And R has **a lot** of users, which means that if you have a problem, and you pose it to the user community, someone will help you.
 3. R is powerful and extensible (meaning that procedures for analyzing data that don’t currently exist can be readily developed);
-4. R has the capability for mapping data, an asset not generally available in other statistical software;
-5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields
+4. R has the capability for mapping data, an asset not generally available in other statistical software.
+5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields.
 
 \
 

@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Lab 2: Geocoding, Vector Data, and Census Data</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/tabwid-1.1.3/tabwid.css" rel="stylesheet" />
+<script src="site_libs/tabwid-1.1.3/tabwid.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="lab2.html">Lab 2: Geocoding, Vector Data, and Census Data </a>
+    </li>
+    <li>
+      <a href="lab3.html">Lab 3: Polygons and Rasters</a>
+    </li>
+    <li>
+      <a href="lab4.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="lab5.html">Lab 5: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="lab6.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="lab7.html">Lab 7: Spatial Statistics</a>
+    </li>
+    <li>
+      <a href="lab8.html">Lab 8: Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 2: Geocoding, Vector Data, and Census
+Data</h1>
+
+</div>
+
+
+<p>In this lab, we are going to work with vector data, which we’ve
+talked about last week. We are going to work with a dataset of cancer
+patients across California, as well as Census data on socioeconomic
+factors. We will also talk about geocoding addresses and will discuss
+how to visualize data.</p>
+<p>The objectives of this guide are to teach you:</p>
+<ol style="list-style-type: decimal">
+<li>How to geocode addresses</li>
+<li>How to bring in and visualize point data</li>
+<li>How to download Census data using the Census API</li>
+<li>How to conduct exploratory data analysis</li>
+</ol>
+<p>Let’s get cracking!</p>
+<p><br />
+</p>
+<div id="open-up-an-r-markdown-file" class="section level1">
+<h1>Open up an R Markdown file</h1>
+<p>We hopefully remember some of this from last week in <a
+href="lab1.rmd">Lab 1</a>, but let’s open an R Markdown file by clicking
+on <em>File</em> at the top menu in RStudio, select <em>New File</em>,
+and then <em>R Markdown…</em>. A window should pop up. In that window,
+for <em>title</em>, put in “Lab 2”. For <em>author</em>, put your name.
+Leave the HTML radio button clicked, and select OK. A new R Markdown
+file should pop up in the top left window.</p>
+<p><br />
+</p>
+</div>
+<div id="what-packages-do-we-need" class="section level1">
+<h1>What packages do we need?</h1>
+<p>Let’s load some packages that we will need this week. We need to load
+any packages we previously installed using the function
+<code>library()</code>. Remember, install once, load every time. And if
+it gives you an error for <code>no package called...</code>, then we
+need to install those packages using <code>install.packages()</code>. So
+when using a package, <code>library()</code> should always be at the top
+of your R Markdown.</p>
+<pre class="r"><code>library(sf)
+library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## Loading required package: gam</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## 
+## Attaching package: &#39;foreach&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     accumulate, when</code></pre>
+<pre><code>## Loaded gam 1.22-5</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: &#39;survival&#39;</code></pre>
+<pre><code>## The following object is masked _by_ &#39;.GlobalEnv&#39;:
+## 
+##     cancer</code></pre>
+<pre class="r"><code>library(tidyverse)
+library(tidycensus)
+library(ipumsr)
+library(censusapi)
+library(lehdr)
+library(tidyUSDA)
+library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose</code></pre>
+<pre class="r"><code>library(tidygeocoder)
+library(crsuggest)</code></pre>
+<pre><code>## Using the EPSG Dataset v10.019, a product of the International Association of Oil &amp; Gas Producers. 
+## Please view the terms of use at https://epsg.org/terms-of-use.html.</code></pre>
+<p><br />
+</p>
+</div>
+<div id="geocoding" class="section level1">
+<h1>Geocoding</h1>
+<p><br />
+</p>
+<p>So, let’s say we wanted to map all of the marijuana dispensaries
+across San Francisco. Let’s download a .csv of these from the Github
+site, then take a look at the dataset.</p>
+<pre class="r"><code>sf_mj &lt;- read_csv(&quot;/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/san_francisco_active_marijuana_retailers.csv&quot;)</code></pre>
+<pre><code>## Rows: 33 Columns: 10
+## ── Column specification ──────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (10): License Number, License Type, Business Owner, Business Structure, ...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>head(sf_mj)                  </code></pre>
+<pre><code>## # A tibble: 6 × 10
+##   `License Number` `License Type`          `Business Owner` `Business Structure`
+##   &lt;chr&gt;            &lt;chr&gt;                   &lt;chr&gt;            &lt;chr&gt;               
+## 1 C10-0000614-LIC  Cannabis - Retailer Li… Terry Muller     Limited Liability C…
+## 2 C10-0000586-LIC  Cannabis - Retailer Li… Jeremy Goodin    Corporation         
+## 3 C10-0000587-LIC  Cannabis - Retailer Li… Justin Jarin     Corporation         
+## 4 C10-0000539-LIC  Cannabis - Retailer Li… Ondyn Herschelle Corporation         
+## 5 C10-0000522-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## 6 C10-0000523-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## # ℹ 6 more variables: `Premise Address` &lt;chr&gt;, Status &lt;chr&gt;,
+## #   `Issue Date` &lt;chr&gt;, `Expiration Date` &lt;chr&gt;, Activities &lt;chr&gt;,
+## #   `Adult-Use/Medicinal` &lt;chr&gt;</code></pre>
+<p><br />
+</p>
+<p>OK, some interesting columns there, and we have <em>Premise
+Address</em> as a column that we might want to make spatial. Let’s look
+closer at that.</p>
+<pre class="r"><code>head(sf_mj$`Premise Address`)</code></pre>
+<pre><code>## [1] &quot;2165 IRVING ST san francisco, CA 94122 County: SAN FRANCISCO&quot; 
+## [2] &quot;122 10TH ST SAN FRANCISCO, CA 941032605 County: SAN FRANCISCO&quot;
+## [3] &quot;843 Howard ST SAN FRANCISCO, CA 94103 County: SAN FRANCISCO&quot;  
+## [4] &quot;70 SECOND ST SAN FRANCISCO, CA 94105 County: SAN FRANCISCO&quot;   
+## [5] &quot;527 Howard ST San Francisco, CA 94105 County: SAN FRANCISCO&quot;  
+## [6] &quot;2414 Lombard ST San Francisco, CA 94123 County: SAN FRANCISCO&quot;</code></pre>
+<p><br />
+</p>
+<p>OK that column looks like what we want to geocode. But how do we take
+these addresses and make them into spatial information? We have to
+geocode them! To do so, we will use the <strong>tidygeocoder</strong>
+package in R. But first, we see that the addresses look a little
+strange. The address county is always “County: SAN FRANCISCO” so we will
+<code>gsub()</code> out that entire string.</p>
+<pre class="r"><code>sf_mj$`Premise Address` &lt;- gsub(&quot; County: SAN FRANCISCO&quot;,
+                                  &quot;&quot;, sf_mj$`Premise Address`)
+head(sf_mj$`Premise Address`)</code></pre>
+<pre><code>## [1] &quot;2165 IRVING ST san francisco, CA 94122&quot; 
+## [2] &quot;122 10TH ST SAN FRANCISCO, CA 941032605&quot;
+## [3] &quot;843 Howard ST SAN FRANCISCO, CA 94103&quot;  
+## [4] &quot;70 SECOND ST SAN FRANCISCO, CA 94105&quot;   
+## [5] &quot;527 Howard ST San Francisco, CA 94105&quot;  
+## [6] &quot;2414 Lombard ST San Francisco, CA 94123&quot;</code></pre>
+<p>That looks much better.</p>
+<p><br />
+</p>
+<p>Now let’s give a try to geocoding these addresses with the
+<strong>tidygeocoder</strong> package. We will use the
+<code>geocode()</code> function to add a latitude and longitude to each
+of our addresses in the <em>Premise Address</em> column. We will use the
+Open Street Map address database by specifying
+<code>method = "osm"</code>. This will take about a minute to run, so be
+patient!</p>
+<p>=</p>
+<pre class="r"><code>sf_mj_geo      &lt;- geocode(sf_mj, &quot;Premise Address&quot;,
+                          method = &quot;osm&quot;)</code></pre>
+<pre><code>## Passing 33 addresses to the Nominatim single address geocoder</code></pre>
+<pre><code>## Query completed in: 33.8 seconds</code></pre>
+<pre class="r"><code>head(sf_mj_geo)</code></pre>
+<pre><code>## # A tibble: 6 × 12
+##   `License Number` `License Type`          `Business Owner` `Business Structure`
+##   &lt;chr&gt;            &lt;chr&gt;                   &lt;chr&gt;            &lt;chr&gt;               
+## 1 C10-0000614-LIC  Cannabis - Retailer Li… Terry Muller     Limited Liability C…
+## 2 C10-0000586-LIC  Cannabis - Retailer Li… Jeremy Goodin    Corporation         
+## 3 C10-0000587-LIC  Cannabis - Retailer Li… Justin Jarin     Corporation         
+## 4 C10-0000539-LIC  Cannabis - Retailer Li… Ondyn Herschelle Corporation         
+## 5 C10-0000522-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## 6 C10-0000523-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## # ℹ 8 more variables: `Premise Address` &lt;chr&gt;, Status &lt;chr&gt;,
+## #   `Issue Date` &lt;chr&gt;, `Expiration Date` &lt;chr&gt;, Activities &lt;chr&gt;,
+## #   `Adult-Use/Medicinal` &lt;chr&gt;, lat &lt;dbl&gt;, long &lt;dbl&gt;</code></pre>
+<p><br />
+</p>
+<p>Hmm, looks like some of our addresses have an <code>NA</code> for
+their lat and long. Let’s take a closer look.</p>
+<pre class="r"><code>summary(sf_mj_geo$lat)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##   37.71   37.75   37.78   37.77   37.78   37.80      10</code></pre>
+<pre class="r"><code>summary(sf_mj_geo$long)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##  -122.5  -122.4  -122.4  -122.4  -122.4  -122.4      10</code></pre>
+<p><br />
+</p>
+<p>Looks like we have 10 addresses missing <em>lat</em> and 10 missing
+<em>long</em>. Let’s try this again using a different geocoding database
+called <em>arcgis</em>.</p>
+<pre class="r"><code>sf_mj_geo_arc      &lt;- geocode(sf_mj, &quot;Premise Address&quot;,
+                          method = &quot;arcgis&quot;)</code></pre>
+<pre><code>## Passing 33 addresses to the ArcGIS single address geocoder</code></pre>
+<pre><code>## Query completed in: 14.8 seconds</code></pre>
+<pre class="r"><code>head(sf_mj_geo_arc)</code></pre>
+<pre><code>## # A tibble: 6 × 12
+##   `License Number` `License Type`          `Business Owner` `Business Structure`
+##   &lt;chr&gt;            &lt;chr&gt;                   &lt;chr&gt;            &lt;chr&gt;               
+## 1 C10-0000614-LIC  Cannabis - Retailer Li… Terry Muller     Limited Liability C…
+## 2 C10-0000586-LIC  Cannabis - Retailer Li… Jeremy Goodin    Corporation         
+## 3 C10-0000587-LIC  Cannabis - Retailer Li… Justin Jarin     Corporation         
+## 4 C10-0000539-LIC  Cannabis - Retailer Li… Ondyn Herschelle Corporation         
+## 5 C10-0000522-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## 6 C10-0000523-LIC  Cannabis - Retailer Li… Ryan Hudson      Limited Liability C…
+## # ℹ 8 more variables: `Premise Address` &lt;chr&gt;, Status &lt;chr&gt;,
+## #   `Issue Date` &lt;chr&gt;, `Expiration Date` &lt;chr&gt;, Activities &lt;chr&gt;,
+## #   `Adult-Use/Medicinal` &lt;chr&gt;, lat &lt;dbl&gt;, long &lt;dbl&gt;</code></pre>
+<pre class="r"><code>summary(sf_mj_geo_arc$lat)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   37.71   37.76   37.77   37.77   37.78   37.80</code></pre>
+<pre class="r"><code>summary(sf_mj_geo_arc$long)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  -122.5  -122.4  -122.4  -122.4  -122.4  -122.4</code></pre>
+<p><br />
+</p>
+<p>Woohoo! No missingness. Love to see it. OK, let’s plot these data and
+see how they look.</p>
+<pre class="r"><code>plot(sf_mj_geo_arc$long, sf_mj_geo_arc$lat)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We are in business! We have taken addresses and converted them into
+latitude and longitude! I think we need a badge! <img
+src="tidygeocoder_hex.png" alt="tidygeocoder Badge" /></p>
+<p><br />
+</p>
+<p>Bonus exercise! Let’s take these addresses and <em>reverse geocode
+them</em>. That’s just a fancy way of saying that we will take latitude
+and longitude data and convert it into readable addresses.</p>
+<pre class="r"><code>reverse &lt;- sf_mj_geo_arc %&gt;%
+  reverse_geocode(lat = lat, long = long, method = &#39;arcgis&#39;,
+                  address = address_found, full_results = TRUE) %&gt;%
+  select(-`Business Owner`,-`Business Structure`,-`License Number`,-`License Type`,-Status,-`Issue Date`,-`Expiration Date`,-Activities,-`Adult-Use/Medicinal`)</code></pre>
+<pre><code>## Passing 33 coordinates to the ArcGIS single coordinate geocoder</code></pre>
+<pre><code>## Query completed in: 13.7 seconds</code></pre>
+<pre class="r"><code>head(reverse)</code></pre>
+<pre><code>## # A tibble: 6 × 31
+##   `Premise Address`      lat  long address_found Match_addr ShortLabel Addr_type
+##   &lt;chr&gt;                &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;    
+## 1 2165 IRVING ST san …  37.8 -122. Smokin D&#39;s B… Smokin D&#39;… Smokin D&#39;… POI      
+## 2 122 10TH ST SAN FRA…  37.8 -122. Urbana Soma,… Urbana So… Urbana So… POI      
+## 3 843 Howard ST SAN F…  37.8 -122. Comart Busin… Comart Bu… Comart Bu… POI      
+## 4 70 SECOND ST SAN FR…  37.8 -122. Vsc, 76 2nd … Vsc        Vsc        POI      
+## 5 527 Howard ST San F…  37.8 -122. The Apotheca… The Apoth… The Apoth… POI      
+## 6 2414 Lombard ST San…  37.8 -122. Mile 7.6 Us … Mile 7.6 … Mile 7.6 … Distance…
+## # ℹ 24 more variables: Type &lt;chr&gt;, PlaceName &lt;chr&gt;, AddNum &lt;chr&gt;,
+## #   Address &lt;chr&gt;, Block &lt;chr&gt;, Sector &lt;chr&gt;, Neighborhood &lt;chr&gt;,
+## #   District &lt;chr&gt;, City &lt;chr&gt;, MetroArea &lt;chr&gt;, Subregion &lt;chr&gt;, Region &lt;chr&gt;,
+## #   RegionAbbr &lt;chr&gt;, Territory &lt;chr&gt;, Postal &lt;chr&gt;, PostalExt &lt;chr&gt;,
+## #   CntryName &lt;chr&gt;, CountryCode &lt;chr&gt;, X &lt;dbl&gt;, Y &lt;dbl&gt;, InputX &lt;dbl&gt;,
+## #   InputY &lt;dbl&gt;, StrucType &lt;chr&gt;, StrucDet &lt;chr&gt;</code></pre>
+<p><br />
+</p>
+<p>Looking at <em>Premise Address</em> and <em>address_found</em> we can
+see that we did pretty well! Not perfect, but most are the right address
+or a few doors down. Well done!</p>
+<p><br />
+</p>
+</div>
+<div id="spatial-data-in-r" class="section level1">
+<h1>Spatial Data in R</h1>
+<p>Although there are a few ways to work with vector spatial data in R,
+we will focus on the <strong>sf</strong> package in this course. The
+majority of spatial folks in R have shifted to <strong>sf</strong> for
+vector data, and so it makes sense to focus on it in the class.</p>
+<p>Processing spatial data is very similar to nonspatial data thanks to
+the package <strong>sf</strong>, which is tidy friendly.
+<strong>sf</strong> stands for simple features. The <a
+href="https://en.wikipedia.org/wiki/Simple_Features">Simple Features
+standard</a> defines a simple feature as a representation of a real
+world object by a point or points that may or may not be connected by
+straight line segments to form lines or polygons. A feature is thought
+of as a thing, or an object in the real world, such as a building or a
+tree. A county can be a feature. As can a city and a neighborhood.
+Features have a geometry describing where on Earth the features are
+located, and they have attributes, which describe other properties.</p>
+<p>Now let’s get our hands dirty working with some spatial data.</p>
+<p><br />
+</p>
+</div>
+<div id="import-cancer-data" class="section level1">
+<h1>Import Cancer Data</h1>
+<p>For this lab, we will primarily be working with the <a
+href="https://cran.r-project.org/web/packages/MapGAM/index.html"><em>MapGAM</em>
+package</a>. If you go to the link, you can read the reference manual on
+the various datasets available in the package. For this lab, we will
+mainly be working with the <em>CAdata</em> dataset. While they are based
+on real patterns expected in observational epidemiologic studies, these
+data have been simulated and are for teaching purposes only. The data
+contain 5000 simulated ovarian cancer cases. This is a cohort with
+<strong>time to mortality</strong> measured, but for the purposes of our
+class, we will conduct simple tabular analyses looking at associations
+between spatial exposures with mortality at end of follow-up.</p>
+<p><br />
+</p>
+<p>The CAdata dataset contains the following variables: - time
+(follow-up time to either event of being censored) - event (1=dead,
+0=censored) - X (Latitude) - Y (Longitude) - AGE (age in years) - INS
+(insurance status, categorical)</p>
+<p><br />
+</p>
+<p>So let’s bring in the <em>CAdata</em> dataset and have a look at
+it.</p>
+<pre class="r"><code>#Download from Course Github site
+download.file(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds&quot;, &quot;ca_cancer.rds&quot;, mode = &quot;wb&quot;)
+
+#Load cancer dataset
+CAdata &lt;- readRDS(&quot;ca_cancer.rds&quot;)
+head(CAdata)</code></pre>
+<pre><code>##         time event AGE INS                   geometry
+## 1   1.275976     1  67 Mcr  POINT (-122.3492 38.3025)
+## 14  3.509907     1  69 Mcr POINT (-121.9832 37.82052)
+## 17 10.297702     0  75 Mng  POINT (-122.3092 38.3314)
+## 36  7.012532     0  46 Mcr POINT (-122.2031 38.09592)
+## 55  3.389200     0  70 Mcr POINT (-122.6356 38.26257)
+## 92  6.110251     1  59 Unk POINT (-122.0198 37.35523)</code></pre>
+<pre class="r"><code>glimpse(CAdata)</code></pre>
+<pre><code>## Rows: 974
+## Columns: 5
+## $ time     &lt;dbl&gt; 1.2759763, 3.5099074, 10.2977017, 7.0125318, 3.3891999, 6.110…
+## $ event    &lt;dbl&gt; 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1…
+## $ AGE      &lt;int&gt; 67, 69, 75, 46, 70, 59, 69, 79, 79, 45, 78, 78, 43, 72, 65, 7…
+## $ INS      &lt;fct&gt; Mcr, Mcr, Mng, Mcr, Mcr, Unk, Unk, Mcr, Mcr, Mcd, Mcr, Mcr, M…
+## $ geometry &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-121.9832 37.82052), …</code></pre>
+<p><br />
+</p>
+<p>OK, so the variables look great. Is it a spatial dataset that can be
+recognized by R? Let’s check the coordinate reference system (CRS) using
+the <code>st_crs</code> command in the <strong>sf</strong> package.</p>
+<pre class="r"><code>st_crs(CAdata)</code></pre>
+<pre><code>## Coordinate Reference System: NA</code></pre>
+<p>Hmmm, NA. That doesn’t look good. So how do we make this a spatial
+file? We will need to add a CRS.</p>
+<p><br />
+</p>
+<div id="add-coordinate-reference-system" class="section level2">
+<h2>Add coordinate reference system</h2>
+<p>Let’s add a CRS by using <code>st_as_sf</code> from the
+<strong>sf</strong> package. We can see that X is our latitude column
+and Y is our longitude column. We know that the CRS for this dataset is
+State Plane Projected coordinate system, North America Datum
+1983(NAD_1983_StatePlane_California_I_FIPS_0401) for California based on
+the documentation for the <strong>MapGAM</strong> package. We then can
+Google that along with “EPSG” and we get the EPSG code of 2229. The EPSG
+code we can plug into the <code>st_as_sf</code> to tell R to create a
+spatial dataset in <strong>sf</strong> that has the CRS of 2229. Then we
+will double check the CRS.</p>
+<pre class="r"><code>head(CAdata)</code></pre>
+<pre><code>##         time event AGE INS                   geometry
+## 1   1.275976     1  67 Mcr  POINT (-122.3492 38.3025)
+## 14  3.509907     1  69 Mcr POINT (-121.9832 37.82052)
+## 17 10.297702     0  75 Mng  POINT (-122.3092 38.3314)
+## 36  7.012532     0  46 Mcr POINT (-122.2031 38.09592)
+## 55  3.389200     0  70 Mcr POINT (-122.6356 38.26257)
+## 92  6.110251     1  59 Unk POINT (-122.0198 37.35523)</code></pre>
+<pre class="r"><code>CAdata_proj &lt;- st_as_sf(CAdata, crs=2229)</code></pre>
+<pre><code>## Warning: st_crs&lt;- : replacing crs does not reproject data; use st_transform for
+## that</code></pre>
+<pre class="r"><code>head(CAdata_proj)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 4 fields
+## Geometry type: POINT
+## Dimension:     XY
+## Bounding box:  xmin: -122.6356 ymin: 37.35523 xmax: -121.9832 ymax: 38.3314
+## Projected CRS: NAD83 / California zone 5 (ftUS)
+##         time event AGE INS                   geometry
+## 1   1.275976     1  67 Mcr  POINT (-122.3492 38.3025)
+## 14  3.509907     1  69 Mcr POINT (-121.9832 37.82052)
+## 17 10.297702     0  75 Mng  POINT (-122.3092 38.3314)
+## 36  7.012532     0  46 Mcr POINT (-122.2031 38.09592)
+## 55  3.389200     0  70 Mcr POINT (-122.6356 38.26257)
+## 92  6.110251     1  59 Unk POINT (-122.0198 37.35523)</code></pre>
+<pre class="r"><code>st_crs(CAdata_proj)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: EPSG:2229 
+##   wkt:
+## PROJCRS[&quot;NAD83 / California zone 5 (ftUS)&quot;,
+##     BASEGEOGCRS[&quot;NAD83&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         ID[&quot;EPSG&quot;,4269]],
+##     CONVERSION[&quot;SPCS83 California zone 5 (US survey foot)&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,33.5,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-118,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,35.4666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,34.0333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,6561666.667,
+##             LENGTHUNIT[&quot;US survey foot&quot;,0.304800609601219],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,1640416.667,
+##             LENGTHUNIT[&quot;US survey foot&quot;,0.304800609601219],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;easting (X)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;US survey foot&quot;,0.304800609601219]],
+##         AXIS[&quot;northing (Y)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;US survey foot&quot;,0.304800609601219]],
+##     USAGE[
+##         SCOPE[&quot;Engineering survey, topographic mapping.&quot;],
+##         AREA[&quot;United States (USA) - California - counties Kern; Los Angeles; San Bernardino; San Luis Obispo; Santa Barbara; Ventura.&quot;],
+##         BBOX[32.76,-121.42,35.81,-114.12]],
+##     ID[&quot;EPSG&quot;,2229]]</code></pre>
+<pre class="r"><code>possible_crs &lt;- suggest_crs(CAdata_proj)
+glimpse(possible_crs)</code></pre>
+<pre><code>## Rows: 7
+## Columns: 6
+## $ crs_code  &lt;chr&gt; &quot;32607&quot;, &quot;32407&quot;, &quot;32207&quot;, &quot;6931&quot;, &quot;3395&quot;, &quot;3857&quot;, &quot;6933&quot;
+## $ crs_name  &lt;chr&gt; &quot;WGS 84 / UTM zone 7N&quot;, &quot;WGS 72BE / UTM zone 7N&quot;, &quot;WGS 72 / …
+## $ crs_type  &lt;chr&gt; &quot;projected&quot;, &quot;projected&quot;, &quot;projected&quot;, &quot;projected&quot;, &quot;project…
+## $ crs_gcs   &lt;dbl&gt; 4326, 4324, 4322, 4326, 4326, 4326, 4326
+## $ crs_units &lt;chr&gt; &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;, &quot;m&quot;
+## $ crs_proj4 &lt;chr&gt; &quot;+proj=utm +zone=7 +datum=WGS84 +units=m +no_defs&quot;, &quot;+proj=u…</code></pre>
+<p>Here we see that <code>suggest_crs</code> offers the top ten most
+likely CRS options. Let’s transform our dataset to match the suggested
+CRS.</p>
+<pre class="r"><code>CAdata_proj_fixed &lt;- st_transform(CAdata_proj,32608)
+st_crs(CAdata_proj_fixed)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: EPSG:32608 
+##   wkt:
+## PROJCRS[&quot;WGS 84 / UTM zone 8N&quot;,
+##     BASEGEOGCRS[&quot;WGS 84&quot;,
+##         ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##             MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##             MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##             ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ENSEMBLEACCURACY[2.0]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         ID[&quot;EPSG&quot;,4326]],
+##     CONVERSION[&quot;UTM zone 8N&quot;,
+##         METHOD[&quot;Transverse Mercator&quot;,
+##             ID[&quot;EPSG&quot;,9807]],
+##         PARAMETER[&quot;Latitude of natural origin&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8801]],
+##         PARAMETER[&quot;Longitude of natural origin&quot;,-135,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8802]],
+##         PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996,
+##             SCALEUNIT[&quot;unity&quot;,1],
+##             ID[&quot;EPSG&quot;,8805]],
+##         PARAMETER[&quot;False easting&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8806]],
+##         PARAMETER[&quot;False northing&quot;,0,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8807]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##     USAGE[
+##         SCOPE[&quot;Navigation and medium accuracy spatial referencing.&quot;],
+##         AREA[&quot;Between 138°W and 132°W, northern hemisphere between equator and 84°N, onshore and offshore. Canada - British Columbia (BC); Northwest Territiories (NWT); Yukon. United States (USA) - Alaska (AK).&quot;],
+##         BBOX[0,-138,84,-132]],
+##     ID[&quot;EPSG&quot;,32608]]</code></pre>
+</div>
+<div id="map-the-cancer-data" class="section level2">
+<h2>Map the cancer data</h2>
+<p>Nice! We have a spatial dataset. That <em>geometry</em> column is how
+<strong>sf</strong> stores the geographic data, and we definitely have a
+full CRS with all sorts of info. OK, let’s plot our data to make sure
+they look spatial!</p>
+<pre class="r"><code>plot(CAdata_proj)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Looking good! Get yourself a <a
+href="https://youtu.be/3soC6VADpcw?si=4njBib3jWPsUYaES">cookie</a>.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="downloading-census-data" class="section level1">
+<h1>Downloading Census Data</h1>
+<p>One of the primary sources of data that we’ll be using in this class
+is the United States Decennial Census and the American Community Survey.
+There are two ways to bring Census data into R: Downloading it from an
+online source or using an API.</p>
+<p><strong>Note that we will gather 2016-2020 ACS data from all sources.
+Census boundaries changed in 2020, which means that 2016-2020 data will
+not completely merge with ACS data before 2020. So make sure you merge
+2020 data only with 2020 data (but you can merge 2019 data with data
+between 2010-2019). This is especially important for tract data, with
+many new tracts created in 2020 and existing tracts experiencing
+dramatic changes in their boundaries between 2010 and 2020. See the
+impact of tract boundary changes between 2000 and 2010 <a
+href="https://crd230.github.io/censusgeography.html">here</a>.</strong>
+You may also explore the <a
+href="https://search.library.ucdavis.edu/view/action/uresolver.do?operation=resolveService&amp;package_service_id=28104223860003126&amp;institutionId=3126&amp;customerId=3125&amp;VE=true">Neighborhood
+Change Database</a> which is available through the UC Davis library, and
+is a dataset that incorporates tract boundary changes over time. We are
+working on acquiring the 2020 data there!</p>
+<p><br />
+</p>
+<div id="download-census-data-from-an-online-source"
+class="section level2">
+<h2>Download Census data from an online source</h2>
+<p>The first way to obtain Census data is to download them directly from
+the web onto your hard drive. There are several websites where you can
+download Census data including <a
+href="https://www.socialexplorer.com/">Social Explorer</a> and <a
+href="https://ucdavis.policymap.com/maps">PolicyMap</a>, which we have
+free access to as UC Davis affiliates, and the <a
+href="https://www.nhgis.org/">National Historical Geographic Information
+System (NHGIS)</a>, which is free for everyone. To find out how to
+download data from PolicyMap and NHGIS, check out tutorials <a
+href="https://policymap.helpdocs.io/data-download">here</a> and [here]<a
+href="https://www.nhgis.org/user-resources/users-guide"
+class="uri">https://www.nhgis.org/user-resources/users-guide</a>).</p>
+<p><br />
+</p>
+</div>
+<div id="use-the-census-api-and-tidycensus" class="section level2">
+<h2>Use the Census API and tidycensus</h2>
+<p>The other way to bring Census data into R is to use the [Census
+Application Program Interface (API)]<a
+href="https://www.census.gov/data/developers/guidance/api-user-guide.What_is_the_API.html"
+class="uri">https://www.census.gov/data/developers/guidance/api-user-guide.What_is_the_API.html</a>).
+An API allows for direct requests for data in machine-readable form.
+That is, rather than you having to navigate to some website, scroll
+around to find a dataset, download that dataset once you find it, save
+that data onto your hard drive, and then bring the data into R, you just
+tell R to retrieve data directly from the source using one or two lines
+of code.</p>
+<p>In order to directly download data from the Census API, you need a
+key. You can sign up for a free key <a
+href="http://api.census.gov/data/key_signup.html">here</a>, which you
+should have already done before the lab. Type your key in quotes using
+the census_api_key() command.</p>
+<pre class="r"><code>census_api_key(&quot;YOUR API KEY GOES HERE&quot;, install = TRUE)</code></pre>
+<p><br />
+</p>
+<p>The option <code>install = TRUE</code> saves the API key in your R
+environment, which means you don’t have to run
+<code>census_api_key()</code> every single time. The function for
+downloading American Community Survey (ACS) Census data is
+<code>get_acs()</code>. The command for downloading decennial Census
+data is <code>get_decennial()</code>. Both functions come from the
+<strong>tidycensus</strong> package, which allows users to interface
+with the US Census Bureau’s decennial Census and American Community
+Survey APIs. Getting variables using the Census API requires knowing the
+variable ID - and there are thousands of variables (and thus thousands
+of IDs) across the different Census files. To rapidly search for
+variables, use the commands <code>load_variables()</code> and
+<code>View()</code>. Because we’ll be using the ACS in this guide, let’s
+check the variables in the most recent 2023 5-year ACS (2019-2023) using
+the following commands.</p>
+<pre class="r"><code>v23 &lt;- load_variables(2023, &quot;acs5&quot;, cache = TRUE)
+View(v23)</code></pre>
+<p><br />
+</p>
+<p>A window should have popped up showing you a record layout of the
+2019-2023 ACS. To search for specific data, select “Filter” located at
+the top left of this window and use the search boxes that pop up. For
+example, type in “Hispanic” in the box under “Label”. You should see
+near the top of the list the first set of variables we’ll want to
+download - race/ethnicity. Another way of finding variable names is to
+search them using <a
+href="https://www.socialexplorer.com/data/metadata/">Social
+Explorer</a>. Click on the appropriate survey data year and then
+“American Community Survey Tables”, which will take you to a list of
+variables with their Census IDs.</p>
+<p>Let’s extract race/ethnicity data and total population for <a
+href="https://en.wikipedia.org/wiki/List_of_counties_in_California">California
+counties</a> using the <code>get_acs()</code> command.</p>
+<p><br />
+</p>
+<pre class="r"><code>ca &lt;- get_acs(geography = &quot;county&quot;, 
+              year = 2023,
+              variables = c(tpopr = &quot;B03002_001&quot;, 
+                            nhwhite = &quot;B03002_003&quot;, nhblk = &quot;B03002_004&quot;, 
+                            nhasn = &quot;B03002_006&quot;, hisp = &quot;B03002_012&quot;), 
+              state = &quot;CA&quot;,
+              survey = &quot;acs5&quot;,
+              output = &quot;wide&quot;)</code></pre>
+<pre><code>## Getting data from the 2019-2023 5-year ACS</code></pre>
+<p><br />
+</p>
+<p>In the above code, we specified the following arguments</p>
+<ul>
+<li><code>geography</code>: The level of geography we want the data in;
+in our case, the county. Other geographic options can be found [here]<a
+href="https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus"
+class="uri">https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus</a>).</li>
+<li><code>year</code>: The end year of the data (because we want
+2016-2020, we use 2020).</li>
+<li><code>variables</code>: The variables we want to bring in as
+specified in a vector you create using the function <code>c()</code>.
+Note that we created variable names of our own (e.g. “nhwhite”) and we
+put the ACS IDs in quotes (“B03002_003”). Had we not done this, the
+variable names will come in as they are named in the ACS, which are not
+very descriptive.</li>
+<li><code>state</code>: We can filter the counties to those in a
+specific state. Here it is “CA” for California. If we don’t specify
+this, we get all counties in the United States.</li>
+<li><code>survey</code>: The specific Census survey were extracting data
+from. We want data from the 5-year American Community Survey, so we
+specify “acs5”. The ACS comes in 1- and 5-year - varieties.</li>
+<li><code>output</code>: The argument tells R to return a wide dataset
+as opposed to a long dataset (see this vignette for more info).</li>
+</ul>
+<p>Another useful option to set is <code>cache_table = TRUE</code>, so
+you don’t have to re-download after you’ve downloaded successfully the
+first time. Type in <code>? get_acs()</code> to see the full list of
+options.</p>
+<p><br />
+</p>
+<p>As you learned in Lab 1, whenever you bring in a dataset, the first
+thing you should always do is view it to get a sense of its structure
+and to make sure you got what you expected. One way of doing this is to
+use the <code>glimpse()</code> command</p>
+<pre class="r"><code>glimpse(ca)</code></pre>
+<pre><code>## Rows: 58
+## Columns: 12
+## $ GEOID    &lt;chr&gt; &quot;06001&quot;, &quot;06003&quot;, &quot;06005&quot;, &quot;06007&quot;, &quot;06009&quot;, &quot;06011&quot;, &quot;06013&quot;…
+## $ NAME     &lt;chr&gt; &quot;Alameda County, California&quot;, &quot;Alpine County, California&quot;, &quot;A…
+## $ tpoprE   &lt;dbl&gt; 1651949, 1695, 41029, 209470, 45995, 21895, 1161458, 27293, 1…
+## $ tpoprM   &lt;dbl&gt; NA, 234, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+## $ nhwhiteE &lt;dbl&gt; 466445, 993, 30234, 139527, 35599, 6869, 455961, 16668, 14254…
+## $ nhwhiteM &lt;dbl&gt; 1170, 215, 341, 767, 318, 133, 1843, 199, 589, 979, 75, 554, …
+## $ nhblkE   &lt;dbl&gt; 159042, 0, 781, 3550, 529, 311, 94864, 805, 1522, 42060, 158,…
+## $ nhblkM   &lt;dbl&gt; 1736, 14, 143, 393, 140, 44, 1594, 123, 232, 1334, 126, 271, …
+## $ nhasnE   &lt;dbl&gt; 528377, 8, 587, 11010, 1066, 101, 212373, 821, 9640, 108809, …
+## $ nhasnM   &lt;dbl&gt; 2269, 8, 129, 497, 238, 159, 2008, 264, 416, 1332, 182, 403, …
+## $ hispE    &lt;dbl&gt; 385245, 249, 6361, 40829, 6403, 13639, 316799, 5350, 27230, 5…
+## $ hispM    &lt;dbl&gt; NA, 115, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</code></pre>
+<p><br />
+</p>
+<p>You get a quick, compact summary of your tibble. You can also use the
+<code>head()</code> command, which shows you the first several rows of
+your data object (<code>tail()</code> will give you the last several
+rows).</p>
+<pre class="r"><code>head(ca)</code></pre>
+<pre><code>## # A tibble: 6 × 12
+##   GEOID NAME  tpoprE tpoprM nhwhiteE nhwhiteM nhblkE nhblkM nhasnE nhasnM  hispE
+##   &lt;chr&gt; &lt;chr&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 06001 Alam… 1.65e6     NA   466445     1170 159042   1736 528377   2269 385245
+## 2 06003 Alpi… 1.69e3    234      993      215      0     14      8      8    249
+## 3 06005 Amad… 4.10e4     NA    30234      341    781    143    587    129   6361
+## 4 06007 Butt… 2.09e5     NA   139527      767   3550    393  11010    497  40829
+## 5 06009 Cala… 4.60e4     NA    35599      318    529    140   1066    238   6403
+## 6 06011 Colu… 2.19e4     NA     6869      133    311     44    101    159  13639
+## # ℹ 1 more variable: hispM &lt;dbl&gt;</code></pre>
+<p><br />
+</p>
+<p>The tibble contains counties with their estimates for race/ethnicity.
+These variables end with the letter “E”. It also contains the <a
+href="https://walker-data.com/tidycensus/articles/margins-of-error.html">margins
+of error</a> for each estimate. These variables end with the letter
+“M”.</p>
+<p><strong>tidycensus</strong> is a game changer in being able to bring
+in Census data into R in a convenient, fast, efficient and tidy friendly
+way. We’ll be using this package in the next lab to bring in Census
+spatial data. And congratulations! You’ve just earned another badge.
+Fantastic! <img src="tidycensus_sticker.png"
+alt="tidycensus Badge" /></p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="reading-in-data" class="section level1">
+<h1>Reading in data</h1>
+<div id="policymap" class="section level2">
+<h2>PolicyMap</h2>
+<p>To save us time, I’ve uploaded PolicyMap (csv) on the Github for you
+to use in this lab. Save this file in the same folder where your Lab 2 R
+Markdown file resides.To read in a csv file, first make sure that R is
+pointed to the folder you saved your data into. Type in
+<code>getwd()</code> to find out the current directory and
+<code>setwd("directory name")</code> to set the directory to the folder
+containing the data.</p>
+<p>From a Mac laptop, I type in the following command to set the
+directory to the folder containing my data.</p>
+<pre class="r"><code>setwd(&quot;/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/&quot;)</code></pre>
+<p><br />
+</p>
+<p>For a Windows system, you can find the pathway of a file by right
+clicking on it and selecting Properties. You will find that instead of a
+forward slash like in a Mac, a windows pathway will be indicated by a
+single back slash . R doesn’t like this because it thinks of a single
+back slash as an escape character. Use instead two back slashes \</p>
+<pre class="r"><code>setwd(&quot;C:\\Users\\pjames\\Documents\\UCD\\Spring2025\\SPH215\\Labs\\Lab 2&quot;)</code></pre>
+<p>or a forward slash /.</p>
+<pre class="r"><code>setwd(&quot;C:/Users/pjames/Documents/UCD/Spring2025/SPH215/Labs/Lab 2&quot;)</code></pre>
+<p>You can also manually set the working directory by clicking on
+Session -&gt; Set Working Directory -&gt; Choose Directory from the
+menu.</p>
+<p><br />
+</p>
+<p>Once you’ve set your directory, use the function
+<code>read_csv()</code>, which is a part of the
+<strong>tidyverse</strong> package, and plug in the name of the file in
+quotes inside the parentheses. Make sure you include the <em>.csv</em>
+extension.</p>
+<pre class="r"><code>ca.pm &lt;- read_csv(&quot;PolicyMap Data 2025-03-27 192555 UTC.csv&quot;, skip = 1)</code></pre>
+<pre><code>## Rows: 58 Columns: 10
+## ── Column specification ──────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (8): GeoID_Description, GeoID_Name, SitsinState, GeoID, GeoID_Formatted,...
+## dbl (2): mhhinc, GeoVintage
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p><br />
+</p>
+<p>The option skip = 1 tells R to skip the first row of the file when
+bringing it in. This is done because there are two rows of column names.
+The first row contains the extended version, while the second is the
+abridged version. Above we keep the abridged version.</p>
+<p>You should see a tibble <em>ca.pm</em> pop up in your Environment
+window (top right). What does our data set look like?</p>
+<pre class="r"><code>glimpse(ca.pm)</code></pre>
+<pre><code>## Rows: 58
+## Columns: 10
+## $ GeoID_Description &lt;chr&gt; &quot;County&quot;, &quot;County&quot;, &quot;County&quot;, &quot;County&quot;, &quot;County&quot;, &quot;C…
+## $ GeoID_Name        &lt;chr&gt; &quot;Alameda&quot;, &quot;Alpine&quot;, &quot;Amador&quot;, &quot;Butte&quot;, &quot;Calaveras&quot;,…
+## $ SitsinState       &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;…
+## $ GeoID             &lt;chr&gt; &quot;06001&quot;, &quot;06003&quot;, &quot;06005&quot;, &quot;06007&quot;, &quot;06009&quot;, &quot;06011&quot;…
+## $ GeoID_Formatted   &lt;chr&gt; &quot;=\&quot;06001\&quot;&quot;, &quot;=\&quot;06003\&quot;&quot;, &quot;=\&quot;06005\&quot;&quot;, &quot;=\&quot;06007\…
+## $ mhhinc            &lt;dbl&gt; 126240, 110781, 81526, 68574, 79877, 75149, 125727, …
+## $ TimeFrame         &lt;chr&gt; &quot;2019-2023&quot;, &quot;2019-2023&quot;, &quot;2019-2023&quot;, &quot;2019-2023&quot;, …
+## $ GeoVintage        &lt;dbl&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2022…
+## $ Source            &lt;chr&gt; &quot;Census&quot;, &quot;Census&quot;, &quot;Census&quot;, &quot;Census&quot;, &quot;Census&quot;, &quot;C…
+## $ Location          &lt;chr&gt; &quot;California (State)&quot;, &quot;California (State)&quot;, &quot;Califor…</code></pre>
+<p><br />
+</p>
+<p>If you like viewing your data through an Excel style worksheet, type
+in View(ca.pm), and ca.pm should pop up in the top left window of your R
+Studio interface.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="more-data-wrangling" class="section level1">
+<h1>More data wrangling</h1>
+<p>We learned about the various data wrangling related functions from
+the <strong>tidyverse</strong> package in <a href="lab1.html">Lab 1</a>.
+Let’s employ some of those functions to create a single county level
+dataset that joins the datasets we downloaded from the Census API and
+PolicyMap.</p>
+<p>We are going to combine these datasets using the county FIPS codes.
+In the Census API and PolicyMap, these are contained in the variables
+GEOID and GeoID, respectively. Let’s make sure they are in the same
+class.</p>
+<pre class="r"><code>class(ca.pm$GeoID)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<pre class="r"><code>class(ca$GEOID)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<p><br />
+</p>
+<div id="piping" class="section level2">
+<h2>Piping</h2>
+<p>One of the important innovations from the tidyverse is the pipe
+operator <code>%&gt;%</code>. You use the pipe operator when you want to
+combine multiple operations into one line of continuous code. Let’s
+create our final data object <em>cacounty</em> using our brand new
+friend the pipe.</p>
+<pre class="r"><code>cacounty &lt;- ca %&gt;% 
+      left_join(ca.pm, by = c(&quot;GEOID&quot; = &quot;GeoID&quot;)) %&gt;%
+      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+             mhisp = case_when(phisp &gt; 0.5 ~ &quot;Majority&quot;,
+                               TRUE ~ &quot;Not Majority&quot;)) %&gt;%
+      rename(County = GeoID_Name) %&gt;%
+      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
+glimpse(cacounty)</code></pre>
+<pre><code>## Rows: 58
+## Columns: 8
+## $ GEOID  &lt;chr&gt; &quot;06001&quot;, &quot;06003&quot;, &quot;06005&quot;, &quot;06007&quot;, &quot;06009&quot;, &quot;06011&quot;, &quot;06013&quot;, …
+## $ County &lt;chr&gt; &quot;Alameda&quot;, &quot;Alpine&quot;, &quot;Amador&quot;, &quot;Butte&quot;, &quot;Calaveras&quot;, &quot;Colusa&quot;, …
+## $ pwhite &lt;dbl&gt; 0.28236041, 0.58584071, 0.73689342, 0.66609538, 0.77397543, 0.3…
+## $ pasian &lt;dbl&gt; 0.319850673, 0.004719764, 0.014306954, 0.052561226, 0.023176432…
+## $ pblack &lt;dbl&gt; 0.0962753693, 0.0000000000, 0.0190353165, 0.0169475343, 0.01150…
+## $ phisp  &lt;dbl&gt; 0.2332064, 0.1469027, 0.1550367, 0.1949157, 0.1392108, 0.622927…
+## $ mhisp  &lt;chr&gt; &quot;Not Majority&quot;, &quot;Not Majority&quot;, &quot;Not Majority&quot;, &quot;Not Majority&quot;,…
+## $ mhhinc &lt;dbl&gt; 126240, 110781, 81526, 68574, 79877, 75149, 125727, 66780, 1061…</code></pre>
+<p>Let’s break down what the pipe is doing here. First, you start out
+with your dataset ca. You “pipe” that into the command
+<code>left_join()</code>. Notice that you didn’t have to type in ca
+inside that command - <code>%&gt;%</code> pipes that in for you. The
+command joins the data object <em>ca.pm</em> to <em>ca</em>. The result
+of this function gets piped into the <code>mutate()</code> function,
+which creates the percent race/ethnicity (from the Census API), and
+majority Hispanic variables. This gets piped into the
+<code>rename()</code> function, which renames the ambiguous variable
+name <em>GeoID_Name</em> to the more descriptive name <em>County</em>.
+This then gets piped into the final function, <code>select()</code>,
+which keeps the necessary variables. Finally, the code saves the result
+into cacounty which we designated at the beginning with the arrow
+operator.</p>
+<p>Piping makes code clearer, and simultaneously gets rid of the need to
+define any intermediate objects that you would have needed to keep track
+of while reading the code. PIPE, Pipe, and pipe whenever you can. Badge
+it! <img src="pipe.png" alt="pipe Badge!" /> /</p>
+</div>
+<div id="saving-data" class="section level2">
+<h2>Saving data</h2>
+<p>If you want to save your data frame or tibble as a csv file on your
+hard drive, use the command <code>write_csv()</code>. Before you save a
+file, make sure R is pointed to the appropriate folder on your hard
+drive by using the function <code>getwd()</code>. If it’s not pointed to
+the right folder, use the function <code>setwd()</code> to set the
+appropriate working directory.</p>
+<pre class="r"><code>write_csv(cacounty, &quot;lab2_file.csv&quot;)</code></pre>
+<p>The first argument is the name of the R object you want to save. The
+second argument is the name of the csv file in quotes. Make sure to add
+the .csv extension. The file is saved in your current working
+directory.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1>Exploratory data analysis</h1>
+<p>The functions above help us bring in and clean data. The next set of
+functions covered in this section will help us summarize the data. Data
+refer to pieces of information that describe a status or a measure of
+magnitude. A variable is a set of observations on a particular
+characteristic. The distribution of a variable is a listing showing all
+the possible values of the data for that variable and how often they
+occur. Exploratory Data Analysis (EDA) encompasses a set of methods
+(some would say a framework or perspective) for summarizing a variable’s
+distribution, and the relationship between the distributions of two or
+more variables. We will cover two general approaches to summarizing your
+data: descriptive statistics and visualization via graphs and
+charts.</p>
+<p><br />
+</p>
+<div id="descriptive-statistics" class="section level2">
+<h2>Descriptive statistics</h2>
+<p>When describing a distribution, your quantitative message is often
+best communicated by reducing data to a few summary numbers. These
+numbers are meant to summarize the “typical” value in the distribution
+(e.g., mean, median, mode) and the variation or “spread” in the
+distribution (e.g., minimum/maximum, interquartile range, standard
+deviation). These summary numbers are known as descriptive
+statistics.</p>
+<p>We can use the function summarize() to get descriptive statistics of
+our data. For example, let’s calculate the mean household income in
+California counties. The first argument inside summarize() is the data
+object cacounty and the second argument is the function calculating the
+specific summary statistic, in this case mean().</p>
+<pre class="r"><code>cacounty %&gt;%
+  summarize(Mean = mean(mhhinc))</code></pre>
+<pre><code>## # A tibble: 1 × 1
+##     Mean
+##    &lt;dbl&gt;
+## 1 87001.</code></pre>
+<p>The average county median household income is $87,001. If the
+variable <em>mhhinc</em> contained missing values, we would have gotten
+<em>NA</em> as a result. To omit missing values from the calculation,
+you need to add <code>rm = TRUE</code> to <code>mean()</code>.</p>
+<p>We can calculate more than one summary statistic within
+<code>summarize()</code>. What is the spread of the distribution? We can
+add to <code>summarize()</code> the function <code>sd()</code> to
+calculate the standard deviation.<br />
+</p>
+<pre class="r"><code>cacounty %&gt;%
+  summarize(Mean = mean(mhhinc), SD = sd(mhhinc))</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##     Mean     SD
+##    &lt;dbl&gt;  &lt;dbl&gt;
+## 1 87001. 25547.</code></pre>
+<p><br />
+</p>
+<p>Does the average income differ by California region? First, let’s
+create a new variable region designating each county as Bay Area,
+Southern California, Central Valley, Capital Region and the Rest of
+California using the <code>case_when()</code> function within the
+<code>mutate()</code> function.</p>
+<pre class="r"><code>cacounty &lt;- cacounty %&gt;%
+    mutate(region = case_when(County == &quot;Sonoma&quot; | County == &quot;Napa&quot; | 
+                              County == &quot;Solano&quot; | County == &quot;Marin&quot; | 
+                              County == &quot;Contra Costa&quot; | County == &quot;San Francisco&quot; |
+                              County == &quot;San Mateo&quot; | County == &quot;Alameda&quot; | 
+                              County == &quot;Santa Clara&quot; ~ &quot;Bay Area&quot;,
+                              County == &quot;Imperial&quot; | County == &quot;Los Angeles&quot; | 
+                              County == &quot;Orange&quot; | County == &quot;Riverside&quot; |
+                              County == &quot;San Diego&quot; | County == &quot;San Bernardino&quot; |
+                              County == &quot;Ventura&quot; ~ &quot;Southern California&quot;,
+                              County == &quot;Fresno&quot; | County == &quot;Madera&quot; | 
+                              County == &quot;Mariposa&quot; | County == &quot;Merced&quot; | 
+                              County == &quot;Tulare&quot; | 
+                              County == &quot;Kings&quot; ~ &quot;Central Valley&quot;,
+                              County == &quot;Alpine&quot; | County == &quot;Colusa&quot; |
+                              County == &quot;El Dorado&quot; | County == &quot;Glenn&quot; |
+                              County == &quot;Placer&quot; | County == &quot;Sacramento&quot; |
+                              County == &quot;Sutter&quot; | County == &quot;Yolo&quot; |
+                              County == &quot;Yuba&quot; ~ &quot;Capital Region&quot;,
+                              TRUE ~ &quot;Rest&quot;))</code></pre>
+<p><br />
+</p>
+<p>Next, we need to pair <code>summarize()</code> with the function
+<code>group_by()</code>. The function <code>group_by()</code> tells R to
+run subsequent functions on the data object by a group characteristic
+(such as gender, educational attainment, or in this case, region). We’ll
+need to use our new best friend %&gt;% to accomplish this task.</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc))</code></pre>
+<pre><code>## # A tibble: 5 × 2
+##   region                 Mean
+##   &lt;chr&gt;                 &lt;dbl&gt;
+## 1 Bay Area            129297.
+## 2 Capital Region       89288.
+## 3 Central Valley       69265.
+## 4 Rest                 74959.
+## 5 Southern California  91332.</code></pre>
+<p>The first pipe sends cacounty into the function
+<code>group_by()</code>, which tells R to group <em>cacounty</em> by the
+variable <em>region</em>.</p>
+<p>How do you know the tibble is grouped? Because it tells you!</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) </code></pre>
+<pre><code>## # A tibble: 58 × 9
+## # Groups:   region [5]
+##    GEOID County       pwhite  pasian  pblack phisp mhisp        mhhinc region   
+##    &lt;chr&gt; &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;    
+##  1 06001 Alameda       0.282 0.320   0.0963  0.233 Not Majority 126240 Bay Area 
+##  2 06003 Alpine        0.586 0.00472 0       0.147 Not Majority 110781 Capital …
+##  3 06005 Amador        0.737 0.0143  0.0190  0.155 Not Majority  81526 Rest     
+##  4 06007 Butte         0.666 0.0526  0.0169  0.195 Not Majority  68574 Rest     
+##  5 06009 Calaveras     0.774 0.0232  0.0115  0.139 Not Majority  79877 Rest     
+##  6 06011 Colusa        0.314 0.00461 0.0142  0.623 Majority      75149 Capital …
+##  7 06013 Contra Costa  0.393 0.183   0.0817  0.273 Not Majority 125727 Bay Area 
+##  8 06015 Del Norte     0.611 0.0301  0.0295  0.196 Not Majority  66780 Rest     
+##  9 06017 El Dorado     0.741 0.0501  0.00791 0.142 Not Majority 106190 Capital …
+## 10 06019 Fresno        0.270 0.108   0.0416  0.541 Majority      71434 Central …
+## # ℹ 48 more rows</code></pre>
+<p><br />
+</p>
+<p>The second pipe takes this grouped dataset and sends it into the
+<code>summarize()</code> command, which calculates the mean income (by
+region, because the dataset is grouped by region).</p>
+<p>To get the mean, median and standard deviation of median income, its
+correlation with percent Hispanic, and give column labels for the
+variables in the resulting summary table, we type in:</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))</code></pre>
+<pre><code>## # A tibble: 5 × 5
+##   region                 Mean  Median     SD Correlation
+##   &lt;chr&gt;                 &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;
+## 1 Bay Area            129297. 126240  22246.      -0.620
+## 2 Capital Region       89288.  88724  17295.      -0.788
+## 3 Central Valley       69265.  69120.  3918.       0.423
+## 4 Rest                 74959.  71931  15803.       0.606
+## 5 Southern California  91332.  89672  19132.      -0.951</code></pre>
+<p><br />
+</p>
+<p>The variable <em>mhhinc</em> is numeric. How do we summarize
+categorical variables? We usually summarize categorical variables by
+examining a frequency table. To get the percent of counties that have a
+majority Hispanic population mhisp, you’ll need to combine the functions
+<em>group_by()</em>, <em>summarize()</em> and <em>mutate()</em> using
+<code>%&gt;%</code>.</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(mhisp) %&gt;%
+  summarize(n = n()) %&gt;%
+  mutate(freq = n / sum(n))</code></pre>
+<pre><code>## # A tibble: 2 × 3
+##   mhisp            n  freq
+##   &lt;chr&gt;        &lt;int&gt; &lt;dbl&gt;
+## 1 Majority        12 0.207
+## 2 Not Majority    46 0.793</code></pre>
+<p><br />
+</p>
+<p>The code group_by(mhisp) separates the counties by the categories of
+mhisp (Majority, Not Majority). We then used summarize() to count the
+number of counties that are Majority and Not Majority. The function to
+get a count is n(), and we saved this count in a variable named n. Next,
+we used mutate() on this table to get the proportion of counties by
+Majority Hispanic designation. The code sum(n) adds the values of n. We
+then divide the value of each n by this sum. That yields the final
+frequency table.</p>
+<p>Instead of calculating descriptive statistics one at a time using
+summarize(), you can obtain a set of summary statistics for one or all
+the numeric variables in your dataset using the summary() function.</p>
+<pre class="r"><code>summary(cacounty)</code></pre>
+<pre><code>##     GEOID              County              pwhite            pasian       
+##  Length:58          Length:58          Min.   :0.09421   Min.   :0.00000  
+##  Class :character   Class :character   1st Qu.:0.31535   1st Qu.:0.01888  
+##  Mode  :character   Mode  :character   Median :0.49018   Median :0.04404  
+##                                        Mean   :0.50723   Mean   :0.07748  
+##                                        3rd Qu.:0.66599   3rd Qu.:0.08630  
+##                                        Max.   :0.88832   Max.   :0.39306  
+##      pblack             phisp            mhisp               mhhinc      
+##  Min.   :0.000000   Min.   :0.05892   Length:58          Min.   : 53498  
+##  1st Qu.:0.009634   1st Qu.:0.15611   Class :character   1st Qu.: 67888  
+##  Median :0.016844   Median :0.27110   Mode  :character   Median : 80702  
+##  Mean   :0.028112   Mean   :0.32170                      Mean   : 87001  
+##  3rd Qu.:0.033734   3rd Qu.:0.46747                      3rd Qu.:102701  
+##  Max.   :0.125967   Max.   :0.85579                      Max.   :159674  
+##     region         
+##  Length:58         
+##  Class :character  
+##  Mode  :character  
+##                    
+##                    
+## </code></pre>
+<p><br />
+</p>
+</div>
+<div id="tables-for-presentation" class="section level2">
+<h2>Tables for presentation</h2>
+<p>The output from the descriptive statistics we’ve ran so far is not
+presentation ready. For example, taking a screenshot of the following
+results table produces unnecessary information that is confusing and
+messy.</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))</code></pre>
+<pre><code>## # A tibble: 5 × 5
+##   region                 Mean  Median     SD Correlation
+##   &lt;chr&gt;                 &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;
+## 1 Bay Area            129297. 126240  22246.      -0.620
+## 2 Capital Region       89288.  88724  17295.      -0.788
+## 3 Central Valley       69265.  69120.  3918.       0.423
+## 4 Rest                 74959.  71931  15803.       0.606
+## 5 Southern California  91332.  89672  19132.      -0.951</code></pre>
+<p>Furthermore, you would like to show a table, say, in a Story Map that
+does not require you to take a screenshot or copying and pasting into
+Excel, but instead can be produced via code, that way it can be fixed if
+there is an issue, and is reproducible.</p>
+<p>One way of producing presentation tables in R is through the
+flextable package. First, you will need to save the tibble or data frame
+of results into an object. For example, let’s save the above results
+into an object named region.summary</p>
+<pre class="r"><code>region.summary &lt;- cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))</code></pre>
+<p>You then input the object into the function flextable(). Save it into
+an object called my_table</p>
+<pre class="r"><code>my_table &lt;- flextable(region.summary)</code></pre>
+<p><br />
+</p>
+<p>You should see a relatively clean table pop up either in your console
+or Viewer window.</p>
+<p><br />
+</p>
+<p>What kind of object is <em>my_table</em>?</p>
+<pre class="r"><code>class(my_table)</code></pre>
+<pre><code>## [1] &quot;flextable&quot;</code></pre>
+<p><br />
+</p>
+<p>After doing this, we can progressively pipe the my_table object
+through more flextable formatting functions. For example, you can change
+the column header names using the function set_header_labels() and
+center the header names using the function align().</p>
+<pre class="r"><code>my_table &lt;- my_table %&gt;%
+          set_header_labels(
+            region = &quot;Region&quot;,
+            Mean = &quot;Mean&quot;,
+            Median = &quot;Median&quot;,
+            SD = &quot;Standard Deviation&quot;,
+            Correlation = &quot;Correlation&quot;) %&gt;%
+  align(align = &quot;center&quot;)
+
+my_table</code></pre>
+<div class="tabwid"><style>.cl-2e227c34{}.cl-2e1f6eae{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-2e20a8dc{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2e20a8e6{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2e20a8e7{margin:0;text-align:center;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-2e20b714{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2e20b715{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2e20b716{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-2e20b717{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-2e227c34'><thead><tr style="overflow-wrap:break-word;"><th class="cl-2e20b714"><p class="cl-2e20a8dc"><span class="cl-2e1f6eae">Region</span></p></th><th class="cl-2e20b715"><p class="cl-2e20a8e6"><span class="cl-2e1f6eae">Mean</span></p></th><th class="cl-2e20b715"><p class="cl-2e20a8e6"><span class="cl-2e1f6eae">Median</span></p></th><th class="cl-2e20b715"><p class="cl-2e20a8e6"><span class="cl-2e1f6eae">Standard Deviation</span></p></th><th class="cl-2e20b715"><p class="cl-2e20a8e6"><span class="cl-2e1f6eae">Correlation</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">Bay Area</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">129,297.33</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">126,240.0</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">22,246.495</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">-0.6196837</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">Capital Region</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">89,287.78</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">88,724.0</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">17,294.860</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">-0.7878129</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">Central Valley</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">69,265.17</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">69,119.5</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">3,918.442</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">0.4231022</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">Rest</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">74,958.74</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">71,931.0</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">15,803.202</span></p></td><td class="cl-2e20b716"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">0.6064605</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-2e20b717"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">Southern California</span></p></td><td class="cl-2e20b717"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">91,331.86</span></p></td><td class="cl-2e20b717"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">89,672.0</span></p></td><td class="cl-2e20b717"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">19,131.821</span></p></td><td class="cl-2e20b717"><p class="cl-2e20a8e7"><span class="cl-2e1f6eae">-0.9513650</span></p></td></tr></tbody></table></div>
+<p>Well doesn’t that look spiffy! There are a slew of options for
+formatting your table, including adding footnotes, borders, shade and
+other features. Check out this useful tutorial for an explanation of
+some of these features.</p>
+<p>Once you’re done formatting your table, you can then export it to
+Word, PowerPoint or HTML or as an image (PNG) files. To do this, use one
+of the following functions: save_as_docx(), save_as_pptx(),
+save_as_image(), and save_as_html().</p>
+<p>Use the save_as_image() function to save your table as an image.</p>
+<pre class="r"><code>save_as_image(my_table, path = &quot;reg_income.png&quot;)</code></pre>
+<pre><code>## [1] &quot;reg_income.png&quot;</code></pre>
+<p>You first put in the table my_table, and set the file name with the
+png extension. Check your working directory. You should see the file
+<em>reg_income.png</em>.</p>
+<p><br />
+</p>
+</div>
+<div id="data-visualization" class="section level2">
+<h2>Data visualization</h2>
+<p>Another way of summarizing variables and their relationships is
+through graphs and charts. The main package for R graphing is
+<em>ggplot2</em> which is a part of the <em>tidyverse</em> package. The
+graphing function is <code>ggplot()</code> and it takes on the basic
+template</p>
+<p>ggplot(data = <DATA>) + <GEOM_FUNCTION>(mapping = aes(x, y)) +
+<OPTIONS>()</p>
+<ol style="list-style-type: decimal">
+<li>ggplot() is the base function where you specify your dataset using
+the data = <DATA> argument.</li>
+<li>You then need to build on this base by using the plus operator + and
+<GEOM_FUNCTION>() where <GEOM_FUNCTION>() is a unique geom function
+indicating the type of graph you want to plot. Each unique function has
+its unique set of mapping arguments which you specify using the mapping
+= aes() argument. Charts and graphs have an x-axis, y-axis, or both.
+Check this ggplot cheat sheet for all possible geoms.</li>
+<li><code>&lt;OPTIONS&gt;()</code> are a set of functions you can
+specify to change the look of the graph, for example relabeling the axes
+or adding a title.</li>
+</ol>
+<p>The basic idea is that a ggplot graphic layers geometric objects
+(circles, lines, etc), themes, and scales on top of data.</p>
+<p>You first start out with the base layer. It represents the empty
+<em>ggplot</em> layer defined by the <code>ggplot()</code> function.</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot()</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<p>We get an empty plot. We haven’t told ggplot() what type of geometric
+object(s) we want to plot, nor how the variables should be mapped to the
+geometric objects, so we just have a blank plot. We have geoms to paint
+the blank canvas.</p>
+<p>From here, we add a “geom” layer to the ggplot object. Layers are
+added to ggplot objects using +, instead of %&gt;%, since you are not
+explicitly piping an object into each subsequent layer, but adding
+layers on top of one another. Each geom is associated with a specific
+type of graph.</p>
+<p>Let’s go through some of the more common and popular graphs for
+visualizing your data.</p>
+<p><br />
+</p>
+<div id="histogram" class="section level3">
+<h3>Histogram</h3>
+<p>A typical visual for summarizing a single numeric variable is a
+histogram. To create a histogram, use geom_histogram() for
+&lt;GEOM_FUNCTION()&gt;. Let’s create a histogram of median household
+income. Note that we don’t need to specify the y= here because we are
+plotting only one variable. We pipe in the object cacounty into ggplot()
+to establish the base layer. We then use geom_histogram() to add the
+data layer on top of the base.</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) </code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+<p>We can continue to add layers to the plot. For example, we use the
+argument xlab(“Median household income”) to label the x-axis as “Median
+household income”.</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) +
+  xlab(&quot;Median household income&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<p>Note the message produced with the plot. It tells us that we can use
+the bins = argument to change the number of bins used to produce the
+histogram. You can increase the number of bins to make the bins narrower
+and thus get a finer grain of detail. Or you can decrease the number of
+bins to get a broader visual summary of the shape of the variable’s
+distribution. Compare bins = 10 to bins = 50.</p>
+</div>
+<div id="boxplot" class="section level3">
+<h3>Boxplot</h3>
+<p>We can use a boxplot to visually summarize the distribution of a
+single numeric variable or the relationship between a categorical and
+numeric variable. Use geom_boxplot() for &lt;GEOM_FUNCTION()&gt; to
+create a boxplot. Let’s examine median household income. Note that a
+boxplot uses y= rather than x= to specify where mhhinc goes. We also
+provide a descriptive y-axis label using the ylab() function.</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot() +
+    geom_boxplot(mapping = aes(y = mhhinc)) +
+    ylab(&quot;Median household income&quot;)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p>Let’s examine the distribution of median income by mhisp. Because we
+are examining the association between two variables, we need to specify
+x and y variables in aes() (we also specify both x- and y-axis
+labels).</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab(&quot;Majority Hispanic&quot;) +
+    ylab(&quot;Median household income&quot;)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<p>The top and bottom of a boxplot represent the 75th and 25th
+percentiles, respectively. The line in the middle of the box is the 50th
+percentile. Points outside the whiskers represent outliers. Outliers are
+defined as having values that are either larger than the 75th percentile
+plus 1.5 times the IQR or smaller than the 25th percentile minus 1.5
+times the IQR.</p>
+<p>The boxplot is for all counties combined. Use the facet_wrap()
+function to separate by region. Notice the tilde ~ before the variable
+region inside facet_wrap().</p>
+<pre class="r"><code>cacounty %&gt;%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab(&quot;Majority Hispanic&quot;) +
+    ylab(&quot;Median household income&quot;) +
+    facet_wrap(~region) </code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-48-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="bar-chart" class="section level3">
+<h3>Bar chart</h3>
+<p>The primary purpose of a bar chart is to illustrate and compare the
+values for a categorical variable. Bar charts show either the number or
+frequency of each category. To create a bar chart, use geom_bar() for
+<GEOM_FUNCTION>(). Let’s show a bar chart of median household income by
+region. We’ll borrow from code above that generated a tibble of mean
+household income by region, and pipe that into ggplot().</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc)) %&gt;%
+  ggplot(aes(x=region, y = Mean)) +
+  geom_bar(stat = &quot;Identity&quot;) +
+  xlab(&quot;Region&quot;) +
+  ylab(&quot;Average household income&quot;)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-49-1.png" width="672" /></p>
+<p>Right now the bars are ordered based on the region names. We can
+order the bars in descending order based on household income by using
+the reorder() function. Notice the negative sign in front of Mean to
+order by descending order.</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc)) %&gt;%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = &quot;Identity&quot;) +
+  xlab(&quot;Region&quot;) +
+  ylab(&quot;Average household income&quot;)</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-50-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We can flip the axes using the function coord_flip().</p>
+<pre class="r"><code>cacounty %&gt;%
+  group_by(region) %&gt;%
+  summarize(Mean = mean(mhhinc)) %&gt;%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = &quot;Identity&quot;) +
+  xlab(&quot;Region&quot;) +
+  ylab(&quot;Average household income&quot;) +
+  coord_flip()</code></pre>
+<p><img src="Lab2_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>ggplot() is a powerful function, and you can make a lot of visually
+captivating graphs. We have just scratched the surface of its functions
+and features. You can also make your graphs really “pretty” and
+professional looking by altering graphing features, including colors,
+labels, titles and axes. For a list of ggplot() functions that alter
+various features of a graph, check out Chapter 28 in RDS.</p>
+<p>Here’s your ggplot2 badge. Wear it with pride! <img src="ggplot2.png"
+alt="ggplot2 Badge" /></p>
+<p><br />
+</p>
+</div>
+</div>
+</div>
+<div id="other-us-government-datasets" class="section level1">
+<h1>Other US Government datasets</h1>
+<p>Check out the <a href="Other.html">Data Sources</a> link for more
+links to US Government Data</p>
+</div>
+<div id="acknowledgements" class="section level1">
+<h1>Acknowledgements</h1>
+<p>Major acknowledgements to Noli Brazil (as always) and <a
+href="https://crimebythenumbers.com/geocoding.html">Crime by the
+Numbers</a>.</p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDI6IEdlb2NvZGluZywgVmVjdG9yIERhdGEsIGFuZCBDZW5zdXMgRGF0YSIKLS0tCgpJbiB0aGlzIGxhYiwgd2UgYXJlIGdvaW5nIHRvIHdvcmsgd2l0aCB2ZWN0b3IgZGF0YSwgd2hpY2ggd2UndmUgdGFsa2VkIGFib3V0IGxhc3Qgd2Vlay4gV2UgYXJlIGdvaW5nIHRvIHdvcmsgd2l0aCBhIGRhdGFzZXQgb2YgY2FuY2VyIHBhdGllbnRzIGFjcm9zcyBDYWxpZm9ybmlhLCBhcyB3ZWxsIGFzIENlbnN1cyBkYXRhIG9uIHNvY2lvZWNvbm9taWMgZmFjdG9ycy4gV2Ugd2lsbCBhbHNvIHRhbGsgYWJvdXQgZ2VvY29kaW5nIGFkZHJlc3NlcyBhbmQgd2lsbCBkaXNjdXNzIGhvdyB0byB2aXN1YWxpemUgZGF0YS4gCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3U6CgoxLiBIb3cgdG8gZ2VvY29kZSBhZGRyZXNzZXMKMi4gSG93IHRvIGJyaW5nIGluIGFuZCB2aXN1YWxpemUgcG9pbnQgZGF0YQozLiBIb3cgdG8gZG93bmxvYWQgQ2Vuc3VzIGRhdGEgdXNpbmcgdGhlIENlbnN1cyBBUEkKNC4gSG93IHRvIGNvbmR1Y3QgZXhwbG9yYXRvcnkgZGF0YSBhbmFseXNpcwoKTGV0J3MgZ2V0IGNyYWNraW5nIQoKXAoKIyBPcGVuIHVwIGFuIFIgTWFya2Rvd24gZmlsZQoKV2UgaG9wZWZ1bGx5IHJlbWVtYmVyIHNvbWUgb2YgdGhpcyBmcm9tIGxhc3Qgd2VlayBpbiBbTGFiIDFdKGxhYjEucm1kKSwgYnV0IGxldCdzIG9wZW4gYW4gUiBNYXJrZG93biBmaWxlIGJ5IGNsaWNraW5nIG9uICpGaWxlKiBhdCB0aGUgdG9wIG1lbnUgaW4gUlN0dWRpbywgc2VsZWN0ICpOZXcgRmlsZSosIGFuZCB0aGVuICpSIE1hcmtkb3duLi4uKi4gQSB3aW5kb3cgc2hvdWxkIHBvcCB1cC4gSW4gdGhhdCB3aW5kb3csIGZvciAqdGl0bGUqLCBwdXQgaW4g4oCcTGFiIDLigJ0uIEZvciAqYXV0aG9yKiwgcHV0IHlvdXIgbmFtZS4gTGVhdmUgdGhlIEhUTUwgcmFkaW8gYnV0dG9uIGNsaWNrZWQsIGFuZCBzZWxlY3QgT0suIEEgbmV3IFIgTWFya2Rvd24gZmlsZSBzaG91bGQgcG9wIHVwIGluIHRoZSB0b3AgbGVmdCB3aW5kb3cuCgpcCgojIFdoYXQgcGFja2FnZXMgZG8gd2UgbmVlZD8KCkxldCdzIGxvYWQgc29tZSBwYWNrYWdlcyB0aGF0IHdlIHdpbGwgbmVlZCB0aGlzIHdlZWsuIFdlIG5lZWQgdG8gbG9hZCBhbnkgcGFja2FnZXMgd2UgcHJldmlvdXNseSBpbnN0YWxsZWQgIHVzaW5nIHRoZSBmdW5jdGlvbiBgbGlicmFyeSgpYC4gUmVtZW1iZXIsIGluc3RhbGwgb25jZSwgbG9hZCBldmVyeSB0aW1lLiBBbmQgaWYgaXQgZ2l2ZXMgeW91IGFuIGVycm9yIGZvciBgbm8gcGFja2FnZSBjYWxsZWQuLi5gLCB0aGVuIHdlIG5lZWQgdG8gaW5zdGFsbCB0aG9zZSBwYWNrYWdlcyB1c2luZyBgaW5zdGFsbC5wYWNrYWdlcygpYC4gU28gd2hlbiB1c2luZyBhIHBhY2thZ2UsIGBsaWJyYXJ5KClgIHNob3VsZCBhbHdheXMgYmUgYXQgdGhlIHRvcCBvZiB5b3VyIFIgTWFya2Rvd24uCgoKYGBge3J9CmxpYnJhcnkoc2YpCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeSh0aWR5Y2Vuc3VzKQpsaWJyYXJ5KGlwdW1zcikKbGlicmFyeShjZW5zdXNhcGkpCmxpYnJhcnkobGVoZHIpCmxpYnJhcnkodGlkeVVTREEpCmxpYnJhcnkoZmxleHRhYmxlKQpsaWJyYXJ5KHRpZHlnZW9jb2RlcikKbGlicmFyeShjcnN1Z2dlc3QpCmBgYAoKXAoKIyBHZW9jb2RpbmcKClwKClNvLCBsZXQncyBzYXkgd2Ugd2FudGVkIHRvIG1hcCBhbGwgb2YgdGhlIG1hcmlqdWFuYSBkaXNwZW5zYXJpZXMgYWNyb3NzIFNhbiBGcmFuY2lzY28uIExldCdzIGRvd25sb2FkIGEgLmNzdiBvZiB0aGVzZSBmcm9tIHRoZSBHaXRodWIgc2l0ZSwgdGhlbiB0YWtlIGEgbG9vayBhdCB0aGUgZGF0YXNldC4KCmBgYHtyfQpzZl9taiA8LSByZWFkX2NzdigiL1VzZXJzL3BqYW1lczEvRHJvcGJveC9VQyBEYXZpcyBGb2xkZXJzL1NQSCAyMTUgR0lTIGFuZCBQdWJsaWMgSGVhbHRoL0dpdGh1Yl9XZWJzaXRlL1NQSDIxNS9zYW5fZnJhbmNpc2NvX2FjdGl2ZV9tYXJpanVhbmFfcmV0YWlsZXJzLmNzdiIpCgpoZWFkKHNmX21qKSAgICAgICAgICAgICAgICAgIAoKYGBgCgpcCgpPSywgc29tZSBpbnRlcmVzdGluZyBjb2x1bW5zIHRoZXJlLCBhbmQgd2UgaGF2ZSAqUHJlbWlzZSBBZGRyZXNzKiBhcyBhIGNvbHVtbiB0aGF0IHdlIG1pZ2h0IHdhbnQgdG8gbWFrZSBzcGF0aWFsLiBMZXQncyBsb29rIGNsb3NlciBhdCB0aGF0LgoKCmBgYHtyfQpoZWFkKHNmX21qJGBQcmVtaXNlIEFkZHJlc3NgKQpgYGAKClwKCk9LIHRoYXQgY29sdW1uIGxvb2tzIGxpa2Ugd2hhdCB3ZSB3YW50IHRvIGdlb2NvZGUuIEJ1dCBob3cgZG8gd2UgdGFrZSB0aGVzZSBhZGRyZXNzZXMgYW5kIG1ha2UgdGhlbSBpbnRvIHNwYXRpYWwgaW5mb3JtYXRpb24/IFdlIGhhdmUgdG8gZ2VvY29kZSB0aGVtISBUbyBkbyBzbywgd2Ugd2lsbCB1c2UgdGhlICoqdGlkeWdlb2NvZGVyKiogcGFja2FnZSBpbiBSLiBCdXQgZmlyc3QsIHdlIHNlZSB0aGF0IHRoZSBhZGRyZXNzZXMgbG9vayBhIGxpdHRsZSBzdHJhbmdlLiBUaGUgYWRkcmVzcyBjb3VudHkgaXMgYWx3YXlzICJDb3VudHk6IFNBTiBGUkFOQ0lTQ08iIHNvIHdlIHdpbGwgYGdzdWIoKWAgb3V0IHRoYXQgZW50aXJlIHN0cmluZy4KYGBge3J9CnNmX21qJGBQcmVtaXNlIEFkZHJlc3NgIDwtIGdzdWIoIiBDb3VudHk6IFNBTiBGUkFOQ0lTQ08iLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIiIsIHNmX21qJGBQcmVtaXNlIEFkZHJlc3NgKQpoZWFkKHNmX21qJGBQcmVtaXNlIEFkZHJlc3NgKQpgYGAKVGhhdCBsb29rcyBtdWNoIGJldHRlci4KClwKCk5vdyBsZXQncyBnaXZlIGEgdHJ5IHRvIGdlb2NvZGluZyB0aGVzZSBhZGRyZXNzZXMgd2l0aCB0aGUgKip0aWR5Z2VvY29kZXIqKiBwYWNrYWdlLiBXZSB3aWxsIHVzZSB0aGUgYGdlb2NvZGUoKWAgZnVuY3Rpb24gdG8gYWRkIGEgbGF0aXR1ZGUgYW5kIGxvbmdpdHVkZSB0byBlYWNoIG9mIG91ciBhZGRyZXNzZXMgaW4gdGhlICpQcmVtaXNlIEFkZHJlc3MqIGNvbHVtbi4gV2Ugd2lsbCB1c2UgdGhlIE9wZW4gU3RyZWV0IE1hcCBhZGRyZXNzIGRhdGFiYXNlIGJ5IHNwZWNpZnlpbmcgYG1ldGhvZCA9ICJvc20iYC4gVGhpcyB3aWxsIHRha2UgYWJvdXQgYSBtaW51dGUgdG8gcnVuLCBzbyBiZSBwYXRpZW50ISAKCj0KYGBge3J9CnNmX21qX2dlbyAgICAgIDwtIGdlb2NvZGUoc2ZfbWosICJQcmVtaXNlIEFkZHJlc3MiLAogICAgICAgICAgICAgICAgICAgICAgICAgIG1ldGhvZCA9ICJvc20iKQpoZWFkKHNmX21qX2dlbykKYGBgCgpcCgpIbW0sIGxvb2tzIGxpa2Ugc29tZSBvZiBvdXIgYWRkcmVzc2VzIGhhdmUgYW4gYE5BYCBmb3IgdGhlaXIgbGF0IGFuZCBsb25nLiBMZXQncyB0YWtlIGEgY2xvc2VyIGxvb2suCgpgYGB7cn0Kc3VtbWFyeShzZl9tal9nZW8kbGF0KQpzdW1tYXJ5KHNmX21qX2dlbyRsb25nKQpgYGAKClwKCkxvb2tzIGxpa2Ugd2UgaGF2ZSAxMCBhZGRyZXNzZXMgbWlzc2luZyAqbGF0KiBhbmQgMTAgbWlzc2luZyAqbG9uZyouIExldCdzIHRyeSB0aGlzIGFnYWluIHVzaW5nIGEgZGlmZmVyZW50IGdlb2NvZGluZyBkYXRhYmFzZSBjYWxsZWQgKmFyY2dpcyouCgpgYGB7cn0Kc2ZfbWpfZ2VvX2FyYyAgICAgIDwtIGdlb2NvZGUoc2ZfbWosICJQcmVtaXNlIEFkZHJlc3MiLAogICAgICAgICAgICAgICAgICAgICAgICAgIG1ldGhvZCA9ICJhcmNnaXMiKQpoZWFkKHNmX21qX2dlb19hcmMpCnN1bW1hcnkoc2ZfbWpfZ2VvX2FyYyRsYXQpCnN1bW1hcnkoc2ZfbWpfZ2VvX2FyYyRsb25nKQpgYGAKClwKCldvb2hvbyEgTm8gbWlzc2luZ25lc3MuIExvdmUgdG8gc2VlIGl0LiBPSywgbGV0J3MgcGxvdCB0aGVzZSBkYXRhIGFuZCBzZWUgaG93IHRoZXkgbG9vay4gCgpgYGB7cn0KcGxvdChzZl9tal9nZW9fYXJjJGxvbmcsIHNmX21qX2dlb19hcmMkbGF0KQpgYGAKClwKCldlIGFyZSBpbiBidXNpbmVzcyEgV2UgaGF2ZSB0YWtlbiBhZGRyZXNzZXMgYW5kIGNvbnZlcnRlZCB0aGVtIGludG8gbGF0aXR1ZGUgYW5kIGxvbmdpdHVkZSEgSSB0aGluayB3ZSBuZWVkIGEgYmFkZ2UhCiFbdGlkeWdlb2NvZGVyIEJhZGdlXSh0aWR5Z2VvY29kZXJfaGV4LnBuZykgCgpcCgpCb251cyBleGVyY2lzZSEgTGV0J3MgdGFrZSB0aGVzZSBhZGRyZXNzZXMgYW5kICpyZXZlcnNlIGdlb2NvZGUgdGhlbSouIFRoYXQncyBqdXN0IGEgZmFuY3kgd2F5IG9mIHNheWluZyB0aGF0IHdlIHdpbGwgdGFrZSBsYXRpdHVkZSBhbmQgbG9uZ2l0dWRlIGRhdGEgYW5kIGNvbnZlcnQgaXQgaW50byByZWFkYWJsZSBhZGRyZXNzZXMuCgpgYGB7cn0KcmV2ZXJzZSA8LSBzZl9tal9nZW9fYXJjICU+JQogIHJldmVyc2VfZ2VvY29kZShsYXQgPSBsYXQsIGxvbmcgPSBsb25nLCBtZXRob2QgPSAnYXJjZ2lzJywKICAgICAgICAgICAgICAgICAgYWRkcmVzcyA9IGFkZHJlc3NfZm91bmQsIGZ1bGxfcmVzdWx0cyA9IFRSVUUpICU+JQogIHNlbGVjdCgtYEJ1c2luZXNzIE93bmVyYCwtYEJ1c2luZXNzIFN0cnVjdHVyZWAsLWBMaWNlbnNlIE51bWJlcmAsLWBMaWNlbnNlIFR5cGVgLC1TdGF0dXMsLWBJc3N1ZSBEYXRlYCwtYEV4cGlyYXRpb24gRGF0ZWAsLUFjdGl2aXRpZXMsLWBBZHVsdC1Vc2UvTWVkaWNpbmFsYCkKaGVhZChyZXZlcnNlKQpgYGAKClwKCkxvb2tpbmcgYXQgKlByZW1pc2UgQWRkcmVzcyogYW5kICphZGRyZXNzX2ZvdW5kKiB3ZSBjYW4gc2VlIHRoYXQgd2UgZGlkIHByZXR0eSB3ZWxsISBOb3QgcGVyZmVjdCwgYnV0IG1vc3QgYXJlIHRoZSByaWdodCBhZGRyZXNzIG9yIGEgZmV3IGRvb3JzIGRvd24uIFdlbGwgZG9uZSEKClwKCiMgU3BhdGlhbCBEYXRhIGluIFIKCkFsdGhvdWdoIHRoZXJlIGFyZSBhIGZldyB3YXlzIHRvIHdvcmsgd2l0aCB2ZWN0b3Igc3BhdGlhbCBkYXRhIGluIFIsIHdlIHdpbGwgZm9jdXMgb24gdGhlICoqc2YqKiBwYWNrYWdlIGluIHRoaXMgY291cnNlLiBUaGUgbWFqb3JpdHkgb2Ygc3BhdGlhbCBmb2xrcyBpbiBSIGhhdmUgc2hpZnRlZCB0byAqKnNmKiogZm9yIHZlY3RvciBkYXRhLCBhbmQgc28gaXQgbWFrZXMgc2Vuc2UgdG8gZm9jdXMgb24gaXQgaW4gdGhlIGNsYXNzLgoKUHJvY2Vzc2luZyBzcGF0aWFsIGRhdGEgaXMgdmVyeSBzaW1pbGFyIHRvIG5vbnNwYXRpYWwgZGF0YSB0aGFua3MgdG8gdGhlIHBhY2thZ2UgKipzZioqLCB3aGljaCBpcyB0aWR5IGZyaWVuZGx5LiAqKnNmKiogc3RhbmRzIGZvciBzaW1wbGUgZmVhdHVyZXMuIFRoZSBbU2ltcGxlIEZlYXR1cmVzIHN0YW5kYXJkXShodHRwczovL2VuLndpa2lwZWRpYS5vcmcvd2lraS9TaW1wbGVfRmVhdHVyZXMpIGRlZmluZXMgYSBzaW1wbGUgZmVhdHVyZSBhcyBhIHJlcHJlc2VudGF0aW9uIG9mIGEgcmVhbCB3b3JsZCBvYmplY3QgYnkgYSBwb2ludCBvciBwb2ludHMgdGhhdCBtYXkgb3IgbWF5IG5vdCBiZSBjb25uZWN0ZWQgYnkgc3RyYWlnaHQgbGluZSBzZWdtZW50cyB0byBmb3JtIGxpbmVzIG9yIHBvbHlnb25zLiBBIGZlYXR1cmUgaXMgdGhvdWdodCBvZiBhcyBhIHRoaW5nLCBvciBhbiBvYmplY3QgaW4gdGhlIHJlYWwgd29ybGQsIHN1Y2ggYXMgYSBidWlsZGluZyBvciBhIHRyZWUuIEEgY291bnR5IGNhbiBiZSBhIGZlYXR1cmUuIEFzIGNhbiBhIGNpdHkgYW5kIGEgbmVpZ2hib3Job29kLiBGZWF0dXJlcyBoYXZlIGEgZ2VvbWV0cnkgZGVzY3JpYmluZyB3aGVyZSBvbiBFYXJ0aCB0aGUgZmVhdHVyZXMgYXJlIGxvY2F0ZWQsIGFuZCB0aGV5IGhhdmUgYXR0cmlidXRlcywgd2hpY2ggZGVzY3JpYmUgb3RoZXIgcHJvcGVydGllcy4gCgpOb3cgbGV0J3MgZ2V0IG91ciBoYW5kcyBkaXJ0eSB3b3JraW5nIHdpdGggc29tZSBzcGF0aWFsIGRhdGEuCgpcCgojIEltcG9ydCBDYW5jZXIgRGF0YQoKRm9yIHRoaXMgbGFiLCB3ZSB3aWxsIHByaW1hcmlseSBiZSB3b3JraW5nIHdpdGggdGhlIFsqTWFwR0FNKiBwYWNrYWdlXShodHRwczovL2NyYW4uci1wcm9qZWN0Lm9yZy93ZWIvcGFja2FnZXMvTWFwR0FNL2luZGV4Lmh0bWwpLiBJZiB5b3UgZ28gdG8gdGhlIGxpbmssIHlvdSBjYW4gcmVhZCB0aGUgcmVmZXJlbmNlIG1hbnVhbCBvbiB0aGUgdmFyaW91cyBkYXRhc2V0cyBhdmFpbGFibGUgaW4gdGhlIHBhY2thZ2UuIEZvciB0aGlzIGxhYiwgd2Ugd2lsbCBtYWlubHkgYmUgd29ya2luZyB3aXRoIHRoZSAqQ0FkYXRhKiBkYXRhc2V0LiBXaGlsZSB0aGV5IGFyZSBiYXNlZCBvbiByZWFsIHBhdHRlcm5zIGV4cGVjdGVkIGluIG9ic2VydmF0aW9uYWwgZXBpZGVtaW9sb2dpYyBzdHVkaWVzLCB0aGVzZSBkYXRhIGhhdmUgYmVlbiBzaW11bGF0ZWQgYW5kIGFyZSBmb3IgdGVhY2hpbmcgcHVycG9zZXMgb25seS4gVGhlIGRhdGEgY29udGFpbiA1MDAwIHNpbXVsYXRlZCBvdmFyaWFuIGNhbmNlciBjYXNlcy4gVGhpcyBpcyBhIGNvaG9ydCB3aXRoICoqdGltZSB0byBtb3J0YWxpdHkqKiBtZWFzdXJlZCwgYnV0IGZvciB0aGUgcHVycG9zZXMgb2Ygb3VyIGNsYXNzLCB3ZSB3aWxsIGNvbmR1Y3Qgc2ltcGxlIHRhYnVsYXIgYW5hbHlzZXMgbG9va2luZyBhdCBhc3NvY2lhdGlvbnMgYmV0d2VlbiBzcGF0aWFsIGV4cG9zdXJlcyB3aXRoIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwLgoKXAoKVGhlIENBZGF0YSBkYXRhc2V0IGNvbnRhaW5zIHRoZSBmb2xsb3dpbmcgdmFyaWFibGVzOgotIHRpbWUgKGZvbGxvdy11cCB0aW1lIHRvIGVpdGhlciBldmVudCBvZiBiZWluZyBjZW5zb3JlZCkKLSBldmVudCAoMT1kZWFkLCAwPWNlbnNvcmVkKQotIFggKExhdGl0dWRlKQotIFkgKExvbmdpdHVkZSkKLSBBR0UgKGFnZSBpbiB5ZWFycykKLSBJTlMgKGluc3VyYW5jZSBzdGF0dXMsIGNhdGVnb3JpY2FsKQoKXAoKU28gbGV0J3MgYnJpbmcgaW4gdGhlICpDQWRhdGEqIGRhdGFzZXQgYW5kIGhhdmUgYSBsb29rIGF0IGl0LgoKYGBge3J9CiNEb3dubG9hZCBmcm9tIENvdXJzZSBHaXRodWIgc2l0ZQpkb3dubG9hZC5maWxlKCJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3JlZnMvaGVhZHMvbWFpbi9DQV9DYW5jZXJfRGF0YS5yZHMiLCAiY2FfY2FuY2VyLnJkcyIsIG1vZGUgPSAid2IiKQoKI0xvYWQgY2FuY2VyIGRhdGFzZXQKQ0FkYXRhIDwtIHJlYWRSRFMoImNhX2NhbmNlci5yZHMiKQpoZWFkKENBZGF0YSkKZ2xpbXBzZShDQWRhdGEpCmBgYAoKXAoKT0ssIHNvIHRoZSB2YXJpYWJsZXMgbG9vayBncmVhdC4gSXMgaXQgYSBzcGF0aWFsIGRhdGFzZXQgdGhhdCBjYW4gYmUgcmVjb2duaXplZCBieSBSPyBMZXQncyBjaGVjayB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtIChDUlMpIHVzaW5nIHRoZSBgc3RfY3JzYCBjb21tYW5kIGluIHRoZSAqKnNmKiogcGFja2FnZS4KCmBgYHtyfQpzdF9jcnMoQ0FkYXRhKQpgYGAKCkhtbW0sIE5BLiBUaGF0IGRvZXNuJ3QgbG9vayBnb29kLiBTbyBob3cgZG8gd2UgbWFrZSB0aGlzIGEgc3BhdGlhbCBmaWxlPyBXZSB3aWxsIG5lZWQgdG8gYWRkIGEgQ1JTLiAKClwKCiMjIEFkZCBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0KCkxldCdzIGFkZCBhIENSUyBieSB1c2luZyBgc3RfYXNfc2ZgIGZyb20gdGhlICoqc2YqKiBwYWNrYWdlLiBXZSBjYW4gc2VlIHRoYXQgWCBpcyBvdXIgbGF0aXR1ZGUgY29sdW1uIGFuZCBZIGlzIG91ciBsb25naXR1ZGUgY29sdW1uLiBXZSBrbm93IHRoYXQgdGhlIENSUyBmb3IgdGhpcyBkYXRhc2V0IGlzIFN0YXRlIFBsYW5lIFByb2plY3RlZCBjb29yZGluYXRlIHN5c3RlbSwgTm9ydGggQW1lcmljYSBEYXR1bSAxOTgzKE5BRF8xOTgzX1N0YXRlUGxhbmVfQ2FsaWZvcm5pYV9JX0ZJUFNfMDQwMSkgZm9yIENhbGlmb3JuaWEgYmFzZWQgb24gdGhlIGRvY3VtZW50YXRpb24gZm9yIHRoZSAqKk1hcEdBTSoqIHBhY2thZ2UuIFdlIHRoZW4gY2FuIEdvb2dsZSB0aGF0IGFsb25nIHdpdGggIkVQU0ciIGFuZCB3ZSBnZXQgdGhlIEVQU0cgY29kZSBvZiAyMjI5LiBUaGUgRVBTRyBjb2RlIHdlIGNhbiBwbHVnIGludG8gdGhlIGBzdF9hc19zZmAgdG8gdGVsbCBSIHRvIGNyZWF0ZSBhIHNwYXRpYWwgZGF0YXNldCBpbiAqKnNmKiogdGhhdCBoYXMgdGhlIENSUyBvZiAyMjI5LiBUaGVuIHdlIHdpbGwgZG91YmxlIGNoZWNrIHRoZSBDUlMuCgpgYGB7cn0KaGVhZChDQWRhdGEpCkNBZGF0YV9wcm9qIDwtIHN0X2FzX3NmKENBZGF0YSwgY3JzPTIyMjkpCmhlYWQoQ0FkYXRhX3Byb2opCnN0X2NycyhDQWRhdGFfcHJvaikKCnBvc3NpYmxlX2NycyA8LSBzdWdnZXN0X2NycyhDQWRhdGFfcHJvaikKZ2xpbXBzZShwb3NzaWJsZV9jcnMpCmBgYAoKSGVyZSB3ZSBzZWUgdGhhdCBgc3VnZ2VzdF9jcnNgIG9mZmVycyB0aGUgdG9wIHRlbiBtb3N0IGxpa2VseSBDUlMgb3B0aW9ucy4gTGV0J3MgdHJhbnNmb3JtIG91ciBkYXRhc2V0IHRvIG1hdGNoIHRoZSBzdWdnZXN0ZWQgQ1JTLgoKYGBge3J9CkNBZGF0YV9wcm9qX2ZpeGVkIDwtIHN0X3RyYW5zZm9ybShDQWRhdGFfcHJvaiwzMjYwOCkKc3RfY3JzKENBZGF0YV9wcm9qX2ZpeGVkKQpgYGAKCiMjIE1hcCB0aGUgY2FuY2VyIGRhdGEKCk5pY2UhIFdlIGhhdmUgYSBzcGF0aWFsIGRhdGFzZXQuIFRoYXQgKmdlb21ldHJ5KiBjb2x1bW4gaXMgaG93ICoqc2YqKiBzdG9yZXMgdGhlIGdlb2dyYXBoaWMgZGF0YSwgYW5kIHdlIGRlZmluaXRlbHkgaGF2ZSBhIGZ1bGwgQ1JTIHdpdGggYWxsIHNvcnRzIG9mIGluZm8uIE9LLCBsZXQncyBwbG90IG91ciBkYXRhIHRvIG1ha2Ugc3VyZSB0aGV5IGxvb2sgc3BhdGlhbCEKYGBge3J9CnBsb3QoQ0FkYXRhX3Byb2opCmBgYAoKXAoKTG9va2luZyBnb29kISBHZXQgeW91cnNlbGYgYSBbY29va2llXShodHRwczovL3lvdXR1LmJlLzNzb0M2VkFEcGN3P3NpPTRuakJpYjNqV1BzVVlhRVMpLgoKXAoKIyBEb3dubG9hZGluZyBDZW5zdXMgRGF0YQoKT25lIG9mIHRoZSBwcmltYXJ5IHNvdXJjZXMgb2YgZGF0YSB0aGF0IHdl4oCZbGwgYmUgdXNpbmcgaW4gdGhpcyBjbGFzcyBpcyB0aGUgVW5pdGVkIFN0YXRlcyBEZWNlbm5pYWwgQ2Vuc3VzIGFuZCB0aGUgQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleS4gVGhlcmUgYXJlIHR3byB3YXlzIHRvIGJyaW5nIENlbnN1cyBkYXRhIGludG8gUjogRG93bmxvYWRpbmcgaXQgZnJvbSBhbiBvbmxpbmUgc291cmNlIG9yIHVzaW5nIGFuIEFQSS4KCioqTm90ZSB0aGF0IHdlIHdpbGwgZ2F0aGVyIDIwMTYtMjAyMCBBQ1MgZGF0YSBmcm9tIGFsbCBzb3VyY2VzLiBDZW5zdXMgYm91bmRhcmllcyBjaGFuZ2VkIGluIDIwMjAsIHdoaWNoIG1lYW5zIHRoYXQgMjAxNi0yMDIwIGRhdGEgd2lsbCBub3QgY29tcGxldGVseSBtZXJnZSB3aXRoIEFDUyBkYXRhIGJlZm9yZSAyMDIwLiBTbyBtYWtlIHN1cmUgeW91IG1lcmdlIDIwMjAgZGF0YSBvbmx5IHdpdGggMjAyMCBkYXRhIChidXQgeW91IGNhbiBtZXJnZSAyMDE5IGRhdGEgd2l0aCBkYXRhIGJldHdlZW4gMjAxMC0yMDE5KS4gVGhpcyBpcyBlc3BlY2lhbGx5IGltcG9ydGFudCBmb3IgdHJhY3QgZGF0YSwgd2l0aCBtYW55IG5ldyB0cmFjdHMgY3JlYXRlZCBpbiAyMDIwIGFuZCBleGlzdGluZyB0cmFjdHMgZXhwZXJpZW5jaW5nIGRyYW1hdGljIGNoYW5nZXMgaW4gdGhlaXIgYm91bmRhcmllcyBiZXR3ZWVuIDIwMTAgYW5kIDIwMjAuIFNlZSB0aGUgaW1wYWN0IG9mIHRyYWN0IGJvdW5kYXJ5IGNoYW5nZXMgYmV0d2VlbiAyMDAwIGFuZCAyMDEwIFtoZXJlXShodHRwczovL2NyZDIzMC5naXRodWIuaW8vY2Vuc3VzZ2VvZ3JhcGh5Lmh0bWwpLioqIFlvdSBtYXkgYWxzbyBleHBsb3JlIHRoZSBbTmVpZ2hib3Job29kIENoYW5nZSBEYXRhYmFzZV0oaHR0cHM6Ly9zZWFyY2gubGlicmFyeS51Y2RhdmlzLmVkdS92aWV3L2FjdGlvbi91cmVzb2x2ZXIuZG8/b3BlcmF0aW9uPXJlc29sdmVTZXJ2aWNlJnBhY2thZ2Vfc2VydmljZV9pZD0yODEwNDIyMzg2MDAwMzEyNiZpbnN0aXR1dGlvbklkPTMxMjYmY3VzdG9tZXJJZD0zMTI1JlZFPXRydWUpIHdoaWNoIGlzIGF2YWlsYWJsZSB0aHJvdWdoIHRoZSBVQyBEYXZpcyBsaWJyYXJ5LCBhbmQgaXMgYSBkYXRhc2V0IHRoYXQgaW5jb3Jwb3JhdGVzIHRyYWN0IGJvdW5kYXJ5IGNoYW5nZXMgb3ZlciB0aW1lLiBXZSBhcmUgd29ya2luZyBvbiBhY3F1aXJpbmcgdGhlIDIwMjAgZGF0YSB0aGVyZSEKClwKCiMjIERvd25sb2FkIENlbnN1cyBkYXRhIGZyb20gYW4gb25saW5lIHNvdXJjZQoKVGhlIGZpcnN0IHdheSB0byBvYnRhaW4gQ2Vuc3VzIGRhdGEgaXMgdG8gZG93bmxvYWQgdGhlbSBkaXJlY3RseSBmcm9tIHRoZSB3ZWIgb250byB5b3VyIGhhcmQgZHJpdmUuIFRoZXJlIGFyZSBzZXZlcmFsIHdlYnNpdGVzIHdoZXJlIHlvdSBjYW4gZG93bmxvYWQgQ2Vuc3VzIGRhdGEgaW5jbHVkaW5nIFtTb2NpYWwgRXhwbG9yZXJdKGh0dHBzOi8vd3d3LnNvY2lhbGV4cGxvcmVyLmNvbS8pIGFuZCBbUG9saWN5TWFwXShodHRwczovL3VjZGF2aXMucG9saWN5bWFwLmNvbS9tYXBzKSwgd2hpY2ggd2UgaGF2ZSBmcmVlIGFjY2VzcyB0byBhcyBVQyBEYXZpcyBhZmZpbGlhdGVzLCBhbmQgdGhlIFtOYXRpb25hbCBIaXN0b3JpY2FsIEdlb2dyYXBoaWMgSW5mb3JtYXRpb24gU3lzdGVtIChOSEdJUyldKGh0dHBzOi8vd3d3Lm5oZ2lzLm9yZy8pLCB3aGljaCBpcyBmcmVlIGZvciBldmVyeW9uZS4gVG8gZmluZCBvdXQgaG93IHRvIGRvd25sb2FkIGRhdGEgZnJvbSBQb2xpY3lNYXAgYW5kIE5IR0lTLCBjaGVjayBvdXQgdHV0b3JpYWxzIFtoZXJlXShodHRwczovL3BvbGljeW1hcC5oZWxwZG9jcy5pby9kYXRhLWRvd25sb2FkKSBhbmQgW2hlcmVdaHR0cHM6Ly93d3cubmhnaXMub3JnL3VzZXItcmVzb3VyY2VzL3VzZXJzLWd1aWRlKS4KClwKCiMjIFVzZSB0aGUgQ2Vuc3VzIEFQSSBhbmQgdGlkeWNlbnN1cwoKVGhlIG90aGVyIHdheSB0byBicmluZyBDZW5zdXMgZGF0YSBpbnRvIFIgaXMgdG8gdXNlIHRoZSBbQ2Vuc3VzIEFwcGxpY2F0aW9uIFByb2dyYW0gSW50ZXJmYWNlIChBUEkpXWh0dHBzOi8vd3d3LmNlbnN1cy5nb3YvZGF0YS9kZXZlbG9wZXJzL2d1aWRhbmNlL2FwaS11c2VyLWd1aWRlLldoYXRfaXNfdGhlX0FQSS5odG1sKS4gQW4gQVBJIGFsbG93cyBmb3IgZGlyZWN0IHJlcXVlc3RzIGZvciBkYXRhIGluIG1hY2hpbmUtcmVhZGFibGUgZm9ybS4gVGhhdCBpcywgcmF0aGVyIHRoYW4geW91IGhhdmluZyB0byBuYXZpZ2F0ZSB0byBzb21lIHdlYnNpdGUsIHNjcm9sbCBhcm91bmQgdG8gZmluZCBhIGRhdGFzZXQsIGRvd25sb2FkIHRoYXQgZGF0YXNldCBvbmNlIHlvdSBmaW5kIGl0LCBzYXZlIHRoYXQgZGF0YSBvbnRvIHlvdXIgaGFyZCBkcml2ZSwgYW5kIHRoZW4gYnJpbmcgdGhlIGRhdGEgaW50byBSLCB5b3UganVzdCB0ZWxsIFIgdG8gcmV0cmlldmUgZGF0YSBkaXJlY3RseSBmcm9tIHRoZSBzb3VyY2UgdXNpbmcgb25lIG9yIHR3byBsaW5lcyBvZiBjb2RlLgoKSW4gb3JkZXIgdG8gZGlyZWN0bHkgZG93bmxvYWQgZGF0YSBmcm9tIHRoZSBDZW5zdXMgQVBJLCB5b3UgbmVlZCBhIGtleS4gWW91IGNhbiBzaWduIHVwIGZvciBhIGZyZWUga2V5IFtoZXJlXShodHRwOi8vYXBpLmNlbnN1cy5nb3YvZGF0YS9rZXlfc2lnbnVwLmh0bWwpLCB3aGljaCB5b3Ugc2hvdWxkIGhhdmUgYWxyZWFkeSBkb25lIGJlZm9yZSB0aGUgbGFiLiBUeXBlIHlvdXIga2V5IGluIHF1b3RlcyB1c2luZyB0aGUgY2Vuc3VzX2FwaV9rZXkoKSBjb21tYW5kLgpgYGB7ciwgZXZhbCA9IEZBTFNFfQpjZW5zdXNfYXBpX2tleSgiWU9VUiBBUEkgS0VZIEdPRVMgSEVSRSIsIGluc3RhbGwgPSBUUlVFKQpgYGAKCmBgYHtyLCBlY2hvPUZBTFNFLCBldmFsPUZBTFNFfQpjZW5zdXNfYXBpX2tleSgiNWQ2ODkzNWM5NmMyNmVlNjdjYTUyZWI5NzNkNzFlNGE3Yjg0OTBhZCIsIGluc3RhbGwgPSBUUlVFLCBvdmVyd3JpdGU9VFJVRSkKYGBgCgpcCgpUaGUgb3B0aW9uIGBpbnN0YWxsID0gVFJVRWAgc2F2ZXMgdGhlIEFQSSBrZXkgaW4geW91ciBSIGVudmlyb25tZW50LCB3aGljaCBtZWFucyB5b3UgZG9u4oCZdCBoYXZlIHRvIHJ1biBgY2Vuc3VzX2FwaV9rZXkoKWAgZXZlcnkgc2luZ2xlIHRpbWUuIFRoZSBmdW5jdGlvbiBmb3IgZG93bmxvYWRpbmcgQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleSAoQUNTKSBDZW5zdXMgZGF0YSBpcyBgZ2V0X2FjcygpYC4gVGhlIGNvbW1hbmQgZm9yIGRvd25sb2FkaW5nIGRlY2VubmlhbCBDZW5zdXMgZGF0YSBpcyBgZ2V0X2RlY2VubmlhbCgpYC4gQm90aCBmdW5jdGlvbnMgY29tZSBmcm9tIHRoZSAqKnRpZHljZW5zdXMqKiBwYWNrYWdlLCB3aGljaCBhbGxvd3MgdXNlcnMgdG8gaW50ZXJmYWNlIHdpdGggdGhlIFVTIENlbnN1cyBCdXJlYXXigJlzIGRlY2VubmlhbCBDZW5zdXMgYW5kIEFtZXJpY2FuIENvbW11bml0eSBTdXJ2ZXkgQVBJcy4gR2V0dGluZyB2YXJpYWJsZXMgdXNpbmcgdGhlIENlbnN1cyBBUEkgcmVxdWlyZXMga25vd2luZyB0aGUgdmFyaWFibGUgSUQgLSBhbmQgdGhlcmUgYXJlIHRob3VzYW5kcyBvZiB2YXJpYWJsZXMgKGFuZCB0aHVzIHRob3VzYW5kcyBvZiBJRHMpIGFjcm9zcyB0aGUgZGlmZmVyZW50IENlbnN1cyBmaWxlcy4gVG8gcmFwaWRseSBzZWFyY2ggZm9yIHZhcmlhYmxlcywgdXNlIHRoZSBjb21tYW5kcyBgbG9hZF92YXJpYWJsZXMoKWAgYW5kIGBWaWV3KClgLiBCZWNhdXNlIHdl4oCZbGwgYmUgdXNpbmcgdGhlIEFDUyBpbiB0aGlzIGd1aWRlLCBsZXTigJlzIGNoZWNrIHRoZSB2YXJpYWJsZXMgaW4gdGhlIG1vc3QgcmVjZW50IDIwMjMgNS15ZWFyIEFDUyAoMjAxOS0yMDIzKSB1c2luZyB0aGUgZm9sbG93aW5nIGNvbW1hbmRzLgpgYGB7cn0KdjIzIDwtIGxvYWRfdmFyaWFibGVzKDIwMjMsICJhY3M1IiwgY2FjaGUgPSBUUlVFKQpWaWV3KHYyMykKYGBgCgpcCgpBIHdpbmRvdyBzaG91bGQgaGF2ZSBwb3BwZWQgdXAgc2hvd2luZyB5b3UgYSByZWNvcmQgbGF5b3V0IG9mIHRoZSAyMDE5LTIwMjMgQUNTLiBUbyBzZWFyY2ggZm9yIHNwZWNpZmljIGRhdGEsIHNlbGVjdCDigJxGaWx0ZXLigJ0gbG9jYXRlZCBhdCB0aGUgdG9wIGxlZnQgb2YgdGhpcyB3aW5kb3cgYW5kIHVzZSB0aGUgc2VhcmNoIGJveGVzIHRoYXQgcG9wIHVwLiBGb3IgZXhhbXBsZSwgdHlwZSBpbiDigJxIaXNwYW5pY+KAnSBpbiB0aGUgYm94IHVuZGVyIOKAnExhYmVs4oCdLiBZb3Ugc2hvdWxkIHNlZSBuZWFyIHRoZSB0b3Agb2YgdGhlIGxpc3QgdGhlIGZpcnN0IHNldCBvZiB2YXJpYWJsZXMgd2XigJlsbCB3YW50IHRvIGRvd25sb2FkIC0gcmFjZS9ldGhuaWNpdHkuIEFub3RoZXIgd2F5IG9mIGZpbmRpbmcgdmFyaWFibGUgbmFtZXMgaXMgdG8gc2VhcmNoIHRoZW0gdXNpbmcgW1NvY2lhbCBFeHBsb3Jlcl0oaHR0cHM6Ly93d3cuc29jaWFsZXhwbG9yZXIuY29tL2RhdGEvbWV0YWRhdGEvKS4gQ2xpY2sgb24gdGhlIGFwcHJvcHJpYXRlIHN1cnZleSBkYXRhIHllYXIgYW5kIHRoZW4g4oCcQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleSBUYWJsZXPigJ0sIHdoaWNoIHdpbGwgdGFrZSB5b3UgdG8gYSBsaXN0IG9mIHZhcmlhYmxlcyB3aXRoIHRoZWlyIENlbnN1cyBJRHMuCgpMZXTigJlzIGV4dHJhY3QgcmFjZS9ldGhuaWNpdHkgZGF0YSBhbmQgdG90YWwgcG9wdWxhdGlvbiBmb3IgW0NhbGlmb3JuaWEgY291bnRpZXNdKGh0dHBzOi8vZW4ud2lraXBlZGlhLm9yZy93aWtpL0xpc3Rfb2ZfY291bnRpZXNfaW5fQ2FsaWZvcm5pYSkgdXNpbmcgdGhlIGBnZXRfYWNzKClgIGNvbW1hbmQuCgpcCgpgYGB7cn0KY2EgPC0gZ2V0X2FjcyhnZW9ncmFwaHkgPSAiY291bnR5IiwgCiAgICAgICAgICAgICAgeWVhciA9IDIwMjMsCiAgICAgICAgICAgICAgdmFyaWFibGVzID0gYyh0cG9wciA9ICJCMDMwMDJfMDAxIiwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBuaHdoaXRlID0gIkIwMzAwMl8wMDMiLCBuaGJsayA9ICJCMDMwMDJfMDA0IiwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBuaGFzbiA9ICJCMDMwMDJfMDA2IiwgaGlzcCA9ICJCMDMwMDJfMDEyIiksIAogICAgICAgICAgICAgIHN0YXRlID0gIkNBIiwKICAgICAgICAgICAgICBzdXJ2ZXkgPSAiYWNzNSIsCiAgICAgICAgICAgICAgb3V0cHV0ID0gIndpZGUiKQoKYGBgCgpcCgpJbiB0aGUgYWJvdmUgY29kZSwgd2Ugc3BlY2lmaWVkIHRoZSBmb2xsb3dpbmcgYXJndW1lbnRzCgotIGBnZW9ncmFwaHlgOiBUaGUgbGV2ZWwgb2YgZ2VvZ3JhcGh5IHdlIHdhbnQgdGhlIGRhdGEgaW47IGluIG91ciBjYXNlLCB0aGUgY291bnR5LiBPdGhlciBnZW9ncmFwaGljIG9wdGlvbnMgY2FuIGJlIGZvdW5kIFtoZXJlXWh0dHBzOi8vd2Fsa2Vya2UuZ2l0aHViLmlvL3RpZHljZW5zdXMvYXJ0aWNsZXMvYmFzaWMtdXNhZ2UuaHRtbCNnZW9ncmFwaHktaW4tdGlkeWNlbnN1cykuCi0gYHllYXJgOiBUaGUgZW5kIHllYXIgb2YgdGhlIGRhdGEgKGJlY2F1c2Ugd2Ugd2FudCAyMDE2LTIwMjAsIHdlIHVzZSAyMDIwKS4KLSBgdmFyaWFibGVzYDogVGhlIHZhcmlhYmxlcyB3ZSB3YW50IHRvIGJyaW5nIGluIGFzIHNwZWNpZmllZCBpbiBhIHZlY3RvciB5b3UgY3JlYXRlIHVzaW5nIHRoZSBmdW5jdGlvbiBgYygpYC4gTm90ZSB0aGF0IHdlIGNyZWF0ZWQgdmFyaWFibGUgbmFtZXMgb2Ygb3VyIG93biAoZS5nLiDigJxuaHdoaXRl4oCdKSBhbmQgd2UgcHV0IHRoZSBBQ1MgSURzIGluIHF1b3RlcyAo4oCcQjAzMDAyXzAwM+KAnSkuIEhhZCB3ZSBub3QgZG9uZSB0aGlzLCB0aGUgdmFyaWFibGUgbmFtZXMgd2lsbCBjb21lIGluIGFzIHRoZXkgYXJlIG5hbWVkIGluIHRoZSBBQ1MsIHdoaWNoIGFyZSBub3QgdmVyeSBkZXNjcmlwdGl2ZS4KLSBgc3RhdGVgOiBXZSBjYW4gZmlsdGVyIHRoZSBjb3VudGllcyB0byB0aG9zZSBpbiBhIHNwZWNpZmljIHN0YXRlLiBIZXJlIGl0IGlzIOKAnENB4oCdIGZvciBDYWxpZm9ybmlhLiBJZiB3ZSBkb27igJl0IHNwZWNpZnkgdGhpcywgd2UgZ2V0IGFsbCBjb3VudGllcyBpbiB0aGUgVW5pdGVkIFN0YXRlcy4KLSBgc3VydmV5YDogVGhlIHNwZWNpZmljIENlbnN1cyBzdXJ2ZXkgd2VyZSBleHRyYWN0aW5nIGRhdGEgZnJvbS4gV2Ugd2FudCBkYXRhIGZyb20gdGhlIDUteWVhciBBbWVyaWNhbiBDb21tdW5pdHkgU3VydmV5LCBzbyB3ZSBzcGVjaWZ5IOKAnGFjczXigJ0uIFRoZSBBQ1MgY29tZXMgaW4gMS0gYW5kIDUteWVhciAtIHZhcmlldGllcy4KLSBgb3V0cHV0YDogVGhlIGFyZ3VtZW50IHRlbGxzIFIgdG8gcmV0dXJuIGEgd2lkZSBkYXRhc2V0IGFzIG9wcG9zZWQgdG8gYSBsb25nIGRhdGFzZXQgKHNlZSB0aGlzIHZpZ25ldHRlIGZvciBtb3JlIGluZm8pLgoKQW5vdGhlciB1c2VmdWwgb3B0aW9uIHRvIHNldCBpcyBgY2FjaGVfdGFibGUgPSBUUlVFYCwgc28geW91IGRvbuKAmXQgaGF2ZSB0byByZS1kb3dubG9hZCBhZnRlciB5b3XigJl2ZSBkb3dubG9hZGVkIHN1Y2Nlc3NmdWxseSB0aGUgZmlyc3QgdGltZS4gVHlwZSBpbiBgPyBnZXRfYWNzKClgIHRvIHNlZSB0aGUgZnVsbCBsaXN0IG9mIG9wdGlvbnMuCgpcCgpBcyB5b3UgbGVhcm5lZCBpbiBMYWIgMSwgd2hlbmV2ZXIgeW91IGJyaW5nIGluIGEgZGF0YXNldCwgdGhlIGZpcnN0IHRoaW5nIHlvdSBzaG91bGQgYWx3YXlzIGRvIGlzIHZpZXcgaXQgdG8gZ2V0IGEgc2Vuc2Ugb2YgaXRzIHN0cnVjdHVyZSBhbmQgdG8gbWFrZSBzdXJlIHlvdSBnb3Qgd2hhdCB5b3UgZXhwZWN0ZWQuIE9uZSB3YXkgb2YgZG9pbmcgdGhpcyBpcyB0byB1c2UgdGhlIGBnbGltcHNlKClgIGNvbW1hbmQKCmBgYHtyfQpnbGltcHNlKGNhKQpgYGAKClwKCllvdSBnZXQgYSBxdWljaywgY29tcGFjdCBzdW1tYXJ5IG9mIHlvdXIgdGliYmxlLiBZb3UgY2FuIGFsc28gdXNlIHRoZSBgaGVhZCgpYCBjb21tYW5kLCB3aGljaCBzaG93cyB5b3UgdGhlIGZpcnN0IHNldmVyYWwgcm93cyBvZiB5b3VyIGRhdGEgb2JqZWN0IChgdGFpbCgpYCB3aWxsIGdpdmUgeW91IHRoZSBsYXN0IHNldmVyYWwgcm93cykuCgpgYGB7cn0KaGVhZChjYSkKYGBgCgpcCgpUaGUgdGliYmxlIGNvbnRhaW5zIGNvdW50aWVzIHdpdGggdGhlaXIgZXN0aW1hdGVzIGZvciByYWNlL2V0aG5pY2l0eS4gVGhlc2UgdmFyaWFibGVzIGVuZCB3aXRoIHRoZSBsZXR0ZXIg4oCcReKAnS4gSXQgYWxzbyBjb250YWlucyB0aGUgW21hcmdpbnMgb2YgZXJyb3JdKGh0dHBzOi8vd2Fsa2VyLWRhdGEuY29tL3RpZHljZW5zdXMvYXJ0aWNsZXMvbWFyZ2lucy1vZi1lcnJvci5odG1sKSBmb3IgZWFjaCBlc3RpbWF0ZS4gVGhlc2UgdmFyaWFibGVzIGVuZCB3aXRoIHRoZSBsZXR0ZXIg4oCcTeKAnS4KCioqdGlkeWNlbnN1cyoqIGlzIGEgZ2FtZSBjaGFuZ2VyIGluIGJlaW5nIGFibGUgdG8gYnJpbmcgaW4gQ2Vuc3VzIGRhdGEgaW50byBSIGluIGEgY29udmVuaWVudCwgZmFzdCwgZWZmaWNpZW50IGFuZCB0aWR5IGZyaWVuZGx5IHdheS4gV2XigJlsbCBiZSB1c2luZyB0aGlzIHBhY2thZ2UgaW4gdGhlIG5leHQgbGFiIHRvIGJyaW5nIGluIENlbnN1cyBzcGF0aWFsIGRhdGEuIEFuZCBjb25ncmF0dWxhdGlvbnMhIFlvdeKAmXZlIGp1c3QgZWFybmVkIGFub3RoZXIgYmFkZ2UuIEZhbnRhc3RpYyEKIVt0aWR5Y2Vuc3VzIEJhZGdlXSh0aWR5Y2Vuc3VzX3N0aWNrZXIucG5nKQoKXAoKIyBSZWFkaW5nIGluIGRhdGEKIyMgUG9saWN5TWFwCgpUbyBzYXZlIHVzIHRpbWUsIEnigJl2ZSB1cGxvYWRlZCBQb2xpY3lNYXAgKGNzdikgb24gdGhlIEdpdGh1YiBmb3IgeW91IHRvIHVzZSBpbiB0aGlzIGxhYi4gU2F2ZSB0aGlzIGZpbGUgaW4gdGhlIHNhbWUgZm9sZGVyIHdoZXJlIHlvdXIgTGFiIDIgUiBNYXJrZG93biBmaWxlIHJlc2lkZXMuVG8gcmVhZCBpbiBhIGNzdiBmaWxlLCBmaXJzdCBtYWtlIHN1cmUgdGhhdCBSIGlzIHBvaW50ZWQgdG8gdGhlIGZvbGRlciB5b3Ugc2F2ZWQgeW91ciBkYXRhIGludG8uIFR5cGUgaW4gYGdldHdkKClgIHRvIGZpbmQgb3V0IHRoZSBjdXJyZW50IGRpcmVjdG9yeSBhbmQgYHNldHdkKCJkaXJlY3RvcnkgbmFtZSIpYCB0byBzZXQgdGhlIGRpcmVjdG9yeSB0byB0aGUgZm9sZGVyIGNvbnRhaW5pbmcgdGhlIGRhdGEuIAoKRnJvbSBhIE1hYyBsYXB0b3AsIEkgdHlwZSBpbiB0aGUgZm9sbG93aW5nIGNvbW1hbmQgdG8gc2V0IHRoZSBkaXJlY3RvcnkgdG8gdGhlIGZvbGRlciBjb250YWluaW5nIG15IGRhdGEuCgpgYGB7cn0Kc2V0d2QoIi9Vc2Vycy9wamFtZXMxL0Ryb3Bib3gvVUMgRGF2aXMgRm9sZGVycy9TUEggMjE1IEdJUyBhbmQgUHVibGljIEhlYWx0aC9HaXRodWJfV2Vic2l0ZS9TUEgyMTUvIikKYGBgCgpcCgpGb3IgYSBXaW5kb3dzIHN5c3RlbSwgeW91IGNhbiBmaW5kIHRoZSBwYXRod2F5IG9mIGEgZmlsZSBieSByaWdodCBjbGlja2luZyBvbiBpdCBhbmQgc2VsZWN0aW5nIFByb3BlcnRpZXMuIFlvdSB3aWxsIGZpbmQgdGhhdCBpbnN0ZWFkIG9mIGEgZm9yd2FyZCBzbGFzaCBsaWtlIGluIGEgTWFjLCBhIHdpbmRvd3MgcGF0aHdheSB3aWxsIGJlIGluZGljYXRlZCBieSBhIHNpbmdsZSBiYWNrIHNsYXNoIFwuIFIgZG9lc27igJl0IGxpa2UgdGhpcyBiZWNhdXNlIGl0IHRoaW5rcyBvZiBhIHNpbmdsZSBiYWNrIHNsYXNoIGFzIGFuIGVzY2FwZSBjaGFyYWN0ZXIuIFVzZSBpbnN0ZWFkIHR3byBiYWNrIHNsYXNoZXMgXFwKCmBgYHtyIGV2YWw9RkFMU0V9CnNldHdkKCJDOlxcVXNlcnNcXHBqYW1lc1xcRG9jdW1lbnRzXFxVQ0RcXFNwcmluZzIwMjVcXFNQSDIxNVxcTGFic1xcTGFiIDIiKQpgYGAKb3IgYSBmb3J3YXJkIHNsYXNoIC8uCgpgYGB7ciBldmFsPUZBTFNFfQpzZXR3ZCgiQzovVXNlcnMvcGphbWVzL0RvY3VtZW50cy9VQ0QvU3ByaW5nMjAyNS9TUEgyMTUvTGFicy9MYWIgMiIpCmBgYAoKWW91IGNhbiBhbHNvIG1hbnVhbGx5IHNldCB0aGUgd29ya2luZyBkaXJlY3RvcnkgYnkgY2xpY2tpbmcgb24gU2Vzc2lvbiAtPiBTZXQgV29ya2luZyBEaXJlY3RvcnkgLT4gQ2hvb3NlIERpcmVjdG9yeSBmcm9tIHRoZSBtZW51LgoKXAoKT25jZSB5b3XigJl2ZSBzZXQgeW91ciBkaXJlY3RvcnksIHVzZSB0aGUgZnVuY3Rpb24gYHJlYWRfY3N2KClgLCB3aGljaCBpcyBhIHBhcnQgb2YgdGhlICoqdGlkeXZlcnNlKiogcGFja2FnZSwgYW5kIHBsdWcgaW4gdGhlIG5hbWUgb2YgdGhlIGZpbGUgaW4gcXVvdGVzIGluc2lkZSB0aGUgcGFyZW50aGVzZXMuIE1ha2Ugc3VyZSB5b3UgaW5jbHVkZSB0aGUgKi5jc3YqIGV4dGVuc2lvbi4KCmBgYHtyfQpjYS5wbSA8LSByZWFkX2NzdigiUG9saWN5TWFwIERhdGEgMjAyNS0wMy0yNyAxOTI1NTUgVVRDLmNzdiIsIHNraXAgPSAxKQpgYGAKClwKClRoZSBvcHRpb24gc2tpcCA9IDEgdGVsbHMgUiB0byBza2lwIHRoZSBmaXJzdCByb3cgb2YgdGhlIGZpbGUgd2hlbiBicmluZ2luZyBpdCBpbi4gVGhpcyBpcyBkb25lIGJlY2F1c2UgdGhlcmUgYXJlIHR3byByb3dzIG9mIGNvbHVtbiBuYW1lcy4gVGhlIGZpcnN0IHJvdyBjb250YWlucyB0aGUgZXh0ZW5kZWQgdmVyc2lvbiwgd2hpbGUgdGhlIHNlY29uZCBpcyB0aGUgYWJyaWRnZWQgdmVyc2lvbi4gQWJvdmUgd2Uga2VlcCB0aGUgYWJyaWRnZWQgdmVyc2lvbi4KCllvdSBzaG91bGQgc2VlIGEgdGliYmxlICpjYS5wbSogcG9wIHVwIGluIHlvdXIgRW52aXJvbm1lbnQgd2luZG93ICh0b3AgcmlnaHQpLiBXaGF0IGRvZXMgb3VyIGRhdGEgc2V0IGxvb2sgbGlrZT8KCmBgYHtyfQpnbGltcHNlKGNhLnBtKQpgYGAKClwKCklmIHlvdSBsaWtlIHZpZXdpbmcgeW91ciBkYXRhIHRocm91Z2ggYW4gRXhjZWwgc3R5bGUgd29ya3NoZWV0LCB0eXBlIGluIFZpZXcoY2EucG0pLCBhbmQgY2EucG0gc2hvdWxkIHBvcCB1cCBpbiB0aGUgdG9wIGxlZnQgd2luZG93IG9mIHlvdXIgUiBTdHVkaW8gaW50ZXJmYWNlLgoKXAoKIyBNb3JlIGRhdGEgd3JhbmdsaW5nCgpXZSBsZWFybmVkIGFib3V0IHRoZSB2YXJpb3VzIGRhdGEgd3JhbmdsaW5nIHJlbGF0ZWQgZnVuY3Rpb25zIGZyb20gdGhlICoqdGlkeXZlcnNlKiogcGFja2FnZSBpbiBbTGFiIDFdKGxhYjEuaHRtbCkuIExldOKAmXMgZW1wbG95IHNvbWUgb2YgdGhvc2UgZnVuY3Rpb25zIHRvIGNyZWF0ZSBhIHNpbmdsZSBjb3VudHkgbGV2ZWwgZGF0YXNldCB0aGF0IGpvaW5zIHRoZSBkYXRhc2V0cyB3ZSBkb3dubG9hZGVkIGZyb20gdGhlIENlbnN1cyBBUEkgYW5kIFBvbGljeU1hcC4KCldlIGFyZSBnb2luZyB0byBjb21iaW5lIHRoZXNlIGRhdGFzZXRzIHVzaW5nIHRoZSBjb3VudHkgRklQUyBjb2Rlcy4gSW4gdGhlIENlbnN1cyBBUEkgYW5kIFBvbGljeU1hcCwgdGhlc2UgYXJlIGNvbnRhaW5lZCBpbiB0aGUgdmFyaWFibGVzIEdFT0lEIGFuZCBHZW9JRCwgcmVzcGVjdGl2ZWx5LiBMZXTigJlzIG1ha2Ugc3VyZSB0aGV5IGFyZSBpbiB0aGUgc2FtZSBjbGFzcy4KCmBgYHtyfQpjbGFzcyhjYS5wbSRHZW9JRCkKY2xhc3MoY2EkR0VPSUQpCmBgYAoKXAoKIyMgUGlwaW5nCgpPbmUgb2YgdGhlIGltcG9ydGFudCBpbm5vdmF0aW9ucyBmcm9tIHRoZSB0aWR5dmVyc2UgaXMgdGhlIHBpcGUgb3BlcmF0b3IgYCU+JWAuIFlvdSB1c2UgdGhlIHBpcGUgb3BlcmF0b3Igd2hlbiB5b3Ugd2FudCB0byBjb21iaW5lIG11bHRpcGxlIG9wZXJhdGlvbnMgaW50byBvbmUgbGluZSBvZiBjb250aW51b3VzIGNvZGUuIExldOKAmXMgY3JlYXRlIG91ciBmaW5hbCBkYXRhIG9iamVjdCAqY2Fjb3VudHkqIHVzaW5nIG91ciBicmFuZCBuZXcgZnJpZW5kIHRoZSBwaXBlLgoKYGBge3J9CmNhY291bnR5IDwtIGNhICU+JSAKICAgICAgbGVmdF9qb2luKGNhLnBtLCBieSA9IGMoIkdFT0lEIiA9ICJHZW9JRCIpKSAlPiUKICAgICAgbXV0YXRlKHB3aGl0ZSA9IG5od2hpdGVFL3Rwb3ByRSwgcGFzaWFuID0gbmhhc25FL3Rwb3ByRSwgCiAgICAgICAgICAgICAgcGJsYWNrID0gbmhibGtFL3Rwb3ByRSwgcGhpc3AgPSBoaXNwRS90cG9wckUsCiAgICAgICAgICAgICBtaGlzcCA9IGNhc2Vfd2hlbihwaGlzcCA+IDAuNSB+ICJNYWpvcml0eSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBUUlVFIH4gIk5vdCBNYWpvcml0eSIpKSAlPiUKICAgICAgcmVuYW1lKENvdW50eSA9IEdlb0lEX05hbWUpICU+JQogICAgICBzZWxlY3QoR0VPSUQsIENvdW50eSwgcHdoaXRlLCBwYXNpYW4sIHBibGFjaywgcGhpc3AsIG1oaXNwLCBtaGhpbmMpCmdsaW1wc2UoY2Fjb3VudHkpCmBgYAoKTGV04oCZcyBicmVhayBkb3duIHdoYXQgdGhlIHBpcGUgaXMgZG9pbmcgaGVyZS4gRmlyc3QsIHlvdSBzdGFydCBvdXQgd2l0aCB5b3VyIGRhdGFzZXQgY2EuIFlvdSDigJxwaXBl4oCdIHRoYXQgaW50byB0aGUgY29tbWFuZCBgbGVmdF9qb2luKClgLiBOb3RpY2UgdGhhdCB5b3UgZGlkbuKAmXQgaGF2ZSB0byB0eXBlIGluIGNhIGluc2lkZSB0aGF0IGNvbW1hbmQgLSBgJT4lYCBwaXBlcyB0aGF0IGluIGZvciB5b3UuIFRoZSBjb21tYW5kIGpvaW5zIHRoZSBkYXRhIG9iamVjdCAqY2EucG0qIHRvICpjYSouIFRoZSByZXN1bHQgb2YgdGhpcyBmdW5jdGlvbiBnZXRzIHBpcGVkIGludG8gdGhlIGBtdXRhdGUoKWAgZnVuY3Rpb24sIHdoaWNoIGNyZWF0ZXMgdGhlIHBlcmNlbnQgcmFjZS9ldGhuaWNpdHkgKGZyb20gdGhlIENlbnN1cyBBUEkpLCBhbmQgbWFqb3JpdHkgSGlzcGFuaWMgdmFyaWFibGVzLiBUaGlzIGdldHMgcGlwZWQgaW50byB0aGUgYHJlbmFtZSgpYCBmdW5jdGlvbiwgd2hpY2ggcmVuYW1lcyB0aGUgYW1iaWd1b3VzIHZhcmlhYmxlIG5hbWUgKkdlb0lEX05hbWUqIHRvIHRoZSBtb3JlIGRlc2NyaXB0aXZlIG5hbWUgKkNvdW50eSouIFRoaXMgdGhlbiBnZXRzIHBpcGVkIGludG8gdGhlIGZpbmFsIGZ1bmN0aW9uLCBgc2VsZWN0KClgLCB3aGljaCBrZWVwcyB0aGUgbmVjZXNzYXJ5IHZhcmlhYmxlcy4gRmluYWxseSwgdGhlIGNvZGUgc2F2ZXMgdGhlIHJlc3VsdCBpbnRvIGNhY291bnR5IHdoaWNoIHdlIGRlc2lnbmF0ZWQgYXQgdGhlIGJlZ2lubmluZyB3aXRoIHRoZSBhcnJvdyBvcGVyYXRvci4KClBpcGluZyBtYWtlcyBjb2RlIGNsZWFyZXIsIGFuZCBzaW11bHRhbmVvdXNseSBnZXRzIHJpZCBvZiB0aGUgbmVlZCB0byBkZWZpbmUgYW55IGludGVybWVkaWF0ZSBvYmplY3RzIHRoYXQgeW91IHdvdWxkIGhhdmUgbmVlZGVkIHRvIGtlZXAgdHJhY2sgb2Ygd2hpbGUgcmVhZGluZyB0aGUgY29kZS4gUElQRSwgUGlwZSwgYW5kIHBpcGUgd2hlbmV2ZXIgeW91IGNhbi4gQmFkZ2UgaXQhCiFbcGlwZSBCYWRnZSFdKHBpcGUucG5nKQovCgojIyBTYXZpbmcgZGF0YQoKSWYgeW91IHdhbnQgdG8gc2F2ZSB5b3VyIGRhdGEgZnJhbWUgb3IgdGliYmxlIGFzIGEgY3N2IGZpbGUgb24geW91ciBoYXJkIGRyaXZlLCB1c2UgdGhlIGNvbW1hbmQgYHdyaXRlX2NzdigpYC4gQmVmb3JlIHlvdSBzYXZlIGEgZmlsZSwgbWFrZSBzdXJlIFIgaXMgcG9pbnRlZCB0byB0aGUgYXBwcm9wcmlhdGUgZm9sZGVyIG9uIHlvdXIgaGFyZCBkcml2ZSBieSB1c2luZyB0aGUgZnVuY3Rpb24gYGdldHdkKClgLiBJZiBpdOKAmXMgbm90IHBvaW50ZWQgdG8gdGhlIHJpZ2h0IGZvbGRlciwgdXNlIHRoZSBmdW5jdGlvbiBgc2V0d2QoKWAgdG8gc2V0IHRoZSBhcHByb3ByaWF0ZSB3b3JraW5nIGRpcmVjdG9yeS4KCmBgYHtyfQp3cml0ZV9jc3YoY2Fjb3VudHksICJsYWIyX2ZpbGUuY3N2IikKYGBgCgpUaGUgZmlyc3QgYXJndW1lbnQgaXMgdGhlIG5hbWUgb2YgdGhlIFIgb2JqZWN0IHlvdSB3YW50IHRvIHNhdmUuIFRoZSBzZWNvbmQgYXJndW1lbnQgaXMgdGhlIG5hbWUgb2YgdGhlIGNzdiBmaWxlIGluIHF1b3Rlcy4gTWFrZSBzdXJlIHRvIGFkZCB0aGUgLmNzdiBleHRlbnNpb24uIFRoZSBmaWxlIGlzIHNhdmVkIGluIHlvdXIgY3VycmVudCB3b3JraW5nIGRpcmVjdG9yeS4KClwKCiMgRXhwbG9yYXRvcnkgZGF0YSBhbmFseXNpcwoKVGhlIGZ1bmN0aW9ucyBhYm92ZSBoZWxwIHVzIGJyaW5nIGluIGFuZCBjbGVhbiBkYXRhLiBUaGUgbmV4dCBzZXQgb2YgZnVuY3Rpb25zIGNvdmVyZWQgaW4gdGhpcyBzZWN0aW9uIHdpbGwgaGVscCB1cyBzdW1tYXJpemUgdGhlIGRhdGEuIERhdGEgcmVmZXIgdG8gcGllY2VzIG9mIGluZm9ybWF0aW9uIHRoYXQgZGVzY3JpYmUgYSBzdGF0dXMgb3IgYSBtZWFzdXJlIG9mIG1hZ25pdHVkZS4gQSB2YXJpYWJsZSBpcyBhIHNldCBvZiBvYnNlcnZhdGlvbnMgb24gYSBwYXJ0aWN1bGFyIGNoYXJhY3RlcmlzdGljLiBUaGUgZGlzdHJpYnV0aW9uIG9mIGEgdmFyaWFibGUgaXMgYSBsaXN0aW5nIHNob3dpbmcgYWxsIHRoZSBwb3NzaWJsZSB2YWx1ZXMgb2YgdGhlIGRhdGEgZm9yIHRoYXQgdmFyaWFibGUgYW5kIGhvdyBvZnRlbiB0aGV5IG9jY3VyLiBFeHBsb3JhdG9yeSBEYXRhIEFuYWx5c2lzIChFREEpIGVuY29tcGFzc2VzIGEgc2V0IG9mIG1ldGhvZHMgKHNvbWUgd291bGQgc2F5IGEgZnJhbWV3b3JrIG9yIHBlcnNwZWN0aXZlKSBmb3Igc3VtbWFyaXppbmcgYSB2YXJpYWJsZeKAmXMgZGlzdHJpYnV0aW9uLCBhbmQgdGhlIHJlbGF0aW9uc2hpcCBiZXR3ZWVuIHRoZSBkaXN0cmlidXRpb25zIG9mIHR3byBvciBtb3JlIHZhcmlhYmxlcy4gV2Ugd2lsbCBjb3ZlciB0d28gZ2VuZXJhbCBhcHByb2FjaGVzIHRvIHN1bW1hcml6aW5nIHlvdXIgZGF0YTogZGVzY3JpcHRpdmUgc3RhdGlzdGljcyBhbmQgdmlzdWFsaXphdGlvbiB2aWEgZ3JhcGhzIGFuZCBjaGFydHMuCgpcCgojIyBEZXNjcmlwdGl2ZSBzdGF0aXN0aWNzCgpXaGVuIGRlc2NyaWJpbmcgYSBkaXN0cmlidXRpb24sIHlvdXIgcXVhbnRpdGF0aXZlIG1lc3NhZ2UgaXMgb2Z0ZW4gYmVzdCBjb21tdW5pY2F0ZWQgYnkgcmVkdWNpbmcgZGF0YSB0byBhIGZldyBzdW1tYXJ5IG51bWJlcnMuIFRoZXNlIG51bWJlcnMgYXJlIG1lYW50IHRvIHN1bW1hcml6ZSB0aGUg4oCcdHlwaWNhbOKAnSB2YWx1ZSBpbiB0aGUgZGlzdHJpYnV0aW9uIChlLmcuLCBtZWFuLCBtZWRpYW4sIG1vZGUpIGFuZCB0aGUgdmFyaWF0aW9uIG9yIOKAnHNwcmVhZOKAnSBpbiB0aGUgZGlzdHJpYnV0aW9uIChlLmcuLCBtaW5pbXVtL21heGltdW0sIGludGVycXVhcnRpbGUgcmFuZ2UsIHN0YW5kYXJkIGRldmlhdGlvbikuIFRoZXNlIHN1bW1hcnkgbnVtYmVycyBhcmUga25vd24gYXMgZGVzY3JpcHRpdmUgc3RhdGlzdGljcy4KCldlIGNhbiB1c2UgdGhlIGZ1bmN0aW9uIHN1bW1hcml6ZSgpIHRvIGdldCBkZXNjcmlwdGl2ZSBzdGF0aXN0aWNzIG9mIG91ciBkYXRhLiBGb3IgZXhhbXBsZSwgbGV04oCZcyBjYWxjdWxhdGUgdGhlIG1lYW4gaG91c2Vob2xkIGluY29tZSBpbiBDYWxpZm9ybmlhIGNvdW50aWVzLiBUaGUgZmlyc3QgYXJndW1lbnQgaW5zaWRlIHN1bW1hcml6ZSgpIGlzIHRoZSBkYXRhIG9iamVjdCBjYWNvdW50eSBhbmQgdGhlIHNlY29uZCBhcmd1bWVudCBpcyB0aGUgZnVuY3Rpb24gY2FsY3VsYXRpbmcgdGhlIHNwZWNpZmljIHN1bW1hcnkgc3RhdGlzdGljLCBpbiB0aGlzIGNhc2UgbWVhbigpLgoKYGBge3J9CmNhY291bnR5ICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpKQpgYGAKClRoZSBhdmVyYWdlIGNvdW50eSBtZWRpYW4gaG91c2Vob2xkIGluY29tZSBpcyAkODcsMDAxLiBJZiB0aGUgdmFyaWFibGUgKm1oaGluYyogY29udGFpbmVkIG1pc3NpbmcgdmFsdWVzLCB3ZSB3b3VsZCBoYXZlIGdvdHRlbiAqTkEqIGFzIGEgcmVzdWx0LiBUbyBvbWl0IG1pc3NpbmcgdmFsdWVzIGZyb20gdGhlIGNhbGN1bGF0aW9uLCB5b3UgbmVlZCB0byBhZGQgYHJtID0gVFJVRWAgdG8gYG1lYW4oKWAuCgpXZSBjYW4gY2FsY3VsYXRlIG1vcmUgdGhhbiBvbmUgc3VtbWFyeSBzdGF0aXN0aWMgd2l0aGluIGBzdW1tYXJpemUoKWAuIFdoYXQgaXMgdGhlIHNwcmVhZCBvZiB0aGUgZGlzdHJpYnV0aW9uPyBXZSBjYW4gYWRkIHRvIGBzdW1tYXJpemUoKWAgdGhlIGZ1bmN0aW9uIGBzZCgpYCB0byBjYWxjdWxhdGUgdGhlIHN0YW5kYXJkIGRldmlhdGlvbi4KXAoKYGBge3J9CmNhY291bnR5ICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpLCBTRCA9IHNkKG1oaGluYykpCmBgYAoKXAoKRG9lcyB0aGUgYXZlcmFnZSBpbmNvbWUgZGlmZmVyIGJ5IENhbGlmb3JuaWEgcmVnaW9uPyBGaXJzdCwgbGV04oCZcyBjcmVhdGUgYSBuZXcgdmFyaWFibGUgcmVnaW9uIGRlc2lnbmF0aW5nIGVhY2ggY291bnR5IGFzIEJheSBBcmVhLCBTb3V0aGVybiBDYWxpZm9ybmlhLCBDZW50cmFsIFZhbGxleSwgQ2FwaXRhbCBSZWdpb24gYW5kIHRoZSBSZXN0IG9mIENhbGlmb3JuaWEgdXNpbmcgdGhlIGBjYXNlX3doZW4oKWAgZnVuY3Rpb24gd2l0aGluIHRoZSBgbXV0YXRlKClgIGZ1bmN0aW9uLgoKYGBge3J9CmNhY291bnR5IDwtIGNhY291bnR5ICU+JQogICAgbXV0YXRlKHJlZ2lvbiA9IGNhc2Vfd2hlbihDb3VudHkgPT0gIlNvbm9tYSIgfCBDb3VudHkgPT0gIk5hcGEiIHwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiU29sYW5vIiB8IENvdW50eSA9PSAiTWFyaW4iIHwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiQ29udHJhIENvc3RhIiB8IENvdW50eSA9PSAiU2FuIEZyYW5jaXNjbyIgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIlNhbiBNYXRlbyIgfCBDb3VudHkgPT0gIkFsYW1lZGEiIHwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiU2FudGEgQ2xhcmEiIH4gIkJheSBBcmVhIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQ291bnR5ID09ICJJbXBlcmlhbCIgfCBDb3VudHkgPT0gIkxvcyBBbmdlbGVzIiB8IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIk9yYW5nZSIgfCBDb3VudHkgPT0gIlJpdmVyc2lkZSIgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIlNhbiBEaWVnbyIgfCBDb3VudHkgPT0gIlNhbiBCZXJuYXJkaW5vIiB8CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiVmVudHVyYSIgfiAiU291dGhlcm4gQ2FsaWZvcm5pYSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiRnJlc25vIiB8IENvdW50eSA9PSAiTWFkZXJhIiB8IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIk1hcmlwb3NhIiB8IENvdW50eSA9PSAiTWVyY2VkIiB8IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIlR1bGFyZSIgfCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQ291bnR5ID09ICJLaW5ncyIgfiAiQ2VudHJhbCBWYWxsZXkiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIkFscGluZSIgfCBDb3VudHkgPT0gIkNvbHVzYSIgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIkVsIERvcmFkbyIgfCBDb3VudHkgPT0gIkdsZW5uIiB8CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvdW50eSA9PSAiUGxhY2VyIiB8IENvdW50eSA9PSAiU2FjcmFtZW50byIgfAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDb3VudHkgPT0gIlN1dHRlciIgfCBDb3VudHkgPT0gIllvbG8iIHwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQ291bnR5ID09ICJZdWJhIiB+ICJDYXBpdGFsIFJlZ2lvbiIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFRSVUUgfiAiUmVzdCIpKQpgYGAKClwKCk5leHQsIHdlIG5lZWQgdG8gcGFpciBgc3VtbWFyaXplKClgIHdpdGggdGhlIGZ1bmN0aW9uIGBncm91cF9ieSgpYC4gVGhlIGZ1bmN0aW9uIGBncm91cF9ieSgpYCB0ZWxscyBSIHRvIHJ1biBzdWJzZXF1ZW50IGZ1bmN0aW9ucyBvbiB0aGUgZGF0YSBvYmplY3QgYnkgYSBncm91cCBjaGFyYWN0ZXJpc3RpYyAoc3VjaCBhcyBnZW5kZXIsIGVkdWNhdGlvbmFsIGF0dGFpbm1lbnQsIG9yIGluIHRoaXMgY2FzZSwgcmVnaW9uKS4gV2XigJlsbCBuZWVkIHRvIHVzZSBvdXIgbmV3IGJlc3QgZnJpZW5kICU+JSB0byBhY2NvbXBsaXNoIHRoaXMgdGFzay4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBncm91cF9ieShyZWdpb24pICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpKQpgYGAKClRoZSBmaXJzdCBwaXBlIHNlbmRzIGNhY291bnR5IGludG8gdGhlIGZ1bmN0aW9uIGBncm91cF9ieSgpYCwgd2hpY2ggdGVsbHMgUiB0byBncm91cCAqY2Fjb3VudHkqIGJ5IHRoZSB2YXJpYWJsZSAqcmVnaW9uKi4KCkhvdyBkbyB5b3Uga25vdyB0aGUgdGliYmxlIGlzIGdyb3VwZWQ/IEJlY2F1c2UgaXQgdGVsbHMgeW91IQoKYGBge3J9CmNhY291bnR5ICU+JQogIGdyb3VwX2J5KHJlZ2lvbikgCmBgYAoKXAoKVGhlIHNlY29uZCBwaXBlIHRha2VzIHRoaXMgZ3JvdXBlZCBkYXRhc2V0IGFuZCBzZW5kcyBpdCBpbnRvIHRoZSBgc3VtbWFyaXplKClgIGNvbW1hbmQsIHdoaWNoIGNhbGN1bGF0ZXMgdGhlIG1lYW4gaW5jb21lIChieSByZWdpb24sIGJlY2F1c2UgdGhlIGRhdGFzZXQgaXMgZ3JvdXBlZCBieSByZWdpb24pLgoKVG8gZ2V0IHRoZSBtZWFuLCBtZWRpYW4gYW5kIHN0YW5kYXJkIGRldmlhdGlvbiBvZiBtZWRpYW4gaW5jb21lLCBpdHMgY29ycmVsYXRpb24gd2l0aCBwZXJjZW50IEhpc3BhbmljLCBhbmQgZ2l2ZSBjb2x1bW4gbGFiZWxzIGZvciB0aGUgdmFyaWFibGVzIGluIHRoZSByZXN1bHRpbmcgc3VtbWFyeSB0YWJsZSwgd2UgdHlwZSBpbjoKCmBgYHtyfQpjYWNvdW50eSAlPiUKICBncm91cF9ieShyZWdpb24pICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpLAogICAgICAgICAgICBNZWRpYW4gPSBtZWRpYW4obWhoaW5jKSwKICAgICAgICAgICAgU0QgPSBzZChtaGhpbmMpLAogICAgICAgICAgICBDb3JyZWxhdGlvbiA9IGNvcihtaGhpbmMsIHBoaXNwKSkKYGBgCgpcCgpUaGUgdmFyaWFibGUgKm1oaGluYyogaXMgbnVtZXJpYy4gSG93IGRvIHdlIHN1bW1hcml6ZSBjYXRlZ29yaWNhbCB2YXJpYWJsZXM/IFdlIHVzdWFsbHkgc3VtbWFyaXplIGNhdGVnb3JpY2FsIHZhcmlhYmxlcyBieSBleGFtaW5pbmcgYSBmcmVxdWVuY3kgdGFibGUuIFRvIGdldCB0aGUgcGVyY2VudCBvZiBjb3VudGllcyB0aGF0IGhhdmUgYSBtYWpvcml0eSBIaXNwYW5pYyBwb3B1bGF0aW9uIG1oaXNwLCB5b3XigJlsbCBuZWVkIHRvIGNvbWJpbmUgdGhlIGZ1bmN0aW9ucyAqZ3JvdXBfYnkoKSosICpzdW1tYXJpemUoKSogYW5kICptdXRhdGUoKSogdXNpbmcgYCU+JWAuCgpgYGB7cn0KY2Fjb3VudHkgJT4lCiAgZ3JvdXBfYnkobWhpc3ApICU+JQogIHN1bW1hcml6ZShuID0gbigpKSAlPiUKICBtdXRhdGUoZnJlcSA9IG4gLyBzdW0obikpCmBgYAoKXAoKVGhlIGNvZGUgZ3JvdXBfYnkobWhpc3ApIHNlcGFyYXRlcyB0aGUgY291bnRpZXMgYnkgdGhlIGNhdGVnb3JpZXMgb2YgbWhpc3AgKE1ham9yaXR5LCBOb3QgTWFqb3JpdHkpLiBXZSB0aGVuIHVzZWQgc3VtbWFyaXplKCkgdG8gY291bnQgdGhlIG51bWJlciBvZiBjb3VudGllcyB0aGF0IGFyZSBNYWpvcml0eSBhbmQgTm90IE1ham9yaXR5LiBUaGUgZnVuY3Rpb24gdG8gZ2V0IGEgY291bnQgaXMgbigpLCBhbmQgd2Ugc2F2ZWQgdGhpcyBjb3VudCBpbiBhIHZhcmlhYmxlIG5hbWVkIG4uIE5leHQsIHdlIHVzZWQgbXV0YXRlKCkgb24gdGhpcyB0YWJsZSB0byBnZXQgdGhlIHByb3BvcnRpb24gb2YgY291bnRpZXMgYnkgTWFqb3JpdHkgSGlzcGFuaWMgZGVzaWduYXRpb24uIFRoZSBjb2RlIHN1bShuKSBhZGRzIHRoZSB2YWx1ZXMgb2Ygbi4gV2UgdGhlbiBkaXZpZGUgdGhlIHZhbHVlIG9mIGVhY2ggbiBieSB0aGlzIHN1bS4gVGhhdCB5aWVsZHMgdGhlIGZpbmFsIGZyZXF1ZW5jeSB0YWJsZS4KCkluc3RlYWQgb2YgY2FsY3VsYXRpbmcgZGVzY3JpcHRpdmUgc3RhdGlzdGljcyBvbmUgYXQgYSB0aW1lIHVzaW5nIHN1bW1hcml6ZSgpLCB5b3UgY2FuIG9idGFpbiBhIHNldCBvZiBzdW1tYXJ5IHN0YXRpc3RpY3MgZm9yIG9uZSBvciBhbGwgdGhlIG51bWVyaWMgdmFyaWFibGVzIGluIHlvdXIgZGF0YXNldCB1c2luZyB0aGUgc3VtbWFyeSgpIGZ1bmN0aW9uLgoKYGBge3J9CnN1bW1hcnkoY2Fjb3VudHkpCmBgYAoKXAoKIyMgVGFibGVzIGZvciBwcmVzZW50YXRpb24KClRoZSBvdXRwdXQgZnJvbSB0aGUgZGVzY3JpcHRpdmUgc3RhdGlzdGljcyB3ZeKAmXZlIHJhbiBzbyBmYXIgaXMgbm90IHByZXNlbnRhdGlvbiByZWFkeS4gRm9yIGV4YW1wbGUsIHRha2luZyBhIHNjcmVlbnNob3Qgb2YgdGhlIGZvbGxvd2luZyByZXN1bHRzIHRhYmxlIHByb2R1Y2VzIHVubmVjZXNzYXJ5IGluZm9ybWF0aW9uIHRoYXQgaXMgY29uZnVzaW5nIGFuZCBtZXNzeS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBncm91cF9ieShyZWdpb24pICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpLAogICAgICAgICAgICBNZWRpYW4gPSBtZWRpYW4obWhoaW5jKSwKICAgICAgICAgICAgU0QgPSBzZChtaGhpbmMpLAogICAgICAgICAgICBDb3JyZWxhdGlvbiA9IGNvcihtaGhpbmMsIHBoaXNwKSkKYGBgCgpGdXJ0aGVybW9yZSwgeW91IHdvdWxkIGxpa2UgdG8gc2hvdyBhIHRhYmxlLCBzYXksIGluIGEgU3RvcnkgTWFwIHRoYXQgZG9lcyBub3QgcmVxdWlyZSB5b3UgdG8gdGFrZSBhIHNjcmVlbnNob3Qgb3IgY29weWluZyBhbmQgcGFzdGluZyBpbnRvIEV4Y2VsLCBidXQgaW5zdGVhZCBjYW4gYmUgcHJvZHVjZWQgdmlhIGNvZGUsIHRoYXQgd2F5IGl0IGNhbiBiZSBmaXhlZCBpZiB0aGVyZSBpcyBhbiBpc3N1ZSwgYW5kIGlzIHJlcHJvZHVjaWJsZS4KCk9uZSB3YXkgb2YgcHJvZHVjaW5nIHByZXNlbnRhdGlvbiB0YWJsZXMgaW4gUiBpcyB0aHJvdWdoIHRoZSBmbGV4dGFibGUgcGFja2FnZS4gRmlyc3QsIHlvdSB3aWxsIG5lZWQgdG8gc2F2ZSB0aGUgdGliYmxlIG9yIGRhdGEgZnJhbWUgb2YgcmVzdWx0cyBpbnRvIGFuIG9iamVjdC4gRm9yIGV4YW1wbGUsIGxldOKAmXMgc2F2ZSB0aGUgYWJvdmUgcmVzdWx0cyBpbnRvIGFuIG9iamVjdCBuYW1lZCByZWdpb24uc3VtbWFyeQoKYGBge3J9CnJlZ2lvbi5zdW1tYXJ5IDwtIGNhY291bnR5ICU+JQogIGdyb3VwX2J5KHJlZ2lvbikgJT4lCiAgc3VtbWFyaXplKE1lYW4gPSBtZWFuKG1oaGluYyksCiAgICAgICAgICAgIE1lZGlhbiA9IG1lZGlhbihtaGhpbmMpLAogICAgICAgICAgICBTRCA9IHNkKG1oaGluYyksCiAgICAgICAgICAgIENvcnJlbGF0aW9uID0gY29yKG1oaGluYywgcGhpc3ApKQpgYGAKCllvdSB0aGVuIGlucHV0IHRoZSBvYmplY3QgaW50byB0aGUgZnVuY3Rpb24gZmxleHRhYmxlKCkuIFNhdmUgaXQgaW50byBhbiBvYmplY3QgY2FsbGVkIG15X3RhYmxlCgpgYGB7cn0KbXlfdGFibGUgPC0gZmxleHRhYmxlKHJlZ2lvbi5zdW1tYXJ5KQpgYGAKClwKCllvdSBzaG91bGQgc2VlIGEgcmVsYXRpdmVseSBjbGVhbiB0YWJsZSBwb3AgdXAgZWl0aGVyIGluIHlvdXIgY29uc29sZSBvciBWaWV3ZXIgd2luZG93LgoKXAoKV2hhdCBraW5kIG9mIG9iamVjdCBpcyAqbXlfdGFibGUqPwpgYGB7cn0KY2xhc3MobXlfdGFibGUpCmBgYAoKXAoKQWZ0ZXIgZG9pbmcgdGhpcywgd2UgY2FuIHByb2dyZXNzaXZlbHkgcGlwZSB0aGUgbXlfdGFibGUgb2JqZWN0IHRocm91Z2ggbW9yZSBmbGV4dGFibGUgZm9ybWF0dGluZyBmdW5jdGlvbnMuIEZvciBleGFtcGxlLCB5b3UgY2FuIGNoYW5nZSB0aGUgY29sdW1uIGhlYWRlciBuYW1lcyB1c2luZyB0aGUgZnVuY3Rpb24gc2V0X2hlYWRlcl9sYWJlbHMoKSBhbmQgY2VudGVyIHRoZSBoZWFkZXIgbmFtZXMgdXNpbmcgdGhlIGZ1bmN0aW9uIGFsaWduKCkuCgpgYGB7cn0KbXlfdGFibGUgPC0gbXlfdGFibGUgJT4lCiAgICAgICAgICBzZXRfaGVhZGVyX2xhYmVscygKICAgICAgICAgICAgcmVnaW9uID0gIlJlZ2lvbiIsCiAgICAgICAgICAgIE1lYW4gPSAiTWVhbiIsCiAgICAgICAgICAgIE1lZGlhbiA9ICJNZWRpYW4iLAogICAgICAgICAgICBTRCA9ICJTdGFuZGFyZCBEZXZpYXRpb24iLAogICAgICAgICAgICBDb3JyZWxhdGlvbiA9ICJDb3JyZWxhdGlvbiIpICU+JQogIGFsaWduKGFsaWduID0gImNlbnRlciIpCgpteV90YWJsZQpgYGAKCldlbGwgZG9lc24ndCB0aGF0IGxvb2sgc3BpZmZ5ISBUaGVyZSBhcmUgYSBzbGV3IG9mIG9wdGlvbnMgZm9yIGZvcm1hdHRpbmcgeW91ciB0YWJsZSwgaW5jbHVkaW5nIGFkZGluZyBmb290bm90ZXMsIGJvcmRlcnMsIHNoYWRlIGFuZCBvdGhlciBmZWF0dXJlcy4gQ2hlY2sgb3V0IHRoaXMgdXNlZnVsIHR1dG9yaWFsIGZvciBhbiBleHBsYW5hdGlvbiBvZiBzb21lIG9mIHRoZXNlIGZlYXR1cmVzLgoKT25jZSB5b3XigJlyZSBkb25lIGZvcm1hdHRpbmcgeW91ciB0YWJsZSwgeW91IGNhbiB0aGVuIGV4cG9ydCBpdCB0byBXb3JkLCBQb3dlclBvaW50IG9yIEhUTUwgb3IgYXMgYW4gaW1hZ2UgKFBORykgZmlsZXMuIFRvIGRvIHRoaXMsIHVzZSBvbmUgb2YgdGhlIGZvbGxvd2luZyBmdW5jdGlvbnM6IHNhdmVfYXNfZG9jeCgpLCBzYXZlX2FzX3BwdHgoKSwgc2F2ZV9hc19pbWFnZSgpLCBhbmQgc2F2ZV9hc19odG1sKCkuIAoKVXNlIHRoZSBzYXZlX2FzX2ltYWdlKCkgZnVuY3Rpb24gdG8gc2F2ZSB5b3VyIHRhYmxlIGFzIGFuIGltYWdlLgoKYGBge3J9CnNhdmVfYXNfaW1hZ2UobXlfdGFibGUsIHBhdGggPSAicmVnX2luY29tZS5wbmciKQpgYGAKCllvdSBmaXJzdCBwdXQgaW4gdGhlIHRhYmxlIG15X3RhYmxlLCBhbmQgc2V0IHRoZSBmaWxlIG5hbWUgd2l0aCB0aGUgcG5nIGV4dGVuc2lvbi4gQ2hlY2sgeW91ciB3b3JraW5nIGRpcmVjdG9yeS4gWW91IHNob3VsZCBzZWUgdGhlIGZpbGUgKnJlZ19pbmNvbWUucG5nKi4KClwKCiMjIERhdGEgdmlzdWFsaXphdGlvbgoKQW5vdGhlciB3YXkgb2Ygc3VtbWFyaXppbmcgdmFyaWFibGVzIGFuZCB0aGVpciByZWxhdGlvbnNoaXBzIGlzIHRocm91Z2ggZ3JhcGhzIGFuZCBjaGFydHMuIFRoZSBtYWluIHBhY2thZ2UgZm9yIFIgZ3JhcGhpbmcgaXMgKmdncGxvdDIqIHdoaWNoIGlzIGEgcGFydCBvZiB0aGUgKnRpZHl2ZXJzZSogcGFja2FnZS4gVGhlIGdyYXBoaW5nIGZ1bmN0aW9uIGlzIGBnZ3Bsb3QoKWAgYW5kIGl0IHRha2VzIG9uIHRoZSBiYXNpYyB0ZW1wbGF0ZQoKZ2dwbG90KGRhdGEgPSA8REFUQT4pICsKICAgICAgPEdFT01fRlVOQ1RJT04+KG1hcHBpbmcgPSBhZXMoeCwgeSkpICsKICAgICAgPE9QVElPTlM+KCkKCgoxLiBnZ3Bsb3QoKSBpcyB0aGUgYmFzZSBmdW5jdGlvbiB3aGVyZSB5b3Ugc3BlY2lmeSB5b3VyIGRhdGFzZXQgdXNpbmcgdGhlIGRhdGEgPSA8REFUQT4gYXJndW1lbnQuCjIuIFlvdSB0aGVuIG5lZWQgdG8gYnVpbGQgb24gdGhpcyBiYXNlIGJ5IHVzaW5nIHRoZSBwbHVzIG9wZXJhdG9yICsgYW5kIDxHRU9NX0ZVTkNUSU9OPigpIHdoZXJlIDxHRU9NX0ZVTkNUSU9OPigpIGlzIGEgdW5pcXVlIGdlb20gZnVuY3Rpb24gaW5kaWNhdGluZyB0aGUgdHlwZSBvZiBncmFwaCB5b3Ugd2FudCB0byBwbG90LiBFYWNoIHVuaXF1ZSBmdW5jdGlvbiBoYXMgaXRzIHVuaXF1ZSBzZXQgb2YgbWFwcGluZyBhcmd1bWVudHMgd2hpY2ggeW91IHNwZWNpZnkgdXNpbmcgdGhlIG1hcHBpbmcgPSBhZXMoKSBhcmd1bWVudC4gQ2hhcnRzIGFuZCBncmFwaHMgaGF2ZSBhbiB4LWF4aXMsIHktYXhpcywgb3IgYm90aC4gQ2hlY2sgdGhpcyBnZ3Bsb3QgY2hlYXQgc2hlZXQgZm9yIGFsbCBwb3NzaWJsZSBnZW9tcy4KMy4gYDxPUFRJT05TPigpYCBhcmUgYSBzZXQgb2YgZnVuY3Rpb25zIHlvdSBjYW4gc3BlY2lmeSB0byBjaGFuZ2UgdGhlIGxvb2sgb2YgdGhlIGdyYXBoLCBmb3IgZXhhbXBsZSByZWxhYmVsaW5nIHRoZSBheGVzIG9yIGFkZGluZyBhIHRpdGxlLgoKVGhlIGJhc2ljIGlkZWEgaXMgdGhhdCBhIGdncGxvdCBncmFwaGljIGxheWVycyBnZW9tZXRyaWMgb2JqZWN0cyAoY2lyY2xlcywgbGluZXMsIGV0YyksIHRoZW1lcywgYW5kIHNjYWxlcyBvbiB0b3Agb2YgZGF0YS4KCllvdSBmaXJzdCBzdGFydCBvdXQgd2l0aCB0aGUgYmFzZSBsYXllci4gSXQgcmVwcmVzZW50cyB0aGUgZW1wdHkgKmdncGxvdCogbGF5ZXIgZGVmaW5lZCBieSB0aGUgYGdncGxvdCgpYCBmdW5jdGlvbi4KYGBge3J9CmNhY291bnR5ICU+JQogIGdncGxvdCgpCmBgYAoKV2UgZ2V0IGFuIGVtcHR5IHBsb3QuIFdlIGhhdmVu4oCZdCB0b2xkIGdncGxvdCgpIHdoYXQgdHlwZSBvZiBnZW9tZXRyaWMgb2JqZWN0KHMpIHdlIHdhbnQgdG8gcGxvdCwgbm9yIGhvdyB0aGUgdmFyaWFibGVzIHNob3VsZCBiZSBtYXBwZWQgdG8gdGhlIGdlb21ldHJpYyBvYmplY3RzLCBzbyB3ZSBqdXN0IGhhdmUgYSBibGFuayBwbG90LiBXZSBoYXZlIGdlb21zIHRvIHBhaW50IHRoZSBibGFuayBjYW52YXMuCgpGcm9tIGhlcmUsIHdlIGFkZCBhIOKAnGdlb23igJ0gbGF5ZXIgdG8gdGhlIGdncGxvdCBvYmplY3QuIExheWVycyBhcmUgYWRkZWQgdG8gZ2dwbG90IG9iamVjdHMgdXNpbmcgKywgaW5zdGVhZCBvZiAlPiUsIHNpbmNlIHlvdSBhcmUgbm90IGV4cGxpY2l0bHkgcGlwaW5nIGFuIG9iamVjdCBpbnRvIGVhY2ggc3Vic2VxdWVudCBsYXllciwgYnV0IGFkZGluZyBsYXllcnMgb24gdG9wIG9mIG9uZSBhbm90aGVyLiBFYWNoIGdlb20gaXMgYXNzb2NpYXRlZCB3aXRoIGEgc3BlY2lmaWMgdHlwZSBvZiBncmFwaC4KCkxldOKAmXMgZ28gdGhyb3VnaCBzb21lIG9mIHRoZSBtb3JlIGNvbW1vbiBhbmQgcG9wdWxhciBncmFwaHMgZm9yIHZpc3VhbGl6aW5nIHlvdXIgZGF0YS4KClwKCiMjIyBIaXN0b2dyYW0KCkEgdHlwaWNhbCB2aXN1YWwgZm9yIHN1bW1hcml6aW5nIGEgc2luZ2xlIG51bWVyaWMgdmFyaWFibGUgaXMgYSBoaXN0b2dyYW0uIFRvIGNyZWF0ZSBhIGhpc3RvZ3JhbSwgdXNlIGdlb21faGlzdG9ncmFtKCkgZm9yIDxHRU9NX0ZVTkNUSU9OKCk+LiBMZXTigJlzIGNyZWF0ZSBhIGhpc3RvZ3JhbSBvZiBtZWRpYW4gaG91c2Vob2xkIGluY29tZS4gTm90ZSB0aGF0IHdlIGRvbuKAmXQgbmVlZCB0byBzcGVjaWZ5IHRoZSB5PSBoZXJlIGJlY2F1c2Ugd2UgYXJlIHBsb3R0aW5nIG9ubHkgb25lIHZhcmlhYmxlLiBXZSBwaXBlIGluIHRoZSBvYmplY3QgY2Fjb3VudHkgaW50byBnZ3Bsb3QoKSB0byBlc3RhYmxpc2ggdGhlIGJhc2UgbGF5ZXIuIFdlIHRoZW4gdXNlIGdlb21faGlzdG9ncmFtKCkgdG8gYWRkIHRoZSBkYXRhIGxheWVyIG9uIHRvcCBvZiB0aGUgYmFzZS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBnZ3Bsb3QoKSArIAogIGdlb21faGlzdG9ncmFtKG1hcHBpbmcgPSBhZXMoeD1taGhpbmMpKSAKYGBgCgpXZSBjYW4gY29udGludWUgdG8gYWRkIGxheWVycyB0byB0aGUgcGxvdC4gRm9yIGV4YW1wbGUsIHdlIHVzZSB0aGUgYXJndW1lbnQgeGxhYigiTWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUiKSB0byBsYWJlbCB0aGUgeC1heGlzIGFzIOKAnE1lZGlhbiBob3VzZWhvbGQgaW5jb21l4oCdLgoKYGBge3J9CmNhY291bnR5ICU+JQogIGdncGxvdCgpICsgCiAgZ2VvbV9oaXN0b2dyYW0obWFwcGluZyA9IGFlcyh4PW1oaGluYykpICsKICB4bGFiKCJNZWRpYW4gaG91c2Vob2xkIGluY29tZSIpCmBgYAoKTm90ZSB0aGUgbWVzc2FnZSBwcm9kdWNlZCB3aXRoIHRoZSBwbG90LiBJdCB0ZWxscyB1cyB0aGF0IHdlIGNhbiB1c2UgdGhlIGJpbnMgPSBhcmd1bWVudCB0byBjaGFuZ2UgdGhlIG51bWJlciBvZiBiaW5zIHVzZWQgdG8gcHJvZHVjZSB0aGUgaGlzdG9ncmFtLiBZb3UgY2FuIGluY3JlYXNlIHRoZSBudW1iZXIgb2YgYmlucyB0byBtYWtlIHRoZSBiaW5zIG5hcnJvd2VyIGFuZCB0aHVzIGdldCBhIGZpbmVyIGdyYWluIG9mIGRldGFpbC4gT3IgeW91IGNhbiBkZWNyZWFzZSB0aGUgbnVtYmVyIG9mIGJpbnMgdG8gZ2V0IGEgYnJvYWRlciB2aXN1YWwgc3VtbWFyeSBvZiB0aGUgc2hhcGUgb2YgdGhlIHZhcmlhYmxl4oCZcyBkaXN0cmlidXRpb24uIENvbXBhcmUgYmlucyA9IDEwIHRvIGJpbnMgPSA1MC4KCgojIyMgQm94cGxvdAoKV2UgY2FuIHVzZSBhIGJveHBsb3QgdG8gdmlzdWFsbHkgc3VtbWFyaXplIHRoZSBkaXN0cmlidXRpb24gb2YgYSBzaW5nbGUgbnVtZXJpYyB2YXJpYWJsZSBvciB0aGUgcmVsYXRpb25zaGlwIGJldHdlZW4gYSBjYXRlZ29yaWNhbCBhbmQgbnVtZXJpYyB2YXJpYWJsZS4gVXNlIGdlb21fYm94cGxvdCgpIGZvciA8R0VPTV9GVU5DVElPTigpPiB0byBjcmVhdGUgYSBib3hwbG90LiBMZXTigJlzIGV4YW1pbmUgbWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUuIE5vdGUgdGhhdCBhIGJveHBsb3QgdXNlcyB5PSByYXRoZXIgdGhhbiB4PSB0byBzcGVjaWZ5IHdoZXJlIG1oaGluYyBnb2VzLiBXZSBhbHNvIHByb3ZpZGUgYSBkZXNjcmlwdGl2ZSB5LWF4aXMgbGFiZWwgdXNpbmcgdGhlIHlsYWIoKSBmdW5jdGlvbi4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBnZ3Bsb3QoKSArCiAgICBnZW9tX2JveHBsb3QobWFwcGluZyA9IGFlcyh5ID0gbWhoaW5jKSkgKwogICAgeWxhYigiTWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUiKQpgYGAKCkxldOKAmXMgZXhhbWluZSB0aGUgZGlzdHJpYnV0aW9uIG9mIG1lZGlhbiBpbmNvbWUgYnkgbWhpc3AuIEJlY2F1c2Ugd2UgYXJlIGV4YW1pbmluZyB0aGUgYXNzb2NpYXRpb24gYmV0d2VlbiB0d28gdmFyaWFibGVzLCB3ZSBuZWVkIHRvIHNwZWNpZnkgeCBhbmQgeSB2YXJpYWJsZXMgaW4gYWVzKCkgKHdlIGFsc28gc3BlY2lmeSBib3RoIHgtIGFuZCB5LWF4aXMgbGFiZWxzKS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBnZ3Bsb3QoKSArCiAgICBnZW9tX2JveHBsb3QobWFwcGluZyA9IGFlcyh4ID0gbWhpc3AsIHkgPSBtaGhpbmMpKSArCiAgICB4bGFiKCJNYWpvcml0eSBIaXNwYW5pYyIpICsKICAgIHlsYWIoIk1lZGlhbiBob3VzZWhvbGQgaW5jb21lIikKYGBgCgpUaGUgdG9wIGFuZCBib3R0b20gb2YgYSBib3hwbG90IHJlcHJlc2VudCB0aGUgNzV0aCBhbmQgMjV0aCBwZXJjZW50aWxlcywgcmVzcGVjdGl2ZWx5LiBUaGUgbGluZSBpbiB0aGUgbWlkZGxlIG9mIHRoZSBib3ggaXMgdGhlIDUwdGggcGVyY2VudGlsZS4gUG9pbnRzIG91dHNpZGUgdGhlIHdoaXNrZXJzIHJlcHJlc2VudCBvdXRsaWVycy4gT3V0bGllcnMgYXJlIGRlZmluZWQgYXMgaGF2aW5nIHZhbHVlcyB0aGF0IGFyZSBlaXRoZXIgbGFyZ2VyIHRoYW4gdGhlIDc1dGggcGVyY2VudGlsZSBwbHVzIDEuNSB0aW1lcyB0aGUgSVFSIG9yIHNtYWxsZXIgdGhhbiB0aGUgMjV0aCBwZXJjZW50aWxlIG1pbnVzIDEuNSB0aW1lcyB0aGUgSVFSLgoKVGhlIGJveHBsb3QgaXMgZm9yIGFsbCBjb3VudGllcyBjb21iaW5lZC4gVXNlIHRoZSBmYWNldF93cmFwKCkgZnVuY3Rpb24gdG8gc2VwYXJhdGUgYnkgcmVnaW9uLiBOb3RpY2UgdGhlIHRpbGRlIH4gYmVmb3JlIHRoZSB2YXJpYWJsZSByZWdpb24gaW5zaWRlIGZhY2V0X3dyYXAoKS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBnZ3Bsb3QoKSArCiAgICBnZW9tX2JveHBsb3QobWFwcGluZyA9IGFlcyh4ID0gbWhpc3AsIHkgPSBtaGhpbmMpKSArCiAgICB4bGFiKCJNYWpvcml0eSBIaXNwYW5pYyIpICsKICAgIHlsYWIoIk1lZGlhbiBob3VzZWhvbGQgaW5jb21lIikgKwogICAgZmFjZXRfd3JhcCh+cmVnaW9uKSAKYGBgCgpcCgojIyMgQmFyIGNoYXJ0CgpUaGUgcHJpbWFyeSBwdXJwb3NlIG9mIGEgYmFyIGNoYXJ0IGlzIHRvIGlsbHVzdHJhdGUgYW5kIGNvbXBhcmUgdGhlIHZhbHVlcyBmb3IgYSBjYXRlZ29yaWNhbCB2YXJpYWJsZS4gQmFyIGNoYXJ0cyBzaG93IGVpdGhlciB0aGUgbnVtYmVyIG9yIGZyZXF1ZW5jeSBvZiBlYWNoIGNhdGVnb3J5LiBUbyBjcmVhdGUgYSBiYXIgY2hhcnQsIHVzZSBnZW9tX2JhcigpIGZvciA8R0VPTV9GVU5DVElPTj4oKS4gTGV04oCZcyBzaG93IGEgYmFyIGNoYXJ0IG9mIG1lZGlhbiBob3VzZWhvbGQgaW5jb21lIGJ5IHJlZ2lvbi4gV2XigJlsbCBib3Jyb3cgZnJvbSBjb2RlIGFib3ZlIHRoYXQgZ2VuZXJhdGVkIGEgdGliYmxlIG9mIG1lYW4gaG91c2Vob2xkIGluY29tZSBieSByZWdpb24sIGFuZCBwaXBlIHRoYXQgaW50byBnZ3Bsb3QoKS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBncm91cF9ieShyZWdpb24pICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpKSAlPiUKICBnZ3Bsb3QoYWVzKHg9cmVnaW9uLCB5ID0gTWVhbikpICsKICBnZW9tX2JhcihzdGF0ID0gIklkZW50aXR5IikgKwogIHhsYWIoIlJlZ2lvbiIpICsKICB5bGFiKCJBdmVyYWdlIGhvdXNlaG9sZCBpbmNvbWUiKQpgYGAKClJpZ2h0IG5vdyB0aGUgYmFycyBhcmUgb3JkZXJlZCBiYXNlZCBvbiB0aGUgcmVnaW9uIG5hbWVzLiBXZSBjYW4gb3JkZXIgdGhlIGJhcnMgaW4gZGVzY2VuZGluZyBvcmRlciBiYXNlZCBvbiBob3VzZWhvbGQgaW5jb21lIGJ5IHVzaW5nIHRoZSByZW9yZGVyKCkgZnVuY3Rpb24uIE5vdGljZSB0aGUgbmVnYXRpdmUgc2lnbiBpbiBmcm9udCBvZiBNZWFuIHRvIG9yZGVyIGJ5IGRlc2NlbmRpbmcgb3JkZXIuCgpgYGB7cn0KY2Fjb3VudHkgJT4lCiAgZ3JvdXBfYnkocmVnaW9uKSAlPiUKICBzdW1tYXJpemUoTWVhbiA9IG1lYW4obWhoaW5jKSkgJT4lCiAgZ2dwbG90KGFlcyh4PXJlb3JkZXIocmVnaW9uLCAtTWVhbiksIHkgPSBNZWFuKSkgKwogIGdlb21fYmFyKHN0YXQgPSAiSWRlbnRpdHkiKSArCiAgeGxhYigiUmVnaW9uIikgKwogIHlsYWIoIkF2ZXJhZ2UgaG91c2Vob2xkIGluY29tZSIpCmBgYAoKXAoKV2UgY2FuIGZsaXAgdGhlIGF4ZXMgdXNpbmcgdGhlIGZ1bmN0aW9uIGNvb3JkX2ZsaXAoKS4KCmBgYHtyfQpjYWNvdW50eSAlPiUKICBncm91cF9ieShyZWdpb24pICU+JQogIHN1bW1hcml6ZShNZWFuID0gbWVhbihtaGhpbmMpKSAlPiUKICBnZ3Bsb3QoYWVzKHg9cmVvcmRlcihyZWdpb24sIC1NZWFuKSwgeSA9IE1lYW4pKSArCiAgZ2VvbV9iYXIoc3RhdCA9ICJJZGVudGl0eSIpICsKICB4bGFiKCJSZWdpb24iKSArCiAgeWxhYigiQXZlcmFnZSBob3VzZWhvbGQgaW5jb21lIikgKwogIGNvb3JkX2ZsaXAoKQpgYGAKClwKCmdncGxvdCgpIGlzIGEgcG93ZXJmdWwgZnVuY3Rpb24sIGFuZCB5b3UgY2FuIG1ha2UgYSBsb3Qgb2YgdmlzdWFsbHkgY2FwdGl2YXRpbmcgZ3JhcGhzLiBXZSBoYXZlIGp1c3Qgc2NyYXRjaGVkIHRoZSBzdXJmYWNlIG9mIGl0cyBmdW5jdGlvbnMgYW5kIGZlYXR1cmVzLiBZb3UgY2FuIGFsc28gbWFrZSB5b3VyIGdyYXBocyByZWFsbHkg4oCccHJldHR54oCdIGFuZCBwcm9mZXNzaW9uYWwgbG9va2luZyBieSBhbHRlcmluZyBncmFwaGluZyBmZWF0dXJlcywgaW5jbHVkaW5nIGNvbG9ycywgbGFiZWxzLCB0aXRsZXMgYW5kIGF4ZXMuIEZvciBhIGxpc3Qgb2YgZ2dwbG90KCkgZnVuY3Rpb25zIHRoYXQgYWx0ZXIgdmFyaW91cyBmZWF0dXJlcyBvZiBhIGdyYXBoLCBjaGVjayBvdXQgQ2hhcHRlciAyOCBpbiBSRFMuCgpIZXJl4oCZcyB5b3VyIGdncGxvdDIgYmFkZ2UuIFdlYXIgaXQgd2l0aCBwcmlkZSEKIVtnZ3Bsb3QyIEJhZGdlXShnZ3Bsb3QyLnBuZykKCgpcCgojIE90aGVyIFVTIEdvdmVybm1lbnQgZGF0YXNldHMKCkNoZWNrIG91dCB0aGUgW0RhdGEgU291cmNlc10oT3RoZXIuaHRtbCkgbGluayBmb3IgbW9yZSBsaW5rcyB0byBVUyBHb3Zlcm5tZW50IERhdGEKCiMgQWNrbm93bGVkZ2VtZW50cwoKTWFqb3IgYWNrbm93bGVkZ2VtZW50cyB0byBOb2xpIEJyYXppbCAoYXMgYWx3YXlzKSBhbmQgW0NyaW1lIGJ5IHRoZSBOdW1iZXJzXShodHRwczovL2NyaW1lYnl0aGVudW1iZXJzLmNvbS9nZW9jb2RpbmcuaHRtbCkuIAoKCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab2.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

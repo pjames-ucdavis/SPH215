@@ -9,21 +9,21 @@ navbar:
       menu:
         - text: "Lab 1: Intro to R"
           href: lab1.html
-        - text: "Lab 2: "
+        - text: "Lab 2: Geocoding, Vector Data, and Census Data "
           href: lab2.html
-        - text: "Lab 3: "
+        - text: "Lab 3: Polygons and Rasters"
           href: lab3.html
-        - text: "Lab 4: "
+        - text: "Lab 4: Spatial Data Processing with Vector Data"
           href: lab4.html
-        - text: "Lab 5: "
+        - text: "Lab 5: Spatial Data Processing with Vector and Raster Data"
           href: lab5.html
-        - text: "Lab 6: "
+        - text: "Lab 6: Network Analysis"
           href: lab6.html
-        - text: "Lab 7: "
+        - text: "Lab 7: Spatial Statistics"
           href: lab7.html
-        - text: "Lab 8: "
+        - text: "Lab 8: Geographically Weighted Regression"
           href: lab8.html
-        - text: "Lab 9: "
+        - text: "Lab 9: Future Directions in GIS and Public Health"
           href: lab9.html
     - text: "Assignment Guide"
       href: Assignments.html
