@@ -12,19 +12,19 @@ navbar:
         - text: "Lab 2: Geocoding, Vector Data, and Census Data "
           href: Lab2.html
         - text: "Lab 3: Polygons and Rasters"
-          href: lab3.html
+          href: Lab3.html
         - text: "Lab 4: Spatial Data Processing with Vector Data"
-          href: lab4.html
+          href: Lab4.html
         - text: "Lab 5: Spatial Data Processing with Vector and Raster Data"
-          href: lab5.html
+          href: Lab5.html
         - text: "Lab 6: Network Analysis"
-          href: lab6.html
+          href: Lab6.html
         - text: "Lab 7: Spatial Statistics"
-          href: lab7.html
+          href: Lab7.html
         - text: "Lab 8: Geographically Weighted Regression"
-          href: lab8.html
+          href: Lab8.html
         - text: "Lab 9: Future Directions in GIS and Public Health"
-          href: lab9.html
+          href: Lab9.html
     - text: "Assignment Guide"
       href: Assignments.html
     - text: "Data Sources"
