@@ -16,7 +16,7 @@ The objectives of the guide are as follows
 - Understand R functions
 - Introduction to tidyverse and its suite of data wrangling functions
 - Understand R Markdown
-- This lab guide follows closely and supplements the material presented in Chapters 2, 4, 5, 7 and 21 in the textbook [R for Data Science (RDS)](http://r4ds.had.co.nz/index.html).
+- This lab guide follows closely and supplements the material presented in Chapters 2, 4, 5, 7 and 21 in the textbook [R for Data Science (RDS)](https://r4ds.hadley.nz/).
 
 \
 
