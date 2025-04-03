@@ -591,11 +591,11 @@ my_table <- my_table %>%
 my_table
 ```
 
-Well doesn't that look spiffy! There are a slew of options for formatting your table, including adding footnotes, borders, shade and other features. Check out this useful tutorial for an explanation of some of these features.
+Well doesn't that look spiffy! There are a slew of options for formatting your table, including adding footnotes, borders, shade and other features. Check out this [useful tutorial](https://ardata-fr.github.io/flextable-book/) for an explanation of some of these features.
 
-Once you’re done formatting your table, you can then export it to Word, PowerPoint or HTML or as an image (PNG) files. To do this, use one of the following functions: save_as_docx(), save_as_pptx(), save_as_image(), and save_as_html(). 
+Once you’re done formatting your table, you can then export it to Word, PowerPoint or HTML or as an image (PNG) files. To do this, use one of the following functions: `save_as_docx()`, `save_as_pptx()`, `save_as_image()`, and `save_as_html()`. 
 
-Use the save_as_image() function to save your table as an image.
+Use the `save_as_image()` function to save your table as an image.
 
 ```{r}
 save_as_image(my_table, path = "reg_income.png")
@@ -741,7 +741,7 @@ Here’s your ggplot2 badge. Wear it with pride!
 
 \
 
-![ggplot2 Badge](ggplot2.png)
+![ggplot2 Badge](ggplot2.png){width=20%, height=20%}
 
 
 \
@@ -749,6 +749,8 @@ Here’s your ggplot2 badge. Wear it with pride!
 # Other US Government datasets
 
 Check out the [Data Sources](Other.html) link for more links to US Government Data
+
+\
 
 # Acknowledgements
 

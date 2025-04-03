@@ -25,6 +25,8 @@ Below you will find links to data sources that contain spatial data and health d
 
 - [Institute for Health Metrics and Evaluation](https://www.healthdata.org/data-tools-practices/data-sources) An independent population health research organization based at the University of Washington School of Medicine, the Institute for Health Metrics and Evaluation (IHME) works with collaborators around the world to develop timely, relevant, and scientifically valid evidence that illuminates the state of health everywhere. They develop numerous metrics, including the Global Burden of Disease metrics.
 
+- [UCSF Health Atlas](https://healthatlas.ucsf.edu/) An incredible resource from our colleagues at UCSF. Health Atlas is an interactive mapping website to explore neighborhood-level characteristics and see how they relate at a population level. The project was initiated by UCSF Population Health and Health Equity and led by the Population Health Data Initiative. 
+
 \
 
 # Other Types of Health-Adjacent Data
