@@ -73,9 +73,9 @@ Now, where do you write this command? You write it in a script. A script is basi
 I am skipping over many details, but the above steps outline the general work flow. You might now be thinking that you’re perfectly happy pointing and clicking your mouse in Excel (or wherever) to do your data analysis tasks. So, why should you adopt the statistical programming approach to conducting a data analysis?
 
 1. Your script documents the decisions you made during the data analysis process. This is beneficial for many reasons.
-- It allows you to recreate your steps if you need to rerun or alter your analysis many weeks, months, or even years in the future.
-- It allows you to share your steps with other people. If someone asks you what were the decisions made in the data analysis process, - just hand them the script.
-- Related to the above points, a script promotes **transparency** (here is what I did) and **reproducibility** (you can do it too). When you write code, you are forced to explicitly state the steps you took to do your research. When you do research by clicking through drop-down menus, your steps are lost, or at least documenting them requires considerable extra effort.
+  - It allows you to recreate your steps if you need to rerun or alter your analysis many weeks, months, or even years in the future.
+  - It allows you to share your steps with other people. If someone asks you what were the decisions made in the data analysis process, - just hand them the script.
+  - Related to the above points, a script promotes **transparency** (here is what I did) and **reproducibility** (you can do it too). When you write code, you are forced to explicitly state the steps you took to do your research. When you do research by clicking through drop-down menus, your steps are lost, or at least documenting them requires considerable extra effort.
 2. If you make a mistake in a data analysis step, you can go back, change a few lines of code, and **poof**, you’ve fixed your problem.
 3. It is more efficient. In particular, cleaning data can encompass a lot of tedious work that can be streamlined using statistical programming.
 
