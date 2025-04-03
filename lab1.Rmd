@@ -42,12 +42,11 @@ The next question you may have is “I love Excel [or insert your favorite progr
 
 R is different from Excel in that it is generally not a point-and-click program. You will be primarily writing code to clean and analyze data. What does *writing* or *sourcing* code mean? A basic example will help clarify. Let’s say you are given a dataset with cancer cases across CA. You have a variable in the dataset representing age Let’s say this variable is named **AGE**. To get the mean age of the people in your dataset, you would write code that would look something like this
 
-```{r, echo=FALSE}
-download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
-```
-
 
 ```{r}
+#Download Cancer Dataset
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+
 #Read in Cancer Dataset
 cancer <- readRDS("ca_cancer.rds")
 
@@ -119,7 +118,8 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 If you click on the R program you just downloaded, you will find a very basic user interface. For example, below is what I get on a Mac:
 
 ![The Basic R Console](R_basic.png)
-/
+
+\
 
 We will not use R’s direct interface to run analyses in this class. Instead, we will use the program **RStudio**, which is much easier to interact with! RStudio gives you a true integrated development environment (IDE), where you can write code in a window, see results in other windows, see locations of files, see objects you’ve created, and so on. To clarify which is which: R is the name of the programming language itself and RStudio is an interface that makes writing code, running analyses, and visualizing data in R so much easier.
 
@@ -141,8 +141,7 @@ Open up RStudio. You should see the interface shown in the figure below which ha
 
 ![The RStudio Console](RStudio_image.png)
 
-/
-
+\
 
 - **Console** (bottom left) - The way R works is you write a line of code to execute some kind of task on a data object. - The R Console allows you to run code interactively. The screen prompt `>` is an invitation from R to enter its - world. This is where you type code in, press enter to execute the code, and see the results.
 - **Environment, History, and Connections tabs** (upper-right)
@@ -165,13 +164,13 @@ There is also a fourth window. But, we’ll get to this window a little later. T
 While not required, I strongly suggest that you change preferences in RStudio to never save the workspace so you always open with a clean environment. See [Ch. 8.1](https://r4ds.had.co.nz/workflow-projects.html#what-is-real) of R4DS for some more background
 
 1. From the Tools menu on RStudio, open the Tools menu and then select Global Options.
-1. If not already highlighted, click on the General button from the left panel.
-1. Uncheck the following Restore boxes
+2. If not already highlighted, click on the General button from the left panel.
+3. Uncheck the following Restore boxes
   - Restore most recently opened project at startup
   - Restore previously open source documents at startup
   - Restore .RData into workspace at startup
-1. Set Save Workspace to .RData on exit to Never
-1. Click OK at the bottom to save the changes and close the preferences window. You may need to restart RStudio.
+4. Set Save Workspace to .RData on exit to Never
+5. Click OK at the bottom to save the changes and close the preferences window. You may need to restart RStudio.
 
 The reason for making these changes is that it is preferable for reproducibility to start each R session with a clean environment. You can restore a previous environment either by rerunning code or by manually loading a previously saved session.
 
@@ -282,26 +281,26 @@ b
 
 You can pronounce the above as “b becomes ‘hello world’”.
 
-The first line tells R to store b as 'hello world. In the next line, we are telling R to print what b is.
+The first line tells R to store b as 'hello world.' In the next line, we are telling R to print what b is.
 
 Note that R is case sensitive, if you type in *B* instead of *b*, you will get an error.
 
-Similarly, you can save the numbers 4, 16 and 9 into a vector called v1
+Similarly, you can save the numbers 4, 16 and 9 into a vector called *v1*.
 
 ```{r}
 v1 <- c(4, 16, 9)
 v1
 ```
 
-/
+\
 
-You should see the objects b and v1 pop up in the Environment tab on the top right window of your RStudio interface.
+You should see the objects *b* and *v1* pop up in the Environment tab on the top right window of your RStudio interface.
 
-/
+\
 
 ![Environment Window](lab0fig.png)
 
-/
+\
 
 Note that the name *v1* is nothing special here. You could have named the object *x* or *sph215* or your pet’s name (mine was Ali Baba). You can’t, however, name objects using special characters (e.g. !, @, $) or only numbers (although you can combine numbers and letters, but a number cannot be at the beginning e.g. *2d2*). For example, you’ll get an error if you save the vector *c(4,16,9)* to an object with the following names
 
@@ -350,6 +349,8 @@ typeof(v1)
 
 Note that a vector cannot hold values of different types. If different data types exist, R will coerce the values into the highest type based on its internal hierarchy: logical < integer < double < character. Type in `test <- c("r", 6, TRUE)` in your R console. What is the vector type of `test`?
 
+\
+
 The command `length()` determines the number of data values that the vector is storing.
 
 ```{r}
@@ -369,6 +370,8 @@ is.numeric(b)
 ```{r}
 is.numeric(v1)
 ```
+
+\
 
 There is also `is.logical()`, `is.character()`, and `is.factor()`. You can also coerce a vector of one data type to another. For example, save the value “1” and “2” (both in quotes) into a vector named *x1*.
 ```{r}
@@ -394,6 +397,8 @@ rm(x2)
 ```
 
 The data frame object *x2* should have disappeared from the Environment tab. Au revoir! 
+
+\
 
 Also note that when you close down R Studio, the objects you created above will disappear for good. Unless you save them onto your hard drive (we’ll touch on saving data in later labs), all data objects you create in your current R session will go bye bye when you exit the program.
 
@@ -488,7 +493,7 @@ OK, so that wasn't too hard. Now let's try something a little trickier! What is 
 df1[2,1]
 ```
 
-See--we can do hard things!
+See -- we can do hard things!
 
 \
 
@@ -552,13 +557,19 @@ The only packages loaded into my current session is **methods**, a package that 
 
 Let's load **matrixStats** using `library()`, and then we will see a check mark appears next to **matrixStats**.
 
+```{r}
+install.packages("matrixStats")
+library(matrixStats)
+```
+
+
 \
 
 Look at us!
 
 To uninstall a package, use the function `remove.packages()`.
 
-**Note that you only need to install packages once `(install.packages()`, but you need to load them each time you relaunch RStudio `(library()`.** Repeat after me: Install once, library every time. If you need to reinstall R or update to a new version of R, you will need to reinstall all packages. And as noted earlier, R has several packages already preloaded into your working environment. These are known as **base** packages and a list of their functions can be found [here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html). 
+**Note that you only need to install packages once with `install.packages()`, but you need to load them each time you relaunch RStudio with `library()`.** Repeat after me: Install once, library every time. If you need to reinstall R or update to a new version of R, you will need to reinstall all packages. And as noted earlier, R has several packages already preloaded into your working environment. These are known as **base** packages and a list of their functions can be found [here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html). 
 
 \
 
@@ -624,7 +635,7 @@ nycdf
 
 \
 
-Um, that was a lot... Tibble is much cleaner. You can bring up the Excel like worksheet of the tibble (or data frame) using the `View()` function.
+Um, that was a lot....Tibble is much cleaner. You can bring up the Excel like worksheet of the tibble (or data frame) using the `View()` function.
 ```{r}
 View(nyctibble)
 ```
@@ -637,14 +648,15 @@ names(nyctibble)
 ```
 Those may come in handy if we wanted to analyze the data!
 
+\
+
 Finally, let's convert a regular data frame to a tibble using the `as_tibble()` function.
 
 ```{r}
 as_tibble(nycdf)
 ```
 
-Not all functions work with tibbles, particularly those that are specific to spatial data. As such, we’ll be using a combination of tibbles and regular data frames throughout the class, with a preference towards tibbles where possible. Note that when you search on Google for how to do something in R, you will likely get **
-non-tidy ways* of doing things. Most of these suggestions are fine, but some are not and may screw you up down the road. My advice is to try to stick with tidy functions to do things in R.
+Not all functions work with tibbles, particularly those that are specific to spatial data. As such, we’ll be using a combination of tibbles and regular data frames throughout the class, with a preference towards tibbles where possible. Note that when you search on Google for how to do something in R, you will likely get **non-tidy ways** of doing things. Most of these suggestions are fine, but some are not and may screw you up down the road. My advice is to try to stick with tidy functions to do things in R.
 
 Anyway, you earned another badge. Yes!
 
@@ -703,6 +715,9 @@ More often than you think, you will encounter a column / variable with a name th
 ```{r}
 names(ca1)
 ```
+
+\
+
 The name *Estimated median income of a household, between 2014-2018.* is a doozy! Just a little long. Use the command `rename()` to - you guessed it - rename a variable! Let’s rename *Estimated median income of a household, between 2014-2018.* to *medinc*.
 
 ```{r}
@@ -792,7 +807,7 @@ mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE,
 
 \
 
-Note that you can create new variables based on the variables you just created in the same line of code. For example, you can create a categorical variable yielding “Majority” if the tract is majority Hispanic and “Not Majority” otherwise after creating the percent Hispanic variable within the same `mutate()` command. Let’s save these changes back into *ca2*.
+Note that you can create new variables based on the variables you just created in the same line of code. For example, you can create a categorical variable called *mhisp* yielding “Majority” if the tract is majority Hispanic and “Not Majority” otherwise after creating the percent Hispanic variable *phisp* within the same `mutate()` command. Let’s save these changes back into *ca2*.
 
 ```{r}
 ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
@@ -801,7 +816,7 @@ ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE,
                                 TRUE ~ "Not Majority"))
 ```
 
-We used the function case_when() to create mhisp - the function tells R that if the condition phisp > 0.5 is met, the tract’s value for the variable mhisp will be “Majority”, otherwise (designated by TRUE) it will be “Not Majority”.
+We used the function `case_when()` to create *mhisp* - the function tells R that if the condition *phisp* > 0.5 is met, the tract’s value for the variable *mhisp* will be “Majority”, otherwise (designated by `TRUE`) it will be “Not Majority”.
 
 Take a look at our data. Pay attention to *phisp* and *mhisp*. Did our calculation work?
 
@@ -944,16 +959,21 @@ Here are a few practice questions. You don’t need to submit these, but it’s 
   a. [1] 0 0 0 0 0
   a. [1] 1 2 3 1 2 3 1 2 3 1 2 3
   a. [1] 4 5 5 6 6 6
-1. Explain what is the problem in each line of code below. Fix the code so it will run properly.
+  
+2. Explain what is the problem in each line of code below. Fix the code so it will run properly.
   a. my variable <- 3
   b. seq(1, 10 by = 2)
   c. Library(cars)
-1. Look up the help documentation for the function `cut()`.
+
+3. Look up the help documentation for the function `cut()`.
   a. Describe the purpose of this function. What kind of data type(s) does this function accept? Which arguments/options are required? Which arguments are not required and what are their default value(s)?
   b. Create an example vector and use the `cut()` function on it. Explain your results.
-1. Load the *mtcars* dataset by using the code `data(mtcars)`. Find the minimum, mean, median and maximum of the variable *mpg* in the *mtcars* dataset using just one line of code. We have not covered a function that does this yet, so the main point 1. of this question is to get you used to using the resources you have available to find an answer. Describe the process 1. you used (searched online? use the class textbook?) to find the answer.
-1. Look up the functions `arrange()` and `relocate()`. Input the variable *phisp* from *cacounty* in each function. What are the functions doing?
-1. Use the function `bind_rows()` to create a new dataset called *cacounty_brows* that combines *ca1* and *ca2*. Describe the structure of this new dataset. Do the same for the function `bind_cols()` (name the new dataset *cacounty_bcols*). How is `bind_cols()` different from `left_join()`?
+
+4. Load the *mtcars* dataset by using the code `data(mtcars)`. Find the minimum, mean, median and maximum of the variable *mpg* in the *mtcars* dataset using just one line of code. We have not covered a function that does this yet, so the main point 1. of this question is to get you used to using the resources you have available to find an answer. Describe the process you used (searched online? used the class textbook?) to find the answer.
+
+5. Look up the functions `arrange()` and `relocate()`. Input the variable *phisp* from *cacounty* in each function. What are the functions doing?
+
+6. Use the function `bind_rows()` to create a new dataset called *cacounty_brows* that combines *ca1* and *ca2*. Describe the structure of this new dataset. Do the same for the function `bind_cols()` (name the new dataset *cacounty_bcols*). How is `bind_cols()` different from `left_join()`?
 
 \
 
