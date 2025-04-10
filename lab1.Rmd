@@ -860,6 +860,8 @@ Let’s use `select()` to keep the necessary variables.
 cacounty <- select(cacounty, GEOID, County, pwhite, pasian, pblack, phisp, mhisp, medinc)
 ```
 
+\
+
 ## Filtering
 
 Filtering means selecting rows/observations based on their values. To filter in R, use the command `filter()`. Visually, filtering rows looks like.
