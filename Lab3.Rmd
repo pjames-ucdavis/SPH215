@@ -145,18 +145,151 @@ We won’t go through all of these functions as the list is quite extensive. But
 
 ## Intersect
 
-A common spatial data wrangling issue is to subset a set of spatial objects based on their location relative to another spatial object. In our case, we want to keep California tracts that are in the Sacramento metro area. We can do this using the `st_join()` function. We’ll need to specify a type of join. Let’s first try `join = st_intersects`.
+A common spatial data wrangling issue is to subset a set of spatial objects based on their location relative to another spatial object. In our case, we want to keep California tracts that are in the Sacramento metro area. We can do this using the `st_join()` function. We’ll need to specify a type of join. Let’s first try `join = st_intersects`. First, let's bring in a polygon of the Sacramento metro area from Github.
 
 ```{r}
-
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds"
+download.file(url, destfile = "sac.metro.rds", mode = "wb")
+sac.metro <- readRDS("sac.metro.rds")
 ```
 
+\
+
+Let's take a look at *sac.metro* and understand what file it is.
+
+```{r}
+glimpse(sac.metro)
+```
+
+\
+
+OK, that geometry looks good. And it's a polygon, so that's good. Let's now try to intersect our *sac.metro* dataset with our *ca.tracts* dataset. 
+
+```{r}
+sac.metro.tracts.int <- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)
+```
+
+\
+
+The above code tells R to identify the polygons in *ca.tracts* that intersect with the polygon *sac.metro*. We indicate we want a polygon intersection by specifying `join = st_intersects`. The option `left=FALSE` tells R to remove the polygons from *ca.tracts* that do not intersect (make it TRUE and see what happens) with *sac.metro*. Plotting our tracts, we get:
+```{r}
+tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +  
+  tm_borders(col = "red")
+```
+
+\
+
+## Within
+
+We have one small issue. Using `join = st_intersects` returns all tracts that intersect *sac.metro*, which include those that touch the metro’s boundary. No bueno. We can instead use the argument `join = st_within` to return tracts that are *completely within* the metro area.
+
+```{r}
+sac.metro.tracts.w <- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +
+  tm_borders(col = "red")
+```
+
+\
+
+Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table, you’ll see it includes all the variables from both *ca.tracts* and *sac.metro*. We don’t need these variables, so use `select()` to eliminate them. You’ll also notice that if variables from two data sets share the same name, R will keep both and attach a *.x* and *.y* to the end. For example, I was found in both *ca.tracts* and *sac.metro*, so R named one *GEOID.x* and the other that was merged in was named *GEOID.y*.
+
+\
 
 # Mapping in R
 
-## ggplot
+OK, so now we've talked a little about how to bring in and manipulate vector polygon data, let's do some mapping and create some choropleth maps. We can do this with the **ggplot** package, the **tmap** package, and the **leaflet** package (which we won't cover now, but it's very cool for interactive maps). Let's start with **ggplot**.
+
+## Choropleth maps in ggplot
+
+Because **sf** is tidy friendly, it is no surprise we can use the **tidyverse** plotting function `ggplot()` to make maps. We already received an introduction to `ggplot()` in [Lab 2](lab2.html). Recall its basic structure:
+
+```{r, eval=FALSE}
+ggplot(data = <DATA>) +
+      <GEOM_FUNCTION>(mapping = aes(x, y)) +
+      <OPTIONS>()
+```
+
+\
+
+In mapping, `geom_sf()` is `<GEOM_FUNCTION>()`. Unlike with functions like `geom_histogram()` and `geom_boxplot()`, we don’t specify an x and y axis. Instead you use `fill` if you want to map a variable or color to just map boundaries.
+
+Let’s use `ggplot()` to make a choropleth map. We need to specify a numeric variable in the `fill =` argument within `geom_sf()`. Here we map tract-level median household income in the Sacramento metro area.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))
+```
+
+\
+
+We can also specify a title (as well as subtitles and captions) using the `labs()` function.
+
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = "Median Income Sacramento MSA Tracts") 
+```
+
+\
+
+We can make further layout adjustments to the map. Don’t like a blue scale on the legend? You can change it using the `scale_file_gradient()` function. Let’s change it to a white to red gradient. We can also eliminate the gray tract border colors to make the fill color distinction clearer. We do this by specifying `color = NA` inside `geom_sf()`. We can also get rid of the gray background by specifying a basic black and white theme using `theme_bw()`. We also added a caption indicating the source of the data using the `captions =` parameter within `labs()`. We then changed the color to red using labels for `low=` and `high=`, and we added a name to our legend with `name='.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+    labs(title = "Median Income Sacramento MSA Tracts",
+         caption = "Source: American Community Survey") +  
+  theme_bw()
+```
+Dare I say, we are ready for the New York Times with this map!
+
+\
+
+## Points on top of polygons
+
+OK, now that we have mapped points and mapped polygons, let's put them both together!
+
+
+# FINALIZE
+
 ## tmap
-### Choropleth map
+
+Whether you prefer **tmap** or **ggplot** is up to you, but I find that **tmap** has some benefits, so let’s focus on its mapping functions next.
+
+**tmap** uses the same layered logic as **ggplot**. As we saw last week, the initial command is `tm_shape()`, which specifies the geography to which the mapping is applied. You then build on `tm_shape()` by adding one or more elements such as `tm_polygons()` for polygons, `tm_borders()` for lines, and `tm_dots()` for points. All additional functions take on the form of `tm_`. Check the full list of `tm_` elements [here](https://www.rdocumentation.org/packages/tmap/versions/2.0/topics/tmap-element).
+
+### Choropleth maps in tmap
+
+Let’s make a static choropleth map of median household income in Sacramento MSA just like we did above, but this time in **tmap**.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile")
+```
+
+\
+
+We first put the dataset *sac.metro.tracts.w* inside `tm_shape()`. Because you are plotting polygons, you use `tm_polygons()` next. The argument `col = "medincE"` tells R to shade (or color) the tracts by the variable *medincE.* The argument `style = "quantile"` tells R to break up the shading into quantiles, or equal groups of 5 as a default. I find that this is where **tmap** offers a distinct advantage over **ggplot** in that users have greater control over the legend and bin breaks. **tmap** allows users to specify algorithms to automatically create breaks with the style argument. You can also change the number of breaks by setting `n=`. The default is `n=5`. Rather than quintiles, you can show quartiles using `n=4`. I'm feeling crazy. Let's do it.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",  n=4)
+```
+
+\
+
+Check out [this link](https://geocompr.robinlovelace.net/adv-map.html#color-settings) for more on  available classification styles in **tmap**.
+
+You can overlay multiple features on one map. For example, we can add park polygons on top of tracts, providing a visual association between parks and percent white. You will need to add two `tm_shape()` functions each for *sac.metro.tracts.w* and *parks*.
+
 ### Color scheme
 ### Legend
 ### Title
