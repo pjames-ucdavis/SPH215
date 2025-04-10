@@ -412,7 +412,7 @@ class(ca$GEOID)
 
 ## Piping
 
-One of the important innovations from the tidyverse is the pipe operator `%>%`. You use the pipe operator when you want to combine multiple operations into one line of continuous code. Let’s create our final data object *cacounty* using our brand new friend the pipe.
+One of the important innovations from the tidyverse is the pipe operator `%>%`. You use the pipe operator when you want to combine multiple operations into one line of continuous code. Let’s create our final data object *cacounty* using our brand new friend the pipe. Let's put together a lot of what we've done over the past few weeks into one step! Now we are cooking with gas!
 
 ```{r}
 cacounty <- ca %>% 
@@ -574,7 +574,7 @@ cacounty %>%
 
 Furthermore, you would like to show a table, say, in a manuscript that does not require you to take a screenshot or copying and pasting into Excel, but instead can be produced via code, that way it can be fixed if there is an issue, and is reproducible.
 
-One way of producing presentation tables in R is through the **flextable** package. First, you will need to save the tibble or data frame of results into an object. For example, let’s save the above results into an object named region.summary
+One way of producing presentation tables in R is through the **flextable** package. First, you will need to save the tibble or data frame of results into an object. For example, let’s save the above results into an object named *region.summary*
 
 ```{r}
 region.summary <- cacounty %>%
@@ -589,6 +589,7 @@ You then input the object into the function `flextable()`. Save it into an objec
 
 ```{r}
 my_table <- flextable(region.summary)
+my_table
 ```
 
 \
@@ -604,7 +605,7 @@ class(my_table)
 
 \
 
-After doing this, we can progressively pipe the *my_table* object through more flextable formatting functions. For example, you can change the column header names using the function `set_header_labels()` and center the header names using the function `align()`.
+After doing this, we can progressively pipe the *my_table* object through more **flextable** formatting functions. For example, you can change the column header names using the function `set_header_labels()` and center the header names using the function `align()`.
 
 ```{r}
 my_table <- my_table %>%
@@ -614,7 +615,7 @@ my_table <- my_table %>%
             Median = "Median",
             SD = "Standard Deviation",
             Correlation = "Correlation") %>%
-  align(align = "center")
+              flextable::align(align = "center", part = "all")
 
 my_table
 ```
@@ -629,7 +630,7 @@ Use the `save_as_image()` function to save your table as an image.
 save_as_image(my_table, path = "reg_income.png")
 ```
 
-You first put in the table my_table, and set the file name with the png extension. Check your working directory. You should see the file *reg_income.png*.
+You first put in the table my_table, and set the file name with the .png extension. Check your working directory. You should see the file *reg_income.png*.
 
 \
 
@@ -658,7 +659,7 @@ cacounty %>%
 
 We get an empty plot. We haven’t told `ggplot()` what type of geometric object(s) we want to plot, nor how the variables should be mapped to the geometric objects, so we just have a blank plot. We have `geoms` to paint the blank canvas.
 
-From here, we add a “geom” layer to the ggplot object. Layers are added to ggplot objects using +, instead of %>%, since you are not explicitly piping an object into each subsequent layer, but adding layers on top of one another. Each geom is associated with a specific type of graph.
+From here, we add a “`geom`” layer to the ggplot object. Layers are added to ggplot objects using `+`, instead of `%>%`, since you are not explicitly piping an object into each subsequent layer, but adding layers on top of one another. Each `geom` is associated with a specific type of graph.
 
 Let’s go through some of the more common and popular graphs for visualizing your data.
 
@@ -666,7 +667,7 @@ Let’s go through some of the more common and popular graphs for visualizing yo
 
 ### Histogram
 
-A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for <GEOM_FUNCTION()>. Let’s create a histogram of median household income. Note that we don’t need to specify the y= here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
+A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for <GEOM_FUNCTION()>. Let’s create a histogram of median household income. Note that we don’t need to specify the `y=` here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
 
 ```{r}
 cacounty %>%
@@ -683,13 +684,22 @@ cacounty %>%
   xlab("Median household income")
 ```
 
-Note the message produced with the plot. It tells us that we can use the bins = argument to change the number of bins used to produce the histogram. You can increase the number of bins to make the bins narrower and thus get a finer grain of detail. Or you can decrease the number of bins to get a broader visual summary of the shape of the variable’s distribution. Compare bins = 10 to bins = 50.
+Note the message produced with the plot. It tells us that we can use the `bins =` argument to change the number of bins used to produce the histogram. You can increase the number of bins to make the bins narrower and thus get a finer grain of detail. Or you can decrease the number of bins to get a broader visual summary of the shape of the variable’s distribution. Compare bins = 10 to bins = 50.
+
+\
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc), bins=10) +
+  xlab("Median household income")
+```
 
 \
 
 ### Boxplot
 
-We can use a boxplot to visually summarize the distribution of a single numeric variable or the relationship between a categorical and numeric variable. Use `geom_boxplot()` for <GEOM_FUNCTION()> to create a boxplot. Let’s examine median household income. Note that a boxplot uses y= rather than x= to specify where mhhinc goes. We also provide a descriptive y-axis label using the ylab() function.
+We can use a *boxplot* to visually summarize the distribution of a single numeric variable or the relationship between a categorical and numeric variable. Use `geom_boxplot()` for <GEOM_FUNCTION()> to create a boxplot. Let’s examine median household income. Note that a boxplot uses y= rather than x= to specify where mhhinc goes. We also provide a descriptive y-axis label using the `ylab()` function.
 
 ```{r}
 cacounty %>%
@@ -772,7 +782,7 @@ cacounty %>%
 
 \
 
-Well aren't we fancy? `ggplot()` is a powerful function, and you can make a lot of visually captivating graphs. We have just scratched the surface of its functions and features. You can also make your graphs really “pretty” and professional looking by altering graphing features, including colors, labels, titles and axes. For a list of `ggplot()` functions that alter various features of a graph, check out Chapter 28 in RDS.
+Well aren't we fancy? `ggplot()` is a powerful function, and you can make a lot of visually captivating graphs. We have just scratched the surface of its functions and features. You can also make your graphs really “pretty” and professional looking by altering graphing features, including colors, labels, titles and axes. For a list of `ggplot()` functions that alter various features of a graph, check out Chapter 28 in [RDS](https://r4ds.hadley.nz/).
 
 Here’s your **ggplot2** badge. Wear it with pride! OK, we've done a lot today. Get outside and get some fresh air!
 

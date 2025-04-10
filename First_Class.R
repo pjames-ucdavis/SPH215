@@ -100,3 +100,6 @@ cacounty <- left_join(ca1, ca2, by = "GEOID")
 glimpse(cacounty)
 
 filter(cacounty, GEOID == "06067")
+filter(cacounty, GEOID != "06067")
+filter(cacounty, pwhite > 0.5)
+filter(cacounty, pwhite < 0.5)
