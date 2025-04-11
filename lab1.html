@@ -1177,7 +1177,7 @@ example, we will be using commands from the package
 <pre class="r"><code>install.packages(&quot;tidyverse&quot;)</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//Rtmp47B8aK/downloaded_packages</code></pre>
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpWmntkB/downloaded_packages</code></pre>
 <p>You should see a bunch of gibberish roll through your console screen.
 Don’t worry, that’s just R downloading all of the other packages and
 applications that <strong>tidyverse</strong> relies on. These are known
@@ -1192,13 +1192,13 @@ fine.</p>
 <strong>tidyverse</strong> this time (just to make things trickier for
 us!).</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ────── tidyverse 2.0.0 ──
+<pre><code>## ── Attaching core tidyverse packages ─── tidyverse 2.0.0 ──
 ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
 ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
 ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
 ## ✔ purrr     1.0.4     
-## ── Conflicts ──────────────────────── tidyverse_conflicts() ──
+## ── Conflicts ───────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
@@ -1224,7 +1224,7 @@ and then we will see a check mark appears next to
 <pre class="r"><code>install.packages(&quot;matrixStats&quot;)</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//Rtmp47B8aK/downloaded_packages</code></pre>
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpWmntkB/downloaded_packages</code></pre>
 <pre class="r"><code>library(matrixStats)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;matrixStats&#39;</code></pre>
@@ -1282,7 +1282,7 @@ and similarities between data frames and tibbles. Install the package
 <pre class="r"><code>install.packages(&quot;nycflights13&quot;)</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//Rtmp47B8aK/downloaded_packages</code></pre>
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpWmntkB/downloaded_packages</code></pre>
 <p><br />
 </p>
 <p>Make sure you also load the package.</p>
@@ -1434,7 +1434,7 @@ for this course, so you can read them in directly from there. We’ll name
 these objects <em>ca1</em> and <em>ca2</em>.</p>
 <pre class="r"><code>ca1 &lt;- read_csv(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset1.csv&quot;)</code></pre>
 <pre><code>## Rows: 58 Columns: 4
-## ── Column specification ──────────────────────────────────────
+## ── Column specification ───────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr (2): County, Formatted FIPS
 ## dbl (2): FIPS Code, Estimated median income of a household, between 2014-2018.
@@ -1443,7 +1443,7 @@ these objects <em>ca1</em> and <em>ca2</em>.</p>
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>ca2 &lt;- read_csv(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset2.csv&quot;)</code></pre>
 <pre><code>## Rows: 58 Columns: 12
-## ── Column specification ──────────────────────────────────────
+## ── Column specification ───────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): GEOID, NAME
 ## dbl (10): tpoprE, tpoprM, nhwhiteE, nhwhiteM, nhblkE, nhblkM, nhasnE, nhasnM...
@@ -2022,11 +2022,11 @@ head(cancer)</code></pre>
 install.packages(&quot;sf&quot;) # for analysis using vector data</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//Rtmp47B8aK/downloaded_packages</code></pre>
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpWmntkB/downloaded_packages</code></pre>
 <pre class="r"><code>install.packages(&quot;tmap&quot;) # to show pretty maps</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//Rtmp47B8aK/downloaded_packages</code></pre>
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpWmntkB/downloaded_packages</code></pre>
 <pre class="r"><code>## Load these packages
 library(sf)</code></pre>
 <pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
@@ -2040,7 +2040,7 @@ tmap_mode(&quot;view&quot;)</code></pre>
 <pre><code>## ℹ tmap mode set to &quot;view&quot;.</code></pre>
 <pre class="r"><code>cancer_map = tm_shape(cancer_projected) + tm_dots(size=0.5,alpha=0.8, col=&quot;event&quot;,style=&quot;cat&quot;)</code></pre>
 <pre><code>## </code></pre>
-<pre><code>## ── tmap v3 code detected ─────────────────────────────────────</code></pre>
+<pre><code>## ── tmap v3 code detected ──────────────────────────────────</code></pre>
 <pre><code>## [v3-&gt;v4] `tm_dots()`: instead of `style = &quot;cat&quot;`, use
 ## fill.scale = `tm_scale_categorical()`.
 ## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of

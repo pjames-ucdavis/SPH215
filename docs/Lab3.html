@@ -402,17 +402,1169 @@ div.tocify {
 
 <p><br />
 </p>
-<p>Please check back here for more soon!</p>
+<pre class="r"><code>library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)</code></pre>
+<p>In <a href="Lab2.html">Lab 2</a>, we worked with the tidycensus
+package and the Census API to bring in Census data into R. We can use
+the same commands to bring in Census geography. If you haven’t already,
+make sure to <a href="https://api.census.gov/data/key_signup.html">sign
+up for and install your Census API key</a>. If you could not install
+your API key, you’ll need to use <code>census_api_key()</code> to
+activate it.</p>
+<pre class="r"><code>census_api_key(&quot;YOUR API KEY GOES HERE&quot;, install = TRUE)</code></pre>
 <p><br />
 </p>
-<div id="choropleth-maps" class="section level1">
-<h1>Choropleth Maps</h1>
+<p>Use the <code>set_acs()</code> command to bring in California
+tract-level race/ethnicity counts, total population, and total number of
+households. How did I find the variable IDs? Check <a
+href="Lab2.html">Lab 2</a>. Since we want tracts, we’ll use the
+<code>geography = "tract"</code> argument.</p>
+<pre class="r"><code>ca.tracts &lt;- get_acs(geography = &quot;tract&quot;, 
+              year = 2023,
+              variables = c(tpopr = &quot;B03002_001&quot;, 
+                            nhwhite = &quot;B03002_003&quot;, nhblk = &quot;B03002_004&quot;, 
+                            nhasn = &quot;B03002_006&quot;, hisp = &quot;B03002_012&quot;), 
+              state = &quot;CA&quot;,
+              output = &quot;wide&quot;,
+              survey = &quot;acs5&quot;,
+              geometry = TRUE,
+              cb = FALSE)</code></pre>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |                                                                      |   1%  |                                                                              |=                                                                     |   1%  |                                                                              |=                                                                     |   2%  |                                                                              |==                                                                    |   2%  |                                                                              |==                                                                    |   3%  |                                                                              |==                                                                    |   4%  |                                                                              |===                                                                   |   4%  |                                                                              |===                                                                   |   5%  |                                                                              |====                                                                  |   5%  |                                                                              |====                                                                  |   6%  |                                                                              |=====                                                                 |   6%  |                                                                              |=====                                                                 |   7%  |                                                                              |=====                                                                 |   8%  |                                                                              |======                                                                |   8%  |                                                                              |======                                                                |   9%  |                                                                              |=======                                                               |   9%  |                                                                              |=======                                                               |  10%  |                                                                              |=======                                                               |  11%  |                                                                              |========                                                              |  11%  |                                                                              |========                                                              |  12%  |                                                                              |=========                                                             |  12%  |                                                                              |=========                                                             |  13%  |                                                                              |=========                                                             |  14%  |                                                                              |==========                                                            |  14%  |                                                                              |==========                                                            |  15%  |                                                                              |===========                                                           |  15%  |                                                                              |===========                                                           |  16%  |                                                                              |============                                                          |  16%  |                                                                              |============                                                          |  17%  |                                                                              |============                                                          |  18%  |                                                                              |=============                                                         |  18%  |                                                                              |=============                                                         |  19%  |                                                                              |==============                                                        |  19%  |                                                                              |==============                                                        |  20%  |                                                                              |==============                                                        |  21%  |                                                                              |===============                                                       |  21%  |                                                                              |===============                                                       |  22%  |                                                                              |================                                                      |  22%  |                                                                              |================                                                      |  23%  |                                                                              |================                                                      |  24%  |                                                                              |=================                                                     |  24%  |                                                                              |=================                                                     |  25%  |                                                                              |==================                                                    |  25%  |                                                                              |==================                                                    |  26%  |                                                                              |===================                                                   |  26%  |                                                                              |===================                                                   |  27%  |                                                                              |===================                                                   |  28%  |                                                                              |====================                                                  |  28%  |                                                                              |====================                                                  |  29%  |                                                                              |=====================                                                 |  29%  |                                                                              |=====================                                                 |  30%  |                                                                              |=====================                                                 |  31%  |                                                                              |======================                                                |  31%  |                                                                              |======================                                                |  32%  |                                                                              |=======================                                               |  32%  |                                                                              |=======================                                               |  33%  |                                                                              |=======================                                               |  34%  |                                                                              |========================                                              |  34%  |                                                                              |========================                                              |  35%  |                                                                              |=========================                                             |  35%  |                                                                              |=========================                                             |  36%  |                                                                              |==========================                                            |  36%  |                                                                              |==========================                                            |  37%  |                                                                              |==========================                                            |  38%  |                                                                              |===========================                                           |  38%  |                                                                              |===========================                                           |  39%  |                                                                              |============================                                          |  39%  |                                                                              |============================                                          |  40%  |                                                                              |============================                                          |  41%  |                                                                              |=============================                                         |  41%  |                                                                              |=============================                                         |  42%  |                                                                              |==============================                                        |  42%  |                                                                              |==============================                                        |  43%  |                                                                              |==============================                                        |  44%  |                                                                              |===============================                                       |  44%  |                                                                              |===============================                                       |  45%  |                                                                              |================================                                      |  45%  |                                                                              |================================                                      |  46%  |                                                                              |=================================                                     |  46%  |                                                                              |=================================                                     |  47%  |                                                                              |=================================                                     |  48%  |                                                                              |==================================                                    |  48%  |                                                                              |==================================                                    |  49%  |                                                                              |===================================                                   |  49%  |                                                                              |===================================                                   |  50%  |                                                                              |===================================                                   |  51%  |                                                                              |====================================                                  |  51%  |                                                                              |====================================                                  |  52%  |                                                                              |=====================================                                 |  52%  |                                                                              |=====================================                                 |  53%  |                                                                              |=====================================                                 |  54%  |                                                                              |======================================                                |  54%  |                                                                              |======================================                                |  55%  |                                                                              |=======================================                               |  55%  |                                                                              |=======================================                               |  56%  |                                                                              |========================================                              |  56%  |                                                                              |========================================                              |  57%  |                                                                              |========================================                              |  58%  |                                                                              |=========================================                             |  58%  |                                                                              |=========================================                             |  59%  |                                                                              |==========================================                            |  59%  |                                                                              |==========================================                            |  60%  |                                                                              |==========================================                            |  61%  |                                                                              |===========================================                           |  61%  |                                                                              |===========================================                           |  62%  |                                                                              |============================================                          |  62%  |                                                                              |============================================                          |  63%  |                                                                              |============================================                          |  64%  |                                                                              |=============================================                         |  64%  |                                                                              |=============================================                         |  65%  |                                                                              |==============================================                        |  65%  |                                                                              |==============================================                        |  66%  |                                                                              |===============================================                       |  66%  |                                                                              |===============================================                       |  67%  |                                                                              |===============================================                       |  68%  |                                                                              |================================================                      |  68%  |                                                                              |================================================                      |  69%  |                                                                              |=================================================                     |  69%  |                                                                              |=================================================                     |  70%  |                                                                              |=================================================                     |  71%  |                                                                              |==================================================                    |  71%  |                                                                              |==================================================                    |  72%  |                                                                              |===================================================                   |  72%  |                                                                              |===================================================                   |  73%  |                                                                              |===================================================                   |  74%  |                                                                              |====================================================                  |  74%  |                                                                              |====================================================                  |  75%  |                                                                              |=====================================================                 |  75%  |                                                                              |=====================================================                 |  76%  |                                                                              |======================================================                |  76%  |                                                                              |======================================================                |  77%  |                                                                              |======================================================                |  78%  |                                                                              |=======================================================               |  78%  |                                                                              |=======================================================               |  79%  |                                                                              |========================================================              |  79%  |                                                                              |========================================================              |  80%  |                                                                              |========================================================              |  81%  |                                                                              |=========================================================             |  81%  |                                                                              |=========================================================             |  82%  |                                                                              |==========================================================            |  82%  |                                                                              |==========================================================            |  83%  |                                                                              |==========================================================            |  84%  |                                                                              |===========================================================           |  84%  |                                                                              |===========================================================           |  85%  |                                                                              |============================================================          |  85%  |                                                                              |============================================================          |  86%  |                                                                              |=============================================================         |  86%  |                                                                              |=============================================================         |  87%  |                                                                              |=============================================================         |  88%  |                                                                              |==============================================================        |  88%  |                                                                              |==============================================================        |  89%  |                                                                              |===============================================================       |  89%  |                                                                              |===============================================================       |  90%  |                                                                              |===============================================================       |  91%  |                                                                              |================================================================      |  91%  |                                                                              |================================================================      |  92%  |                                                                              |=================================================================     |  92%  |                                                                              |=================================================================     |  93%  |                                                                              |=================================================================     |  94%  |                                                                              |==================================================================    |  94%  |                                                                              |==================================================================    |  95%  |                                                                              |===================================================================   |  95%  |                                                                              |===================================================================   |  96%  |                                                                              |====================================================================  |  96%  |                                                                              |====================================================================  |  97%  |                                                                              |====================================================================  |  98%  |                                                                              |===================================================================== |  98%  |                                                                              |===================================================================== |  99%  |                                                                              |======================================================================|  99%  |                                                                              |======================================================================| 100%</code></pre>
+<p><br />
+</p>
+<p>The only difference between the code above and what we used in <a
+href="lab2.html">Lab 2</a> is we have one additional argument added to
+the <code>get_acs()</code> command: <code>geometry = TRUE</code>. This
+tells R to bring in the spatial features associated with the geography
+you specified in the command, in the above case California tracts. You
+can set <code>cache_table = TRUE</code> so that you don’t have to
+re-download after you’ve downloaded successfully the first time. This is
+important because you might be downloading a really large file, or may
+encounter Census FTP issues when trying to collect data.</p>
+<p><br />
+</p>
+<p>We can also download the data another way. We can go to the <a
+href="https://www.census.gov/cgi-bin/geo/shapefiles/index.php">Census
+Shapefiles website</a> and navigate to 2023, Census Tracts, then
+California. We will then download a .zip file that contains an ESRI
+shapefile of the Census tracts for California. When we unzip the file,
+we see a series of files. Thankfully, the <strong>sf</strong> package
+has an <code>st_read()</code> function that can tackle this! For more
+detailed data downloads, you can use <a
+href="https://www.nhgis.org/">National Historical Geographic Information
+System (NHGIS)</a>.</p>
+<pre class="r"><code>ca.tracts &lt;- st_read(&quot;/Users/pjames1/Downloads/tl_2024_06_tract/tl_2024_06_tract.shp&quot;)</code></pre>
+<p>Lets take a look at our data.</p>
+<p><br />
+</p>
+<pre class="r"><code>ca.tracts</code></pre>
+<pre><code>## Simple feature collection with 9129 features and 12 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: -124.482 ymin: 32.52951 xmax: -114.1312 ymax: 42.0095
+## Geodetic CRS:  NAD83
+## First 10 features:
+##          GEOID                                                 NAME tpoprE
+## 1  06001442700        Census Tract 4427; Alameda County; California   2998
+## 2  06001442800        Census Tract 4428; Alameda County; California   3087
+## 3  06037204920 Census Tract 2049.20; Los Angeles County; California   2459
+## 4  06037205110 Census Tract 2051.10; Los Angeles County; California   3690
+## 5  06037320101 Census Tract 3201.01; Los Angeles County; California   3402
+## 6  06037205120 Census Tract 2051.20; Los Angeles County; California   3409
+## 7  06037206010 Census Tract 2060.10; Los Angeles County; California   3490
+## 8  06037206020 Census Tract 2060.20; Los Angeles County; California   8179
+## 9  06037206050 Census Tract 2060.50; Los Angeles County; California   2290
+## 10 06037111402 Census Tract 1114.02; Los Angeles County; California   5998
+##    tpoprM nhwhiteE nhwhiteM nhblkE nhblkM nhasnE nhasnM hispE hispM
+## 1     475      921      168    119    115   1577    469   308    81
+## 2     386      779      183     12     49   1671    356   561   181
+## 3     387       68       33     49     51      0     14  2331   387
+## 4     446       14       14      8     12      0     14  3642   446
+## 5     438      236      131     65     93    123    164  2978   481
+## 6     624       15       24      8     10     70    104  3303   628
+## 7     605      500      264     17     75   1030    235  1919   519
+## 8     350     1379      165   2633    344    238     76  3541   285
+## 9     509      138       49     18     22    151     82  1932   519
+## 10   1024     2685      831     18     19    920    563  2322   433
+##                          geometry
+## 1  MULTIPOLYGON (((-122.0172 3...
+## 2  MULTIPOLYGON (((-122.0023 3...
+## 3  MULTIPOLYGON (((-118.2028 3...
+## 4  MULTIPOLYGON (((-118.2196 3...
+## 5  MULTIPOLYGON (((-118.4388 3...
+## 6  MULTIPOLYGON (((-118.2202 3...
+## 7  MULTIPOLYGON (((-118.2392 3...
+## 8  MULTIPOLYGON (((-118.2379 3...
+## 9  MULTIPOLYGON (((-118.2287 3...
+## 10 MULTIPOLYGON (((-118.5023 3...</code></pre>
+<p><br />
+</p>
+<p>The object looks much like a basic tibble, but with a few
+differences.</p>
+<ul>
+<li>You’ll find that the description of the object now indicates that it
+is a simple feature collection with 9,129 features (tracts in -
+California) with 13 fields (attributes or columns of data).</li>
+<li>The <code>Geometry Type</code> indicates that the spatial data are
+in <code>MULTIPOLYGON</code> form (as opposed to points or lines, the
+other basic vector data forms).</li>
+<li><code>Bounding box</code> indicates the spatial extent of the
+features (from left to right, for example, California tracts go from a
+longitude of -124.482 to -114.1312).</li>
+<li><code>Geodetic CRS</code> tells us the coordinate reference
+system.</li>
+<li>The final difference is that the data frame contains the column
+geometry. This column (a list-column) contains the geometry for each
+observation. This looks familiar!</li>
+</ul>
+<p>At its most basic, an <strong>sf</strong> object is a collection of
+simple features that includes attributes and geometries in the form of a
+data frame. In other words, it is a data frame (or tibble) with rows of
+features, columns of attributes, and a special column always named
+geometry that contains the spatial aspects of the features.</p>
+<p>If you want to peek behind the curtain and learn more about the nitty
+gritty details about simple features, check out the official
+<strong>sf</strong> <a
+href="https://r-spatial.github.io/sf/articles/sf1.html">vignette.</a></p>
+<p><br />
+</p>
+<div id="data-wrangling" class="section level1">
+<h1>Data Wrangling</h1>
+<p>There is a lot of stuff <a
+href="https://www.jessesadler.com/post/simple-feature-objects/">behind
+the curtain</a> of how R handles spatial data as simple features, but
+the main takeaway is that <strong>sf</strong> objects are data frames.
+This means you can use many of the <strong>tidyverse</strong> functions
+we’ve learned in the past couple labs to manipulate <strong>sf</strong>
+objects, including the pipe <code>%&gt;%</code> operator. For example,
+let’s do the following data wrangling tasks on
+<code>ca.tracts</code>.</p>
+<ol style="list-style-type: decimal">
+<li>Keep necessary variables using the <code>select()</code>
+function</li>
+<li>Break up the column <em>NAME</em> into separate tract, county and
+state variables using the <code>separate()</code> function</li>
+</ol>
+<p>We do all of this in one line of continuous code using the pipe
+operator <code>%&gt;%</code></p>
+<pre class="r"><code>ca.tracts &lt;- ca.tracts %&gt;%
+              separate(NAME, c(&quot;Tract&quot;, &quot;County&quot;, &quot;State&quot;), sep = &quot;; &quot;)
+
+glimpse(ca.tracts)</code></pre>
+<pre><code>## Rows: 9,129
+## Columns: 15
+## $ GEOID    &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;, &quot;06037205110&quot;, &quot;…
+## $ Tract    &lt;chr&gt; &quot;Census Tract 4427&quot;, &quot;Census Tract 4428&quot;, &quot;Census Tract 2049.…
+## $ County   &lt;chr&gt; &quot;Alameda County&quot;, &quot;Alameda County&quot;, &quot;Los Angeles County&quot;, &quot;Lo…
+## $ State    &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;Cali…
+## $ tpoprE   &lt;dbl&gt; 2998, 3087, 2459, 3690, 3402, 3409, 3490, 8179, 2290, 5998, 4…
+## $ tpoprM   &lt;dbl&gt; 475, 386, 387, 446, 438, 624, 605, 350, 509, 1024, 578, 621, …
+## $ nhwhiteE &lt;dbl&gt; 921, 779, 68, 14, 236, 15, 500, 1379, 138, 2685, 2306, 11, 81…
+## $ nhwhiteM &lt;dbl&gt; 168, 183, 33, 14, 131, 24, 264, 165, 49, 831, 535, 27, 73, 18…
+## $ nhblkE   &lt;dbl&gt; 119, 12, 49, 8, 65, 8, 17, 2633, 18, 18, 93, 26, 2, 352, 1086…
+## $ nhblkM   &lt;dbl&gt; 115, 49, 51, 12, 93, 10, 75, 344, 22, 19, 97, 41, 4, 264, 679…
+## $ nhasnE   &lt;dbl&gt; 1577, 1671, 0, 0, 123, 70, 1030, 238, 151, 920, 665, 13, 29, …
+## $ nhasnM   &lt;dbl&gt; 469, 356, 14, 14, 164, 104, 235, 76, 82, 563, 176, 21, 45, 26…
+## $ hispE    &lt;dbl&gt; 308, 561, 2331, 3642, 2978, 3303, 1919, 3541, 1932, 2322, 134…
+## $ hispM    &lt;dbl&gt; 81, 181, 387, 446, 481, 628, 519, 285, 519, 433, 265, 618, 18…
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-122.0172 3..., MULTIPOLYGON (((…</code></pre>
+<p><br />
+</p>
+<p>Another important data wrangling operation is to join attribute data
+to an sf object. For example, let’s say you wanted to add tract level
+median household income, which is located in the file
+ca_med_inc_2018.csv. Read the file in.</p>
+<pre class="r"><code>ca.inc &lt;- get_acs(geography = &quot;tract&quot;, 
+              year = 2023,
+              variables = c(medinc = &quot;B19013_001&quot;), 
+              state = &quot;CA&quot;,
+              survey = &quot;acs5&quot;,
+              output = &quot;wide&quot;)</code></pre>
+<pre><code>## Getting data from the 2019-2023 5-year ACS</code></pre>
+<p><br />
+</p>
+<p>Unlike before, we brought these data in without the
+<code>geometry = TRUE</code> option. So this is just a table. But
+remember, an <strong>sf</strong> object is a data frame, so we can use
+<code>left_join()</code>, which we covered in <a href="lab1.html">Lab
+1</a>, to join the files <em>ca.inc</em> and <em>ca.tracts</em>.</p>
+<pre class="r"><code>ca.tracts &lt;- ca.tracts %&gt;%
+  left_join(ca.inc, by = &quot;GEOID&quot;)
+
+#take a look to make sure the join worked
+glimpse(ca.tracts)</code></pre>
+<pre><code>## Rows: 9,129
+## Columns: 18
+## $ GEOID    &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;, &quot;06037205110&quot;, &quot;…
+## $ Tract    &lt;chr&gt; &quot;Census Tract 4427&quot;, &quot;Census Tract 4428&quot;, &quot;Census Tract 2049.…
+## $ County   &lt;chr&gt; &quot;Alameda County&quot;, &quot;Alameda County&quot;, &quot;Los Angeles County&quot;, &quot;Lo…
+## $ State    &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;Cali…
+## $ tpoprE   &lt;dbl&gt; 2998, 3087, 2459, 3690, 3402, 3409, 3490, 8179, 2290, 5998, 4…
+## $ tpoprM   &lt;dbl&gt; 475, 386, 387, 446, 438, 624, 605, 350, 509, 1024, 578, 621, …
+## $ nhwhiteE &lt;dbl&gt; 921, 779, 68, 14, 236, 15, 500, 1379, 138, 2685, 2306, 11, 81…
+## $ nhwhiteM &lt;dbl&gt; 168, 183, 33, 14, 131, 24, 264, 165, 49, 831, 535, 27, 73, 18…
+## $ nhblkE   &lt;dbl&gt; 119, 12, 49, 8, 65, 8, 17, 2633, 18, 18, 93, 26, 2, 352, 1086…
+## $ nhblkM   &lt;dbl&gt; 115, 49, 51, 12, 93, 10, 75, 344, 22, 19, 97, 41, 4, 264, 679…
+## $ nhasnE   &lt;dbl&gt; 1577, 1671, 0, 0, 123, 70, 1030, 238, 151, 920, 665, 13, 29, …
+## $ nhasnM   &lt;dbl&gt; 469, 356, 14, 14, 164, 104, 235, 76, 82, 563, 176, 21, 45, 26…
+## $ hispE    &lt;dbl&gt; 308, 561, 2331, 3642, 2978, 3303, 1919, 3541, 1932, 2322, 134…
+## $ hispM    &lt;dbl&gt; 81, 181, 387, 446, 481, 628, 519, 285, 519, 433, 265, 618, 18…
+## $ NAME     &lt;chr&gt; &quot;Census Tract 4427; Alameda County; California&quot;, &quot;Census Trac…
+## $ medincE  &lt;dbl&gt; 199154, 180800, 70500, 52262, 110967, 28516, 60703, 148661, 4…
+## $ medincM  &lt;dbl&gt; 30525, 28293, 15698, 5659, 22149, 3246, 28578, 39223, 19295, …
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-122.0172 3..., MULTIPOLYGON (((…</code></pre>
+<p><br />
+</p>
+<p>Note that we can’t use <code>left_join()</code> to join the attribute
+tables of two <strong>sf</strong> files. You will need to either make
+one of them not spatial by using the <code>st_drop_geometry()</code>
+function or use the <code>st_join()</code> function to spatially join
+them.</p>
+<p>We use the function <code>tm_shape()</code> from the
+<strong>tmap</strong> package to map the data.</p>
+<pre class="r"><code>tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap mode set to &quot;plot&quot;.</code></pre>
+<pre class="r"><code>tract_map &lt;- tm_shape(ca.tracts) +   tm_polygons()
+tract_map</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="spatial-data-wrangling" class="section level1">
+<h1>Spatial Data Wrangling</h1>
+<p>There is Data Wrangling and then there is Spatial Data Wrangling. Cue
+dangerous sounding music. Well, it’s not that dangerous or scary.
+Spatial Data Wrangling involves cleaning or altering your data set based
+on the geographic location of features. The <strong>sf</strong> package
+offers a suite of functions unique to wrangling spatial data. Most of
+these functions start out with the prefix <code>st_</code>. To see all
+of the functions, type in</p>
+<pre class="r"><code>methods(class = &quot;sf&quot;)</code></pre>
+<pre><code>##   [1] [                            [[&lt;-                        
+##   [3] [&lt;-                          $&lt;-                         
+##   [5] aggregate                    anti_join                   
+##   [7] arrange                      as.data.frame               
+##   [9] cbind                        coerce                      
+##  [11] crs                          dbDataType                  
+##  [13] dbWriteTable                 distance                    
+##  [15] distinct                     dplyr_reconstruct           
+##  [17] drop_na                      duplicated                  
+##  [19] ext                          extract                     
+##  [21] filter                       full_join                   
+##  [23] gather                       group_by                    
+##  [25] group_split                  identify                    
+##  [27] initialize                   inner_join                  
+##  [29] left_join                    lines                       
+##  [31] mask                         merge                       
+##  [33] mutate                       nest                        
+##  [35] pivot_longer                 pivot_wider                 
+##  [37] plot                         points                      
+##  [39] polys                        print                       
+##  [41] rasterize                    rbind                       
+##  [43] rename_with                  rename                      
+##  [45] right_join                   rowwise                     
+##  [47] sample_frac                  sample_n                    
+##  [49] select                       semi_join                   
+##  [51] separate_rows                separate                    
+##  [53] show                         slice                       
+##  [55] slotsFromS3                  spread                      
+##  [57] st_agr                       st_agr&lt;-                    
+##  [59] st_area                      st_as_s2                    
+##  [61] st_as_sf                     st_as_sfc                   
+##  [63] st_bbox                      st_boundary                 
+##  [65] st_break_antimeridian        st_buffer                   
+##  [67] st_cast                      st_centroid                 
+##  [69] st_collection_extract        st_concave_hull             
+##  [71] st_convex_hull               st_coordinates              
+##  [73] st_crop                      st_crs                      
+##  [75] st_crs&lt;-                     st_difference               
+##  [77] st_drop_geometry             st_exterior_ring            
+##  [79] st_filter                    st_geometry                 
+##  [81] st_geometry&lt;-                st_inscribed_circle         
+##  [83] st_interpolate_aw            st_intersection             
+##  [85] st_intersects                st_is_full                  
+##  [87] st_is_valid                  st_is                       
+##  [89] st_join                      st_line_merge               
+##  [91] st_m_range                   st_make_valid               
+##  [93] st_minimum_bounding_circle   st_minimum_rotated_rectangle
+##  [95] st_nearest_points            st_node                     
+##  [97] st_normalize                 st_point_on_surface         
+##  [99] st_polygonize                st_precision                
+## [101] st_reverse                   st_sample                   
+## [103] st_segmentize                st_set_precision            
+## [105] st_shift_longitude           st_simplify                 
+## [107] st_snap                      st_sym_difference           
+## [109] st_transform                 st_triangulate_constrained  
+## [111] st_triangulate               st_union                    
+## [113] st_voronoi                   st_wrap_dateline            
+## [115] st_write                     st_z_range                  
+## [117] st_zm                        summarise                   
+## [119] svc                          text                        
+## [121] tmapGetShapeMeta1            tmapGetShapeMeta2           
+## [123] tmapShape                    tmapSubsetShp               
+## [125] transform                    transmute                   
+## [127] ungroup                      unite                       
+## [129] unnest                       vect                        
+## see &#39;?methods&#39; for accessing help and source code</code></pre>
+<p><br />
+</p>
+<p>We won’t go through all of these functions as the list is quite
+extensive. But, we’ll go through a few relevant spatial operations for
+this class below. The function we will be primarily using is
+<code>st_join()</code>.</p>
+<div id="intersect" class="section level2">
+<h2>Intersect</h2>
+<p>A common spatial data wrangling issue is to subset a set of spatial
+objects based on their location relative to another spatial object. In
+our case, we want to keep California tracts that are in the Sacramento
+metro area. We can do this using the <code>st_join()</code> function.
+We’ll need to specify a type of join. Let’s first try
+<code>join = st_intersects</code>. First, let’s bring in a polygon of
+the Sacramento metro area from Github.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds&quot;
+download.file(url, destfile = &quot;sac.metro.rds&quot;, mode = &quot;wb&quot;)
+sac.metro &lt;- readRDS(&quot;sac.metro.rds&quot;)</code></pre>
+<p><br />
+</p>
+<p>Let’s take a look at <em>sac.metro</em> and understand what file it
+is.</p>
+<pre class="r"><code>glimpse(sac.metro)</code></pre>
+<pre><code>## Rows: 1
+## Columns: 14
+## $ CSAFP    &lt;chr&gt; &quot;472&quot;
+## $ CBSAFP   &lt;chr&gt; &quot;40900&quot;
+## $ GEOID    &lt;chr&gt; &quot;40900&quot;
+## $ GEOIDFQ  &lt;chr&gt; &quot;310M700US40900&quot;
+## $ NAME     &lt;chr&gt; &quot;Sacramento-Roseville-Folsom, CA&quot;
+## $ NAMELSAD &lt;chr&gt; &quot;Sacramento-Roseville-Folsom, CA Metro Area&quot;
+## $ LSAD     &lt;chr&gt; &quot;M1&quot;
+## $ MEMI     &lt;chr&gt; &quot;1&quot;
+## $ MTFCC    &lt;chr&gt; &quot;G3110&quot;
+## $ ALAND    &lt;dbl&gt; 13191309279
+## $ AWATER   &lt;dbl&gt; 548018355
+## $ INTPTLAT &lt;chr&gt; &quot;+38.7902715&quot;
+## $ INTPTLON &lt;chr&gt; &quot;-121.0056427&quot;
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-120.0064 3...</code></pre>
+<p><br />
+</p>
+<p>OK, that geometry looks good. And it’s a polygon, so that’s good.
+Let’s now try to intersect our <em>sac.metro</em> dataset with our
+<em>ca.tracts</em> dataset.</p>
+<pre class="r"><code>sac.metro.tracts.int &lt;- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)</code></pre>
+<p><br />
+</p>
+<p>The above code tells R to identify the polygons in <em>ca.tracts</em>
+that intersect with the polygon <em>sac.metro</em>. We indicate we want
+a polygon intersection by specifying <code>join = st_intersects</code>.
+The option <code>left=FALSE</code> tells R to remove the polygons from
+<em>ca.tracts</em> that do not intersect (make it TRUE and see what
+happens) with <em>sac.metro</em>. Plotting our tracts, we get:</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = &quot;blue&quot;) +
+tm_shape(sac.metro) +  
+  tm_borders(col = &quot;red&quot;)</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="within" class="section level2">
+<h2>Within</h2>
+<p>We have one small issue. Using <code>join = st_intersects</code>
+returns all tracts that intersect <em>sac.metro</em>, which include
+those that touch the metro’s boundary. No bueno. We can instead use the
+argument <code>join = st_within</code> to return tracts that are
+<em>completely within</em> the metro area.</p>
+<pre class="r"><code>sac.metro.tracts.w &lt;- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;blue&quot;) +
+tm_shape(sac.metro) +
+  tm_borders(col = &quot;red&quot;)</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Looking much better! Now, if we look at <em>sac.metro.tracts.w</em>’s
+attribute table, you’ll see it includes all the variables from both
+<em>ca.tracts</em> and <em>sac.metro</em>. We don’t need these
+variables, so use <code>select()</code> to eliminate them. You’ll also
+notice that if variables from two data sets share the same name, R will
+keep both and attach a <em>.x</em> and <em>.y</em> to the end. For
+example, I was found in both <em>ca.tracts</em> and <em>sac.metro</em>,
+so R named one <em>GEOID.x</em> and the other that was merged in was
+named <em>GEOID.y</em>.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="mapping-in-r" class="section level1">
+<h1>Mapping in R</h1>
+<p>OK, so now we’ve talked a little about how to bring in and manipulate
+vector polygon data, let’s do some mapping and create some choropleth
+maps. We can do this with the <strong>ggplot</strong> package, the
+<strong>tmap</strong> package, and the <strong>leaflet</strong> package
+(which we won’t cover now, but it’s very cool for interactive maps).
+Let’s start with <strong>ggplot</strong>.</p>
+<div id="choropleth-maps-in-ggplot" class="section level2">
+<h2>Choropleth maps in ggplot</h2>
+<p>Because <strong>sf</strong> is tidy friendly, it is no surprise we
+can use the <strong>tidyverse</strong> plotting function
+<code>ggplot()</code> to make maps. We already received an introduction
+to <code>ggplot()</code> in <a href="lab2.html">Lab 2</a>. Recall its
+basic structure:</p>
+<pre class="r"><code>ggplot(data = &lt;DATA&gt;) +
+      &lt;GEOM_FUNCTION&gt;(mapping = aes(x, y)) +
+      &lt;OPTIONS&gt;()</code></pre>
+<p><br />
+</p>
+<p>In mapping, <code>geom_sf()</code> is
+<code>&lt;GEOM_FUNCTION&gt;()</code>. Unlike with functions like
+<code>geom_histogram()</code> and <code>geom_boxplot()</code>, we don’t
+specify an x and y axis. Instead you use <code>fill</code> if you want
+to map a variable or color to just map boundaries.</p>
+<p>Let’s use <code>ggplot()</code> to make a choropleth map. We need to
+specify a numeric variable in the <code>fill =</code> argument within
+<code>geom_sf()</code>. Here we map tract-level median household income
+in the Sacramento metro area.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We can also specify a title (as well as subtitles and captions) using
+the <code>labs()</code> function.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = &quot;Median Income Sacramento MSA Tracts&quot;) </code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We can make further layout adjustments to the map. Don’t like a blue
+scale on the legend? You can change it using the
+<code>scale_file_gradient()</code> function. Let’s change it to a white
+to red gradient. We can also eliminate the gray tract border colors to
+make the fill color distinction clearer. We do this by specifying
+<code>color = NA</code> inside <code>geom_sf()</code>. We can also get
+rid of the gray background by specifying a basic black and white theme
+using <code>theme_bw()</code>. We also added a caption indicating the
+source of the data using the <code>captions =</code> parameter within
+<code>labs()</code>. We then changed the color to red using labels for
+<code>low=</code> and <code>high=</code>, and we added a name to our
+legend with `name=’.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= &quot;white&quot;, high = &quot;red&quot;, na.value =&quot;gray&quot;, name = &quot;Median Income&quot;) +  
+    labs(title = &quot;Median Income Sacramento MSA Tracts&quot;,
+         caption = &quot;Source: American Community Survey&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-20-1.png" width="672" />
+Dare I say, we are ready for the New York Times with this map!</p>
+<p><br />
+</p>
+</div>
+<div id="points-on-top-of-polygons" class="section level2">
+<h2>Points on top of polygons</h2>
+<p>OK, now that we have mapped points and mapped polygons, let’s put
+them both together! First, we are going to bring in our old friend
+<em>CAdata</em> from last week’s lab.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+summary(ca_pts)</code></pre>
+<pre><code>##       time               event              X                 Y          
+##  Min.   : 0.004068   Min.   :0.0000   Min.   :1811375   Min.   :-241999  
+##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:2018363   1st Qu.: -94700  
+##  Median : 4.749980   Median :1.0000   Median :2325084   Median : -60386  
+##  Mean   : 6.496130   Mean   :0.6062   Mean   :2230219   Mean   :  87591  
+##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:2380230   3rd Qu.: 318280  
+##  Max.   :24.997764   Max.   :1.0000   Max.   :2705633   Max.   : 770658  
+##       AGE         INS      
+##  Min.   :25.00   Mcd: 431  
+##  1st Qu.:53.00   Mcr:1419  
+##  Median :62.00   Mng:2304  
+##  Mean   :61.28   Oth: 526  
+##  3rd Qu.:71.00   Uni: 168  
+##  Max.   :80.00   Unk: 152</code></pre>
+<pre class="r"><code>ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;))
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+#Set CRS
+ca_pts_crs &lt;- st_set_crs(ca_pts, ca_proj)</code></pre>
+<p><br />
+</p>
+<p>This time, we will map those points with <strong>ggplot</strong>.</p>
+<pre class="r"><code>ggplot(data = ca_pts_crs) +
+  geom_sf(fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We can overlay the points over Sacramento tracts to give the
+locations some perspective. Here, you add two <code>geom_sf()</code>
+arguments for the tracts and the cancer cases.</p>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Hmmm. That doesn’t look great. We have lots of cases outside of
+Sacramento. Let’s filter out to just pick cases within the Sacramento
+area.</p>
+<pre class="r"><code>ca_pts_crs.w &lt;- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)</code></pre>
+<p>Ooof. That doesn’t work. It says our
+<code>st_crs(x) == st_crs(y) is not TRUE</code>. That means our
+Coordinate Reference Systems are not matching! Let’s transform our
+cancer dataset <em>ca_pts_crs.w</em> to match the CRS for
+<em>sac.metro.tracts.w</em> with one easy step using
+<code>st_transform</code>:</p>
+<pre class="r"><code>#check crs of each dataset
+st_crs(ca_pts_crs)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(sac.metro.tracts.w)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: NAD83 
+##   wkt:
+## GEOGCRS[&quot;NAD83&quot;,
+##     DATUM[&quot;North American Datum 1983&quot;,
+##         ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##             LENGTHUNIT[&quot;metre&quot;,1]]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;latitude&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;longitude&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     ID[&quot;EPSG&quot;,4269]]</code></pre>
+<pre class="r"><code>#create new dataset with transformed CRS
+ca_pts_crs.transformed &lt;- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+st_crs(ca_pts_crs.transformed )</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: NAD83 
+##   wkt:
+## GEOGCRS[&quot;NAD83&quot;,
+##     DATUM[&quot;North American Datum 1983&quot;,
+##         ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##             LENGTHUNIT[&quot;metre&quot;,1]]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;latitude&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;longitude&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     ID[&quot;EPSG&quot;,4269]]</code></pre>
+<p><br />
+</p>
+<p>OK, let’s try this again!</p>
+<pre class="r"><code>ca_pts_crs.w &lt;- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)</code></pre>
+<p>It worked! OK, now let’s try our map again.</p>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Alright, who’s ready for a challenge? Let’s put it all together in
+one nice map.</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= &quot;white&quot;, high = &quot;red&quot;, na.value =&quot;gray&quot;, name = &quot;Median Income&quot;) +  
+  geom_sf(data = ca_pts_crs.w, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants Overlaid with Median Income of Sacramento Tracts&quot;,
+       caption = &quot;Source: American Community Survey and Ovarian Cancer Cases&quot;) +
+  theme_bw()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Can I just say, you’re very impressive. Well done!</p>
+<p><br />
+</p>
+</div>
+<div id="tmap" class="section level2">
+<h2>tmap</h2>
+<p>Whether you prefer <strong>tmap</strong> or <strong>ggplot</strong>
+is up to you, but I find that <strong>tmap</strong> has some benefits,
+so let’s focus on its mapping functions next.</p>
+<p><strong>tmap</strong> uses the same layered logic as
+<strong>ggplot</strong>. As we saw last week, the initial command is
+<code>tm_shape()</code>, which specifies the geography to which the
+mapping is applied. You then build on <code>tm_shape()</code> by adding
+one or more elements such as <code>tm_polygons()</code> for polygons,
+<code>tm_borders()</code> for lines, and <code>tm_dots()</code> for
+points. All additional functions take on the form of <code>tm_</code>.
+Check the full list of <code>tm_</code> elements <a
+href="https://www.rdocumentation.org/packages/tmap/versions/2.0/topics/tmap-element">here</a>.</p>
+<div id="choropleth-maps-in-tmap" class="section level3">
+<h3>Choropleth maps in tmap</h3>
+<p>Let’s make a static choropleth map of median household income in
+Sacramento MSA just like we did above, but this time in
+<strong>tmap</strong>.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39; to &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We first put the dataset <em>sac.metro.tracts.w</em> inside
+<code>tm_shape()</code>. Because you are plotting polygons, you use
+<code>tm_polygons()</code> next. The argument
+<code>col = "medincE"</code> tells R to shade (or color) the tracts by
+the variable <em>medincE.</em> The argument
+<code>style = "quantile"</code> tells R to break up the shading into
+quantiles, or equal groups of 5 as a default. I find that this is where
+<strong>tmap</strong> offers a distinct advantage over
+<strong>ggplot</strong> in that users have greater control over the
+legend and bin breaks. <strong>tmap</strong> allows users to specify
+algorithms to automatically create breaks with the style argument. You
+can also change the number of breaks by setting <code>n=</code>. The
+default is <code>n=5</code>. Rather than quintiles, you can show
+quartiles using <code>n=4</code>. I’m feeling crazy. Let’s do it.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,  n=4)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;n&#39; to &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Check out <a
+href="https://geocompr.robinlovelace.net/adv-map.html#color-settings">this
+link</a> for more on available classification styles in
+<strong>tmap</strong>.</p>
+<p><br />
+</p>
+<p>The <code>tm_polygons()</code> command is a wrapper around two other
+functions, <code>tm_fill()</code> and <code>tm_borders()</code>.
+<code>tm_fill()</code> controls the contents of the polygons (color,
+classification, etc.), while <code>tm_borders()</code> does the same for
+the polygon outlines.</p>
+<p>For example, using the same shape (but no variable), we obtain the
+outlines of the neighborhoods from the <code>tm_borders()</code>
+command.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_borders()</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Similarly, we obtain a choropleth map without the polygon outlines
+when we just use the <code>tm_fill()</code> command.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) + 
+  tm_fill(&quot;medincE&quot;)</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>When we combine the two commands, we obtain the same map as with
+tm_polygons() (this illustrates how in R one can often obtain the same
+result in a number of different ways). Try this on your own.</p>
+<p><br />
+</p>
+</div>
+<div id="color-scheme" class="section level3">
+<h3>Color scheme</h3>
+<p>The argument <code>palette =</code> defines the color ranges
+associated with the bins and determined by the <code>style</code>
+arguments. Several built-in palettes are contained in
+<strong>tmap</strong>. For example, using <code>palette = "Reds"</code>
+would yield the following map for our example.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;) </code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>Under the hood, <code>“Reds”</code> refers to one of the color
+schemes supported by the <strong>RColorBrewer</strong> package (see
+below).</p>
+<p><br />
+</p>
+<p>In addition to the built-in palettes, customized color ranges can be
+created by specifying a vector with the desired colors as anchors. This
+will create a spectrum of colors in the map that range between the
+colors specified in the vector. For instance, if we used
+<code>c(“red”, “blue”)</code>, the color spectrum would move from red to
+purple, then to blue, with in between shades. In our example:</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = c(&quot;red&quot;,&quot;blue&quot;)) </code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Not exactly a pretty picture. In order to capture a diverging scale,
+we insert <code>“white”</code> in between red and blue.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = c(&quot;red&quot;,&quot;white&quot;, &quot;blue&quot;)) </code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>A preferred approach to select a color palette is to chose one of the
+schemes contained in the <strong>RColorBrewer</strong> package. These
+are based on the research of cartographer Cynthia Brewer (see the
+colorbrewer2 <a
+href="https://colorbrewer2.org/#type=sequential&amp;scheme=BuGn&amp;n=3">website</a>
+for details). ColorBrewer makes a distinction between sequential scales
+(for a scale that goes from low to high), diverging scales (to highlight
+how values differ from a central tendency), and qualitative scales (for
+categorical variables). For each scale, a series of single hue and
+multi-hue scales are suggested. In the <strong>RColorBrewer</strong>
+package, these are referred to by a name (e.g., the “Reds” palette we
+used above is an example). The full list is contained in the
+<strong>RColorBrewer</strong> documentation.</p>
+<p>There are two very useful commands in this package. One sets a color
+palette by specifying its name and the number of desired categories. The
+result is a character vector with the hex codes of the corresponding
+colors.</p>
+<p>For example, we select a sequential color scheme going from blue to
+green, as <em>BuGn</em>, by means of the command
+<code>brewer.pal</code>, with the number of categories (6) and the
+scheme as arguments. The resulting vector contains the HEX codes for the
+colors.</p>
+<pre class="r"><code>brewer.pal(6,&quot;BuGn&quot;)</code></pre>
+<pre><code>## [1] &quot;#EDF8FB&quot; &quot;#CCECE6&quot; &quot;#99D8C9&quot; &quot;#66C2A4&quot; &quot;#2CA25F&quot; &quot;#006D2C&quot;</code></pre>
+<p><br />
+</p>
+<p>Using this palette in our map yields the following result.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette=&quot;BuGn&quot;) </code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;BuGn&quot; is named
+## &quot;brewer.bu_gn&quot;
+## Multiple palettes called &quot;bu_gn&quot; found: &quot;brewer.bu_gn&quot;, &quot;matplotlib.bu_gn&quot;. The first one, &quot;brewer.bu_gn&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>The command <code>display.brewer.pal()</code> allows us to explore
+different color schemes before applying them to a map. For example:</p>
+<pre class="r"><code>display.brewer.pal(6,&quot;BuGn&quot;)</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="legend" class="section level3">
+<h3>Legend</h3>
+<p>There are many options to change the formatting of the legend. The
+automatic title for the legend is not that attractive, since it is
+simply the variable name. This can be customized by setting the
+<code>title</code> argument.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) </code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Another important aspect of the legend is its positioning. This is
+handled through the <code>tm_layout()</code> function. This function has
+a vast number of options, as detailed in the <a
+href="https://www.rdocumentation.org/packages/tmap/versions/2.1-1/topics/tm_layout">documentation</a>.
+There are also specialized subsets of layout functions, focused on
+specific aspects of the map, such as <code>tm_legend()</code>,
+<code>tm_style()</code> and <code>tm_format()</code>. We illustrate the
+positioning of the legend.</p>
+<p>Often, the default location of the legend is appropriate, but
+sometimes further control is needed. The <code>legend.position</code>
+argument to the <code>tm_layout</code> function moves the legend around
+the map, and it takes a vector of two string variables that determine
+both the horizontal position (“left”, “right”, or “center”) and the
+vertical position (“top”, “bottom”, or “center”).</p>
+<p>For example, if we would want to move the legend to the bottom-right
+position, we would use the following set of commands.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_layout(legend.position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>There is also the option to position the legend outside the frame of
+the map. This is accomplished by setting <code>legend.outside</code> to
+TRUE, and optionally also specify its position by means of
+<code>legend.outside.position()</code>. The latter can take the values
+“top”, “bottom”, “right”, and “left”.</p>
+<p>For example, to position the legend outside and on the right, would
+be accomplished by the following commands.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-41-1.png" width="672" />
+We can also customize the size of the legend, its alignment, font, etc.
+Check out the documentation for more!</p>
+<p><br />
+</p>
+</div>
+<div id="title" class="section level3">
+<h3>Title</h3>
+<p>Another functionality of the <code>tm_layout()</code> function is to
+set a title for the map, and specify its position, size, etc. For
+example, we can set the title, the <code>title.size</code> and the
+<code>title.position</code> as in the example below. We made the font
+size a bit smaller (0.8) in order not to overwhelm the map, and
+positioned it in the top left-hand corner.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_layout(title = &quot;Median Income of Sacramento Tracts&quot;, title.size = 0.8, 
+            title.position = c(&quot;left&quot;,&quot;top&quot;),
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>To have a title appear on top (or on the bottom) of the map, we need
+to set the <code>main.title</code> argument of the
+<code>tm_layout()</code> function, with the associated
+<code>main.title.position</code>, as illustrated below (with title.size
+set to 1.25 to have a larger font).</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_layout(main.title = &quot;Median Income of Sacramento Tracts&quot;, 
+            main.title.size = 1.25, main.title.position=&quot;center&quot;,
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="scale-bar-and-arrow" class="section level3">
+<h3>Scale bar and arrow</h3>
+<p>OK this really wouldn’t be a GIS class without talking about one of
+the core elements of a map–the good ole scale bar and arrow. Let’s add
+these to our map. First, we add the scale bar with
+<code>tm_scale_bar()</code>.</p>
+<p>The argument <code>breaks</code> tells R the distances to break up
+and end the bar. The argument <code>position</code> places the scale bar
+on the bottom left part of the map. Note that the <code>scale</code> is
+in miles (we’re in Amurica!). The default is in kilometers (the rest of
+the world!), but you can specify the units within
+<code>tm_shape()</code> using the argument <code>unit</code>.
+<code>text.size</code> scales the size of the bar smaller (below 1) or
+larger (above 1).</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c(&quot;left&quot;, &quot;bottom&quot;)) +
+  tm_layout(main.title = &quot;Median Income of Sacramento Tracts&quot;, 
+            main.title.size = 1.25, main.title.position=&quot;center&quot;,
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## ! `tm_scale_bar()` is deprecated. Please use `tm_scalebar()` instead.
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Next let’s spice things up by adding a north arrow, which we can do
+using the function <code>tm_compass()</code>. You can control for the
+type, size and location of the arrow within this function. I place a
+4-star arrow on the bottom right of the map.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c(&quot;left&quot;, &quot;bottom&quot;)) +
+  tm_compass(type = &quot;4star&quot;, position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+  tm_layout(main.title = &quot;Median Income of Sacramento Tracts&quot;, 
+            main.title.size = 1.25, main.title.position=&quot;center&quot;,
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## ! `tm_scale_bar()` is deprecated. Please use `tm_scalebar()` instead.
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We can also eliminate the frame around the map using the argument
+<code>frame = FALSE</code>.</p>
+<pre class="r"><code>sac.map &lt;- tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;,palette = &quot;Reds&quot;,
+              title = &quot;Median Income&quot;) +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c(&quot;left&quot;, &quot;bottom&quot;)) +
+  tm_compass(type = &quot;4star&quot;, position = c(&quot;right&quot;, &quot;bottom&quot;)) +
+  tm_layout(main.title = &quot;Median Income of Sacramento tracts&quot;, 
+            main.title.size = 1.25, frame = FALSE,
+            main.title.position=&quot;center&quot;,
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## ! `tm_scale_bar()` is deprecated. Please use `tm_scalebar()` instead.
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`</code></pre>
+<pre class="r"><code>sac.map</code></pre>
+<pre><code>## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.</code></pre>
+<p><img src="Lab3_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Note that I saved the map into an object called <em>sac.map</em>. R
+is an object-oriented program, so everything you make in R are objects
+that can be saved for future manipulation. This includes maps. And
+future manipulations of a saved map includes adding more
+<code>tm_*</code> functions to the saved object, such as
+<code>sac.map + tm_layout(your changes here)</code>. Check the help
+documentation for <code>tm_layout()</code> to see the complete list of
+settings.</p>
+</div>
+</div>
+<div id="saving-maps" class="section level2">
+<h2>Saving maps</h2>
+<p>You can save your maps a few ways. 1. On the plotting screen where
+the map is shown, click on Export and save it as either an image or pdf
+file. 2. Use the function <code>tmap_save()</code></p>
+<p>For option 2, we can save the map object <em>sac.map</em> as
+such:</p>
+<pre class="r"><code>tmap_save(sac.map, &quot;sac_city_inc.jpg&quot;)</code></pre>
+<pre><code>## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.
+## 
+## [cols4all] color palettes: use palettes from the R package cols4all. Run
+## `cols4all::c4a_gui()` to explore them. The old palette name &quot;Reds&quot; is named
+## &quot;brewer.reds&quot;
+## Multiple palettes called &quot;reds&quot; found: &quot;brewer.reds&quot;, &quot;matplotlib.reds&quot;. The first one, &quot;brewer.reds&quot;, is returned.
+## 
+## Map saved to /Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/sac_city_inc.jpg
+## 
+## Resolution: 2598.137 by 1697.37 pixels
+## 
+## Size: 8.660457 by 5.6579 inches (300 dpi)</code></pre>
+<p>Specify the <strong>tmap</strong> object and a filename with an
+extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and
+.tiff. The default is .png. Also make sure you’ve set your working
+directory to the folder that you want your map to be saved in.</p>
+<p>You’ve completed your introduction to <strong>sf</strong>. Whew!
+Badge? Yes, please, you earned it! Time to <a
+href="https://www.youtube.com/watch?v=3GwjfUFyY6M">celebrate</a>!</p>
+<p><br />
+</p>
+<div class="float">
+<img src="sf.gif" alt="sf Badge" />
+<div class="figcaption">sf Badge</div>
+</div>
+<p><br />
+</p>
+</div>
 </div>
 <div id="rasters" class="section level1">
 <h1>Rasters</h1>
+<p>Raster datasets are simply an array of pixels/cells organized into
+rows and columns (or a grid) where each cell contains a value
+representing information, such as temperature, soil type, land use,
+water level. Raster maps usually represent continuous phenomena such as
+elevation, temperature, population density or spectral data. Discrete
+features such as soil or land-cover classes can also be represented in
+the raster data model. Rasters are aerial photographs, imagery from
+satellites, google street view images. Few things to note.</p>
+<ul>
+<li>Raster datasets are always rectangular (rows x col) similar to
+matrices. Irregular boundaries are created by using NAs.</li>
+<li>Rasters have to contain values of the same type (int, float,
+boolean) throughout the raster, just like matrices and unlike data
+frames.</li>
+<li>The size of the raster depends on the resolution and the extent of
+the raster. As such many rasters are large and often cannot be held in
+memory completely.</li>
+<li>The workhorse package for working with rasters in R is raster and
+terra packages by Robert Hijmans. terra is better and faster in many
+instances, but is newer and does not have all the functionality and
+support associated with raster.</li>
+</ul>
+<p>Typically you will bring in a raster dataset directly from a file.
+These files come in many different forms, typically .tif, .img, and
+.grd.</p>
+<p>We’ll bring in the files sac_county_lc.tif and nlcd_classes.csv. The
+first file contains USGS land cover (for example, Low Intensity
+Developed, Deciduous Forest) for Sacramento county based on classes
+defined by the National Land Cover Dataset. The second file contains the
+descriptions of the land cover classes.</p>
+<p>We use the function raster() to bring in data into raster form.</p>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDM6IFBvbHlnb25zIGFuZCBSYXN0ZXJzIgotLS0KClwKClBsZWFzZSBjaGVjayBiYWNrIGhlcmUgZm9yIG1vcmUgc29vbiEKClwKCiMgQ2hvcm9wbGV0aCBNYXBzCgojIFJhc3RlcnMK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDM6IFBvbHlnb25zIGFuZCBSYXN0ZXJzIgotLS0KClwKYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmxpYnJhcnkoc2YpCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeSh0aWR5Y2Vuc3VzKQpsaWJyYXJ5KGZsZXh0YWJsZSkKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkodG1hcCkKbGlicmFyeSh0ZXJyYSkKYGBgCgpJbiBbTGFiIDJdKExhYjIuaHRtbCksIHdlIHdvcmtlZCB3aXRoIHRoZSB0aWR5Y2Vuc3VzIHBhY2thZ2UgYW5kIHRoZSBDZW5zdXMgQVBJIHRvIGJyaW5nIGluIENlbnN1cyBkYXRhIGludG8gUi4gV2UgY2FuIHVzZSB0aGUgc2FtZSBjb21tYW5kcyB0byBicmluZyBpbiBDZW5zdXMgZ2VvZ3JhcGh5LiBJZiB5b3UgaGF2ZW7igJl0IGFscmVhZHksIG1ha2Ugc3VyZSB0byBbc2lnbiB1cCBmb3IgYW5kIGluc3RhbGwgeW91ciBDZW5zdXMgQVBJIGtleV0oaHR0cHM6Ly9hcGkuY2Vuc3VzLmdvdi9kYXRhL2tleV9zaWdudXAuaHRtbCkuIElmIHlvdSBjb3VsZCBub3QgaW5zdGFsbCB5b3VyIEFQSSBrZXksIHlvdeKAmWxsIG5lZWQgdG8gdXNlIGBjZW5zdXNfYXBpX2tleSgpYCB0byBhY3RpdmF0ZSBpdC4KCmBgYHtyLCBldmFsID0gRkFMU0V9CmNlbnN1c19hcGlfa2V5KCJZT1VSIEFQSSBLRVkgR09FUyBIRVJFIiwgaW5zdGFsbCA9IFRSVUUpCmBgYAoKYGBge3IsIGVjaG89RkFMU0UsIGV2YWw9RkFMU0V9CmNlbnN1c19hcGlfa2V5KCI1ZDY4OTM1Yzk2YzI2ZWU2N2NhNTJlYjk3M2Q3MWU0YTdiODQ5MGFkIiwgaW5zdGFsbCA9IFRSVUUpCmBgYApcCgpVc2UgdGhlIGBzZXRfYWNzKClgIGNvbW1hbmQgdG8gYnJpbmcgaW4gQ2FsaWZvcm5pYSB0cmFjdC1sZXZlbCByYWNlL2V0aG5pY2l0eSBjb3VudHMsIHRvdGFsIHBvcHVsYXRpb24sIGFuZCB0b3RhbCBudW1iZXIgb2YgaG91c2Vob2xkcy4gSG93IGRpZCBJIGZpbmQgdGhlIHZhcmlhYmxlIElEcz8gQ2hlY2sgW0xhYiAyXShMYWIyLmh0bWwpLiBTaW5jZSB3ZSB3YW50IHRyYWN0cywgd2XigJlsbCB1c2UgdGhlIGBnZW9ncmFwaHkgPSAidHJhY3QiYCBhcmd1bWVudC4KYGBge3IsIG1lc3NhZ2U9RkFMU0V9CmNhLnRyYWN0cyA8LSBnZXRfYWNzKGdlb2dyYXBoeSA9ICJ0cmFjdCIsIAogICAgICAgICAgICAgIHllYXIgPSAyMDIzLAogICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGModHBvcHIgPSAiQjAzMDAyXzAwMSIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbmh3aGl0ZSA9ICJCMDMwMDJfMDAzIiwgbmhibGsgPSAiQjAzMDAyXzAwNCIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbmhhc24gPSAiQjAzMDAyXzAwNiIsIGhpc3AgPSAiQjAzMDAyXzAxMiIpLCAKICAgICAgICAgICAgICBzdGF0ZSA9ICJDQSIsCiAgICAgICAgICAgICAgb3V0cHV0ID0gIndpZGUiLAogICAgICAgICAgICAgIHN1cnZleSA9ICJhY3M1IiwKICAgICAgICAgICAgICBnZW9tZXRyeSA9IFRSVUUsCiAgICAgICAgICAgICAgY2IgPSBGQUxTRSkKYGBgCgpcCgpUaGUgb25seSBkaWZmZXJlbmNlIGJldHdlZW4gdGhlIGNvZGUgYWJvdmUgYW5kIHdoYXQgd2UgdXNlZCBpbiBbTGFiIDJdKGxhYjIuaHRtbCkgaXMgd2UgaGF2ZSBvbmUgYWRkaXRpb25hbCBhcmd1bWVudCBhZGRlZCB0byB0aGUgYGdldF9hY3MoKWAgY29tbWFuZDogYGdlb21ldHJ5ID0gVFJVRWAuIFRoaXMgdGVsbHMgUiB0byBicmluZyBpbiB0aGUgc3BhdGlhbCBmZWF0dXJlcyBhc3NvY2lhdGVkIHdpdGggdGhlIGdlb2dyYXBoeSB5b3Ugc3BlY2lmaWVkIGluIHRoZSBjb21tYW5kLCBpbiB0aGUgYWJvdmUgY2FzZSBDYWxpZm9ybmlhIHRyYWN0cy4gWW91IGNhbiBzZXQgYGNhY2hlX3RhYmxlID0gVFJVRWAgc28gdGhhdCB5b3UgZG9u4oCZdCBoYXZlIHRvIHJlLWRvd25sb2FkIGFmdGVyIHlvdeKAmXZlIGRvd25sb2FkZWQgc3VjY2Vzc2Z1bGx5IHRoZSBmaXJzdCB0aW1lLiBUaGlzIGlzIGltcG9ydGFudCBiZWNhdXNlIHlvdSBtaWdodCBiZSBkb3dubG9hZGluZyBhIHJlYWxseSBsYXJnZSBmaWxlLCBvciBtYXkgZW5jb3VudGVyIENlbnN1cyBGVFAgaXNzdWVzIHdoZW4gdHJ5aW5nIHRvIGNvbGxlY3QgZGF0YS4gCgpcCgpXZSBjYW4gYWxzbyBkb3dubG9hZCB0aGUgZGF0YSBhbm90aGVyIHdheS4gV2UgY2FuIGdvIHRvIHRoZSBbQ2Vuc3VzIFNoYXBlZmlsZXMgd2Vic2l0ZV0oaHR0cHM6Ly93d3cuY2Vuc3VzLmdvdi9jZ2ktYmluL2dlby9zaGFwZWZpbGVzL2luZGV4LnBocCkgYW5kIG5hdmlnYXRlIHRvIDIwMjMsIENlbnN1cyBUcmFjdHMsIHRoZW4gQ2FsaWZvcm5pYS4gV2Ugd2lsbCB0aGVuIGRvd25sb2FkIGEgLnppcCBmaWxlIHRoYXQgY29udGFpbnMgYW4gRVNSSSBzaGFwZWZpbGUgb2YgdGhlIENlbnN1cyB0cmFjdHMgZm9yIENhbGlmb3JuaWEuIFdoZW4gd2UgdW56aXAgdGhlIGZpbGUsIHdlIHNlZSBhIHNlcmllcyBvZiBmaWxlcy4gVGhhbmtmdWxseSwgdGhlICoqc2YqKiBwYWNrYWdlIGhhcyBhbiBgc3RfcmVhZCgpYCBmdW5jdGlvbiB0aGF0IGNhbiB0YWNrbGUgdGhpcyEgRm9yIG1vcmUgZGV0YWlsZWQgZGF0YSBkb3dubG9hZHMsIHlvdSBjYW4gdXNlIFtOYXRpb25hbCBIaXN0b3JpY2FsIEdlb2dyYXBoaWMgSW5mb3JtYXRpb24gU3lzdGVtIChOSEdJUyldKGh0dHBzOi8vd3d3Lm5oZ2lzLm9yZy8pLgoKYGBge3IgZXZhbD1GQUxTRX0KY2EudHJhY3RzIDwtIHN0X3JlYWQoIi9Vc2Vycy9wamFtZXMxL0Rvd25sb2Fkcy90bF8yMDI0XzA2X3RyYWN0L3RsXzIwMjRfMDZfdHJhY3Quc2hwIikKYGBgCgoKTGV0cyB0YWtlIGEgbG9vayBhdCBvdXIgZGF0YS4KClwKCmBgYHtyfQpjYS50cmFjdHMKYGBgCgpcCgpUaGUgb2JqZWN0IGxvb2tzIG11Y2ggbGlrZSBhIGJhc2ljIHRpYmJsZSwgYnV0IHdpdGggYSBmZXcgZGlmZmVyZW5jZXMuCgogIC0gWW914oCZbGwgZmluZCB0aGF0IHRoZSBkZXNjcmlwdGlvbiBvZiB0aGUgb2JqZWN0IG5vdyBpbmRpY2F0ZXMgdGhhdCBpdCBpcyBhIHNpbXBsZSBmZWF0dXJlIGNvbGxlY3Rpb24gd2l0aCA5LDEyOSBmZWF0dXJlcyAodHJhY3RzIGluICAgLSBDYWxpZm9ybmlhKSB3aXRoIDEzIGZpZWxkcyAoYXR0cmlidXRlcyBvciBjb2x1bW5zIG9mIGRhdGEpLgogIC0gVGhlIGBHZW9tZXRyeSBUeXBlYCBpbmRpY2F0ZXMgdGhhdCB0aGUgc3BhdGlhbCBkYXRhIGFyZSBpbiBgTVVMVElQT0xZR09OYCBmb3JtIChhcyBvcHBvc2VkIHRvIHBvaW50cyBvciBsaW5lcywgdGhlIG90aGVyIGJhc2ljIHZlY3RvciBkYXRhIGZvcm1zKS4KICAtIGBCb3VuZGluZyBib3hgIGluZGljYXRlcyB0aGUgc3BhdGlhbCBleHRlbnQgb2YgdGhlIGZlYXR1cmVzIChmcm9tIGxlZnQgdG8gcmlnaHQsIGZvciBleGFtcGxlLCBDYWxpZm9ybmlhIHRyYWN0cyBnbyBmcm9tIGEgbG9uZ2l0dWRlIG9mIC0xMjQuNDgyIHRvIC0xMTQuMTMxMikuCiAgLSBgR2VvZGV0aWMgQ1JTYCB0ZWxscyB1cyB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtLgogIC0gVGhlIGZpbmFsIGRpZmZlcmVuY2UgaXMgdGhhdCB0aGUgZGF0YSBmcmFtZSBjb250YWlucyB0aGUgY29sdW1uIGdlb21ldHJ5LiBUaGlzIGNvbHVtbiAoYSBsaXN0LWNvbHVtbikgY29udGFpbnMgdGhlIGdlb21ldHJ5IGZvciBlYWNoIG9ic2VydmF0aW9uLiBUaGlzIGxvb2tzIGZhbWlsaWFyIQogIApBdCBpdHMgbW9zdCBiYXNpYywgYW4gKipzZioqIG9iamVjdCBpcyBhIGNvbGxlY3Rpb24gb2Ygc2ltcGxlIGZlYXR1cmVzIHRoYXQgaW5jbHVkZXMgYXR0cmlidXRlcyBhbmQgZ2VvbWV0cmllcyBpbiB0aGUgZm9ybSBvZiBhIGRhdGEgZnJhbWUuIEluIG90aGVyIHdvcmRzLCBpdCBpcyBhIGRhdGEgZnJhbWUgKG9yIHRpYmJsZSkgd2l0aCByb3dzIG9mIGZlYXR1cmVzLCBjb2x1bW5zIG9mIGF0dHJpYnV0ZXMsIGFuZCBhIHNwZWNpYWwgY29sdW1uIGFsd2F5cyBuYW1lZCBnZW9tZXRyeSB0aGF0IGNvbnRhaW5zIHRoZSBzcGF0aWFsIGFzcGVjdHMgb2YgdGhlIGZlYXR1cmVzLgoKSWYgeW91IHdhbnQgdG8gcGVlayBiZWhpbmQgdGhlIGN1cnRhaW4gYW5kIGxlYXJuIG1vcmUgYWJvdXQgdGhlIG5pdHR5IGdyaXR0eSBkZXRhaWxzIGFib3V0IHNpbXBsZSBmZWF0dXJlcywgY2hlY2sgb3V0IHRoZSBvZmZpY2lhbCAqKnNmKiogW3ZpZ25ldHRlLl0oaHR0cHM6Ly9yLXNwYXRpYWwuZ2l0aHViLmlvL3NmL2FydGljbGVzL3NmMS5odG1sKQoKXAoKIyBEYXRhIFdyYW5nbGluZwoKVGhlcmUgaXMgYSBsb3Qgb2Ygc3R1ZmYgW2JlaGluZCB0aGUgY3VydGFpbl0oaHR0cHM6Ly93d3cuamVzc2VzYWRsZXIuY29tL3Bvc3Qvc2ltcGxlLWZlYXR1cmUtb2JqZWN0cy8pIG9mIGhvdyBSIGhhbmRsZXMgc3BhdGlhbCBkYXRhIGFzIHNpbXBsZSBmZWF0dXJlcywgYnV0IHRoZSBtYWluIHRha2Vhd2F5IGlzIHRoYXQgKipzZioqIG9iamVjdHMgYXJlIGRhdGEgZnJhbWVzLiBUaGlzIG1lYW5zIHlvdSBjYW4gdXNlIG1hbnkgb2YgdGhlICoqdGlkeXZlcnNlKiogZnVuY3Rpb25zIHdl4oCZdmUgbGVhcm5lZCBpbiB0aGUgcGFzdCBjb3VwbGUgbGFicyB0byBtYW5pcHVsYXRlICoqc2YqKiBvYmplY3RzLCBpbmNsdWRpbmcgdGhlIHBpcGUgYCU+JWAgb3BlcmF0b3IuIEZvciBleGFtcGxlLCBsZXTigJlzIGRvIHRoZSBmb2xsb3dpbmcgZGF0YSB3cmFuZ2xpbmcgdGFza3Mgb24gYGNhLnRyYWN0c2AuCgoxLiBLZWVwIG5lY2Vzc2FyeSB2YXJpYWJsZXMgdXNpbmcgdGhlIGBzZWxlY3QoKWAgZnVuY3Rpb24KMi4gQnJlYWsgdXAgdGhlIGNvbHVtbiAqTkFNRSogaW50byBzZXBhcmF0ZSB0cmFjdCwgY291bnR5IGFuZCBzdGF0ZSB2YXJpYWJsZXMgdXNpbmcgdGhlIGBzZXBhcmF0ZSgpYCBmdW5jdGlvbgoKV2UgZG8gYWxsIG9mIHRoaXMgaW4gb25lIGxpbmUgb2YgY29udGludW91cyBjb2RlIHVzaW5nIHRoZSBwaXBlIG9wZXJhdG9yIGAlPiVgCgpgYGB7cn0KY2EudHJhY3RzIDwtIGNhLnRyYWN0cyAlPiUKICAgICAgICAgICAgICBzZXBhcmF0ZShOQU1FLCBjKCJUcmFjdCIsICJDb3VudHkiLCAiU3RhdGUiKSwgc2VwID0gIjsgIikKCmdsaW1wc2UoY2EudHJhY3RzKQpgYGAKClwKCkFub3RoZXIgaW1wb3J0YW50IGRhdGEgd3JhbmdsaW5nIG9wZXJhdGlvbiBpcyB0byBqb2luIGF0dHJpYnV0ZSBkYXRhIHRvIGFuIHNmIG9iamVjdC4gRm9yIGV4YW1wbGUsIGxldOKAmXMgc2F5IHlvdSB3YW50ZWQgdG8gYWRkIHRyYWN0IGxldmVsIG1lZGlhbiBob3VzZWhvbGQgaW5jb21lLCB3aGljaCBpcyBsb2NhdGVkIGluIHRoZSBmaWxlIGNhX21lZF9pbmNfMjAxOC5jc3YuIFJlYWQgdGhlIGZpbGUgaW4uCgpgYGB7cn0KY2EuaW5jIDwtIGdldF9hY3MoZ2VvZ3JhcGh5ID0gInRyYWN0IiwgCiAgICAgICAgICAgICAgeWVhciA9IDIwMjMsCiAgICAgICAgICAgICAgdmFyaWFibGVzID0gYyhtZWRpbmMgPSAiQjE5MDEzXzAwMSIpLCAKICAgICAgICAgICAgICBzdGF0ZSA9ICJDQSIsCiAgICAgICAgICAgICAgc3VydmV5ID0gImFjczUiLAogICAgICAgICAgICAgIG91dHB1dCA9ICJ3aWRlIikKYGBgCgpcCgpVbmxpa2UgYmVmb3JlLCB3ZSBicm91Z2h0IHRoZXNlIGRhdGEgaW4gd2l0aG91dCB0aGUgYGdlb21ldHJ5ID0gVFJVRWAgb3B0aW9uLiBTbyB0aGlzIGlzIGp1c3QgYSB0YWJsZS4gQnV0IHJlbWVtYmVyLCBhbiAqKnNmKiogb2JqZWN0IGlzIGEgZGF0YSBmcmFtZSwgc28gd2UgY2FuIHVzZSBgbGVmdF9qb2luKClgLCB3aGljaCB3ZSBjb3ZlcmVkIGluIFtMYWIgMV0obGFiMS5odG1sKSwgdG8gam9pbiB0aGUgZmlsZXMgKmNhLmluYyogYW5kICpjYS50cmFjdHMqLgoKYGBge3J9CmNhLnRyYWN0cyA8LSBjYS50cmFjdHMgJT4lCiAgbGVmdF9qb2luKGNhLmluYywgYnkgPSAiR0VPSUQiKQoKI3Rha2UgYSBsb29rIHRvIG1ha2Ugc3VyZSB0aGUgam9pbiB3b3JrZWQKZ2xpbXBzZShjYS50cmFjdHMpCmBgYAoKXAoKTm90ZSB0aGF0IHdlIGNhbuKAmXQgdXNlIGBsZWZ0X2pvaW4oKWAgdG8gam9pbiB0aGUgYXR0cmlidXRlIHRhYmxlcyBvZiB0d28gKipzZioqIGZpbGVzLiBZb3Ugd2lsbCBuZWVkIHRvIGVpdGhlciBtYWtlIG9uZSBvZiB0aGVtIG5vdCBzcGF0aWFsIGJ5IHVzaW5nIHRoZSBgc3RfZHJvcF9nZW9tZXRyeSgpYCBmdW5jdGlvbiBvciB1c2UgdGhlIGBzdF9qb2luKClgIGZ1bmN0aW9uIHRvIHNwYXRpYWxseSBqb2luIHRoZW0uCgpXZSB1c2UgdGhlIGZ1bmN0aW9uIGB0bV9zaGFwZSgpYCBmcm9tIHRoZSAqKnRtYXAqKiBwYWNrYWdlIHRvIG1hcCB0aGUgZGF0YS4gCgpgYGB7cn0KdG1hcF9tb2RlKCJwbG90IikKdHJhY3RfbWFwIDwtIHRtX3NoYXBlKGNhLnRyYWN0cykgKyAgIHRtX3BvbHlnb25zKCkKdHJhY3RfbWFwCmBgYAoKXAoKIyBTcGF0aWFsIERhdGEgV3JhbmdsaW5nCgpUaGVyZSBpcyBEYXRhIFdyYW5nbGluZyBhbmQgdGhlbiB0aGVyZSBpcyBTcGF0aWFsIERhdGEgV3JhbmdsaW5nLiBDdWUgZGFuZ2Vyb3VzIHNvdW5kaW5nIG11c2ljLiBXZWxsLCBpdOKAmXMgbm90IHRoYXQgZGFuZ2Vyb3VzIG9yIHNjYXJ5LiBTcGF0aWFsIERhdGEgV3JhbmdsaW5nIGludm9sdmVzIGNsZWFuaW5nIG9yIGFsdGVyaW5nIHlvdXIgZGF0YSBzZXQgYmFzZWQgb24gdGhlIGdlb2dyYXBoaWMgbG9jYXRpb24gb2YgZmVhdHVyZXMuIFRoZSAqKnNmKiogcGFja2FnZSBvZmZlcnMgYSBzdWl0ZSBvZiBmdW5jdGlvbnMgdW5pcXVlIHRvIHdyYW5nbGluZyBzcGF0aWFsIGRhdGEuIE1vc3Qgb2YgdGhlc2UgZnVuY3Rpb25zIHN0YXJ0IG91dCB3aXRoIHRoZSBwcmVmaXggYHN0X2AuIFRvIHNlZSBhbGwgb2YgdGhlIGZ1bmN0aW9ucywgdHlwZSBpbgoKYGBge3J9Cm1ldGhvZHMoY2xhc3MgPSAic2YiKQpgYGAKClwKCldlIHdvbuKAmXQgZ28gdGhyb3VnaCBhbGwgb2YgdGhlc2UgZnVuY3Rpb25zIGFzIHRoZSBsaXN0IGlzIHF1aXRlIGV4dGVuc2l2ZS4gQnV0LCB3ZeKAmWxsIGdvIHRocm91Z2ggYSBmZXcgcmVsZXZhbnQgc3BhdGlhbCBvcGVyYXRpb25zIGZvciB0aGlzIGNsYXNzIGJlbG93LiBUaGUgZnVuY3Rpb24gd2Ugd2lsbCBiZSBwcmltYXJpbHkgdXNpbmcgaXMgYHN0X2pvaW4oKWAuCgojIyBJbnRlcnNlY3QKCkEgY29tbW9uIHNwYXRpYWwgZGF0YSB3cmFuZ2xpbmcgaXNzdWUgaXMgdG8gc3Vic2V0IGEgc2V0IG9mIHNwYXRpYWwgb2JqZWN0cyBiYXNlZCBvbiB0aGVpciBsb2NhdGlvbiByZWxhdGl2ZSB0byBhbm90aGVyIHNwYXRpYWwgb2JqZWN0LiBJbiBvdXIgY2FzZSwgd2Ugd2FudCB0byBrZWVwIENhbGlmb3JuaWEgdHJhY3RzIHRoYXQgYXJlIGluIHRoZSBTYWNyYW1lbnRvIG1ldHJvIGFyZWEuIFdlIGNhbiBkbyB0aGlzIHVzaW5nIHRoZSBgc3Rfam9pbigpYCBmdW5jdGlvbi4gV2XigJlsbCBuZWVkIHRvIHNwZWNpZnkgYSB0eXBlIG9mIGpvaW4uIExldOKAmXMgZmlyc3QgdHJ5IGBqb2luID0gc3RfaW50ZXJzZWN0c2AuIEZpcnN0LCBsZXQncyBicmluZyBpbiBhIHBvbHlnb24gb2YgdGhlIFNhY3JhbWVudG8gbWV0cm8gYXJlYSBmcm9tIEdpdGh1Yi4KCmBgYHtyfQp1cmwgPC0gImh0dHBzOi8vZ2l0aHViLmNvbS9wamFtZXMtdWNkYXZpcy9TUEgyMTUvcmF3L21haW4vc2FjLm1ldHJvLnJkcyIKZG93bmxvYWQuZmlsZSh1cmwsIGRlc3RmaWxlID0gInNhYy5tZXRyby5yZHMiLCBtb2RlID0gIndiIikKc2FjLm1ldHJvIDwtIHJlYWRSRFMoInNhYy5tZXRyby5yZHMiKQpgYGAKClwKCkxldCdzIHRha2UgYSBsb29rIGF0ICpzYWMubWV0cm8qIGFuZCB1bmRlcnN0YW5kIHdoYXQgZmlsZSBpdCBpcy4KCmBgYHtyfQpnbGltcHNlKHNhYy5tZXRybykKYGBgCgpcCgpPSywgdGhhdCBnZW9tZXRyeSBsb29rcyBnb29kLiBBbmQgaXQncyBhIHBvbHlnb24sIHNvIHRoYXQncyBnb29kLiBMZXQncyBub3cgdHJ5IHRvIGludGVyc2VjdCBvdXIgKnNhYy5tZXRybyogZGF0YXNldCB3aXRoIG91ciAqY2EudHJhY3RzKiBkYXRhc2V0LiAKCmBgYHtyfQpzYWMubWV0cm8udHJhY3RzLmludCA8LSBzdF9qb2luKGNhLnRyYWN0cywgc2FjLm1ldHJvLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBqb2luID0gc3RfaW50ZXJzZWN0cywgbGVmdD1GQUxTRSkKYGBgCgpcCgpUaGUgYWJvdmUgY29kZSB0ZWxscyBSIHRvIGlkZW50aWZ5IHRoZSBwb2x5Z29ucyBpbiAqY2EudHJhY3RzKiB0aGF0IGludGVyc2VjdCB3aXRoIHRoZSBwb2x5Z29uICpzYWMubWV0cm8qLiBXZSBpbmRpY2F0ZSB3ZSB3YW50IGEgcG9seWdvbiBpbnRlcnNlY3Rpb24gYnkgc3BlY2lmeWluZyBgam9pbiA9IHN0X2ludGVyc2VjdHNgLiBUaGUgb3B0aW9uIGBsZWZ0PUZBTFNFYCB0ZWxscyBSIHRvIHJlbW92ZSB0aGUgcG9seWdvbnMgZnJvbSAqY2EudHJhY3RzKiB0aGF0IGRvIG5vdCBpbnRlcnNlY3QgKG1ha2UgaXQgVFJVRSBhbmQgc2VlIHdoYXQgaGFwcGVucykgd2l0aCAqc2FjLm1ldHJvKi4gUGxvdHRpbmcgb3VyIHRyYWN0cywgd2UgZ2V0OgpgYGB7cn0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy5pbnQpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAiYmx1ZSIpICsKdG1fc2hhcGUoc2FjLm1ldHJvKSArICAKICB0bV9ib3JkZXJzKGNvbCA9ICJyZWQiKQpgYGAKClwKCiMjIFdpdGhpbgoKV2UgaGF2ZSBvbmUgc21hbGwgaXNzdWUuIFVzaW5nIGBqb2luID0gc3RfaW50ZXJzZWN0c2AgcmV0dXJucyBhbGwgdHJhY3RzIHRoYXQgaW50ZXJzZWN0ICpzYWMubWV0cm8qLCB3aGljaCBpbmNsdWRlIHRob3NlIHRoYXQgdG91Y2ggdGhlIG1ldHJv4oCZcyBib3VuZGFyeS4gTm8gYnVlbm8uIFdlIGNhbiBpbnN0ZWFkIHVzZSB0aGUgYXJndW1lbnQgYGpvaW4gPSBzdF93aXRoaW5gIHRvIHJldHVybiB0cmFjdHMgdGhhdCBhcmUgKmNvbXBsZXRlbHkgd2l0aGluKiB0aGUgbWV0cm8gYXJlYS4KCmBgYHtyfQpzYWMubWV0cm8udHJhY3RzLncgPC0gc3Rfam9pbihjYS50cmFjdHMsIHNhYy5tZXRybywgam9pbiA9IHN0X3dpdGhpbiwgbGVmdD1GQUxTRSkKCnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJibHVlIikgKwp0bV9zaGFwZShzYWMubWV0cm8pICsKICB0bV9ib3JkZXJzKGNvbCA9ICJyZWQiKQpgYGAKClwKCkxvb2tpbmcgbXVjaCBiZXR0ZXIhIE5vdywgaWYgd2UgbG9vayBhdCAqc2FjLm1ldHJvLnRyYWN0cy53KuKAmXMgYXR0cmlidXRlIHRhYmxlLCB5b3XigJlsbCBzZWUgaXQgaW5jbHVkZXMgYWxsIHRoZSB2YXJpYWJsZXMgZnJvbSBib3RoICpjYS50cmFjdHMqIGFuZCAqc2FjLm1ldHJvKi4gV2UgZG9u4oCZdCBuZWVkIHRoZXNlIHZhcmlhYmxlcywgc28gdXNlIGBzZWxlY3QoKWAgdG8gZWxpbWluYXRlIHRoZW0uIFlvdeKAmWxsIGFsc28gbm90aWNlIHRoYXQgaWYgdmFyaWFibGVzIGZyb20gdHdvIGRhdGEgc2V0cyBzaGFyZSB0aGUgc2FtZSBuYW1lLCBSIHdpbGwga2VlcCBib3RoIGFuZCBhdHRhY2ggYSAqLngqIGFuZCAqLnkqIHRvIHRoZSBlbmQuIEZvciBleGFtcGxlLCBJIHdhcyBmb3VuZCBpbiBib3RoICpjYS50cmFjdHMqIGFuZCAqc2FjLm1ldHJvKiwgc28gUiBuYW1lZCBvbmUgKkdFT0lELngqIGFuZCB0aGUgb3RoZXIgdGhhdCB3YXMgbWVyZ2VkIGluIHdhcyBuYW1lZCAqR0VPSUQueSouCgpcCgojIE1hcHBpbmcgaW4gUgoKT0ssIHNvIG5vdyB3ZSd2ZSB0YWxrZWQgYSBsaXR0bGUgYWJvdXQgaG93IHRvIGJyaW5nIGluIGFuZCBtYW5pcHVsYXRlIHZlY3RvciBwb2x5Z29uIGRhdGEsIGxldCdzIGRvIHNvbWUgbWFwcGluZyBhbmQgY3JlYXRlIHNvbWUgY2hvcm9wbGV0aCBtYXBzLiBXZSBjYW4gZG8gdGhpcyB3aXRoIHRoZSAqKmdncGxvdCoqIHBhY2thZ2UsIHRoZSAqKnRtYXAqKiBwYWNrYWdlLCBhbmQgdGhlICoqbGVhZmxldCoqIHBhY2thZ2UgKHdoaWNoIHdlIHdvbid0IGNvdmVyIG5vdywgYnV0IGl0J3MgdmVyeSBjb29sIGZvciBpbnRlcmFjdGl2ZSBtYXBzKS4gTGV0J3Mgc3RhcnQgd2l0aCAqKmdncGxvdCoqLgoKIyMgQ2hvcm9wbGV0aCBtYXBzIGluIGdncGxvdAoKQmVjYXVzZSAqKnNmKiogaXMgdGlkeSBmcmllbmRseSwgaXQgaXMgbm8gc3VycHJpc2Ugd2UgY2FuIHVzZSB0aGUgKip0aWR5dmVyc2UqKiBwbG90dGluZyBmdW5jdGlvbiBgZ2dwbG90KClgIHRvIG1ha2UgbWFwcy4gV2UgYWxyZWFkeSByZWNlaXZlZCBhbiBpbnRyb2R1Y3Rpb24gdG8gYGdncGxvdCgpYCBpbiBbTGFiIDJdKGxhYjIuaHRtbCkuIFJlY2FsbCBpdHMgYmFzaWMgc3RydWN0dXJlOgoKYGBge3IsIGV2YWw9RkFMU0V9CmdncGxvdChkYXRhID0gPERBVEE+KSArCiAgICAgIDxHRU9NX0ZVTkNUSU9OPihtYXBwaW5nID0gYWVzKHgsIHkpKSArCiAgICAgIDxPUFRJT05TPigpCmBgYAoKXAoKSW4gbWFwcGluZywgYGdlb21fc2YoKWAgaXMgYDxHRU9NX0ZVTkNUSU9OPigpYC4gVW5saWtlIHdpdGggZnVuY3Rpb25zIGxpa2UgYGdlb21faGlzdG9ncmFtKClgIGFuZCBgZ2VvbV9ib3hwbG90KClgLCB3ZSBkb27igJl0IHNwZWNpZnkgYW4geCBhbmQgeSBheGlzLiBJbnN0ZWFkIHlvdSB1c2UgYGZpbGxgIGlmIHlvdSB3YW50IHRvIG1hcCBhIHZhcmlhYmxlIG9yIGNvbG9yIHRvIGp1c3QgbWFwIGJvdW5kYXJpZXMuCgpMZXTigJlzIHVzZSBgZ2dwbG90KClgIHRvIG1ha2UgYSBjaG9yb3BsZXRoIG1hcC4gV2UgbmVlZCB0byBzcGVjaWZ5IGEgbnVtZXJpYyB2YXJpYWJsZSBpbiB0aGUgYGZpbGwgPWAgYXJndW1lbnQgd2l0aGluIGBnZW9tX3NmKClgLiBIZXJlIHdlIG1hcCB0cmFjdC1sZXZlbCBtZWRpYW4gaG91c2Vob2xkIGluY29tZSBpbiB0aGUgU2FjcmFtZW50byBtZXRybyBhcmVhLgoKYGBge3J9CmdncGxvdChkYXRhID0gc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgZ2VvbV9zZihhZXMoZmlsbCA9IG1lZGluY0UpKQpgYGAKClwKCldlIGNhbiBhbHNvIHNwZWNpZnkgYSB0aXRsZSAoYXMgd2VsbCBhcyBzdWJ0aXRsZXMgYW5kIGNhcHRpb25zKSB1c2luZyB0aGUgYGxhYnMoKWAgZnVuY3Rpb24uCgoKYGBge3J9CmdncGxvdChkYXRhID0gc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgZ2VvbV9zZihhZXMoZmlsbCA9IG1lZGluY0UpKSArCiAgICBsYWJzKHRpdGxlID0gIk1lZGlhbiBJbmNvbWUgU2FjcmFtZW50byBNU0EgVHJhY3RzIikgCmBgYAoKXAoKV2UgY2FuIG1ha2UgZnVydGhlciBsYXlvdXQgYWRqdXN0bWVudHMgdG8gdGhlIG1hcC4gRG9u4oCZdCBsaWtlIGEgYmx1ZSBzY2FsZSBvbiB0aGUgbGVnZW5kPyBZb3UgY2FuIGNoYW5nZSBpdCB1c2luZyB0aGUgYHNjYWxlX2ZpbGVfZ3JhZGllbnQoKWAgZnVuY3Rpb24uIExldOKAmXMgY2hhbmdlIGl0IHRvIGEgd2hpdGUgdG8gcmVkIGdyYWRpZW50LiBXZSBjYW4gYWxzbyBlbGltaW5hdGUgdGhlIGdyYXkgdHJhY3QgYm9yZGVyIGNvbG9ycyB0byBtYWtlIHRoZSBmaWxsIGNvbG9yIGRpc3RpbmN0aW9uIGNsZWFyZXIuIFdlIGRvIHRoaXMgYnkgc3BlY2lmeWluZyBgY29sb3IgPSBOQWAgaW5zaWRlIGBnZW9tX3NmKClgLiBXZSBjYW4gYWxzbyBnZXQgcmlkIG9mIHRoZSBncmF5IGJhY2tncm91bmQgYnkgc3BlY2lmeWluZyBhIGJhc2ljIGJsYWNrIGFuZCB3aGl0ZSB0aGVtZSB1c2luZyBgdGhlbWVfYncoKWAuIFdlIGFsc28gYWRkZWQgYSBjYXB0aW9uIGluZGljYXRpbmcgdGhlIHNvdXJjZSBvZiB0aGUgZGF0YSB1c2luZyB0aGUgYGNhcHRpb25zID1gIHBhcmFtZXRlciB3aXRoaW4gYGxhYnMoKWAuIFdlIHRoZW4gY2hhbmdlZCB0aGUgY29sb3IgdG8gcmVkIHVzaW5nIGxhYmVscyBmb3IgYGxvdz1gIGFuZCBgaGlnaD1gLCBhbmQgd2UgYWRkZWQgYSBuYW1lIHRvIG91ciBsZWdlbmQgd2l0aCBgbmFtZT0nLgoKYGBge3J9CmdncGxvdChkYXRhID0gc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgZ2VvbV9zZihhZXMoZmlsbCA9IG1lZGluY0UpLCBjb2xvciA9IE5BKSArCiAgICBzY2FsZV9maWxsX2dyYWRpZW50KGxvdz0gIndoaXRlIiwgaGlnaCA9ICJyZWQiLCBuYS52YWx1ZSA9ImdyYXkiLCBuYW1lID0gIk1lZGlhbiBJbmNvbWUiKSArICAKICAgIGxhYnModGl0bGUgPSAiTWVkaWFuIEluY29tZSBTYWNyYW1lbnRvIE1TQSBUcmFjdHMiLAogICAgICAgICBjYXB0aW9uID0gIlNvdXJjZTogQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleSIpICsgIAogIHRoZW1lX2J3KCkKYGBgCkRhcmUgSSBzYXksIHdlIGFyZSByZWFkeSBmb3IgdGhlIE5ldyBZb3JrIFRpbWVzIHdpdGggdGhpcyBtYXAhCgpcCgojIyBQb2ludHMgb24gdG9wIG9mIHBvbHlnb25zCgpPSywgbm93IHRoYXQgd2UgaGF2ZSBtYXBwZWQgcG9pbnRzIGFuZCBtYXBwZWQgcG9seWdvbnMsIGxldCdzIHB1dCB0aGVtIGJvdGggdG9nZXRoZXIhIEZpcnN0LCB3ZSBhcmUgZ29pbmcgdG8gYnJpbmcgaW4gb3VyIG9sZCBmcmllbmQgKkNBZGF0YSogZnJvbSBsYXN0IHdlZWsncyBsYWIuCgpgYGB7cn0KZGF0YShDQWRhdGEpCmNhX3B0cyA8LSBDQWRhdGEKc3VtbWFyeShjYV9wdHMpCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpKQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCiNTZXQgQ1JTCmNhX3B0c19jcnMgPC0gc3Rfc2V0X2NycyhjYV9wdHMsIGNhX3Byb2opCmBgYAoKXAoKVGhpcyB0aW1lLCB3ZSB3aWxsIG1hcCB0aG9zZSBwb2ludHMgd2l0aCAqKmdncGxvdCoqLgoKYGBge3J9CmdncGxvdChkYXRhID0gY2FfcHRzX2NycykgKwogIGdlb21fc2YoZmlsbCA9ICJibGFjayIpICsKICBsYWJzKHRpdGxlID0gIlN0dWR5IFBhcnRpY2lwYW50cyIsCiAgICAgICBjYXB0aW9uID0gIlNvdXJjZTogT3ZhcmlhbiBDYW5jZXIgQ2FzZXMiKSArICAKICB0aGVtZV9idygpCgpgYGAKClwKCldlIGNhbiBvdmVybGF5IHRoZSBwb2ludHMgb3ZlciBTYWNyYW1lbnRvIHRyYWN0cyB0byBnaXZlIHRoZSBsb2NhdGlvbnMgc29tZSBwZXJzcGVjdGl2ZS4gSGVyZSwgeW91IGFkZCB0d28gYGdlb21fc2YoKWAgYXJndW1lbnRzIGZvciB0aGUgdHJhY3RzIGFuZCB0aGUgY2FuY2VyIGNhc2VzLgoKYGBge3J9CmdncGxvdCgpICsKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncpICsKICBnZW9tX3NmKGRhdGEgPSBjYV9wdHNfY3JzLCBmaWxsID0gImJsYWNrIikgKwogIGxhYnModGl0bGUgPSAiU3R1ZHkgUGFydGljaXBhbnRzIiwKICAgICAgIGNhcHRpb24gPSAiU291cmNlOiBPdmFyaWFuIENhbmNlciBDYXNlcyIpICsgIAogIHRoZW1lX2J3KCkKYGBgCgpcCgpIbW1tLiBUaGF0IGRvZXNuJ3QgbG9vayBncmVhdC4gV2UgaGF2ZSBsb3RzIG9mIGNhc2VzIG91dHNpZGUgb2YgU2FjcmFtZW50by4gTGV0J3MgZmlsdGVyIG91dCB0byBqdXN0IHBpY2sgY2FzZXMgd2l0aGluIHRoZSBTYWNyYW1lbnRvIGFyZWEuIAoKYGBge3IsIGV2YWw9RkFMU0V9CmNhX3B0c19jcnMudyA8LSBzdF9qb2luKGNhX3B0c19jcnMsIHNhYy5tZXRyby50cmFjdHMudywgam9pbiA9IHN0X3dpdGhpbiwgbGVmdD1GQUxTRSkKYGBgCgpPb29mLiBUaGF0IGRvZXNuJ3Qgd29yay4gSXQgc2F5cyBvdXIgIGBzdF9jcnMoeCkgPT0gc3RfY3JzKHkpIGlzIG5vdCBUUlVFYC4gVGhhdCBtZWFucyBvdXIgQ29vcmRpbmF0ZSBSZWZlcmVuY2UgU3lzdGVtcyBhcmUgbm90IG1hdGNoaW5nISBMZXQncyB0cmFuc2Zvcm0gb3VyIGNhbmNlciBkYXRhc2V0ICpjYV9wdHNfY3JzLncqIHRvIG1hdGNoIHRoZSBDUlMgZm9yICpzYWMubWV0cm8udHJhY3RzLncqIHdpdGggb25lIGVhc3kgc3RlcCB1c2luZyBgc3RfdHJhbnNmb3JtYDoKYGBge3J9CiNjaGVjayBjcnMgb2YgZWFjaCBkYXRhc2V0CnN0X2NycyhjYV9wdHNfY3JzKQpzdF9jcnMoc2FjLm1ldHJvLnRyYWN0cy53KQoKI2NyZWF0ZSBuZXcgZGF0YXNldCB3aXRoIHRyYW5zZm9ybWVkIENSUwpjYV9wdHNfY3JzLnRyYW5zZm9ybWVkIDwtIHN0X3RyYW5zZm9ybShjYV9wdHNfY3JzLHN0X2NycyhzYWMubWV0cm8udHJhY3RzLncpKQoKc3RfY3JzKGNhX3B0c19jcnMudHJhbnNmb3JtZWQgKQpgYGAKClwKCk9LLCBsZXQncyB0cnkgdGhpcyBhZ2FpbiEKCmBgYHtyfQpjYV9wdHNfY3JzLncgPC0gc3Rfam9pbihjYV9wdHNfY3JzLnRyYW5zZm9ybWVkLCBzYWMubWV0cm8udHJhY3RzLncsIGpvaW4gPSBzdF93aXRoaW4sIGxlZnQ9RkFMU0UpCmBgYAoKSXQgd29ya2VkISBPSywgbm93IGxldCdzIHRyeSBvdXIgbWFwIGFnYWluLgoKYGBge3J9CmdncGxvdCgpICsKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncpICsKICBnZW9tX3NmKGRhdGEgPSBjYV9wdHNfY3JzLncsIGZpbGwgPSAiYmxhY2siKSArCiAgbGFicyh0aXRsZSA9ICJTdHVkeSBQYXJ0aWNpcGFudHMiLAogICAgICAgY2FwdGlvbiA9ICJTb3VyY2U6IE92YXJpYW4gQ2FuY2VyIENhc2VzIikgKyAgCiAgdGhlbWVfYncoKQpgYGAKClwKCkFscmlnaHQsIHdobydzIHJlYWR5IGZvciBhIGNoYWxsZW5nZT8gTGV0J3MgcHV0IGl0IGFsbCB0b2dldGhlciBpbiBvbmUgbmljZSBtYXAuCgpgYGB7cn0KZ2dwbG90KCkgKyAKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncsIGFlcyhmaWxsID0gbWVkaW5jRSksIGNvbG9yID0gTkEpICsKICAgIHNjYWxlX2ZpbGxfZ3JhZGllbnQobG93PSAid2hpdGUiLCBoaWdoID0gInJlZCIsIG5hLnZhbHVlID0iZ3JheSIsIG5hbWUgPSAiTWVkaWFuIEluY29tZSIpICsgIAogIGdlb21fc2YoZGF0YSA9IGNhX3B0c19jcnMudywgZmlsbCA9ICJibGFjayIpICsKICBsYWJzKHRpdGxlID0gIlN0dWR5IFBhcnRpY2lwYW50cyBPdmVybGFpZCB3aXRoIE1lZGlhbiBJbmNvbWUgb2YgU2FjcmFtZW50byBUcmFjdHMiLAogICAgICAgY2FwdGlvbiA9ICJTb3VyY2U6IEFtZXJpY2FuIENvbW11bml0eSBTdXJ2ZXkgYW5kIE92YXJpYW4gQ2FuY2VyIENhc2VzIikgKwogIHRoZW1lX2J3KCkKICAKYGBgCgpcCgpDYW4gSSBqdXN0IHNheSwgeW91J3JlIHZlcnkgaW1wcmVzc2l2ZS4gV2VsbCBkb25lIQoKXAoKIyMgdG1hcAoKV2hldGhlciB5b3UgcHJlZmVyICoqdG1hcCoqIG9yICoqZ2dwbG90KiogaXMgdXAgdG8geW91LCBidXQgSSBmaW5kIHRoYXQgKip0bWFwKiogaGFzIHNvbWUgYmVuZWZpdHMsIHNvIGxldOKAmXMgZm9jdXMgb24gaXRzIG1hcHBpbmcgZnVuY3Rpb25zIG5leHQuCgoqKnRtYXAqKiB1c2VzIHRoZSBzYW1lIGxheWVyZWQgbG9naWMgYXMgKipnZ3Bsb3QqKi4gQXMgd2Ugc2F3IGxhc3Qgd2VlaywgdGhlIGluaXRpYWwgY29tbWFuZCBpcyBgdG1fc2hhcGUoKWAsIHdoaWNoIHNwZWNpZmllcyB0aGUgZ2VvZ3JhcGh5IHRvIHdoaWNoIHRoZSBtYXBwaW5nIGlzIGFwcGxpZWQuIFlvdSB0aGVuIGJ1aWxkIG9uIGB0bV9zaGFwZSgpYCBieSBhZGRpbmcgb25lIG9yIG1vcmUgZWxlbWVudHMgc3VjaCBhcyBgdG1fcG9seWdvbnMoKWAgZm9yIHBvbHlnb25zLCBgdG1fYm9yZGVycygpYCBmb3IgbGluZXMsIGFuZCBgdG1fZG90cygpYCBmb3IgcG9pbnRzLiBBbGwgYWRkaXRpb25hbCBmdW5jdGlvbnMgdGFrZSBvbiB0aGUgZm9ybSBvZiBgdG1fYC4gQ2hlY2sgdGhlIGZ1bGwgbGlzdCBvZiBgdG1fYCBlbGVtZW50cyBbaGVyZV0oaHR0cHM6Ly93d3cucmRvY3VtZW50YXRpb24ub3JnL3BhY2thZ2VzL3RtYXAvdmVyc2lvbnMvMi4wL3RvcGljcy90bWFwLWVsZW1lbnQpLgoKIyMjIENob3JvcGxldGggbWFwcyBpbiB0bWFwCgpMZXTigJlzIG1ha2UgYSBzdGF0aWMgY2hvcm9wbGV0aCBtYXAgb2YgbWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUgaW4gU2FjcmFtZW50byBNU0EganVzdCBsaWtlIHdlIGRpZCBhYm92ZSwgYnV0IHRoaXMgdGltZSBpbiAqKnRtYXAqKi4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIikKYGBgCgpcCgpXZSBmaXJzdCBwdXQgdGhlIGRhdGFzZXQgKnNhYy5tZXRyby50cmFjdHMudyogaW5zaWRlIGB0bV9zaGFwZSgpYC4gQmVjYXVzZSB5b3UgYXJlIHBsb3R0aW5nIHBvbHlnb25zLCB5b3UgdXNlIGB0bV9wb2x5Z29ucygpYCBuZXh0LiBUaGUgYXJndW1lbnQgYGNvbCA9ICJtZWRpbmNFImAgdGVsbHMgUiB0byBzaGFkZSAob3IgY29sb3IpIHRoZSB0cmFjdHMgYnkgdGhlIHZhcmlhYmxlICptZWRpbmNFLiogVGhlIGFyZ3VtZW50IGBzdHlsZSA9ICJxdWFudGlsZSJgIHRlbGxzIFIgdG8gYnJlYWsgdXAgdGhlIHNoYWRpbmcgaW50byBxdWFudGlsZXMsIG9yIGVxdWFsIGdyb3VwcyBvZiA1IGFzIGEgZGVmYXVsdC4gSSBmaW5kIHRoYXQgdGhpcyBpcyB3aGVyZSAqKnRtYXAqKiBvZmZlcnMgYSBkaXN0aW5jdCBhZHZhbnRhZ2Ugb3ZlciAqKmdncGxvdCoqIGluIHRoYXQgdXNlcnMgaGF2ZSBncmVhdGVyIGNvbnRyb2wgb3ZlciB0aGUgbGVnZW5kIGFuZCBiaW4gYnJlYWtzLiAqKnRtYXAqKiBhbGxvd3MgdXNlcnMgdG8gc3BlY2lmeSBhbGdvcml0aG1zIHRvIGF1dG9tYXRpY2FsbHkgY3JlYXRlIGJyZWFrcyB3aXRoIHRoZSBzdHlsZSBhcmd1bWVudC4gWW91IGNhbiBhbHNvIGNoYW5nZSB0aGUgbnVtYmVyIG9mIGJyZWFrcyBieSBzZXR0aW5nIGBuPWAuIFRoZSBkZWZhdWx0IGlzIGBuPTVgLiBSYXRoZXIgdGhhbiBxdWludGlsZXMsIHlvdSBjYW4gc2hvdyBxdWFydGlsZXMgdXNpbmcgYG49NGAuIEknbSBmZWVsaW5nIGNyYXp5LiBMZXQncyBkbyBpdC4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIiwgIG49NCkKYGBgCgpcCgpDaGVjayBvdXQgW3RoaXMgbGlua10oaHR0cHM6Ly9nZW9jb21wci5yb2JpbmxvdmVsYWNlLm5ldC9hZHYtbWFwLmh0bWwjY29sb3Itc2V0dGluZ3MpIGZvciBtb3JlIG9uICBhdmFpbGFibGUgY2xhc3NpZmljYXRpb24gc3R5bGVzIGluICoqdG1hcCoqLgoKXAoKVGhlIGB0bV9wb2x5Z29ucygpYCBjb21tYW5kIGlzIGEgd3JhcHBlciBhcm91bmQgdHdvIG90aGVyIGZ1bmN0aW9ucywgYHRtX2ZpbGwoKWAgYW5kIGB0bV9ib3JkZXJzKClgLiBgdG1fZmlsbCgpYCBjb250cm9scyB0aGUgY29udGVudHMgb2YgdGhlIHBvbHlnb25zIChjb2xvciwgY2xhc3NpZmljYXRpb24sIGV0Yy4pLCB3aGlsZSBgdG1fYm9yZGVycygpYCBkb2VzIHRoZSBzYW1lIGZvciB0aGUgcG9seWdvbiBvdXRsaW5lcy4KCkZvciBleGFtcGxlLCB1c2luZyB0aGUgc2FtZSBzaGFwZSAoYnV0IG5vIHZhcmlhYmxlKSwgd2Ugb2J0YWluIHRoZSBvdXRsaW5lcyBvZiB0aGUgbmVpZ2hib3Job29kcyBmcm9tIHRoZSBgdG1fYm9yZGVycygpYCBjb21tYW5kLgpgYGB7cn0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgdG1fYm9yZGVycygpCmBgYAoKXAoKU2ltaWxhcmx5LCB3ZSBvYnRhaW4gYSBjaG9yb3BsZXRoIG1hcCB3aXRob3V0IHRoZSBwb2x5Z29uIG91dGxpbmVzIHdoZW4gd2UganVzdCB1c2UgdGhlIGB0bV9maWxsKClgIGNvbW1hbmQuCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsgCiAgdG1fZmlsbCgibWVkaW5jRSIpCmBgYAoKV2hlbiB3ZSBjb21iaW5lIHRoZSB0d28gY29tbWFuZHMsIHdlIG9idGFpbiB0aGUgc2FtZSBtYXAgYXMgd2l0aCB0bV9wb2x5Z29ucygpICh0aGlzIGlsbHVzdHJhdGVzIGhvdyBpbiBSIG9uZSBjYW4gb2Z0ZW4gb2J0YWluIHRoZSBzYW1lIHJlc3VsdCBpbiBhIG51bWJlciBvZiBkaWZmZXJlbnQgd2F5cykuIFRyeSB0aGlzIG9uIHlvdXIgb3duLgoKXAoKIyMjIENvbG9yIHNjaGVtZQoKVGhlIGFyZ3VtZW50IGBwYWxldHRlID1gIGRlZmluZXMgdGhlIGNvbG9yIHJhbmdlcyBhc3NvY2lhdGVkIHdpdGggdGhlIGJpbnMgYW5kIGRldGVybWluZWQgYnkgdGhlIGBzdHlsZWAgYXJndW1lbnRzLiBTZXZlcmFsIGJ1aWx0LWluIHBhbGV0dGVzIGFyZSBjb250YWluZWQgaW4gKip0bWFwKiouIEZvciBleGFtcGxlLCB1c2luZyBgcGFsZXR0ZSA9ICJSZWRzImAgd291bGQgeWllbGQgdGhlIGZvbGxvd2luZyBtYXAgZm9yIG91ciBleGFtcGxlLgpgYGB7cn0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgdG1fcG9seWdvbnMoY29sID0gIm1lZGluY0UiLCBzdHlsZSA9ICJxdWFudGlsZSIscGFsZXR0ZSA9ICJSZWRzIikgCmBgYAoKVW5kZXIgdGhlIGhvb2QsIGDigJxSZWRz4oCdYCByZWZlcnMgdG8gb25lIG9mIHRoZSBjb2xvciBzY2hlbWVzIHN1cHBvcnRlZCBieSB0aGUgKipSQ29sb3JCcmV3ZXIqKiBwYWNrYWdlIChzZWUgYmVsb3cpLgoKXAoKSW4gYWRkaXRpb24gdG8gdGhlIGJ1aWx0LWluIHBhbGV0dGVzLCBjdXN0b21pemVkIGNvbG9yIHJhbmdlcyBjYW4gYmUgY3JlYXRlZCBieSBzcGVjaWZ5aW5nIGEgdmVjdG9yIHdpdGggdGhlIGRlc2lyZWQgY29sb3JzIGFzIGFuY2hvcnMuIFRoaXMgd2lsbCBjcmVhdGUgYSBzcGVjdHJ1bSBvZiBjb2xvcnMgaW4gdGhlIG1hcCB0aGF0IHJhbmdlIGJldHdlZW4gdGhlIGNvbG9ycyBzcGVjaWZpZWQgaW4gdGhlIHZlY3Rvci4gRm9yIGluc3RhbmNlLCBpZiB3ZSB1c2VkIGBjKOKAnHJlZOKAnSwg4oCcYmx1ZeKAnSlgLCB0aGUgY29sb3Igc3BlY3RydW0gd291bGQgbW92ZSBmcm9tIHJlZCB0byBwdXJwbGUsIHRoZW4gdG8gYmx1ZSwgd2l0aCBpbiBiZXR3ZWVuIHNoYWRlcy4gSW4gb3VyIGV4YW1wbGU6CmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIixwYWxldHRlID0gYygicmVkIiwiYmx1ZSIpKSAKYGBgCgpcCgpOb3QgZXhhY3RseSBhIHByZXR0eSBwaWN0dXJlLiBJbiBvcmRlciB0byBjYXB0dXJlIGEgZGl2ZXJnaW5nIHNjYWxlLCB3ZSBpbnNlcnQgYOKAnHdoaXRl4oCdYCBpbiBiZXR3ZWVuIHJlZCBhbmQgYmx1ZS4KYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGUgPSBjKCJyZWQiLCJ3aGl0ZSIsICJibHVlIikpIApgYGAKClwKCkEgcHJlZmVycmVkIGFwcHJvYWNoIHRvIHNlbGVjdCBhIGNvbG9yIHBhbGV0dGUgaXMgdG8gY2hvc2Ugb25lIG9mIHRoZSBzY2hlbWVzIGNvbnRhaW5lZCBpbiB0aGUgKipSQ29sb3JCcmV3ZXIqKiBwYWNrYWdlLiBUaGVzZSBhcmUgYmFzZWQgb24gdGhlIHJlc2VhcmNoIG9mIGNhcnRvZ3JhcGhlciBDeW50aGlhIEJyZXdlciAoc2VlIHRoZSBjb2xvcmJyZXdlcjIgW3dlYnNpdGVdKGh0dHBzOi8vY29sb3JicmV3ZXIyLm9yZy8jdHlwZT1zZXF1ZW50aWFsJnNjaGVtZT1CdUduJm49MykgZm9yIGRldGFpbHMpLiBDb2xvckJyZXdlciBtYWtlcyBhIGRpc3RpbmN0aW9uIGJldHdlZW4gc2VxdWVudGlhbCBzY2FsZXMgKGZvciBhIHNjYWxlIHRoYXQgZ29lcyBmcm9tIGxvdyB0byBoaWdoKSwgZGl2ZXJnaW5nIHNjYWxlcyAodG8gaGlnaGxpZ2h0IGhvdyB2YWx1ZXMgZGlmZmVyIGZyb20gYSBjZW50cmFsIHRlbmRlbmN5KSwgYW5kIHF1YWxpdGF0aXZlIHNjYWxlcyAoZm9yIGNhdGVnb3JpY2FsIHZhcmlhYmxlcykuIEZvciBlYWNoIHNjYWxlLCBhIHNlcmllcyBvZiBzaW5nbGUgaHVlIGFuZCBtdWx0aS1odWUgc2NhbGVzIGFyZSBzdWdnZXN0ZWQuIEluIHRoZSAqKlJDb2xvckJyZXdlcioqIHBhY2thZ2UsIHRoZXNlIGFyZSByZWZlcnJlZCB0byBieSBhIG5hbWUgKGUuZy4sIHRoZSDigJxSZWRz4oCdIHBhbGV0dGUgd2UgdXNlZCBhYm92ZSBpcyBhbiBleGFtcGxlKS4gVGhlIGZ1bGwgbGlzdCBpcyBjb250YWluZWQgaW4gdGhlICoqUkNvbG9yQnJld2VyKiogZG9jdW1lbnRhdGlvbi4KClRoZXJlIGFyZSB0d28gdmVyeSB1c2VmdWwgY29tbWFuZHMgaW4gdGhpcyBwYWNrYWdlLiBPbmUgc2V0cyBhIGNvbG9yIHBhbGV0dGUgYnkgc3BlY2lmeWluZyBpdHMgbmFtZSBhbmQgdGhlIG51bWJlciBvZiBkZXNpcmVkIGNhdGVnb3JpZXMuIFRoZSByZXN1bHQgaXMgYSBjaGFyYWN0ZXIgdmVjdG9yIHdpdGggdGhlIGhleCBjb2RlcyBvZiB0aGUgY29ycmVzcG9uZGluZyBjb2xvcnMuCgpGb3IgZXhhbXBsZSwgd2Ugc2VsZWN0IGEgc2VxdWVudGlhbCBjb2xvciBzY2hlbWUgZ29pbmcgZnJvbSBibHVlIHRvIGdyZWVuLCBhcyAqQnVHbiosIGJ5IG1lYW5zIG9mIHRoZSBjb21tYW5kIGBicmV3ZXIucGFsYCwgd2l0aCB0aGUgbnVtYmVyIG9mIGNhdGVnb3JpZXMgKDYpIGFuZCB0aGUgc2NoZW1lIGFzIGFyZ3VtZW50cy4gVGhlIHJlc3VsdGluZyB2ZWN0b3IgY29udGFpbnMgdGhlIEhFWCBjb2RlcyBmb3IgdGhlIGNvbG9ycy4KCmBgYHtyfQpicmV3ZXIucGFsKDYsIkJ1R24iKQpgYGAKClwKClVzaW5nIHRoaXMgcGFsZXR0ZSBpbiBvdXIgbWFwIHlpZWxkcyB0aGUgZm9sbG93aW5nIHJlc3VsdC4KYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGU9IkJ1R24iKSAKYGBgCgpcCgpUaGUgY29tbWFuZCBgZGlzcGxheS5icmV3ZXIucGFsKClgIGFsbG93cyB1cyB0byBleHBsb3JlIGRpZmZlcmVudCBjb2xvciBzY2hlbWVzIGJlZm9yZSBhcHBseWluZyB0aGVtIHRvIGEgbWFwLiBGb3IgZXhhbXBsZToKYGBge3J9CmRpc3BsYXkuYnJld2VyLnBhbCg2LCJCdUduIikKYGBgCgpcCgojIyMgTGVnZW5kCgpUaGVyZSBhcmUgbWFueSBvcHRpb25zIHRvIGNoYW5nZSB0aGUgZm9ybWF0dGluZyBvZiB0aGUgbGVnZW5kLiBUaGUgYXV0b21hdGljIHRpdGxlIGZvciB0aGUgbGVnZW5kIGlzIG5vdCB0aGF0IGF0dHJhY3RpdmUsIHNpbmNlIGl0IGlzIHNpbXBseSB0aGUgdmFyaWFibGUgbmFtZS4gVGhpcyBjYW4gYmUgY3VzdG9taXplZCBieSBzZXR0aW5nIHRoZSBgdGl0bGVgIGFyZ3VtZW50LgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGUgPSAiUmVkcyIsCiAgICAgICAgICAgICAgdGl0bGUgPSAiTWVkaWFuIEluY29tZSIpIApgYGAKClwKCkFub3RoZXIgaW1wb3J0YW50IGFzcGVjdCBvZiB0aGUgbGVnZW5kIGlzIGl0cyBwb3NpdGlvbmluZy4gVGhpcyBpcyBoYW5kbGVkIHRocm91Z2ggdGhlIGB0bV9sYXlvdXQoKWAgZnVuY3Rpb24uIFRoaXMgZnVuY3Rpb24gaGFzIGEgdmFzdCBudW1iZXIgb2Ygb3B0aW9ucywgYXMgZGV0YWlsZWQgaW4gdGhlIFtkb2N1bWVudGF0aW9uXShodHRwczovL3d3dy5yZG9jdW1lbnRhdGlvbi5vcmcvcGFja2FnZXMvdG1hcC92ZXJzaW9ucy8yLjEtMS90b3BpY3MvdG1fbGF5b3V0KS4gVGhlcmUgYXJlIGFsc28gc3BlY2lhbGl6ZWQgc3Vic2V0cyBvZiBsYXlvdXQgZnVuY3Rpb25zLCBmb2N1c2VkIG9uIHNwZWNpZmljIGFzcGVjdHMgb2YgdGhlIG1hcCwgc3VjaCBhcyBgdG1fbGVnZW5kKClgLCBgdG1fc3R5bGUoKWAgYW5kIGB0bV9mb3JtYXQoKWAuIFdlIGlsbHVzdHJhdGUgdGhlIHBvc2l0aW9uaW5nIG9mIHRoZSBsZWdlbmQuCgpPZnRlbiwgdGhlIGRlZmF1bHQgbG9jYXRpb24gb2YgdGhlIGxlZ2VuZCBpcyBhcHByb3ByaWF0ZSwgYnV0IHNvbWV0aW1lcyBmdXJ0aGVyIGNvbnRyb2wgaXMgbmVlZGVkLiBUaGUgYGxlZ2VuZC5wb3NpdGlvbmAgYXJndW1lbnQgdG8gdGhlIGB0bV9sYXlvdXRgIGZ1bmN0aW9uIG1vdmVzIHRoZSBsZWdlbmQgYXJvdW5kIHRoZSBtYXAsIGFuZCBpdCB0YWtlcyBhIHZlY3RvciBvZiB0d28gc3RyaW5nIHZhcmlhYmxlcyB0aGF0IGRldGVybWluZSBib3RoIHRoZSBob3Jpem9udGFsIHBvc2l0aW9uICjigJxsZWZ04oCdLCDigJxyaWdodOKAnSwgb3Ig4oCcY2VudGVy4oCdKSBhbmQgdGhlIHZlcnRpY2FsIHBvc2l0aW9uICjigJx0b3DigJ0sIOKAnGJvdHRvbeKAnSwgb3Ig4oCcY2VudGVy4oCdKS4KCkZvciBleGFtcGxlLCBpZiB3ZSB3b3VsZCB3YW50IHRvIG1vdmUgdGhlIGxlZ2VuZCB0byB0aGUgYm90dG9tLXJpZ2h0IHBvc2l0aW9uLCB3ZSB3b3VsZCB1c2UgdGhlIGZvbGxvd2luZyBzZXQgb2YgY29tbWFuZHMuCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIixwYWxldHRlID0gIlJlZHMiLAogICAgICAgICAgICAgIHRpdGxlID0gIk1lZGlhbiBJbmNvbWUiKSArCiAgdG1fbGF5b3V0KGxlZ2VuZC5wb3NpdGlvbiA9IGMoInJpZ2h0IiwgImJvdHRvbSIpKQpgYGAKClwKClRoZXJlIGlzIGFsc28gdGhlIG9wdGlvbiB0byBwb3NpdGlvbiB0aGUgbGVnZW5kIG91dHNpZGUgdGhlIGZyYW1lIG9mIHRoZSBtYXAuIFRoaXMgaXMgYWNjb21wbGlzaGVkIGJ5IHNldHRpbmcgYGxlZ2VuZC5vdXRzaWRlYCB0byBUUlVFLCBhbmQgb3B0aW9uYWxseSBhbHNvIHNwZWNpZnkgaXRzIHBvc2l0aW9uIGJ5IG1lYW5zIG9mIGBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbigpYC4gVGhlIGxhdHRlciBjYW4gdGFrZSB0aGUgdmFsdWVzIOKAnHRvcOKAnSwg4oCcYm90dG9t4oCdLCDigJxyaWdodOKAnSwgYW5kIOKAnGxlZnTigJ0uCgpGb3IgZXhhbXBsZSwgdG8gcG9zaXRpb24gdGhlIGxlZ2VuZCBvdXRzaWRlIGFuZCBvbiB0aGUgcmlnaHQsIHdvdWxkIGJlIGFjY29tcGxpc2hlZCBieSB0aGUgZm9sbG93aW5nIGNvbW1hbmRzLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGUgPSAiUmVkcyIsCiAgICAgICAgICAgICAgdGl0bGUgPSAiTWVkaWFuIEluY29tZSIpICsKICB0bV9sYXlvdXQobGVnZW5kLm91dHNpZGUgPSBUUlVFLCBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbiA9ICJyaWdodCIpCmBgYApXZSBjYW4gYWxzbyBjdXN0b21pemUgdGhlIHNpemUgb2YgdGhlIGxlZ2VuZCwgaXRzIGFsaWdubWVudCwgZm9udCwgZXRjLiBDaGVjayBvdXQgdGhlIGRvY3VtZW50YXRpb24gZm9yIG1vcmUhCgpcCgojIyMgVGl0bGUKCkFub3RoZXIgZnVuY3Rpb25hbGl0eSBvZiB0aGUgYHRtX2xheW91dCgpYCBmdW5jdGlvbiBpcyB0byBzZXQgYSB0aXRsZSBmb3IgdGhlIG1hcCwgYW5kIHNwZWNpZnkgaXRzIHBvc2l0aW9uLCBzaXplLCBldGMuIEZvciBleGFtcGxlLCB3ZSBjYW4gc2V0IHRoZSB0aXRsZSwgdGhlIGB0aXRsZS5zaXplYCBhbmQgdGhlIGB0aXRsZS5wb3NpdGlvbmAgYXMgaW4gdGhlIGV4YW1wbGUgYmVsb3cuIFdlIG1hZGUgdGhlIGZvbnQgc2l6ZSBhIGJpdCBzbWFsbGVyICgwLjgpIGluIG9yZGVyIG5vdCB0byBvdmVyd2hlbG0gdGhlIG1hcCwgYW5kIHBvc2l0aW9uZWQgaXQgaW4gdGhlIHRvcCBsZWZ0LWhhbmQgY29ybmVyLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGUgPSAiUmVkcyIsCiAgICAgICAgICAgICAgdGl0bGUgPSAiTWVkaWFuIEluY29tZSIpICsKICB0bV9sYXlvdXQodGl0bGUgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsIHRpdGxlLnNpemUgPSAwLjgsIAogICAgICAgICAgICB0aXRsZS5wb3NpdGlvbiA9IGMoImxlZnQiLCJ0b3AiKSwKICAgICAgICAgICAgbGVnZW5kLm91dHNpZGUgPSBUUlVFLCBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbiA9ICJyaWdodCIpCmBgYAoKXAoKVG8gaGF2ZSBhIHRpdGxlIGFwcGVhciBvbiB0b3AgKG9yIG9uIHRoZSBib3R0b20pIG9mIHRoZSBtYXAsIHdlIG5lZWQgdG8gc2V0IHRoZSBgbWFpbi50aXRsZWAgYXJndW1lbnQgb2YgdGhlIGB0bV9sYXlvdXQoKWAgZnVuY3Rpb24sIHdpdGggdGhlIGFzc29jaWF0ZWQgYG1haW4udGl0bGUucG9zaXRpb25gLCBhcyBpbGx1c3RyYXRlZCBiZWxvdyAod2l0aCB0aXRsZS5zaXplIHNldCB0byAxLjI1IHRvIGhhdmUgYSBsYXJnZXIgZm9udCkuCgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLHBhbGV0dGUgPSAiUmVkcyIsCiAgICAgICAgICAgICAgdGl0bGUgPSAiTWVkaWFuIEluY29tZSIpICsKICB0bV9sYXlvdXQobWFpbi50aXRsZSA9ICJNZWRpYW4gSW5jb21lIG9mIFNhY3JhbWVudG8gVHJhY3RzIiwgCiAgICAgICAgICAgIG1haW4udGl0bGUuc2l6ZSA9IDEuMjUsIG1haW4udGl0bGUucG9zaXRpb249ImNlbnRlciIsCiAgICAgICAgICAgIGxlZ2VuZC5vdXRzaWRlID0gVFJVRSwgbGVnZW5kLm91dHNpZGUucG9zaXRpb24gPSAicmlnaHQiKQoKYGBgCgpcCgojIyMgU2NhbGUgYmFyIGFuZCBhcnJvdwoKT0sgdGhpcyByZWFsbHkgd291bGRuJ3QgYmUgYSBHSVMgY2xhc3Mgd2l0aG91dCB0YWxraW5nIGFib3V0IG9uZSBvZiB0aGUgY29yZSBlbGVtZW50cyBvZiBhIG1hcC0tdGhlIGdvb2Qgb2xlIHNjYWxlIGJhciBhbmQgYXJyb3cuIExldCdzIGFkZCB0aGVzZSB0byBvdXIgbWFwLiBGaXJzdCwgd2UgYWRkIHRoZSBzY2FsZSBiYXIgd2l0aCBgdG1fc2NhbGVfYmFyKClgLgoKVGhlIGFyZ3VtZW50IGBicmVha3NgIHRlbGxzIFIgdGhlIGRpc3RhbmNlcyB0byBicmVhayB1cCBhbmQgZW5kIHRoZSBiYXIuIFRoZSBhcmd1bWVudCBgcG9zaXRpb25gIHBsYWNlcyB0aGUgc2NhbGUgYmFyIG9uIHRoZSBib3R0b20gbGVmdCBwYXJ0IG9mIHRoZSBtYXAuIE5vdGUgdGhhdCB0aGUgYHNjYWxlYCBpcyBpbiBtaWxlcyAod2UncmUgaW4gQW11cmljYSEpLiBUaGUgZGVmYXVsdCBpcyBpbiBraWxvbWV0ZXJzICh0aGUgcmVzdCBvZiB0aGUgd29ybGQhKSwgYnV0IHlvdSBjYW4gc3BlY2lmeSB0aGUgdW5pdHMgd2l0aGluIGB0bV9zaGFwZSgpYCB1c2luZyB0aGUgYXJndW1lbnQgYHVuaXRgLiBgdGV4dC5zaXplYCBzY2FsZXMgdGhlIHNpemUgb2YgdGhlIGJhciBzbWFsbGVyIChiZWxvdyAxKSBvciBsYXJnZXIgKGFib3ZlIDEpLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudywgdW5pdCA9ICJtaSIpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIixwYWxldHRlID0gIlJlZHMiLAogICAgICAgICAgICAgIHRpdGxlID0gIk1lZGlhbiBJbmNvbWUiKSArCiAgdG1fc2NhbGVfYmFyKGJyZWFrcyA9IGMoMCwgNSwgMTAsIDIwKSwgdGV4dC5zaXplID0gMC43NSwgcG9zaXRpb24gPSBjKCJsZWZ0IiwgImJvdHRvbSIpKSArCiAgdG1fbGF5b3V0KG1haW4udGl0bGUgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsIAogICAgICAgICAgICBtYWluLnRpdGxlLnNpemUgPSAxLjI1LCBtYWluLnRpdGxlLnBvc2l0aW9uPSJjZW50ZXIiLAogICAgICAgICAgICBsZWdlbmQub3V0c2lkZSA9IFRSVUUsIGxlZ2VuZC5vdXRzaWRlLnBvc2l0aW9uID0gInJpZ2h0IikKYGBgCgpcCgpOZXh0IGxldCdzIHNwaWNlIHRoaW5ncyB1cCBieSBhZGRpbmcgYSBub3J0aCBhcnJvdywgd2hpY2ggd2UgY2FuIGRvIHVzaW5nIHRoZSBmdW5jdGlvbiBgdG1fY29tcGFzcygpYC4gWW91IGNhbiBjb250cm9sIGZvciB0aGUgdHlwZSwgc2l6ZSBhbmQgbG9jYXRpb24gb2YgdGhlIGFycm93IHdpdGhpbiB0aGlzIGZ1bmN0aW9uLiBJIHBsYWNlIGEgNC1zdGFyIGFycm93IG9uIHRoZSBib3R0b20gcmlnaHQgb2YgdGhlIG1hcC4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncsIHVuaXQgPSAibWkiKSArCiAgdG1fcG9seWdvbnMoY29sID0gIm1lZGluY0UiLCBzdHlsZSA9ICJxdWFudGlsZSIscGFsZXR0ZSA9ICJSZWRzIiwKICAgICAgICAgICAgICB0aXRsZSA9ICJNZWRpYW4gSW5jb21lIikgKwogIHRtX3NjYWxlX2JhcihicmVha3MgPSBjKDAsIDUsIDEwLCAyMCksIHRleHQuc2l6ZSA9IDAuNzUsIAogICAgICAgICAgICAgICBwb3NpdGlvbiA9IGMoImxlZnQiLCAiYm90dG9tIikpICsKICB0bV9jb21wYXNzKHR5cGUgPSAiNHN0YXIiLCBwb3NpdGlvbiA9IGMoInJpZ2h0IiwgImJvdHRvbSIpKSArCiAgdG1fbGF5b3V0KG1haW4udGl0bGUgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsIAogICAgICAgICAgICBtYWluLnRpdGxlLnNpemUgPSAxLjI1LCBtYWluLnRpdGxlLnBvc2l0aW9uPSJjZW50ZXIiLAogICAgICAgICAgICBsZWdlbmQub3V0c2lkZSA9IFRSVUUsIGxlZ2VuZC5vdXRzaWRlLnBvc2l0aW9uID0gInJpZ2h0IikKYGBgCgpcCgpXZSBjYW4gYWxzbyBlbGltaW5hdGUgdGhlIGZyYW1lIGFyb3VuZCB0aGUgbWFwIHVzaW5nIHRoZSBhcmd1bWVudCBgZnJhbWUgPSBGQUxTRWAuCgpgYGB7cn0Kc2FjLm1hcCA8LSB0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncsIHVuaXQgPSAibWkiKSArCiAgdG1fcG9seWdvbnMoY29sID0gIm1lZGluY0UiLCBzdHlsZSA9ICJxdWFudGlsZSIscGFsZXR0ZSA9ICJSZWRzIiwKICAgICAgICAgICAgICB0aXRsZSA9ICJNZWRpYW4gSW5jb21lIikgKwogIHRtX3NjYWxlX2JhcihicmVha3MgPSBjKDAsIDUsIDEwLCAyMCksIHRleHQuc2l6ZSA9IDAuNzUsIHBvc2l0aW9uID0gYygibGVmdCIsICJib3R0b20iKSkgKwogIHRtX2NvbXBhc3ModHlwZSA9ICI0c3RhciIsIHBvc2l0aW9uID0gYygicmlnaHQiLCAiYm90dG9tIikpICsKICB0bV9sYXlvdXQobWFpbi50aXRsZSA9ICJNZWRpYW4gSW5jb21lIG9mIFNhY3JhbWVudG8gdHJhY3RzIiwgCiAgICAgICAgICAgIG1haW4udGl0bGUuc2l6ZSA9IDEuMjUsIGZyYW1lID0gRkFMU0UsCiAgICAgICAgICAgIG1haW4udGl0bGUucG9zaXRpb249ImNlbnRlciIsCiAgICAgICAgICAgIGxlZ2VuZC5vdXRzaWRlID0gVFJVRSwgbGVnZW5kLm91dHNpZGUucG9zaXRpb24gPSAicmlnaHQiKQpzYWMubWFwCmBgYAoKXAoKTm90ZSB0aGF0IEkgc2F2ZWQgdGhlIG1hcCBpbnRvIGFuIG9iamVjdCBjYWxsZWQgKnNhYy5tYXAqLiBSIGlzIGFuIG9iamVjdC1vcmllbnRlZCBwcm9ncmFtLCBzbyBldmVyeXRoaW5nIHlvdSBtYWtlIGluIFIgYXJlIG9iamVjdHMgdGhhdCBjYW4gYmUgc2F2ZWQgZm9yIGZ1dHVyZSBtYW5pcHVsYXRpb24uIFRoaXMgaW5jbHVkZXMgbWFwcy4gQW5kIGZ1dHVyZSBtYW5pcHVsYXRpb25zIG9mIGEgc2F2ZWQgbWFwIGluY2x1ZGVzIGFkZGluZyBtb3JlIGB0bV8qYCBmdW5jdGlvbnMgdG8gdGhlIHNhdmVkIG9iamVjdCwgc3VjaCBhcyBgc2FjLm1hcCArIHRtX2xheW91dCh5b3VyIGNoYW5nZXMgaGVyZSlgLiBDaGVjayB0aGUgaGVscCBkb2N1bWVudGF0aW9uIGZvciBgdG1fbGF5b3V0KClgIHRvIHNlZSB0aGUgY29tcGxldGUgbGlzdCBvZiBzZXR0aW5ncy4gCgojIyBTYXZpbmcgbWFwcwoKWW91IGNhbiBzYXZlIHlvdXIgbWFwcyBhIGZldyB3YXlzLiAKMS4gT24gdGhlIHBsb3R0aW5nIHNjcmVlbiB3aGVyZSB0aGUgbWFwIGlzIHNob3duLCBjbGljayBvbiBFeHBvcnQgYW5kIHNhdmUgaXQgYXMgZWl0aGVyIGFuIGltYWdlIG9yIHBkZiBmaWxlLgoyLiBVc2UgdGhlIGZ1bmN0aW9uIGB0bWFwX3NhdmUoKWAKCkZvciBvcHRpb24gMiwgd2UgY2FuIHNhdmUgdGhlIG1hcCBvYmplY3QgKnNhYy5tYXAqIGFzIHN1Y2g6CmBgYHtyfQp0bWFwX3NhdmUoc2FjLm1hcCwgInNhY19jaXR5X2luYy5qcGciKQpgYGAKU3BlY2lmeSB0aGUgKip0bWFwKiogb2JqZWN0IGFuZCBhIGZpbGVuYW1lIHdpdGggYW4gZXh0ZW5zaW9uLiBJdCBzdXBwb3J0cyAucGRmLCAuZXBzLCAuc3ZnLCAud21mLCAucG5nLCAuanBnLCAuYm1wIGFuZCAudGlmZi4gVGhlIGRlZmF1bHQgaXMgLnBuZy4gQWxzbyBtYWtlIHN1cmUgeW914oCZdmUgc2V0IHlvdXIgd29ya2luZyBkaXJlY3RvcnkgdG8gdGhlIGZvbGRlciB0aGF0IHlvdSB3YW50IHlvdXIgbWFwIHRvIGJlIHNhdmVkIGluLgoKWW914oCZdmUgY29tcGxldGVkIHlvdXIgaW50cm9kdWN0aW9uIHRvICoqc2YqKi4gV2hldyEgQmFkZ2U/IFllcywgcGxlYXNlLCB5b3UgZWFybmVkIGl0ISBUaW1lIHRvIFtjZWxlYnJhdGVdKGh0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9M0d3amZVRnlZNk0pIQoKXAoKIVtzZiBCYWRnZV0oc2YuZ2lmKQoKXAoKCiMgUmFzdGVycwoKUmFzdGVyIGRhdGFzZXRzIGFyZSBzaW1wbHkgYW4gYXJyYXkgb2YgcGl4ZWxzL2NlbGxzIG9yZ2FuaXplZCBpbnRvIHJvd3MgYW5kIGNvbHVtbnMgKG9yIGEgZ3JpZCkgd2hlcmUgZWFjaCBjZWxsIGNvbnRhaW5zIGEgdmFsdWUgcmVwcmVzZW50aW5nIGluZm9ybWF0aW9uLCBzdWNoIGFzIHRlbXBlcmF0dXJlLCBzb2lsIHR5cGUsIGxhbmQgdXNlLCB3YXRlciBsZXZlbC4gUmFzdGVyIG1hcHMgdXN1YWxseSByZXByZXNlbnQgY29udGludW91cyBwaGVub21lbmEgc3VjaCBhcyBlbGV2YXRpb24sIHRlbXBlcmF0dXJlLCBwb3B1bGF0aW9uIGRlbnNpdHkgb3Igc3BlY3RyYWwgZGF0YS4gRGlzY3JldGUgZmVhdHVyZXMgc3VjaCBhcyBzb2lsIG9yIGxhbmQtY292ZXIgY2xhc3NlcyBjYW4gYWxzbyBiZSByZXByZXNlbnRlZCBpbiB0aGUgcmFzdGVyIGRhdGEgbW9kZWwuIFJhc3RlcnMgYXJlIGFlcmlhbCBwaG90b2dyYXBocywgaW1hZ2VyeSBmcm9tIHNhdGVsbGl0ZXMsIGdvb2dsZSBzdHJlZXQgdmlldyBpbWFnZXMuIEZldyB0aGluZ3MgdG8gbm90ZS4KCiAtIFJhc3RlciBkYXRhc2V0cyBhcmUgYWx3YXlzIHJlY3Rhbmd1bGFyIChyb3dzIHggY29sKSBzaW1pbGFyIHRvIG1hdHJpY2VzLiBJcnJlZ3VsYXIgYm91bmRhcmllcyBhcmUgY3JlYXRlZCBieSB1c2luZyBOQXMuCiAtIFJhc3RlcnMgaGF2ZSB0byBjb250YWluIHZhbHVlcyBvZiB0aGUgc2FtZSB0eXBlIChpbnQsIGZsb2F0LCBib29sZWFuKSB0aHJvdWdob3V0IHRoZSByYXN0ZXIsIGp1c3QgbGlrZSBtYXRyaWNlcyBhbmQgdW5saWtlIGRhdGEgZnJhbWVzLgogLSBUaGUgc2l6ZSBvZiB0aGUgcmFzdGVyIGRlcGVuZHMgb24gdGhlIHJlc29sdXRpb24gYW5kIHRoZSBleHRlbnQgb2YgdGhlIHJhc3Rlci4gQXMgc3VjaCBtYW55IHJhc3RlcnMgYXJlIGxhcmdlIGFuZCBvZnRlbiBjYW5ub3QgYmUgaGVsZCBpbiBtZW1vcnkgY29tcGxldGVseS4KIC0gVGhlIHdvcmtob3JzZSBwYWNrYWdlIGZvciB3b3JraW5nIHdpdGggcmFzdGVycyBpbiBSIGlzIHJhc3RlciBhbmQgdGVycmEgcGFja2FnZXMgYnkgUm9iZXJ0IEhpam1hbnMuIHRlcnJhIGlzIGJldHRlciBhbmQgZmFzdGVyIGluIG1hbnkgaW5zdGFuY2VzLCBidXQgaXMgbmV3ZXIgYW5kIGRvZXMgbm90IGhhdmUgYWxsIHRoZSBmdW5jdGlvbmFsaXR5IGFuZCBzdXBwb3J0IGFzc29jaWF0ZWQgd2l0aCByYXN0ZXIuCgpUeXBpY2FsbHkgeW91IHdpbGwgYnJpbmcgaW4gYSByYXN0ZXIgZGF0YXNldCBkaXJlY3RseSBmcm9tIGEgZmlsZS4gVGhlc2UgZmlsZXMgY29tZSBpbiBtYW55IGRpZmZlcmVudCBmb3JtcywgdHlwaWNhbGx5IC50aWYsIC5pbWcsIGFuZCAuZ3JkLgoKV2XigJlsbCBicmluZyBpbiB0aGUgZmlsZXMgc2FjX2NvdW50eV9sYy50aWYgYW5kIG5sY2RfY2xhc3Nlcy5jc3YuIFRoZSBmaXJzdCBmaWxlIGNvbnRhaW5zIFVTR1MgbGFuZCBjb3ZlciAoZm9yIGV4YW1wbGUsIExvdyBJbnRlbnNpdHkgRGV2ZWxvcGVkLCBEZWNpZHVvdXMgRm9yZXN0KSBmb3IgU2FjcmFtZW50byBjb3VudHkgYmFzZWQgb24gY2xhc3NlcyBkZWZpbmVkIGJ5IHRoZSBOYXRpb25hbCBMYW5kIENvdmVyIERhdGFzZXQuIFRoZSBzZWNvbmQgZmlsZSBjb250YWlucyB0aGUgZGVzY3JpcHRpb25zIG9mIHRoZSBsYW5kIGNvdmVyIGNsYXNzZXMuCgpXZSB1c2UgdGhlIGZ1bmN0aW9uIHJhc3RlcigpIHRvIGJyaW5nIGluIGRhdGEgaW50byByYXN0ZXIgZm9ybS4K</div>
 
 
 </div>

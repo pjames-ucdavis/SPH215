@@ -3,17 +3,18 @@ title: "Lab 3: Polygons and Rasters"
 ---
 
 \
-```{r}
+```{r, message=FALSE}
 library(sf)
 library(MapGAM)
 library(tidyverse)
 library(tidycensus)
-library(tigris)
 library(flextable)
+library(RColorBrewer)
+library(tmap)
 library(terra)
 ```
 
-In [Lab 2](lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it.
+In [Lab 2](Lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it.
 
 ```{r, eval = FALSE}
 census_api_key("YOUR API KEY GOES HERE", install = TRUE)
@@ -25,7 +26,7 @@ census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE)
 \
 
 Use the `set_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 2](Lab2.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
-```{r}
+```{r, message=FALSE}
 ca.tracts <- get_acs(geography = "tract", 
               year = 2023,
               variables = c(tpopr = "B03002_001", 
@@ -44,14 +45,14 @@ The only difference between the code above and what we used in [Lab 2](lab2.html
 
 \
 
-We can also download the data another way. We can go to the [Census Shapefiles website](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) and navigate to 2023, Census Tracts, then California. We will then download a .zip file that contains an ESRI shapefile of the Census tracts for California. When we unzip the file, we see a series of files. Thankfully, the **sf** package has an `st_read()` function that can tackle this! For more detailed data downloads, you can use [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/).
+Note: We can also download the data another way. We can go to the [Census Shapefiles website](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) and navigate to 2023, Census Tracts, then California. We can then download a .zip file that contains an ESRI shapefile of the Census tracts for California. When we unzip the file, we see a series of files. Thankfully, the **sf** package has an `st_read()` function that can tackle this! For more detailed data downloads, you can use [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). The code below is example of how we might bring in a shapefile, just for future reference!
 
 ```{r eval=FALSE}
 ca.tracts <- st_read("/Users/pjames1/Downloads/tl_2024_06_tract/tl_2024_06_tract.shp")
 ```
 
 
-Lets take a look at our data.
+OK, let's go back to the data we got from **tidycensus**. Lets take a look at our data.
 
 \
 
@@ -63,7 +64,7 @@ ca.tracts
 
 The object looks much like a basic tibble, but with a few differences.
 
-  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in   - California) with 13 fields (attributes or columns of data).
+  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in California) with 13 fields (attributes or columns of data).
   - The `Geometry Type` indicates that the spatial data are in `MULTIPOLYGON` form (as opposed to points or lines, the other basic vector data forms).
   - `Bounding box` indicates the spatial extent of the features (from left to right, for example, California tracts go from a longitude of -124.482 to -114.1312).
   - `Geodetic CRS` tells us the coordinate reference system.
@@ -77,18 +78,13 @@ If you want to peek behind the curtain and learn more about the nitty gritty det
 
 # Data Wrangling
 
-There is a lot of stuff [behind the curtain](https://www.jessesadler.com/post/simple-feature-objects/) of how R handles spatial data as simple features, but the main takeaway is that **sf** objects are data frames. This means you can use many of the **tidyverse** functions we’ve learned in the past couple labs to manipulate **sf** objects, including the pipe `%>%` operator. For example, let’s do the following data wrangling tasks on `ca.tracts`.
-
-1. Keep necessary variables using the `select()` function
-2. Break up the column *NAME* into separate tract, county and state variables using the `separate()` function
+There is a lot of stuff [behind the curtain](https://www.jessesadler.com/post/simple-feature-objects/) of how R handles spatial data as simple features, but the main takeaway is that **sf** objects are data frames. This means you can use many of the **tidyverse** functions we’ve learned in the past couple labs to manipulate **sf** objects, including the pipe `%>%` operator. For example, let’s break up the column *NAME* into separate tract, county and state variables using the `separate()` function
 
 We do all of this in one line of continuous code using the pipe operator `%>%`
 
 ```{r}
 ca.tracts <- ca.tracts %>%
-              dplyr::select(GEOID, NAME, tpoprE, nhwhiteE, nhblkE, nhasnE, hispE) %>%
               separate(NAME, c("Tract", "County", "State"), sep = "; ")
-
 glimpse(ca.tracts)
 ```
 
@@ -255,10 +251,107 @@ Dare I say, we are ready for the New York Times with this map!
 
 ## Points on top of polygons
 
-OK, now that we have mapped points and mapped polygons, let's put them both together!
+OK, now that we have mapped points and mapped polygons, let's put them both together! First, we are going to bring in our old friend *CAdata* from last week's lab.
 
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
 
-# FINALIZE
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+```
+
+\
+
+This time, we will map those points with **ggplot**.
+
+```{r}
+ggplot(data = ca_pts_crs) +
+  geom_sf(fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+
+```
+
+\
+
+We can overlay the points over Sacramento tracts to give the locations some perspective. Here, you add two `geom_sf()` arguments for the tracts and the cancer cases.
+
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+\
+
+Hmmm. That doesn't look great. We have lots of cases outside of Sacramento. Let's filter out to just pick cases within the Sacramento area. 
+
+```{r, eval=FALSE}
+ca_pts_crs.w <- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+Ooof. That doesn't work. It says our  `st_crs(x) == st_crs(y) is not TRUE`. That means our Coordinate Reference Systems are not matching! Let's transform our cancer dataset *ca_pts_crs.w* to match the CRS for *sac.metro.tracts.w* with one easy step using `st_transform`:
+```{r}
+#check crs of each dataset
+st_crs(ca_pts_crs)
+st_crs(sac.metro.tracts.w)
+
+#create new dataset with transformed CRS
+ca_pts_crs.transformed <- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+st_crs(ca_pts_crs.transformed )
+```
+
+\
+
+OK, let's try this again!
+
+```{r}
+ca_pts_crs.w <- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+It worked! OK, now let's try our map again.
+
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+\
+
+Alright, who's ready for a challenge? Let's put it all together in one nice map.
+
+```{r}
+ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants Overlaid with Median Income of Sacramento Tracts",
+       caption = "Source: American Community Survey and Ovarian Cancer Cases") +
+  theme_bw()
+  
+```
+
+\
+
+Can I just say, you're very impressive. Well done!
+
+\
 
 ## tmap
 
@@ -288,17 +381,225 @@ tm_shape(sac.metro.tracts.w) +
 
 Check out [this link](https://geocompr.robinlovelace.net/adv-map.html#color-settings) for more on  available classification styles in **tmap**.
 
-You can overlay multiple features on one map. For example, we can add park polygons on top of tracts, providing a visual association between parks and percent white. You will need to add two `tm_shape()` functions each for *sac.metro.tracts.w* and *parks*.
+\
+
+The `tm_polygons()` command is a wrapper around two other functions, `tm_fill()` and `tm_borders()`. `tm_fill()` controls the contents of the polygons (color, classification, etc.), while `tm_borders()` does the same for the polygon outlines.
+
+For example, using the same shape (but no variable), we obtain the outlines of the neighborhoods from the `tm_borders()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_borders()
+```
+
+\
+
+Similarly, we obtain a choropleth map without the polygon outlines when we just use the `tm_fill()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) + 
+  tm_fill("medincE")
+```
+
+When we combine the two commands, we obtain the same map as with tm_polygons() (this illustrates how in R one can often obtain the same result in a number of different ways). Try this on your own.
+
+\
 
 ### Color scheme
+
+The argument `palette =` defines the color ranges associated with the bins and determined by the `style` arguments. Several built-in palettes are contained in **tmap**. For example, using `palette = "Reds"` would yield the following map for our example.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds") 
+```
+
+Under the hood, `“Reds”` refers to one of the color schemes supported by the **RColorBrewer** package (see below).
+
+\
+
+In addition to the built-in palettes, customized color ranges can be created by specifying a vector with the desired colors as anchors. This will create a spectrum of colors in the map that range between the colors specified in the vector. For instance, if we used `c(“red”, “blue”)`, the color spectrum would move from red to purple, then to blue, with in between shades. In our example:
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","blue")) 
+```
+
+\
+
+Not exactly a pretty picture. In order to capture a diverging scale, we insert `“white”` in between red and blue.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","white", "blue")) 
+```
+
+\
+
+A preferred approach to select a color palette is to chose one of the schemes contained in the **RColorBrewer** package. These are based on the research of cartographer Cynthia Brewer (see the colorbrewer2 [website](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3) for details). ColorBrewer makes a distinction between sequential scales (for a scale that goes from low to high), diverging scales (to highlight how values differ from a central tendency), and qualitative scales (for categorical variables). For each scale, a series of single hue and multi-hue scales are suggested. In the **RColorBrewer** package, these are referred to by a name (e.g., the “Reds” palette we used above is an example). The full list is contained in the **RColorBrewer** documentation.
+
+There are two very useful commands in this package. One sets a color palette by specifying its name and the number of desired categories. The result is a character vector with the hex codes of the corresponding colors.
+
+For example, we select a sequential color scheme going from blue to green, as *BuGn*, by means of the command `brewer.pal`, with the number of categories (6) and the scheme as arguments. The resulting vector contains the HEX codes for the colors.
+
+```{r}
+brewer.pal(6,"BuGn")
+```
+
+\
+
+Using this palette in our map yields the following result.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette="BuGn") 
+```
+
+\
+
+The command `display.brewer.pal()` allows us to explore different color schemes before applying them to a map. For example:
+```{r}
+display.brewer.pal(6,"BuGn")
+```
+
+\
+
 ### Legend
+
+There are many options to change the formatting of the legend. The automatic title for the legend is not that attractive, since it is simply the variable name. This can be customized by setting the `title` argument.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") 
+```
+
+\
+
+Another important aspect of the legend is its positioning. This is handled through the `tm_layout()` function. This function has a vast number of options, as detailed in the [documentation](https://www.rdocumentation.org/packages/tmap/versions/2.1-1/topics/tm_layout). There are also specialized subsets of layout functions, focused on specific aspects of the map, such as `tm_legend()`, `tm_style()` and `tm_format()`. We illustrate the positioning of the legend.
+
+Often, the default location of the legend is appropriate, but sometimes further control is needed. The `legend.position` argument to the `tm_layout` function moves the legend around the map, and it takes a vector of two string variables that determine both the horizontal position (“left”, “right”, or “center”) and the vertical position (“top”, “bottom”, or “center”).
+
+For example, if we would want to move the legend to the bottom-right position, we would use the following set of commands.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.position = c("right", "bottom"))
+```
+
+\
+
+There is also the option to position the legend outside the frame of the map. This is accomplished by setting `legend.outside` to TRUE, and optionally also specify its position by means of `legend.outside.position()`. The latter can take the values “top”, “bottom”, “right”, and “left”.
+
+For example, to position the legend outside and on the right, would be accomplished by the following commands.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right")
+```
+We can also customize the size of the legend, its alignment, font, etc. Check out the documentation for more!
+
+\
+
 ### Title
+
+Another functionality of the `tm_layout()` function is to set a title for the map, and specify its position, size, etc. For example, we can set the title, the `title.size` and the `title.position` as in the example below. We made the font size a bit smaller (0.8) in order not to overwhelm the map, and positioned it in the top left-hand corner.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(title = "Median Income of Sacramento Tracts", title.size = 0.8, 
+            title.position = c("left","top"),
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+To have a title appear on top (or on the bottom) of the map, we need to set the `main.title` argument of the `tm_layout()` function, with the associated `main.title.position`, as illustrated below (with title.size set to 1.25 to have a larger font).
+
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+
+```
+
+\
+
 ### Scale bar and arrow
-### Dot map
-### Interactive Maps
-## leaflet
+
+OK this really wouldn't be a GIS class without talking about one of the core elements of a map--the good ole scale bar and arrow. Let's add these to our map. First, we add the scale bar with `tm_scale_bar()`.
+
+The argument `breaks` tells R the distances to break up and end the bar. The argument `position` places the scale bar on the bottom left part of the map. Note that the `scale` is in miles (we're in Amurica!). The default is in kilometers (the rest of the world!), but you can specify the units within `tm_shape()` using the argument `unit`. `text.size` scales the size of the bar smaller (below 1) or larger (above 1).
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+Next let's spice things up by adding a north arrow, which we can do using the function `tm_compass()`. You can control for the type, size and location of the arrow within this function. I place a 4-star arrow on the bottom right of the map.
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+We can also eliminate the frame around the map using the argument `frame = FALSE`.
+
+```{r}
+sac.map <- tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento tracts", 
+            main.title.size = 1.25, frame = FALSE,
+            main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+sac.map
+```
+
+\
+
+Note that I saved the map into an object called *sac.map*. R is an object-oriented program, so everything you make in R are objects that can be saved for future manipulation. This includes maps. And future manipulations of a saved map includes adding more `tm_*` functions to the saved object, such as `sac.map + tm_layout(your changes here)`. Check the help documentation for `tm_layout()` to see the complete list of settings. 
+
 ## Saving maps
 
+You can save your maps a few ways. 
+1. On the plotting screen where the map is shown, click on Export and save it as either an image or pdf file.
+2. Use the function `tmap_save()`
+
+For option 2, we can save the map object *sac.map* as such:
+```{r}
+tmap_save(sac.map, "sac_city_inc.jpg")
+```
+Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
+
+You’ve completed your introduction to **sf**. Whew! Badge? Yes, please, you earned it! Time to [celebrate](https://www.youtube.com/watch?v=3GwjfUFyY6M)!
+
+\
+
+![sf Badge](sf.gif)
+
+\
 
 
 # Rasters
