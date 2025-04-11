@@ -26,13 +26,14 @@ We hopefully remember some of this from last week in [Lab 1](lab1.rmd), but let'
 Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
 
 
-```{r}
+```{r, message=FALSE}
 library(tidygeocoder)
 library(sf)
 library(MapGAM)
 library(tidyverse)
 library(tidycensus)
 library(flextable)
+library(tmap)
 ```
 
 \
