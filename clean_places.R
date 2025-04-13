@@ -1,5 +1,5 @@
 # Read in PLACES data
-places_ca<-read_csv("'/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/PLACES_CA_Tracts_2024.csv'")
+places_ca<-read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/PLACES_CA_Tracts_2024.csv")
 glimpse(places_ca)
 alameda<-filter(places_ca, LocationName == "06001401700")
 glimpse(alameda)
