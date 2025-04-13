@@ -199,6 +199,8 @@ Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table
 
 # Mapping in R
 
+## ggplot
+
 OK, so now we've talked a little about how to bring in and manipulate vector polygon data, let's do some mapping and create some choropleth maps. We can do this with the **ggplot** package, the **tmap** package, and the **leaflet** package (which we won't cover now, but it's very cool for interactive maps). Let's start with **ggplot**.
 
 ## Choropleth maps in ggplot
@@ -592,6 +594,43 @@ For option 2, we can save the map object *sac.map* as such:
 tmap_save(sac.map, "sac_city_inc.jpg")
 ```
 Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
+
+\
+
+OK, do we have energy for one more example? Let's bring in data from the [CDC Places dataset](https://www.cdc.gov/places/tools/data-portal.html). This is an incredible resource to access data on the CDC's [Behavioral Risk Factor and Surveillance System (BRFSS)](https://www.cdc.gov/brfss/index.html), as well as social determinants of health data from American Community Survey. I've already downloaded California Census tract data on the "% of adults reporting no leisure-time physical activity". Let's bring this in and take a look at it!
+
+```{r}
+places_ca_lpa<-read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/places_ca_lpa.csv")
+glimpse(places_ca_lpa)
+```
+
+\
+
+Interesting stuff. Looks like the values we care about are stores in a column called *Data_Value* and the FIPS code seems to be in *LocationName*. Let's go ahead and rename *LocationName* and then see if we can join this data with our Census tract data *ca.tracts*.
+
+```{r}
+places_ca_lpa<-rename(places_ca_lpa, GEOID = LocationName)
+glimpse(places_ca_lpa)
+
+ca.tracts.lpa <- ca.tracts %>%
+  left_join(places_ca_lpa, by = "GEOID")
+glimpse(ca.tracts.lpa)
+```
+
+\
+
+It worked! OK, now let's make a map of % of adults reporting no leisure-time physical activity. We will build on what we've learned above! I've also included the option in `tm_polygons()` of `lwd = 0` which makes the borders a width of 0...basically we are making it so there are no borders and we can easily see polygon values in denser concentrations of Census tracts (e.g., around Sacramento, San Francisco, LA, etc.)
+
+```{r}
+tm_shape(ca.tracts.lpa, unit = "mi") +
+  tm_polygons(col = "Data_Value", style = "quantile",palette = "Reds",
+              title = "% Adults No Physical Activity", lwd = 0) +
+  tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
+            main.title.size = 1.25, main.title.position="center")
+```
+Oooooooo that is one goooood looking map!
+
+\
 
 You’ve completed your introduction to **sf**. Whew! Badge? Yes, please, you earned it! Time to [celebrate](https://www.youtube.com/watch?v=3GwjfUFyY6M)!
 
