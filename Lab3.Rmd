@@ -3,7 +3,24 @@ title: "Lab 3: Polygons and Rasters"
 ---
 
 \
-```{r, message=FALSE}
+
+# More with vector data and introducing rasters
+
+In this lab, we are going to work more with vector data. We will learn how to visualize Census data, we will talk about how to wrangle spatial data, and we will get into some really cool ways to create choropleth maps (maps color coded by attributes). Finally, we will introduce the concept of rasters.
+
+The objectives of this guide are to teach you:
+
+1. Visualize Vector Data
+2. Process Vector Data
+3. Create Publication-Ready Maps
+4. Introduce Rasters
+
+Let's get cracking!
+
+First, let's install our packages.
+
+\
+```{r}
 library(sf)
 library(MapGAM)
 library(tidyverse)
@@ -14,7 +31,9 @@ library(tmap)
 library(terra)
 ```
 
-In [Lab 2](Lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it.
+\
+
+In [Lab 2](Lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it with the following code:
 
 ```{r, eval = FALSE}
 census_api_key("YOUR API KEY GOES HERE", install = TRUE)
@@ -131,13 +150,15 @@ tract_map
 
 There is Data Wrangling and then there is Spatial Data Wrangling. Cue dangerous sounding music. Well, it’s not that dangerous or scary. Spatial Data Wrangling involves cleaning or altering your data set based on the geographic location of features. The **sf** package offers a suite of functions unique to wrangling spatial data. Most of these functions start out with the prefix `st_`. To see all of the functions, type in
 
-```{r}
+```{r, eval=FALSE}
 methods(class = "sf")
 ```
 
 \
 
 We won’t go through all of these functions as the list is quite extensive. But, we’ll go through a few relevant spatial operations for this class below. The function we will be primarily using is `st_join()`.
+
+\
 
 ## Intersect
 
@@ -203,7 +224,9 @@ Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table
 
 OK, so now we've talked a little about how to bring in and manipulate vector polygon data, let's do some mapping and create some choropleth maps. We can do this with the **ggplot** package, the **tmap** package, and the **leaflet** package (which we won't cover now, but it's very cool for interactive maps). Let's start with **ggplot**.
 
-## Choropleth maps in ggplot
+\
+
+### ggplot
 
 Because **sf** is tidy friendly, it is no surprise we can use the **tidyverse** plotting function `ggplot()` to make maps. We already received an introduction to `ggplot()` in [Lab 2](lab2.html). Recall its basic structure:
 
@@ -247,11 +270,14 @@ ggplot(data = sac.metro.tracts.w) +
          caption = "Source: American Community Survey") +  
   theme_bw()
 ```
+
+\
+
 Dare I say, we are ready for the New York Times with this map!
 
 \
 
-## Points on top of polygons
+### Points on top of polygons
 
 OK, now that we have mapped points and mapped polygons, let's put them both together! First, we are going to bring in our old friend *CAdata* from last week's lab.
 
@@ -496,6 +522,9 @@ tm_shape(sac.metro.tracts.w) +
               title = "Median Income") +
   tm_layout(legend.outside = TRUE, legend.outside.position = "right")
 ```
+
+\
+
 We can also customize the size of the legend, its alignment, font, etc. Check out the documentation for more!
 
 \
@@ -583,6 +612,8 @@ sac.map
 
 Note that I saved the map into an object called *sac.map*. R is an object-oriented program, so everything you make in R are objects that can be saved for future manipulation. This includes maps. And future manipulations of a saved map includes adding more `tm_*` functions to the saved object, such as `sac.map + tm_layout(your changes here)`. Check the help documentation for `tm_layout()` to see the complete list of settings. 
 
+\
+
 ## Saving maps
 
 You can save your maps a few ways. 
@@ -596,6 +627,8 @@ tmap_save(sac.map, "sac_city_inc.jpg")
 Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
 
 \
+
+## Making a map with CDC Places data 
 
 OK, do we have energy for one more example? Let's bring in data from the [CDC Places dataset](https://www.cdc.gov/places/tools/data-portal.html). This is an incredible resource to access data on the CDC's [Behavioral Risk Factor and Surveillance System (BRFSS)](https://www.cdc.gov/brfss/index.html), as well as social determinants of health data from American Community Survey. I've already downloaded California Census tract data on the "% of adults reporting no leisure-time physical activity". Let's bring this in and take a look at it!
 
@@ -628,6 +661,8 @@ tm_shape(ca.tracts.lpa, unit = "mi") +
   tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
             main.title.size = 1.25, main.title.position="center")
 ```
+\
+
 Oooooooo that is one goooood looking map!
 
 \
@@ -643,15 +678,102 @@ You’ve completed your introduction to **sf**. Whew! Badge? Yes, please, you ea
 
 # Rasters
 
-Raster datasets are simply an array of pixels/cells organized into rows and columns (or a grid) where each cell contains a value representing information, such as temperature, soil type, land use, water level. Raster maps usually represent continuous phenomena such as elevation, temperature, population density or spectral data. Discrete features such as soil or land-cover classes can also be represented in the raster data model. Rasters are aerial photographs, imagery from satellites, google street view images. Few things to note.
+Raster datasets are simply an array of pixels/cells organized into rows and columns (or a grid) where each cell contains a value representing information, such as temperature, vegetation, land use, air pollution, etc. Raster maps usually represent continuous phenomena such as elevation, temperature, or population density. Discrete features such as soil type or land-cover classes can also be represented in the raster data model. Rasters are aerial photographs, imagery from satellites, Google Street View images, etc. A few things to note.
 
- - Raster datasets are always rectangular (rows x col) similar to matrices. Irregular boundaries are created by using NAs.
+ - Raster datasets are always rectangular (rows x col) similar to matrices. Irregular boundaries are created by using `NAs`.
  - Rasters have to contain values of the same type (int, float, boolean) throughout the raster, just like matrices and unlike data frames.
- - The size of the raster depends on the resolution and the extent of the raster. As such many rasters are large and often cannot be held in memory completely.
- - The workhorse package for working with rasters in R is raster and terra packages by Robert Hijmans. terra is better and faster in many instances, but is newer and does not have all the functionality and support associated with raster.
+ - The size of the raster depends on the **resolution** and the **extent** of the raster. As such many rasters are large and often cannot be held in memory completely.
+ - The workhorse package for working with rasters in R is the **terra** package by Robert Hijmans. 
 
 Typically you will bring in a raster dataset directly from a file. These files come in many different forms, typically .tif, .img, and .grd.
 
-We’ll bring in the files sac_county_lc.tif and nlcd_classes.csv. The first file contains USGS land cover (for example, Low Intensity Developed, Deciduous Forest) for Sacramento county based on classes defined by the National Land Cover Dataset. The second file contains the descriptions of the land cover classes.
+\
 
-We use the function raster() to bring in data into raster form.
+We’ll bring in the file NDVI_BayArea.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
+
+```{r}
+NDVI_raster = rast("NDVI_BayArea.tif")
+
+## Get summary of raster data
+NDVI_raster
+
+## Check CRS
+st_crs(NDVI_raster)
+
+```
+
+\
+
+OK we have what looks like a raster. We see our resolution and our extent, and we have a CRS. Nice! Shall we plot this?
+
+```{r}
+## Plot the raster on a map
+tmap_mode("plot")
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(style = "cont") +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+\
+
+Looks pretty cool! Seems to be the Bay Area, and we have some nice variability. But we let's see if we can make this fancier.
+
+```{r}
+# palette for plotting
+breaks_ndvi <- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
+palette_ndvi <- c("#BFBFBF","#DBDBDB","#FFFFE0","#FFFACC","#EDE8B5","#DED99C","#CCC782","#BDB86B","#B0C261","#A3CC59","#91BF52","#80B347","#70A340","#619636","#4F8A2E","#407D24","#306E1C","#216112","#0F540A","#004500")
+
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(title = "NDVI",
+             style="cont",
+             palette = palette_ndvi
+            ) +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+\
+
+## Crop
+
+OK, let's see if we can crop this to focus on San Francisco. I've googled the lat and long for the area around San Francisco, and I'll put these right into my `crop()` function. I can use the `tmap_mode("view")` now because the raster is small enough for R to make interactive.
+
+```{r}
+sf_rast<-crop(NDVI_raster, ext(-122.53, -122.3, 37.6191, 37.9))
+
+tmap_mode("view")
+NDVI_sf_map = tm_shape(sf_rast) +
+  tm_raster(title = "NDVI",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+
+NDVI_sf_map
+```
+
+\
+
+## Classify
+
+So negative values of NDVI represent water. Let's set all negative values to -1, and that will help us to distinguish water from land easier.
+
+```{r}
+sf_rast_neg <- app(sf_rast, fun=function(x){ x[x <= 0] <- -1; return(x)} )
+
+NDVI_sf_map_neg = tm_shape(sf_rast_neg) +
+  tm_raster(title = "NDVI",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+
+NDVI_sf_map_neg
+```
+
+\
+
+Nice. What do we notice? The coast of San Francisco might have some cloud cover errors! Satellite data isn't perfect!
+
+\
+
+

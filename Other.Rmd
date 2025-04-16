@@ -13,6 +13,7 @@ Below you will find links to data sources that contain spatial data and health d
 - [CDC Wonder](https://wonder.cdc.gov/) CDC WONDER -- Wide-ranging ONline Data for Epidemiologic Research -- is an easy-to-use, menu-driven system that makes the information resources of the Centers for Disease Control and Prevention (CDC) available to public health professionals and the public at large. It provides access to a wide array of public health information. There's environmental data here, lots of health data at varying spatial resolutions.
 
 - [Archived CDC GIS Website](https://archive.cdc.gov/www_cdc_gov/dhdsp/maps/gisx/resources/geo-spatial-data.html) Although this website is archived, there are lot of active links to various health-related datasets that contain spatial data. 
+
 - [Dartmouth Atlas](http://www.dartmouthatlas.org/) For more than 25 years, The Dartmouth Atlas Project documented striking variations in how medical resources were distributed and used in the United States. The project used Medicare and Medicaid data to provide information and analysis about national, regional, and local markets, as well as hospitals and their affiliated physicians. Although the website will no longer update Dartmouth Atlas tools or calculate new annual rates, this website will continue to provide historical Dartmouth Atlas rates (through 2019) and associated documentation.
 
 - [Cancer Data](https://gis.cancer.gov/) The NCI GIS Portal for Cancer Research provides tools for mapping and download of cancer statistics, risk factors, cancer related tobacco policy data, and the information related to geographic patterns of cancer. It is intended for researchers, cancer control planners, cancer advocacy groups, and general public to inform and inspire our efforts to reduce cancer burden in the United States.
@@ -27,6 +28,10 @@ Below you will find links to data sources that contain spatial data and health d
 
 - [UCSF Health Atlas](https://healthatlas.ucsf.edu/) An incredible resource from our colleagues at UCSF. Health Atlas is an interactive mapping website to explore neighborhood-level characteristics and see how they relate at a population level. The project was initiated by UCSF Population Health and Health Equity and led by the Population Health Data Initiative. 
 
+- [Demographic and Health Surveys](https://dhsprogram.com/Methodology/GIS.cfm) The Demographic and Health Surveys (DHS) Program has collected, analyzed, and disseminated accurate and representative data on population, health, HIV, and nutrition through more than 400 surveys in over 90 countries. The DHS Program routinely collects geographic information in all surveyed countries. Using GIS, researchers can link DHS data with routine health data, health facility locations, local infrastructure such as roads and rivers, and environmental conditions. Linked DHS and geographic data are now being used to improve planning for family planning interventions, to assess the correlation of malaria prevalence and anemia in children in West Africa, and to analyze the effects of environment on early childhood mortality.
+
+- [California Department of Public Health GIS Open Data](https://data-cdphdata.opendata.arcgis.com/) Search or browse for GIS data from the CA Department of Public Health.
+
 \
 
 # Other Types of Health-Adjacent Data
@@ -34,6 +39,12 @@ Below you will find links to data sources that contain spatial data and health d
 - [PolicyMap](https://ucdavis.policymap.com/) PolicyMap is a fully web-based online data and mapping application that gives you access to over 15,000 indicators related to demographics, housing, crime, mortgages, health, jobs and more. Data is available at all common geographies (address, block group, census tract, zip code, county, city, state, MSA) as well as unique geographies like school districts and political boundaries. Data comes from both public and proprietary sources.
 
 - [ICPSR](https://www.icpsr.umich.edu/web/pages/) ICPSR maintains a data archive of more than 350,000 files of research in the social and behavioral sciences. It hosts 23 specialized collections of data in education, aging, criminal justice, substance abuse, terrorism, and other fields.
+
+- [Data.gov](https://catalog.data.gov/dataset/) The United States Government’s open data site is designed to unleash the power of government open data to inform decisions by the public and policymakers, drive innovation and economic activity, achieve agency missions, and strengthen the foundation of an open and transparent government. Search geospatial datasets and see what they have!
+
+- [CalEnviroScreen](https://oehha.ca.gov/calenviroscreen/report/calenviroscreen-version-20) The Office of Environmental Health Hazard Assessment (OEHHA), on behalf of the California Environmental Protection Agency (CalEPA), announces the availability of the California Communities Environmental Health Screening Tool: CalEnviroScreen Version 2.0 (CalEnviroScreen 2.0). CalEnviroScreen is a screening methodology that can be used to help identify California communities that are disproportionately burdened by multiple sources of pollution. CalEPA has used the tool to designate California communities as disadvantaged pursuant to Senate Bill 535. It uses environmental, health, and socioeconomic information to produce scores for every census tract in the state.
+
+-[Food Environment Atlas from the USDA](https://www.ers.usda.gov/foodatlas/) Assembles statistics on food environment indicators to stimulate research on the determinants of food choices and diet quality, and provides a spatial overview of a community's ability to access healthy food and its success in doing so. Download data: xls.
 
 \
 
