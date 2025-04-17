@@ -694,7 +694,7 @@ Typically you will bring in a raster dataset directly from a file. These files c
 We’ll bring in the file NDVI_BayArea.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
 
 ```{r}
-NDVI_raster = rast("NDVI_BayArea.tif")
+NDVI_raster = rast("NDVI_rast.rds")
 
 ## Get summary of raster data
 NDVI_raster
