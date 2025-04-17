@@ -683,7 +683,9 @@ Raster datasets are simply an array of pixels/cells organized into rows and colu
  - Raster datasets are always rectangular (rows x col) similar to matrices. Irregular boundaries are created by using `NAs`.
  - Rasters have to contain values of the same type (int, float, boolean) throughout the raster, just like matrices and unlike data frames.
  - The size of the raster depends on the **resolution** and the **extent** of the raster. As such many rasters are large and often cannot be held in memory completely.
- - The workhorse package for working with rasters in R is the **terra** package by Robert Hijmans. 
+ 
+ 
+The workhorse package for working with rasters in R is the **terra** package by Robert Hijmans. **terra** has functions for creating, reading, manipulating, and writing raster data. The package also implements raster algebra and many other functions for raster data manipulation. The package works with `SpatRaster` objects. The `rast()` function is used to create these objects. 
 
 Typically you will bring in a raster dataset directly from a file. These files come in many different forms, typically .tif, .img, and .grd.
 
@@ -772,8 +774,60 @@ NDVI_sf_map_neg
 
 \
 
-Nice. What do we notice? The coast of San Francisco might have some cloud cover errors! Satellite data isn't perfect!
+Nice. What do we notice? The coast of San Francisco might have some cloud cover errors! Satellite data isn't perfect! But the good news is, we've learned how to bring in raster data! I think we need a badge!!!!
 
 \
 
+![terra Badge](terra.png)
+
+\
+
+One last step. Let's put all our knowledge together and map our old friend CAdata on top of the NDVI data in San Francisco. First, let's bring in the CAdata dataset on ovarian cancer cases again. 
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+\
+
+Let's check the CRS and compare it to our NDVI dataset.
+
+```{r}
+st_crs(ca_pts)
+st_crs(NDVI_raster)
+```
+
+\
+
+Hmmm, let's make sure they are the same projection.
+
+```{r}
+ca_pts_proj<-st_transform(ca_pts,st_crs(NDVI_raster))
+st_crs(ca_pts_proj)
+```
+
+\
+
+They should be good to go now. Let's map these addresses on top of the raster data!
+
+```{r}
+tmap_mode("plot")
+NDVI_cancer_map = tm_shape(NDVI_raster) +
+  tm_raster(style = "cont", title = "NDVI") +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = "blue")
+NDVI_cancer_map
+```
+
+\
+
+That is one fine looking map. Go get yourself a snack! Treat yourself!
 
