@@ -1,0 +1,187 @@
+---
+title: "Lab 1 Assignment"
+author: "Peter James"
+date: "2025-04-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load Packages
+```{r}
+library(sf)
+library(tidyverse)
+library(tidygeocoder)
+library(MapGAM)
+library(tidycensus)
+library(flextable)
+library(tmap)
+```
+
+\
+
+# Geocoding
+
+Question 1. Read in In N Out Burger
+
+glimpse(innout)
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/innout_final.csv", "innout_final.csv", mode = "wb")
+in_n_out <- read_csv("innout_final.csv")
+```
+
+\
+
+Question 2. Glimpse at the data. Looks like *store address* is the variable to geocode!
+```{r}
+glimpse(in_n_out)
+```
+
+\
+
+Question 3. Geocode the data using "arcgis" geocoder.
+```{r}
+innout_geo      <- geocode(in_n_out, address = "store address",
+                          method = "arcgis")
+```
+
+\
+
+Question 4. Looks like there's no missingness! No NAs!
+```{r}
+summary(innout_geo$lat)
+summary(innout_geo$long)
+```
+
+\
+
+Question 5. We use st_as_sf to make the dataset spatial and we use the crs of 4326
+```{r}
+innout_pts <- st_as_sf(innout_geo, coords=c("long","lat"), crs=4326)
+```
+
+\
+
+Question 6. Map the addreses in red below!
+```{r}
+tmap_mode("view")
+innout_map = tm_shape(innout_pts) + tm_dots(col = "red", size = 0.3, alpha = 0.5)
+innout_map
+```
+
+
+Question 7. Map the addreses in blue below!
+```{r}
+tmap_mode("view")
+innout_map_blue = tm_shape(innout_pts) + tm_dots(col = "blue", size = 0.3, alpha = 0.5)
+innout_map_blue
+```
+
+# Map Point Health Data
+
+Question 8. Import CAdata dataset
+```{r}
+#Load CAdata dataset from MapGAM package
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+
+```
+
+\
+
+Question 9. Add CRS
+```{r}
+
+#Load the projection into an object called ca_proj
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+```
+
+\
+
+Question 10. Create a map of the CAdata dataset with points color coded by quintiles of age.
+```{r}
+cancer_map_age = tm_shape(ca_pts_crs) + tm_dots(col = "AGE", size = 0.3, style = "quantile")
+cancer_map_age
+```
+
+\
+
+Question 11. Map by insurance status
+```{r}
+cancer_map_ins = tm_shape(ca_pts_crs) + tm_dots(col = "INS", size = 0.3, style = "cat")
+cancer_map_ins
+```
+
+\
+
+# Census Data
+
+Question 12. Use the tidycensus package to download American Community Survey Five year estimates from 2018-2022 in California at the Census tract level for the following variable
+```{r}
+ca <- get_acs(geography = "tract", 
+              year = 2022,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+
+```
+\
+
+Question 13.	Take a glimpse at your data.
+```{r}
+glimpse(ca)
+```
+
+\
+
+
+Question 14.	Give us the mean median household income across tracts in California.
+```{r}
+ca %>%
+  summarize(Mean = mean(medincE))
+```
+
+\
+
+Question 15.	Make a table showing the mean, median, and standard deviation of median household income across tract in California, and make it look fancy!
+```{r}
+summarytable <- ca %>%
+  summarize(Mean = mean(medincE),
+            Median = median(medincE),
+            SD = sd(medincE)
+            )
+my_table <- flextable(summarytable)
+my_table
+```
+
+\
+
+Question 16.	Create a histogram of median household income across tracts in California. Make sure it has a label.
+```{r}
+ca %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=medincE)) +
+  xlab("Median household income")
+```
+
+\
+
+Question 17.	OK now give me a boxplot! And I want a nice label for this too!
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(y = medincE)) +
+    ylab("Median household income")
+```
+

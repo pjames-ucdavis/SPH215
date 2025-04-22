@@ -1,0 +1,271 @@
+---
+title: "Lab 3 In Class"
+author: "Peter James"
+date: "2025-04-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message = FALSE)
+```
+
+# Lab 3
+
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(tidygeocoder)
+library(flextable)
+library(tmap)
+```
+
+Download Census data using **tidycensus**
+
+```{r}
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+Get ACS data
+
+```{r}
+acs2023 <- load_variables(2023, "acs5", cache = TRUE)
+View(acs2023)
+```
+
+Get race/ethnicity for CA counties
+```{r}
+ca <- get_acs(geography = "county", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+Look at our data
+```{r}
+glimpse(ca)
+head(ca)
+```
+
+Set Working Directory
+```{r}
+setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
+getwd()
+```
+
+Read in ca.pm
+```{r}
+ca.pm <- read_csv("PolicyMap Data 2025-03-27 192555 UTC.csv", skip = 1)
+```
+
+```{r}
+glimpse(ca.pm)
+```
+Prep to merge
+```{r}
+class(ca.pm$GeoID)
+class(ca$GEOID)
+```
+
+Merge
+```{r}
+cacounty <- ca %>% 
+      left_join(ca.pm, by = c("GEOID" = "GeoID")) %>%
+      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+             mhisp = case_when(phisp > 0.5 ~ "Majority",
+                               TRUE ~ "Not Majority")) %>%
+      rename(County = GeoID_Name) %>%
+      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
+
+glimpse(cacounty)
+```
+
+Save datasets
+```{r}
+write_csv(cacounty, "lab2_file.csv")
+```
+
+Exploratory data analysis
+
+```{r}
+cacounty %>%
+  summarize(Mean = mean(mhhinc))
+
+cacounty %>%
+  summarize(Mean = mean(mhhinc), SD = sd(mhhinc))
+```
+
+```{r}
+cacounty <- cacounty %>%
+    mutate(region = case_when(County == "Sonoma" | County == "Napa" | 
+                              County == "Solano" | County == "Marin" | 
+                              County == "Contra Costa" | County == "San Francisco" |
+                              County == "San Mateo" | County == "Alameda" | 
+                              County == "Santa Clara" ~ "Bay Area",
+                              County == "Imperial" | County == "Los Angeles" | 
+                              County == "Orange" | County == "Riverside" |
+                              County == "San Diego" | County == "San Bernardino" |
+                              County == "Ventura" ~ "Southern California",
+                              County == "Fresno" | County == "Madera" | 
+                              County == "Mariposa" | County == "Merced" | 
+                              County == "Tulare" | 
+                              County == "Kings" ~ "Central Valley",
+                              County == "Alpine" | County == "Colusa" |
+                              County == "El Dorado" | County == "Glenn" |
+                              County == "Placer" | County == "Sacramento" |
+                              County == "Sutter" | County == "Yolo" |
+                              County == "Yuba" ~ "Capital Region",
+                              TRUE ~ "Rest"))
+```
+
+Mean median household income by region
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc))
+```
+
+```{r}
+cacounty %>%
+  group_by(region) 
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+```{r}
+cacounty %>%
+  group_by(mhisp) %>%
+  summarize(n = n()) %>%
+  mutate(freq = n / sum(n))
+```
+
+```{r}
+summary(cacounty)
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+```{r}
+region.summary <- cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+Flextable
+
+```{r}
+my_table <- flextable(region.summary)
+my_table
+
+class(my_table)
+```
+
+Let's make it prettier
+
+```{r}
+my_table <- my_table %>%
+          set_header_labels(
+            region = "Region",
+            Mean = "Mean",
+            Median = "Median",
+            SD = "Standard Deviation",
+            Correlation = "Correlation") %>%
+              flextable::align(align = "center", part = "all")
+
+my_table
+```
+
+```{r}
+save_as_image(my_table, path = "reg_income.png")
+
+```
+
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc), bins=10) +
+  xlab("Median household income")
+```
+
+Boxplot
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(y = mhhinc)) +
+    ylab("Median household income")
+```
+
+By group
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income")
+```
+
+Facet Wrap
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income") +
+    facet_wrap(~region) 
+```
+Bar chart
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=region, y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Median household income")
+```
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income")
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income") +
+  coord_flip()
+```
+

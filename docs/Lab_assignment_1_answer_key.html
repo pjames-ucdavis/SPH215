@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Peter James" />
+
+<meta name="date" content="2025-04-17" />
+
+<title>Lab 1 Assignment</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="site_libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-binding-2.2.2/leaflet.js"></script>
+<script src="site_libs/leaflet-providers-2.0.0/leaflet-providers_2.0.0.js"></script>
+<script src="site_libs/leaflet-providers-plugin-2.2.2/leaflet-providers-plugin.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2.html">Lab 2: Geocoding, Vector Data, and Census Data </a>
+    </li>
+    <li>
+      <a href="Lab3.html">Lab 3: Polygons and Rasters</a>
+    </li>
+    <li>
+      <a href="Lab4.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5.html">Lab 5: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab6.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab7.html">Lab 7: Spatial Statistics</a>
+    </li>
+    <li>
+      <a href="Lab8.html">Lab 8: Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 1 Assignment</h1>
+<h4 class="author">Peter James</h4>
+<h4 class="date">2025-04-17</h4>
+
+</div>
+
+
+<p>Load Packages</p>
+<pre class="r"><code>library(sf)</code></pre>
+<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(tidygeocoder)
+library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp
+## Loading required package: gam
+## Loading required package: splines
+## Loading required package: foreach
+## 
+## Attaching package: &#39;foreach&#39;
+## 
+## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     accumulate, when
+## 
+## Loaded gam 1.22-5
+## 
+## Loading required package: survival</code></pre>
+<pre class="r"><code>library(tidycensus)
+library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose</code></pre>
+<pre class="r"><code>library(tmap)</code></pre>
+<p><br />
+</p>
+<p>Question 1. Read in In N Out Burger</p>
+<p>glimpse(innout)</p>
+<pre class="r"><code>download.file(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/innout_final.csv&quot;, &quot;innout_final.csv&quot;, mode = &quot;wb&quot;)
+in_n_out &lt;- read_csv(&quot;innout_final.csv&quot;)</code></pre>
+<pre><code>## Rows: 30 Columns: 2
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): store address
+## dbl (1): Store Number
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p><br />
+</p>
+<p>Question 2. Glimpse at the data. Looks like <em>store address</em> is
+the variable to geocode!</p>
+<pre class="r"><code>glimpse(in_n_out)</code></pre>
+<pre><code>## Rows: 30
+## Columns: 2
+## $ `Store Number`  &lt;dbl&gt; 131, 327, 276, 217, 225, 247, 320, 319, 197, 207, 143,…
+## $ `store address` &lt;chr&gt; &quot;3501 Truxel Road Sacramento CA 95834&quot;, &quot;8200 Delta Sh…</code></pre>
+<p><br />
+</p>
+<p>Question 3. Geocode the data using “arcgis” geocoder.</p>
+<pre class="r"><code>innout_geo      &lt;- geocode(in_n_out, address = &quot;store address&quot;,
+                          method = &quot;arcgis&quot;)</code></pre>
+<pre><code>## Passing 30 addresses to the ArcGIS single address geocoder</code></pre>
+<pre><code>## Query completed in: 14 seconds</code></pre>
+<p><br />
+</p>
+<p>Question 4. Looks like there’s no missingness! No NAs!</p>
+<pre class="r"><code>summary(innout_geo$lat)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   35.99   37.99   38.39   38.12   38.59   38.76</code></pre>
+<pre class="r"><code>summary(innout_geo$long)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  -122.7  -122.0  -121.5  -121.5  -121.3  -119.7</code></pre>
+<p><br />
+</p>
+<p>Question 5. We use st_as_sf to make the dataset spatial and we use
+the crs of 4326</p>
+<pre class="r"><code>innout_pts &lt;- st_as_sf(innout_geo, coords=c(&quot;long&quot;,&quot;lat&quot;), crs=4326)</code></pre>
+<p><br />
+</p>
+<p>Question 6. Map the addreses in red below!</p>
+<pre class="r"><code>tmap_mode(&quot;view&quot;)</code></pre>
+<pre><code>## ℹ tmap mode set to &quot;view&quot;.</code></pre>
+<pre class="r"><code>innout_map = tm_shape(innout_pts) + tm_dots(col = &quot;red&quot;, size = 0.3, alpha = 0.5)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).[v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>innout_map</code></pre>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-5da898fed66c92b1c7fc" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-5da898fed66c92b1c7fc">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"attributionControl":true},"calls":[{"method":"createMapPane","args":["tmap401",401]},{"method":"addLayersControl","args":[["Esri.WorldGrayCanvas","OpenStreetMap","Esri.WorldTopoMap"],"innout_pts",{"collapsed":true,"autoZIndex":true,"position":"topleft"}]},{"method":"addProviderTiles","args":["Esri.WorldGrayCanvas",null,"Esri.WorldGrayCanvas",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenStreetMap",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["Esri.WorldTopoMap",null,"Esri.WorldTopoMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addCircleMarkers","args":[[38.636837992182,38.462731613993,38.598048514034,38.66054050562,38.59146184688,38.655364806138,38.408511848379,38.424140619312,38.11590602068,35.98615100886,38.366441986694,38.758262013438,38.614528718691,38.59146184688,38.462731613993,36.852251932422,36.70481823697,36.321185988524,37.984713017002,37.996969999744,38.677383856232,38.541166111148,38.257292005353,38.281086552088,38.35162441314,38.460594354412,38.234565983636,37.960716005396,37.879011252016,37.688210987341],[-121.504167337671,-121.491879551435,-121.419401653772,-121.357052280268,-121.550209215633,-121.52613580298,-121.412894363242,-121.391440127693,-121.308159968494,-119.95926196685,-121.961054989119,-121.259557000017,-121.268923106263,-121.550209215633,-121.491879551435,-119.790492765508,-119.770254157377,-119.673543004167,-121.345592039333,-121.314505991207,-121.785945632395,-121.737532597844,-122.064693030931,-122.276223600971,-122.715881319241,-122.725270233455,-122.620885028793,-122.510439959592,-122.515545526481,-122.472013040666],[2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1],null,"innout_pts",{"interactive":true,"className":"","pane":"tmap401","stroke":true,"color":["#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040"],"weight":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"opacity":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"fill":true,"fillColor":["#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"fillOpacity":[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},null,null,["<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>131<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>3501 Truxel Road Sacramento CA 95834<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>327<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8200 Delta Shores Circle Sacramento CA 95832<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>276<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2001 Alta Arden Expy. Sacramento CA 95825<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>217<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>4600 Madison Ave. Sacramento CA 95841<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>225<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>780 Ikea Court West Sacramento CA 95605<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>247<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2900 Del Paso Rd. Sacramento CA 95834<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>320<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>7620 Elk Grove Blvd. Elk Grove CA 95757<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>319<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>9188 E Stockton Blvd. Elk Grove CA 95624<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>197<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2625 W. Kettleman Ln. Lodi CA 95242<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>207<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>33464 Bernard Dr. Kettleman City CA 93239<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>143<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>170 Nut Tree Pkwy. Vacaville CA 95687<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>180<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1803 Taylor Rd. Roseville CA 95661<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>308<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2475 Sunrise Blvd. Rancho Cordova CA 95670<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>141<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>780 Ikea Ct. West Sacramento CA 95605<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>89<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8200 Delta Shores Cir. Sacramento CA 95832<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>135<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8010 N. Blackstone Ave. Fresno CA 93720<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>126<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2657 S. Second St. Fresno CA 93706<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>147<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>280 S. 12th St. Hanford CA 93230<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>165<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2727 W. March Lane Stockton CA 95219<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>169<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>5202 Pacific Ave. Stockton CA 95207<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>232<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>53 W. Main St. Woodland CA 95695<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>233<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1020 Olive Dr. Davis CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>234<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1364 Holiday Ln. Fairfield CA 94534<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>235<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>820 Imola Ave. Napa CA 94559<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>236<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>6000 Redwood Dr. Rohnert Park CA 94928<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>237<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2131 County Center Dr. Santa Rosa CA 95403<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>238<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1010 Lakeville St. Petaluma CA 94952<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>239<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>819 Francisco Blvd. W. San Rafael CA 94901<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>240<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>798 Redwood Hwy. Mill Valley CA 94941<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>241<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>260 Washington St. Daly City CA 94015<\/nobr><\/td><\/tr><\/table><\/div>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"fitBounds":[35.93070878876844,-122.7863047780408,38.81370423352956,-119.6125084595812,[]],"limits":{"lat":[35.98615100886,38.758262013438],"lng":[-122.725270233455,-119.673543004167]}},"evals":[],"jsHooks":[]}</script>
+<p>Question 7. Map the addreses in blue below!</p>
+<pre class="r"><code>tmap_mode(&quot;view&quot;)</code></pre>
+<pre><code>## ℹ tmap mode set to &quot;view&quot;.</code></pre>
+<pre class="r"><code>innout_map_blue = tm_shape(innout_pts) + tm_dots(col = &quot;blue&quot;, size = 0.3, alpha = 0.5)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>innout_map_blue</code></pre>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-4d951f9da333ea54e8eb" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-4d951f9da333ea54e8eb">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"attributionControl":true},"calls":[{"method":"createMapPane","args":["tmap401",401]},{"method":"addLayersControl","args":[["Esri.WorldGrayCanvas","OpenStreetMap","Esri.WorldTopoMap"],"innout_pts",{"collapsed":true,"autoZIndex":true,"position":"topleft"}]},{"method":"addProviderTiles","args":["Esri.WorldGrayCanvas",null,"Esri.WorldGrayCanvas",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenStreetMap",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["Esri.WorldTopoMap",null,"Esri.WorldTopoMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addCircleMarkers","args":[[38.636837992182,38.462731613993,38.598048514034,38.66054050562,38.59146184688,38.655364806138,38.408511848379,38.424140619312,38.11590602068,35.98615100886,38.366441986694,38.758262013438,38.614528718691,38.59146184688,38.462731613993,36.852251932422,36.70481823697,36.321185988524,37.984713017002,37.996969999744,38.677383856232,38.541166111148,38.257292005353,38.281086552088,38.35162441314,38.460594354412,38.234565983636,37.960716005396,37.879011252016,37.688210987341],[-121.504167337671,-121.491879551435,-121.419401653772,-121.357052280268,-121.550209215633,-121.52613580298,-121.412894363242,-121.391440127693,-121.308159968494,-119.95926196685,-121.961054989119,-121.259557000017,-121.268923106263,-121.550209215633,-121.491879551435,-119.790492765508,-119.770254157377,-119.673543004167,-121.345592039333,-121.314505991207,-121.785945632395,-121.737532597844,-122.064693030931,-122.276223600971,-122.715881319241,-122.725270233455,-122.620885028793,-122.510439959592,-122.515545526481,-122.472013040666],[2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1,2.1],null,"innout_pts",{"interactive":true,"className":"","pane":"tmap401","stroke":true,"color":["#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040","#404040"],"weight":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"opacity":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"fill":true,"fillColor":["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"],"fillOpacity":[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},null,null,["<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>131<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>3501 Truxel Road Sacramento CA 95834<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>327<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8200 Delta Shores Circle Sacramento CA 95832<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>276<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2001 Alta Arden Expy. Sacramento CA 95825<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>217<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>4600 Madison Ave. Sacramento CA 95841<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>225<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>780 Ikea Court West Sacramento CA 95605<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>247<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2900 Del Paso Rd. Sacramento CA 95834<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>320<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>7620 Elk Grove Blvd. Elk Grove CA 95757<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>319<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>9188 E Stockton Blvd. Elk Grove CA 95624<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>197<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2625 W. Kettleman Ln. Lodi CA 95242<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>207<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>33464 Bernard Dr. Kettleman City CA 93239<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>143<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>170 Nut Tree Pkwy. Vacaville CA 95687<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>180<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1803 Taylor Rd. Roseville CA 95661<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>308<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2475 Sunrise Blvd. Rancho Cordova CA 95670<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>141<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>780 Ikea Ct. West Sacramento CA 95605<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>89<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8200 Delta Shores Cir. Sacramento CA 95832<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>135<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>8010 N. Blackstone Ave. Fresno CA 93720<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>126<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2657 S. Second St. Fresno CA 93706<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>147<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>280 S. 12th St. Hanford CA 93230<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>165<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2727 W. March Lane Stockton CA 95219<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>169<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>5202 Pacific Ave. Stockton CA 95207<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>232<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>53 W. Main St. Woodland CA 95695<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>233<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1020 Olive Dr. Davis CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>234<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1364 Holiday Ln. Fairfield CA 94534<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>235<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>820 Imola Ave. Napa CA 94559<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>236<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>6000 Redwood Dr. Rohnert Park CA 94928<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>237<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>2131 County Center Dr. Santa Rosa CA 95403<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>238<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>1010 Lakeville St. Petaluma CA 94952<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>239<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>819 Francisco Blvd. W. San Rafael CA 94901<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>240<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>798 Redwood Hwy. Mill Valley CA 94941<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;overflow-y:auto; overflow-x:hidden;}<\/style><div style=\"max-height:25em;padding-right:0px;\"><table>\n\t\t\t   <thead><tr><th colspan=\"2\"><\/th><\/thead><\/tr><tr><td style=\"color: #888888;\"><nobr>Store Number<\/nobr><\/td><td align=\"right\"><nobr>241<\/nobr><\/td><\/tr><tr><td style=\"color: #888888;\"><nobr>store address<\/nobr><\/td><td align=\"right\"><nobr>260 Washington St. Daly City CA 94015<\/nobr><\/td><\/tr><\/table><\/div>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"fitBounds":[35.93070878876844,-122.7863047780408,38.81370423352956,-119.6125084595812,[]],"limits":{"lat":[35.98615100886,38.758262013438],"lng":[-122.725270233455,-119.673543004167]}},"evals":[],"jsHooks":[]}</script>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDEgQXNzaWdubWVudCIKYXV0aG9yOiAiUGV0ZXIgSmFtZXMiCmRhdGU6ICIyMDI1LTA0LTE3IgpvdXRwdXQ6IGh0bWxfZG9jdW1lbnQKLS0tCgpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFKQpgYGAKCkxvYWQgUGFja2FnZXMKYGBge3J9CmxpYnJhcnkoc2YpCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRpZHlnZW9jb2RlcikKbGlicmFyeShNYXBHQU0pCmxpYnJhcnkodGlkeWNlbnN1cykKbGlicmFyeShmbGV4dGFibGUpCmxpYnJhcnkodG1hcCkKYGBgCgpcCgpRdWVzdGlvbiAxLiBSZWFkIGluIEluIE4gT3V0IEJ1cmdlcgoKZ2xpbXBzZShpbm5vdXQpCmBgYHtyfQpkb3dubG9hZC5maWxlKCJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3JlZnMvaGVhZHMvbWFpbi9pbm5vdXRfZmluYWwuY3N2IiwgImlubm91dF9maW5hbC5jc3YiLCBtb2RlID0gIndiIikKaW5fbl9vdXQgPC0gcmVhZF9jc3YoImlubm91dF9maW5hbC5jc3YiKQpgYGAKClwKClF1ZXN0aW9uIDIuIEdsaW1wc2UgYXQgdGhlIGRhdGEuIExvb2tzIGxpa2UgKnN0b3JlIGFkZHJlc3MqIGlzIHRoZSB2YXJpYWJsZSB0byBnZW9jb2RlIQpgYGB7cn0KZ2xpbXBzZShpbl9uX291dCkKYGBgCgpcCgpRdWVzdGlvbiAzLiBHZW9jb2RlIHRoZSBkYXRhIHVzaW5nICJhcmNnaXMiIGdlb2NvZGVyLgpgYGB7cn0KaW5ub3V0X2dlbyAgICAgIDwtIGdlb2NvZGUoaW5fbl9vdXQsIGFkZHJlc3MgPSAic3RvcmUgYWRkcmVzcyIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgbWV0aG9kID0gImFyY2dpcyIpCmBgYAoKXAoKUXVlc3Rpb24gNC4gTG9va3MgbGlrZSB0aGVyZSdzIG5vIG1pc3NpbmduZXNzISBObyBOQXMhCmBgYHtyfQpzdW1tYXJ5KGlubm91dF9nZW8kbGF0KQpzdW1tYXJ5KGlubm91dF9nZW8kbG9uZykKYGBgCgpcCgpRdWVzdGlvbiA1LiBXZSB1c2Ugc3RfYXNfc2YgdG8gbWFrZSB0aGUgZGF0YXNldCBzcGF0aWFsIGFuZCB3ZSB1c2UgdGhlIGNycyBvZiA0MzI2CmBgYHtyfQppbm5vdXRfcHRzIDwtIHN0X2FzX3NmKGlubm91dF9nZW8sIGNvb3Jkcz1jKCJsb25nIiwibGF0IiksIGNycz00MzI2KQpgYGAKClwKClF1ZXN0aW9uIDYuIE1hcCB0aGUgYWRkcmVzZXMgaW4gcmVkIGJlbG93IQpgYGB7cn0KdG1hcF9tb2RlKCJ2aWV3IikKaW5ub3V0X21hcCA9IHRtX3NoYXBlKGlubm91dF9wdHMpICsgdG1fZG90cyhjb2wgPSAicmVkIiwgc2l6ZSA9IDAuMywgYWxwaGEgPSAwLjUpCmlubm91dF9tYXAKYGBgCgoKUXVlc3Rpb24gNy4gTWFwIHRoZSBhZGRyZXNlcyBpbiBibHVlIGJlbG93IQpgYGB7cn0KdG1hcF9tb2RlKCJ2aWV3IikKaW5ub3V0X21hcF9ibHVlID0gdG1fc2hhcGUoaW5ub3V0X3B0cykgKyB0bV9kb3RzKGNvbCA9ICJibHVlIiwgc2l6ZSA9IDAuMywgYWxwaGEgPSAwLjUpCmlubm91dF9tYXBfYmx1ZQpgYGAKCgoKCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab_assignment_1_answer_key.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

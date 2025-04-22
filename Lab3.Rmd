@@ -40,7 +40,7 @@ census_api_key("YOUR API KEY GOES HERE", install = TRUE)
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
-census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE)
+census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overwrite=TRUE)
 ```
 \
 
@@ -691,13 +691,21 @@ Typically you will bring in a raster dataset directly from a file. These files c
 
 \
 
-We’ll bring in the file NDVI_BayArea.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
+We’ll bring in the file NDVI_rast.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
 
 ```{r}
-NDVI_raster = rast("NDVI_rast.rds")
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast.tif"
+download.file(url, destfile = "NDVI_rast.tif", mode = "wb")
+NDVI_raster = rast("NDVI_rast.tif")
 
 ## Get summary of raster data
 NDVI_raster
+```
+
+\
+
+Does it have a CRS?
+```{r}
 
 ## Check CRS
 st_crs(NDVI_raster)
@@ -742,9 +750,9 @@ NDVI_map
 OK, let's see if we can crop this to focus on San Francisco. I've googled the lat and long for the area around San Francisco, and I'll put these right into my `crop()` function. I can use the `tmap_mode("view")` now because the raster is small enough for R to make interactive.
 
 ```{r}
-sf_rast<-crop(NDVI_raster, ext(-122.53, -122.3, 37.6191, 37.9))
+sf_rast<-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
 
-tmap_mode("view")
+tmap_mode("plot")
 NDVI_sf_map = tm_shape(sf_rast) +
   tm_raster(title = "NDVI",
              style="cont",
@@ -801,7 +809,7 @@ Let's check the CRS and compare it to our NDVI dataset.
 
 ```{r}
 st_crs(ca_pts)
-st_crs(NDVI_raster)
+st_crs(sf_rast_neg)
 ```
 
 \
@@ -809,7 +817,7 @@ st_crs(NDVI_raster)
 Hmmm, let's make sure they are the same projection.
 
 ```{r}
-ca_pts_proj<-st_transform(ca_pts,st_crs(NDVI_raster))
+ca_pts_proj<-st_transform(ca_pts,st_crs(sf_rast_neg))
 st_crs(ca_pts_proj)
 ```
 
@@ -819,7 +827,7 @@ They should be good to go now. Let's map these addresses on top of the raster da
 
 ```{r}
 tmap_mode("plot")
-NDVI_cancer_map = tm_shape(NDVI_raster) +
+NDVI_cancer_map = tm_shape(sf_rast_neg) +
   tm_raster(style = "cont", title = "NDVI") +
   tm_legend(outside = TRUE) +
   tm_shape(ca_pts_proj) + 

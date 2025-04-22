@@ -1,0 +1,44 @@
+---
+title: "Lab 2 Assignment"
+author: "Peter James"
+date: "2025-04-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We’ll bring in the file NDVI_rast.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
+
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif"
+download.file(url, destfile = "LST_med_ca.tif", mode = "wb")
+LST_raster = rast("LST_med_ca.tif")
+
+## Get summary of raster data
+LST_raster
+```
+
+\
+
+Does it have a CRS?
+```{r}
+
+## Check CRS
+st_crs(LST_raster)
+
+```
+
+\
+
+OK we have what looks like a raster. We see our resolution and our extent, and we have a CRS. Nice! Shall we plot this?
+
+```{r}
+## Plot the raster on a map
+tmap_mode("plot")
+LST_map = tm_shape(LST_raster) +
+  tm_raster(style = "cont") +
+  tm_legend(outside = TRUE)
+LST_map
+```
