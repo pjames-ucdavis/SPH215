@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Lab 4: Spatial Data Processing with Vector Data</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2.html">Lab 2: Geocoding, Vector Data, and Census Data </a>
+    </li>
+    <li>
+      <a href="Lab3.html">Lab 3: Polygons and Rasters</a>
+    </li>
+    <li>
+      <a href="Lab4.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5.html">Lab 5: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab6.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab7.html">Lab 7: Spatial Statistics</a>
+    </li>
+    <li>
+      <a href="Lab8.html">Lab 8: Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 4: Spatial Data Processing with Vector
+Data</h1>
+
+</div>
+
+
+<p>In this lab, we are going to work more with vector data, spatially
+joining two vector datasets.</p>
+<p>The objectives of this guide are to teach you:</p>
+<ol style="list-style-type: decimal">
+<li>Import our dataset with simulated geocoded addresses and mortality
+data from an ovarian cancer cohort</li>
+<li>Import a dataset with walkability data at the Census tract
+level</li>
+<li>Compare projections of datasets and re-project if needed</li>
+<li>Make maps</li>
+<li>Spatially join the two datasets</li>
+<li>Run a quick statistical analysis on the two datasets combined</li>
+</ol>
+<p>Let’s do this!!!</p>
+<p><br />
+</p>
+<p>First, let’s install our packages.</p>
+<pre class="r"><code>library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+#library(gtools)
+#library(gmodels)</code></pre>
+<p><br />
+</p>
+<div id="spatial-data-processing-with-vector-data-in-r"
+class="section level1">
+<h1>Spatial Data Processing with Vector Data in R</h1>
+<p>In this exercise, we will learn about geospatial analysis with vector
+data.</p>
+<p>We will be using data included in the <strong>MapGAM()</strong> <a
+href="https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf">package</a>.
+As a reminder: While they are based on real patterns expected in
+observational epidemiologic studies, these data have been simulated and
+are for teaching purposes only. The data contain 5000 simulated ovarian
+cancer cases. While this is a cohort with time to mortality, for the
+purposes of our class, we will conduct simple tabular analyses looking
+at associations between different spatial exposures with mortality at
+end of follow-up.</p>
+<p>As another reminder, the <em>CAdata</em> dataset contains the
+following variables:</p>
+<ul>
+<li>time (follow-up time)</li>
+<li>event (1=dead, 0=censored)</li>
+<li>X (Latitude)</li>
+<li>Y (Longitude)</li>
+<li>AGE (age in years)</li>
+<li>INS (insurance status, categorical)</li>
+</ul>
+<p>We will also read in a dataset with walkability index data from
+California. This dataset includes administrative boundaries for United
+States Census tract polygons, along with values for a walkability index
+for each tract derived from z-scores for population density, business
+density, and street connectivity.</p>
+<p><br />
+</p>
+</div>
+<div id="read-in-vector-datasets-and-check-projections"
+class="section level1">
+<h1>Read in Vector Datasets and Check Projections</h1>
+<div id="read-in-cancer-dataset" class="section level2">
+<h2>Read in Cancer Dataset</h2>
+<p>Next, we want to read in all of our spatial data. First, we read in
+the <em>CAdata</em> dataset from the <strong>MapGAM</strong> package,
+and then convert it to a spatial dataset.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p><br />
+</p>
+</div>
+<div id="read-in-walkability-index-dataset-at-the-census-tract-level"
+class="section level2">
+<h2>Read in Walkability Index Dataset at the Census Tract level</h2>
+<p>We then read in the administrative boundaries dataset with the
+walkability index values for the San Francisco Bay Area. Finally, we
+check the file to make sure it was read correctly. Does it have a
+coordinate reference system?</p>
+<pre class="r"><code>## Reading in the walkability index dataset
+url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/BayArea_Walkability_Data.rds&quot;
+download.file(url, destfile = &quot;BayArea_Walkability_Data.rds&quot;, mode = &quot;wb&quot;)
+walkability_tracts = readRDS(&quot;BayArea_Walkability_Data.rds&quot;)
+
+## Is walkability_tracts spatial?
+head(walkability_tracts)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 31 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: -122.2695 ymin: 37.83454 xmax: -122.2124 ymax: 37.88544
+## Geodetic CRS:  WGS 84
+##         GEOID FID_1        GISJOIN STATEFP COUNTYFP TRACTCE NAME.x
+## 1 06001400100     0 G0600010400100      06      001  400100   4001
+## 2 06001400200     1 G0600010400200      06      001  400200   4002
+## 3 06001400300     2 G0600010400300      06      001  400300   4003
+## 4 06001400400     3 G0600010400400      06      001  400400   4004
+## 5 06001400500     4 G0600010400500      06      001  400500   4005
+## 6 06001400600     5 G0600010400600      06      001  400600   4006
+##            NAMELSAD MTFCC FUNCSTAT   ALAND AWATER    INTPTLAT     INTPTLON
+## 1 Census Tract 4001 G5020        S 6894340      0 +37.8676275 -122.2319460
+## 2 Census Tract 4002 G5020        S  586561      0 +37.8481378 -122.2495916
+## 3 Census Tract 4003 G5020        S 1105851      0 +37.8405970 -122.2544404
+## 4 Census Tract 4004 G5020        S  715616      0 +37.8482808 -122.2574478
+## 5 Census Tract 4005 G5020        S  590307      0 +37.8485412 -122.2647277
+## 6 Census Tract 4006 G5020        S  297856      0 +37.8419909 -122.2648882
+##   Shape_Leng Shape_Area Count_ Avg_CBSA Var_CBSA Avg_CBSA_E Var_CBSA_E
+## 1  14302.721  6894336.0     12    41860        0    1953826          0
+## 2   3990.700   586561.4      8    41860        0    1953826          0
+## 3   5379.766  1105847.8     11    41860        0    1953826          0
+## 4   3811.589   715617.2      8    41860        0    1953826          0
+## 5   3285.980   590304.7     10    41860        0    1953826          0
+## 6   2414.036   297856.4      6    41860        0    1953826          0
+##   Avg_CBSA_P Var_CBSA_P Avg_CBSA_W Var_CBSA_W Avg_walkin Var_walkin
+## 1    4335391          0    1852676          0   0.522475  4.1277735
+## 2    4335391          0    1852676          0   1.811125  0.8386494
+## 3    4335391          0    1852676          0   1.554891  1.2472868
+## 4    4335391          0    1852676          0   2.942137  0.7530686
+## 5    4335391          0    1852676          0   2.790860  2.5111812
+## 6    4335391          0    1852676          0   2.055317  2.5502804
+##                                          NAME.y   variable estimate   moe
+## 1 Census Tract 4001, Alameda County, California B19013_001   220921 25969
+## 2 Census Tract 4002, Alameda County, California B19013_001   200192 23361
+## 3 Census Tract 4003, Alameda County, California B19013_001   118695 23530
+## 4 Census Tract 4004, Alameda County, California B19013_001   137067  5162
+## 5 Census Tract 4005, Alameda County, California B19013_001   110052 29999
+## 6 Census Tract 4006, Alameda County, California B19013_001   135682 21626
+##                         geometry
+## 1 MULTIPOLYGON (((-122.2132 3...
+## 2 MULTIPOLYGON (((-122.2419 3...
+## 3 MULTIPOLYGON (((-122.2508 3...
+## 4 MULTIPOLYGON (((-122.2525 3...
+## 5 MULTIPOLYGON (((-122.2618 3...
+## 6 MULTIPOLYGON (((-122.2613 3...</code></pre>
+<p><br />
+</p>
+</div>
+</div>
+<div id="check-projections-for-all-spatial-data" class="section level1">
+<h1>Check Projections for all Spatial Data</h1>
+<p>Finally, we check the projections. <strong>This is the most important
+step and is guaranteed to make life easier with your geospatial
+analysis!</strong> When you have files in different projections, this
+can be a major problem because when we try to overlay the two files they
+may not overlap. First we check the coordinate reference systems for
+each dataset using <code>st_crs()</code>. We then use the
+<code>st_transform()</code> function to convert the projection for our
+point data to match that of our polygon data. When we are done, do the
+projections of the two datasets match?</p>
+<pre class="r"><code>## Look at the coordinate reference system for the cancer data, and for walkability data
+st_crs(ca_pts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(walkability_tracts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: EPSG:4326 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     DATUM[&quot;World Geodetic System 1984&quot;,
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<pre class="r"><code>## Transform the coordinate reference system of the walkability tract data to match that 
+## of the cancer data
+ca_transformed &lt;-st_transform(ca_pts, st_crs(walkability_tracts))  
+
+## Check projection of walkability_transformed
+st_crs(walkability_tracts)==st_crs(ca_transformed)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p><br />
+</p>
+</div>
+<div id="map-the-data" class="section level1">
+<h1>Map The Data</h1>
+<p>Now, we will visualize our spatial data using <strong>tmap</strong>.
+We will overlay the walkability maps with the ovarian cancer data, and
+then make a choropleth map of walkability indices. Do any patterns jump
+out, or are there any outliers?</p>
+<pre class="r"><code>## Make a choropleth map of polygons colored by levels of walkability
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap mode set to &quot;plot&quot;.</code></pre>
+<pre class="r"><code>walkability_map &lt;- tm_shape(walkability_tracts) +
+  tm_polygons(
+    col = &quot;Avg_walkin&quot;,
+    style = &quot;cont&quot;,
+    title = &quot;Walkability Index&quot;,
+    lwd = 0,
+    alpha=.95
+  )</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;cont&quot;`, use fill.scale =
+## `tm_scale_continuous()`.[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.[v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of
+## the visual variable `fill` namely &#39;title&#39; to &#39;fill.legend =
+## tm_legend(&lt;HERE&gt;)&#39;</code></pre>
+<pre class="r"><code>## Make another map adding points for the cancer data to map of polygons
+walkability_cancer_map = walkability_map + 
+  tm_shape(ca_transformed) + 
+  tm_dots(size=0.25, alpha=0.8, col=&quot;blue&quot;)</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>## Plot both maps side by side
+tmap_arrange(walkability_map, walkability_cancer_map)</code></pre>
+<pre><code>## Variable(s) &quot;fill&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.
+## [plot mode] fit legend/component: Some legend items or map compoments do not
+## fit well, and are therefore rescaled.
+## ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.Variable(s) &quot;fill&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.
+## [plot mode] fit legend/component: Some legend items or map compoments do not
+## fit well, and are therefore rescaled.
+## ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.</code></pre>
+<p><img src="Lab4_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>We find that the most highly walkable areas are in the city of San
+Francisco, which makes sense. Our cancer cohort data overlaps with the
+SF Bay Area walkability map, which is reassuring.</p>
+<p><br />
+</p>
+</div>
+<div id="spatial-join" class="section level1">
+<h1>Spatial Join</h1>
+<p>Now that we have visualized our data, let’s see if there is an
+association between the walkability index and mortality among ovarian
+cancer cases. We will first spatially join the two datasets (merge the
+two datasets based on location of cases and the walkability index of the
+census tract that contains them) using <code>st_join()</code>. Then we
+will check the distribution of walkability index. We will use a
+two-sided chi-squared test to test our hypothesis of the association
+between residential walkability index value and mortality among ovarian
+cancer cases. What do we find?</p>
+<pre class="r"><code>## Spatially join the cancer point data to the walkability polygon data
+walkability_cancer = st_join(ca_transformed, walkability_tracts[c(&quot;Avg_walkin&quot;, &quot;GEOID&quot;)]) 
+
+## Take a look at a summary of the values
+summary(walkability_cancer$Avg_walkin)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##  -1.699   0.041   0.729   0.841   1.359   8.196    4026</code></pre>
+<p><br />
+</p>
+<p>Looks like we have lots of NA values. That is because some of our
+participants live outside of the area of our walkability data. Let’s
+drop those missing values.</p>
+<pre class="r"><code>walkability_cancer_nomiss &lt;- walkability_cancer %&gt;%
+    subset(!is.na(Avg_walkin))
+summary(walkability_cancer_nomiss$Avg_walkin)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -1.69880  0.04108  0.72932  0.84103  1.35942  8.19633</code></pre>
+<pre class="r"><code>glimpse(walkability_cancer_nomiss)</code></pre>
+<pre><code>## Rows: 974
+## Columns: 7
+## $ time       &lt;dbl&gt; 1.2759763, 3.5099074, 10.2977017, 7.0125318, 3.3891999, 6.1…
+## $ event      &lt;dbl&gt; 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0,…
+## $ AGE        &lt;int&gt; 67, 69, 75, 46, 70, 59, 69, 79, 79, 45, 78, 78, 43, 72, 65,…
+## $ INS        &lt;fct&gt; Mcr, Mcr, Mng, Mcr, Mcr, Unk, Unk, Mcr, Mcr, Mcd, Mcr, Mcr,…
+## $ Avg_walkin &lt;dbl&gt; -0.2994200, 0.2815286, 0.8322375, -1.3289667, 0.2963222, 1.…
+## $ GEOID      &lt;chr&gt; &quot;06055201101&quot;, &quot;06013346203&quot;, &quot;06055200601&quot;, &quot;06095250502&quot;,…
+## $ geometry   &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-121.9832 37.82052)…</code></pre>
+<p><br />
+</p>
+</div>
+<div id="analyze-our-joined-dataset" class="section level1">
+<h1>Analyze our Joined Dataset</h1>
+<p>OK, we have a dataset with no missingness. Can we look at the
+distribution of our walkability index among participants?</p>
+<pre class="r"><code>## Check distribution of walkability index
+hist(walkability_cancer_nomiss$Avg_walkin) </code></pre>
+<p><img src="Lab4_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>For the purposes of our analysis, let’s divide up our walkability
+data into quartiles. We will do this using the <code>mutate()</code>
+function combined with the <code>ntile()</code> function. Then we will
+take a glimpse at our new dataset.</p>
+<pre class="r"><code>walkability_cancer_nomiss &lt;- walkability_cancer_nomiss %&gt;%
+  mutate(walk_quartile = ntile(Avg_walkin, 4))
+
+glimpse(walkability_cancer_nomiss)</code></pre>
+<pre><code>## Rows: 974
+## Columns: 8
+## $ time          &lt;dbl&gt; 1.2759763, 3.5099074, 10.2977017, 7.0125318, 3.3891999, …
+## $ event         &lt;dbl&gt; 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1,…
+## $ AGE           &lt;int&gt; 67, 69, 75, 46, 70, 59, 69, 79, 79, 45, 78, 78, 43, 72, …
+## $ INS           &lt;fct&gt; Mcr, Mcr, Mng, Mcr, Mcr, Unk, Unk, Mcr, Mcr, Mcd, Mcr, M…
+## $ Avg_walkin    &lt;dbl&gt; -0.2994200, 0.2815286, 0.8322375, -1.3289667, 0.2963222,…
+## $ GEOID         &lt;chr&gt; &quot;06055201101&quot;, &quot;06013346203&quot;, &quot;06055200601&quot;, &quot;0609525050…
+## $ geometry      &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-121.9832 37.820…
+## $ walk_quartile &lt;int&gt; 1, 2, 3, 1, 2, 3, 4, 2, 4, 3, 4, 4, 3, 4, 4, 4, 4, 4, 2,…</code></pre>
+<p><br />
+</p>
+<p>OK that looks good. We have created a new variable
+<em>walk_quartile</em> that tells us what quartile of walkability a
+participant lives in. Let’s do a two by two table of walkability
+quartiles by <em>event</em>, which is whether a participant died over
+followup.</p>
+<pre class="r"><code>## Create a contingency table of event by walk_quartile
+tab &lt;- table(walkability_cancer_nomiss$walk_quartile, walkability_cancer_nomiss$event)
+tab</code></pre>
+<pre><code>##    
+##       0   1
+##   1 100 144
+##   2 107 137
+##   3 104 139
+##   4 113 130</code></pre>
+<p><br />
+</p>
+<p>Hmmm, that’s interesting, but let’s look at this by percentages
+instead.</p>
+<pre class="r"><code>## Convert to percentages by column
+tab_col_perc &lt;- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)</code></pre>
+<pre><code>##    
+##        0    1
+##   1 23.6 26.2
+##   2 25.2 24.9
+##   3 24.5 25.3
+##   4 26.7 23.6</code></pre>
+<p><br />
+</p>
+<p>Do you think the percentages are different by quartile of the
+walkability index? We can run a chi-squared test to be sure. This is a
+statistical test to see whether there is a difference in the probability
+of <em>event</em>, or whether a participant died over follow-up, by the
+quartiles of the walkability index. We do this with the
+<code>chisq.test()</code> function.</p>
+<pre class="r"><code>## Chi-squared test
+chisq.test(tab)</code></pre>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test
+## 
+## data:  tab
+## X-squared = 1.5801, df = 3, p-value = 0.6639</code></pre>
+<p><br />
+</p>
+<p>OK, how do we interpret this? Our null hypothesis is that there is no
+association between mortality at end of follow-up and increasing
+quartile of walkability index. Our alternative hypothesis is that there
+is an association between mortality at end of follow-up and increasing
+quartile of walkability index. We use a two-sided chi-squared test with
+alpha=0.05. Assuming no sources of bias and that the null hypothesis is
+true, the probability of observing increases in mortality at end of
+follow-up with increasing quartiles of walkability as or more extreme as
+those produced in these data is 0.66. Since p&gt;0.05, we fail to reject
+the null hypothesis and conclude that walkability is not associated with
+mortality at end of follow-up (under the assumptions stated above). In
+other words, we don’t see a relationship between walkability exposure
+and our outcome (dying over followup).</p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDQ6IFNwYXRpYWwgRGF0YSBQcm9jZXNzaW5nIHdpdGggVmVjdG9yIERhdGEiCi0tLQoKSW4gdGhpcyBsYWIsIHdlIGFyZSBnb2luZyB0byB3b3JrIG1vcmUgd2l0aCB2ZWN0b3IgZGF0YSwgc3BhdGlhbGx5IGpvaW5pbmcgdHdvIHZlY3RvciBkYXRhc2V0cy4gCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3U6CgogICAxLiBJbXBvcnQgb3VyIGRhdGFzZXQgd2l0aCBzaW11bGF0ZWQgZ2VvY29kZWQgYWRkcmVzc2VzIGFuZCBtb3J0YWxpdHkgZGF0YSBmcm9tIGFuIG92YXJpYW4gY2FuY2VyIGNvaG9ydAogICAyLiBJbXBvcnQgYSBkYXRhc2V0IHdpdGggd2Fsa2FiaWxpdHkgZGF0YSBhdCB0aGUgQ2Vuc3VzIHRyYWN0IGxldmVsCiAgIDMuIENvbXBhcmUgcHJvamVjdGlvbnMgb2YgZGF0YXNldHMgYW5kIHJlLXByb2plY3QgaWYgbmVlZGVkCiAgIDQuIE1ha2UgbWFwcwogICA1LiBTcGF0aWFsbHkgam9pbiB0aGUgdHdvIGRhdGFzZXRzCiAgIDYuIFJ1biBhIHF1aWNrIHN0YXRpc3RpY2FsIGFuYWx5c2lzIG9uIHRoZSB0d28gZGF0YXNldHMgY29tYmluZWQKCkxldCdzIGRvIHRoaXMhISEKClwKCkZpcnN0LCBsZXQncyBpbnN0YWxsIG91ciBwYWNrYWdlcy4KYGBge3J9CmxpYnJhcnkoc2YpCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeShmbGV4dGFibGUpCmxpYnJhcnkoUkNvbG9yQnJld2VyKQpsaWJyYXJ5KHRtYXApCiNsaWJyYXJ5KGd0b29scykKI2xpYnJhcnkoZ21vZGVscykKCmBgYAoKXAoKCiMgU3BhdGlhbCBEYXRhIFByb2Nlc3Npbmcgd2l0aCBWZWN0b3IgRGF0YSBpbiBSCgpJbiB0aGlzIGV4ZXJjaXNlLCB3ZSB3aWxsIGxlYXJuIGFib3V0IGdlb3NwYXRpYWwgYW5hbHlzaXMgd2l0aCB2ZWN0b3IgZGF0YS4gCgpXZSB3aWxsIGJlIHVzaW5nIGRhdGEgaW5jbHVkZWQgaW4gdGhlICoqTWFwR0FNKCkqKiBbcGFja2FnZV0oaHR0cHM6Ly9jcmFuLnItcHJvamVjdC5vcmcvd2ViL3BhY2thZ2VzL01hcEdBTS9NYXBHQU0ucGRmKS4gQXMgYSByZW1pbmRlcjogV2hpbGUgdGhleSBhcmUgYmFzZWQgb24gcmVhbCBwYXR0ZXJucyBleHBlY3RlZCBpbiBvYnNlcnZhdGlvbmFsIGVwaWRlbWlvbG9naWMgc3R1ZGllcywgdGhlc2UgZGF0YSBoYXZlIGJlZW4gc2ltdWxhdGVkIGFuZCBhcmUgZm9yIHRlYWNoaW5nIHB1cnBvc2VzIG9ubHkuIFRoZSBkYXRhIGNvbnRhaW4gNTAwMCBzaW11bGF0ZWQgb3ZhcmlhbiBjYW5jZXIgY2FzZXMuIFdoaWxlIHRoaXMgaXMgYSBjb2hvcnQgd2l0aCB0aW1lIHRvIG1vcnRhbGl0eSwgZm9yIHRoZSBwdXJwb3NlcyBvZiBvdXIgY2xhc3MsIHdlIHdpbGwgY29uZHVjdCBzaW1wbGUgdGFidWxhciBhbmFseXNlcyBsb29raW5nIGF0IGFzc29jaWF0aW9ucyBiZXR3ZWVuIGRpZmZlcmVudCBzcGF0aWFsIGV4cG9zdXJlcyB3aXRoIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwLiAKCkFzIGFub3RoZXIgcmVtaW5kZXIsIHRoZSAqQ0FkYXRhKiBkYXRhc2V0IGNvbnRhaW5zIHRoZSBmb2xsb3dpbmcgdmFyaWFibGVzOgoKKiB0aW1lIChmb2xsb3ctdXAgdGltZSkKKiBldmVudCAoMT1kZWFkLCAwPWNlbnNvcmVkKQoqIFggKExhdGl0dWRlKQoqIFkgKExvbmdpdHVkZSkKKiBBR0UgKGFnZSBpbiB5ZWFycykKKiBJTlMgKGluc3VyYW5jZSBzdGF0dXMsIGNhdGVnb3JpY2FsKQoKV2Ugd2lsbCBhbHNvIHJlYWQgaW4gYSBkYXRhc2V0IHdpdGggd2Fsa2FiaWxpdHkgaW5kZXggZGF0YSBmcm9tIENhbGlmb3JuaWEuIFRoaXMgZGF0YXNldCBpbmNsdWRlcyBhZG1pbmlzdHJhdGl2ZSBib3VuZGFyaWVzIGZvciBVbml0ZWQgU3RhdGVzIENlbnN1cyB0cmFjdCBwb2x5Z29ucywgYWxvbmcgd2l0aCB2YWx1ZXMgZm9yIGEgd2Fsa2FiaWxpdHkgaW5kZXggZm9yIGVhY2ggdHJhY3QgZGVyaXZlZCBmcm9tIHotc2NvcmVzIGZvciBwb3B1bGF0aW9uIGRlbnNpdHksIGJ1c2luZXNzIGRlbnNpdHksIGFuZCBzdHJlZXQgY29ubmVjdGl2aXR5LgoKXAoKIyBSZWFkIGluIFZlY3RvciBEYXRhc2V0cyBhbmQgQ2hlY2sgUHJvamVjdGlvbnMKCiMjIFJlYWQgaW4gQ2FuY2VyIERhdGFzZXQKCk5leHQsIHdlIHdhbnQgdG8gcmVhZCBpbiBhbGwgb2Ygb3VyIHNwYXRpYWwgZGF0YS4gRmlyc3QsIHdlIHJlYWQgaW4gdGhlICpDQWRhdGEqIGRhdGFzZXQgZnJvbSB0aGUgKipNYXBHQU0qKiBwYWNrYWdlLCBhbmQgdGhlbiBjb252ZXJ0IGl0IHRvIGEgc3BhdGlhbCBkYXRhc2V0LiAKCmBgYHtyfQpkYXRhKENBZGF0YSkKY2FfcHRzIDwtIENBZGF0YQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpLCBjcnM9Y2FfcHJvaikKYGBgCgpcCgojIyBSZWFkIGluIFdhbGthYmlsaXR5IEluZGV4IERhdGFzZXQgYXQgdGhlIENlbnN1cyBUcmFjdCBsZXZlbAoKV2UgdGhlbiByZWFkIGluIHRoZSBhZG1pbmlzdHJhdGl2ZSBib3VuZGFyaWVzIGRhdGFzZXQgd2l0aCB0aGUgd2Fsa2FiaWxpdHkgaW5kZXggdmFsdWVzIGZvciB0aGUgU2FuIEZyYW5jaXNjbyBCYXkgQXJlYS4gRmluYWxseSwgd2UgY2hlY2sgdGhlIGZpbGUgdG8gbWFrZSBzdXJlIGl0IHdhcyByZWFkIGNvcnJlY3RseS4gRG9lcyBpdCBoYXZlIGEgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtPwoKCmBgYHtyfQojIyBSZWFkaW5nIGluIHRoZSB3YWxrYWJpbGl0eSBpbmRleCBkYXRhc2V0CnVybCA8LSAiaHR0cHM6Ly9naXRodWIuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yYXcvbWFpbi9CYXlBcmVhX1dhbGthYmlsaXR5X0RhdGEucmRzIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiQmF5QXJlYV9XYWxrYWJpbGl0eV9EYXRhLnJkcyIsIG1vZGUgPSAid2IiKQp3YWxrYWJpbGl0eV90cmFjdHMgPSByZWFkUkRTKCJCYXlBcmVhX1dhbGthYmlsaXR5X0RhdGEucmRzIikKCiMjIElzIHdhbGthYmlsaXR5X3RyYWN0cyBzcGF0aWFsPwpoZWFkKHdhbGthYmlsaXR5X3RyYWN0cykKYGBgCgpcCgojIENoZWNrIFByb2plY3Rpb25zIGZvciBhbGwgU3BhdGlhbCBEYXRhCgpGaW5hbGx5LCB3ZSBjaGVjayB0aGUgcHJvamVjdGlvbnMuICoqVGhpcyBpcyB0aGUgbW9zdCBpbXBvcnRhbnQgc3RlcCBhbmQgaXMgZ3VhcmFudGVlZCB0byBtYWtlIGxpZmUgZWFzaWVyIHdpdGggeW91ciBnZW9zcGF0aWFsIGFuYWx5c2lzISoqIFdoZW4geW91IGhhdmUgZmlsZXMgaW4gZGlmZmVyZW50IHByb2plY3Rpb25zLCB0aGlzIGNhbiBiZSBhIG1ham9yIHByb2JsZW0gYmVjYXVzZSB3aGVuIHdlIHRyeSB0byBvdmVybGF5IHRoZSB0d28gZmlsZXMgdGhleSBtYXkgbm90IG92ZXJsYXAuIEZpcnN0IHdlIGNoZWNrIHRoZSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW1zIGZvciBlYWNoIGRhdGFzZXQgdXNpbmcgYHN0X2NycygpYC4gV2UgdGhlbiB1c2UgdGhlIGBzdF90cmFuc2Zvcm0oKWAgZnVuY3Rpb24gdG8gY29udmVydCB0aGUgcHJvamVjdGlvbiBmb3Igb3VyIHBvaW50IGRhdGEgdG8gbWF0Y2ggdGhhdCBvZiBvdXIgcG9seWdvbiBkYXRhLiBXaGVuIHdlIGFyZSBkb25lLCBkbyB0aGUgcHJvamVjdGlvbnMgb2YgdGhlIHR3byBkYXRhc2V0cyBtYXRjaD8KCgpgYGB7cn0KIyMgTG9vayBhdCB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtIGZvciB0aGUgY2FuY2VyIGRhdGEsIGFuZCBmb3Igd2Fsa2FiaWxpdHkgZGF0YQpzdF9jcnMoY2FfcHRzKQpzdF9jcnMod2Fsa2FiaWxpdHlfdHJhY3RzKQoKIyMgVHJhbnNmb3JtIHRoZSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0gb2YgdGhlIHdhbGthYmlsaXR5IHRyYWN0IGRhdGEgdG8gbWF0Y2ggdGhhdCAKIyMgb2YgdGhlIGNhbmNlciBkYXRhCmNhX3RyYW5zZm9ybWVkIDwtc3RfdHJhbnNmb3JtKGNhX3B0cywgc3RfY3JzKHdhbGthYmlsaXR5X3RyYWN0cykpICAKCiMjIENoZWNrIHByb2plY3Rpb24gb2Ygd2Fsa2FiaWxpdHlfdHJhbnNmb3JtZWQKc3RfY3JzKHdhbGthYmlsaXR5X3RyYWN0cyk9PXN0X2NycyhjYV90cmFuc2Zvcm1lZCkKYGBgCgpcCgojIE1hcCBUaGUgRGF0YQoKTm93LCB3ZSB3aWxsIHZpc3VhbGl6ZSBvdXIgc3BhdGlhbCBkYXRhIHVzaW5nICoqdG1hcCoqLiBXZSB3aWxsIG92ZXJsYXkgdGhlIHdhbGthYmlsaXR5IG1hcHMgd2l0aCB0aGUgb3ZhcmlhbiBjYW5jZXIgZGF0YSwgYW5kIHRoZW4gbWFrZSBhIGNob3JvcGxldGggbWFwIG9mIHdhbGthYmlsaXR5IGluZGljZXMuIERvIGFueSBwYXR0ZXJucyBqdW1wIG91dCwgb3IgYXJlIHRoZXJlIGFueSBvdXRsaWVycz8KCmBgYHtyfQojIyBNYWtlIGEgY2hvcm9wbGV0aCBtYXAgb2YgcG9seWdvbnMgY29sb3JlZCBieSBsZXZlbHMgb2Ygd2Fsa2FiaWxpdHkKdG1hcF9tb2RlKCJwbG90IikKd2Fsa2FiaWxpdHlfbWFwIDwtIHRtX3NoYXBlKHdhbGthYmlsaXR5X3RyYWN0cykgKwogIHRtX3BvbHlnb25zKAogICAgY29sID0gIkF2Z193YWxraW4iLAogICAgc3R5bGUgPSAiY29udCIsCiAgICB0aXRsZSA9ICJXYWxrYWJpbGl0eSBJbmRleCIsCiAgICBsd2QgPSAwLAogICAgYWxwaGE9Ljk1CiAgKQoKIyMgTWFrZSBhbm90aGVyIG1hcCBhZGRpbmcgcG9pbnRzIGZvciB0aGUgY2FuY2VyIGRhdGEgdG8gbWFwIG9mIHBvbHlnb25zCndhbGthYmlsaXR5X2NhbmNlcl9tYXAgPSB3YWxrYWJpbGl0eV9tYXAgKyAKICB0bV9zaGFwZShjYV90cmFuc2Zvcm1lZCkgKyAKICB0bV9kb3RzKHNpemU9MC4yNSwgYWxwaGE9MC44LCBjb2w9ImJsdWUiKQoKIyMgUGxvdCBib3RoIG1hcHMgc2lkZSBieSBzaWRlCnRtYXBfYXJyYW5nZSh3YWxrYWJpbGl0eV9tYXAsIHdhbGthYmlsaXR5X2NhbmNlcl9tYXApCmBgYAoKXAoKV2UgZmluZCB0aGF0IHRoZSBtb3N0IGhpZ2hseSB3YWxrYWJsZSBhcmVhcyBhcmUgaW4gdGhlIGNpdHkgb2YgU2FuIEZyYW5jaXNjbywgd2hpY2ggbWFrZXMgc2Vuc2UuIE91ciBjYW5jZXIgY29ob3J0IGRhdGEgb3ZlcmxhcHMgd2l0aCB0aGUgU0YgQmF5IEFyZWEgd2Fsa2FiaWxpdHkgbWFwLCB3aGljaCBpcyByZWFzc3VyaW5nLiAKClwKCiMgU3BhdGlhbCBKb2luIAoKTm93IHRoYXQgd2UgaGF2ZSB2aXN1YWxpemVkIG91ciBkYXRhLCBsZXQncyBzZWUgaWYgdGhlcmUgaXMgYW4gYXNzb2NpYXRpb24gYmV0d2VlbiB0aGUgd2Fsa2FiaWxpdHkgaW5kZXggYW5kIG1vcnRhbGl0eSBhbW9uZyBvdmFyaWFuIGNhbmNlciBjYXNlcy4gV2Ugd2lsbCBmaXJzdCBzcGF0aWFsbHkgam9pbiB0aGUgdHdvIGRhdGFzZXRzIChtZXJnZSB0aGUgdHdvIGRhdGFzZXRzIGJhc2VkIG9uIGxvY2F0aW9uIG9mIGNhc2VzIGFuZCB0aGUgd2Fsa2FiaWxpdHkgaW5kZXggb2YgdGhlIGNlbnN1cyB0cmFjdCB0aGF0IGNvbnRhaW5zIHRoZW0pIHVzaW5nIGBzdF9qb2luKClgLiBUaGVuIHdlIHdpbGwgY2hlY2sgdGhlIGRpc3RyaWJ1dGlvbiBvZiB3YWxrYWJpbGl0eSBpbmRleC4gV2Ugd2lsbCB1c2UgYSB0d28tc2lkZWQgY2hpLXNxdWFyZWQgdGVzdCB0byB0ZXN0IG91ciBoeXBvdGhlc2lzIG9mIHRoZSBhc3NvY2lhdGlvbiBiZXR3ZWVuIHJlc2lkZW50aWFsIHdhbGthYmlsaXR5IGluZGV4IHZhbHVlIGFuZCBtb3J0YWxpdHkgYW1vbmcgb3ZhcmlhbiBjYW5jZXIgY2FzZXMuIFdoYXQgZG8gd2UgZmluZD8KCmBgYHtyLCBldmFsPVRSVUUsIHdhcm5pbmc9RkFMU0UsIG1lc3NhZ2U9RkFMU0V9CiMjIFNwYXRpYWxseSBqb2luIHRoZSBjYW5jZXIgcG9pbnQgZGF0YSB0byB0aGUgd2Fsa2FiaWxpdHkgcG9seWdvbiBkYXRhCndhbGthYmlsaXR5X2NhbmNlciA9IHN0X2pvaW4oY2FfdHJhbnNmb3JtZWQsIHdhbGthYmlsaXR5X3RyYWN0c1tjKCJBdmdfd2Fsa2luIiwgIkdFT0lEIildKSAKCiMjIFRha2UgYSBsb29rIGF0IGEgc3VtbWFyeSBvZiB0aGUgdmFsdWVzCnN1bW1hcnkod2Fsa2FiaWxpdHlfY2FuY2VyJEF2Z193YWxraW4pCmBgYAoKXAoKTG9va3MgbGlrZSB3ZSBoYXZlIGxvdHMgb2YgTkEgdmFsdWVzLiBUaGF0IGlzIGJlY2F1c2Ugc29tZSBvZiBvdXIgcGFydGljaXBhbnRzIGxpdmUgb3V0c2lkZSBvZiB0aGUgYXJlYSBvZiBvdXIgd2Fsa2FiaWxpdHkgZGF0YS4gTGV0J3MgZHJvcCB0aG9zZSBtaXNzaW5nIHZhbHVlcy4KYGBge3J9CndhbGthYmlsaXR5X2NhbmNlcl9ub21pc3MgPC0gd2Fsa2FiaWxpdHlfY2FuY2VyICU+JQogICAgc3Vic2V0KCFpcy5uYShBdmdfd2Fsa2luKSkKc3VtbWFyeSh3YWxrYWJpbGl0eV9jYW5jZXJfbm9taXNzJEF2Z193YWxraW4pCmdsaW1wc2Uod2Fsa2FiaWxpdHlfY2FuY2VyX25vbWlzcykKYGBgCgpcCgojIEFuYWx5emUgb3VyIEpvaW5lZCBEYXRhc2V0Ck9LLCB3ZSBoYXZlIGEgZGF0YXNldCB3aXRoIG5vIG1pc3NpbmduZXNzLiBDYW4gd2UgbG9vayBhdCB0aGUgZGlzdHJpYnV0aW9uIG9mIG91ciB3YWxrYWJpbGl0eSBpbmRleCBhbW9uZyBwYXJ0aWNpcGFudHM/CmBgYHtyfQojIyBDaGVjayBkaXN0cmlidXRpb24gb2Ygd2Fsa2FiaWxpdHkgaW5kZXgKaGlzdCh3YWxrYWJpbGl0eV9jYW5jZXJfbm9taXNzJEF2Z193YWxraW4pIApgYGAKClwKCkZvciB0aGUgcHVycG9zZXMgb2Ygb3VyIGFuYWx5c2lzLCBsZXQncyBkaXZpZGUgdXAgb3VyIHdhbGthYmlsaXR5IGRhdGEgaW50byBxdWFydGlsZXMuIFdlIHdpbGwgZG8gdGhpcyB1c2luZyB0aGUgYG11dGF0ZSgpYCBmdW5jdGlvbiBjb21iaW5lZCB3aXRoIHRoZSBgbnRpbGUoKWAgZnVuY3Rpb24uIFRoZW4gd2Ugd2lsbCB0YWtlIGEgZ2xpbXBzZSBhdCBvdXIgbmV3IGRhdGFzZXQuCgpgYGB7cn0Kd2Fsa2FiaWxpdHlfY2FuY2VyX25vbWlzcyA8LSB3YWxrYWJpbGl0eV9jYW5jZXJfbm9taXNzICU+JQogIG11dGF0ZSh3YWxrX3F1YXJ0aWxlID0gbnRpbGUoQXZnX3dhbGtpbiwgNCkpCgpnbGltcHNlKHdhbGthYmlsaXR5X2NhbmNlcl9ub21pc3MpCmBgYAoKXAoKT0sgdGhhdCBsb29rcyBnb29kLiBXZSBoYXZlIGNyZWF0ZWQgYSBuZXcgdmFyaWFibGUgKndhbGtfcXVhcnRpbGUqIHRoYXQgdGVsbHMgdXMgd2hhdCBxdWFydGlsZSBvZiB3YWxrYWJpbGl0eSBhIHBhcnRpY2lwYW50IGxpdmVzIGluLiBMZXQncyBkbyBhIHR3byBieSB0d28gdGFibGUgb2Ygd2Fsa2FiaWxpdHkgcXVhcnRpbGVzIGJ5ICpldmVudCosIHdoaWNoIGlzIHdoZXRoZXIgYSBwYXJ0aWNpcGFudCBkaWVkIG92ZXIgZm9sbG93dXAuCmBgYHtyfQojIyBDcmVhdGUgYSBjb250aW5nZW5jeSB0YWJsZSBvZiBldmVudCBieSB3YWxrX3F1YXJ0aWxlCnRhYiA8LSB0YWJsZSh3YWxrYWJpbGl0eV9jYW5jZXJfbm9taXNzJHdhbGtfcXVhcnRpbGUsIHdhbGthYmlsaXR5X2NhbmNlcl9ub21pc3MkZXZlbnQpCnRhYgpgYGAKClwKCkhtbW0sIHRoYXQncyBpbnRlcmVzdGluZywgYnV0IGxldCdzIGxvb2sgYXQgdGhpcyBieSBwZXJjZW50YWdlcyBpbnN0ZWFkLgpgYGB7cn0KIyMgQ29udmVydCB0byBwZXJjZW50YWdlcyBieSBjb2x1bW4KdGFiX2NvbF9wZXJjIDwtIHByb3AudGFibGUodGFiLCBtYXJnaW4gPSAyKSAqIDEwMApyb3VuZCh0YWJfY29sX3BlcmMsIDEpCmBgYAoKXAoKRG8geW91IHRoaW5rIHRoZSBwZXJjZW50YWdlcyBhcmUgZGlmZmVyZW50IGJ5IHF1YXJ0aWxlIG9mIHRoZSB3YWxrYWJpbGl0eSBpbmRleD8gV2UgY2FuIHJ1biBhIGNoaS1zcXVhcmVkIHRlc3QgdG8gYmUgc3VyZS4gVGhpcyBpcyBhIHN0YXRpc3RpY2FsIHRlc3QgdG8gc2VlIHdoZXRoZXIgdGhlcmUgaXMgYSBkaWZmZXJlbmNlIGluIHRoZSBwcm9iYWJpbGl0eSBvZiAqZXZlbnQqLCBvciB3aGV0aGVyIGEgcGFydGljaXBhbnQgZGllZCBvdmVyIGZvbGxvdy11cCwgYnkgdGhlIHF1YXJ0aWxlcyBvZiB0aGUgd2Fsa2FiaWxpdHkgaW5kZXguIFdlIGRvIHRoaXMgd2l0aCB0aGUgYGNoaXNxLnRlc3QoKWAgZnVuY3Rpb24uCmBgYHtyfQojIyBDaGktc3F1YXJlZCB0ZXN0CmNoaXNxLnRlc3QodGFiKQpgYGAKClwKCk9LLCBob3cgZG8gd2UgaW50ZXJwcmV0IHRoaXM/IE91ciBudWxsIGh5cG90aGVzaXMgaXMgdGhhdCB0aGVyZSBpcyBubyBhc3NvY2lhdGlvbiBiZXR3ZWVuIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwIGFuZCBpbmNyZWFzaW5nIHF1YXJ0aWxlIG9mIHdhbGthYmlsaXR5IGluZGV4LiBPdXIgYWx0ZXJuYXRpdmUgaHlwb3RoZXNpcyBpcyB0aGF0IHRoZXJlIGlzIGFuIGFzc29jaWF0aW9uIGJldHdlZW4gbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgYW5kIGluY3JlYXNpbmcgcXVhcnRpbGUgb2Ygd2Fsa2FiaWxpdHkgaW5kZXguIFdlIHVzZSBhIHR3by1zaWRlZCBjaGktc3F1YXJlZCB0ZXN0IHdpdGggYWxwaGE9MC4wNS4gQXNzdW1pbmcgbm8gc291cmNlcyBvZiBiaWFzIGFuZCB0aGF0IHRoZSBudWxsIGh5cG90aGVzaXMgaXMgdHJ1ZSwgdGhlIHByb2JhYmlsaXR5IG9mIG9ic2VydmluZyBpbmNyZWFzZXMgaW4gbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgd2l0aCBpbmNyZWFzaW5nIHF1YXJ0aWxlcyBvZiB3YWxrYWJpbGl0eSBhcyBvciBtb3JlIGV4dHJlbWUgYXMgdGhvc2UgcHJvZHVjZWQgaW4gdGhlc2UgZGF0YSBpcyAwLjY2LiBTaW5jZSBwPjAuMDUsIHdlIGZhaWwgdG8gcmVqZWN0IHRoZSBudWxsIGh5cG90aGVzaXMgYW5kIGNvbmNsdWRlIHRoYXQgd2Fsa2FiaWxpdHkgaXMgbm90IGFzc29jaWF0ZWQgd2l0aCBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cCAodW5kZXIgdGhlIGFzc3VtcHRpb25zIHN0YXRlZCBhYm92ZSkuIEluIG90aGVyIHdvcmRzLCB3ZSBkb24ndCBzZWUgYSByZWxhdGlvbnNoaXAgYmV0d2VlbiB3YWxrYWJpbGl0eSBleHBvc3VyZSBhbmQgb3VyIG91dGNvbWUgKGR5aW5nIG92ZXIgZm9sbG93dXApLgoK</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab4.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

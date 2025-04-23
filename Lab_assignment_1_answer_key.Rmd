@@ -178,8 +178,8 @@ ca %>%
 \
 
 Question 17.	OK now give me a boxplot! And I want a nice label for this too!
-```{r}
-cacounty %>%
+```{r, eval=FALSE}
+ca %>%
   ggplot() +
     geom_boxplot(mapping = aes(y = medincE)) +
     ylab("Median household income")

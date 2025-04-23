@@ -23,7 +23,7 @@ library(tmap)
 
 Download Census data using **tidycensus**
 
-```{r}
+```{r, eval=FALSE}
 census_api_key("YOUR API KEY GOES HERE", install = TRUE)
 ```
 
