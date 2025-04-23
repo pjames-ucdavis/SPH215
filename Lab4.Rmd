@@ -114,7 +114,7 @@ Now, we will visualize our spatial data using **tmap**. We will overlay the walk
 
 ```{r}
 ## Make a choropleth map of polygons colored by levels of walkability
-tmap_mode("view")
+tmap_mode("plot")
 walkability_map <- tm_shape(walkability_tracts) +
   tm_polygons(
     col = "Avg_walkin",

@@ -9,6 +9,17 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
 We’ll bring in the file NDVI_rast.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
 
 ```{r}
@@ -41,4 +52,65 @@ LST_map = tm_shape(LST_raster) +
   tm_raster(style = "cont") +
   tm_legend(outside = TRUE)
 LST_map
+```
+
+\
+
+## Crop
+
+OK, let's see if we can crop this to focus on San Francisco. I've googled the lat and long for the area around San Francisco, and I'll put these right into my `crop()` function. I can use the `tmap_mode("view")` now because the raster is small enough for R to make interactive.
+
+```{r}
+sf_rast<-crop(LST_raster, ext(-122.8, -121.5, 37.5, 38.6))
+
+tmap_mode("plot")
+LAN_sf_map = tm_shape(sf_rast) +
+  tm_raster(title = "LAN",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+
+LAN_sf_map
+```
+
+One last step. Let's put all our knowledge together and map our old friend CAdata on top of the NDVI data in San Francisco. First, let's bring in the CAdata dataset on ovarian cancer cases again. 
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+\
+
+Let's check the CRS and compare it to our NDVI dataset.
+
+```{r}
+st_crs(ca_pts)
+st_crs(LST_raster)
+```
+
+\
+
+Hmmm, let's make sure they are the same projection.
+
+```{r}
+ca_pts_proj<-st_transform(ca_pts,st_crs(LST_raster))
+st_crs(ca_pts_proj)
+```
+
+OK should be good to go
+```{r}
+tmap_mode("plot")
+LAN_cancer_map = tm_shape(LST_raster) +
+  tm_raster(style = "cont", title = "Light at Night") +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = "red")
+LAN_cancer_map
 ```
