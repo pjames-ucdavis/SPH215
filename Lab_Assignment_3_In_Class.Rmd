@@ -1,0 +1,99 @@
+---
+title: "Lab_Assignment_3_In_class"
+author: "Peter James"
+date: "2025-05-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+```
+
+Q1. Bring in CAdata
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+Q2. Bring in ACS Data
+```{r}
+ca.tracts <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+Q3. Check projections. CRS is not the same!
+```{r}
+st_crs(ca_pts)
+st_crs(ca.tracts)
+st_crs(ca.tracts)==st_crs(ca_pts)
+```
+
+Q4. Reproject. We reproject ca_pts to match the CRS for ca.tracts.
+```{r}
+ca_pts_transformed<-st_transform(ca_pts,st_crs(ca.tracts))
+st_crs(ca_pts_transformed)==st_crs(ca.tracts)
+```
+
+Q5. Overlay the map
+```{r}
+tmap_mode("plot")
+
+ca.inc.map <- tm_shape(ca.tracts) + 
+  tm_polygons(col = "medincE", 
+              style = "cont",
+    title = "Median Income",
+    lwd = 0,
+    alpha=.95,
+    palette = "Red") +
+  tm_shape(ca_pts_transformed) + 
+  tm_dots(col = "blue", size = .1, alpha=.5)
+ca.inc.map
+```
+
+Q6. Spatially join
+```{r}
+inc_cancer = st_join(ca_pts_transformed, ca.tracts) 
+```
+
+Q7. Drop missing. Have seven missing values.
+```{r}
+glimpse(inc_cancer)
+summary(inc_cancer$medincE)
+
+inc_cancer_nomiss <- inc_cancer %>%
+    subset(!is.na(medincE))
+
+summary(inc_cancer_nomiss$medincE)
+```
+
+Q8. Histogram
+```{r}
+hist(inc_cancer_nomiss$medincE)
+```
+
+Q9. Quartiles
+```{r}
+walkability_cancer_nomiss <- walkability_cancer_nomiss %>%
+  mutate(walk_quartile = ntile(Avg_walkin, 4))
+```
+

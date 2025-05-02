@@ -1,0 +1,125 @@
+---
+title: "Lab Assignment 2"
+author: "Peter James"
+date: "2025-04-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+Question 1.
+```{r, message=FALSE}
+ca.county <- get_acs(geography = "county", 
+              year = 2023,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+
+Question 2.
+```{r}
+glimpse(ca.county)
+```
+Question 3.
+Map
+```{r}
+tm_shape(ca.county) +
+  tm_polygons(col = "medincE", style = "quantile")
+```
+
+Question 4.
+Change color palette
+```{r}
+tm_shape(ca.county) +
+  tm_polygons(col = "medincE", style = "quantile", palette = "pink")
+```
+
+Question 5.
+Add title and legend
+```{r}
+tm_shape(ca.county) +
+  tm_polygons(col = "medincE", style = "quantile", palette = "pink", title = "Median Income") +
+  tm_layout(main.title = "Median Income of California Counties", title.size = 0.8, 
+            title.position = "center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+# Raster Data
+
+Question 6.
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif"
+download.file(url, destfile = "LST_med_ca.tif", mode = "wb")
+LST_raster = rast("LST_med_ca.tif")
+```
+
+Question 7.
+Map
+```{r}
+lst_map = tm_shape(LST_raster) +
+  tm_raster(style="cont") +
+  tm_legend(outside = TRUE)
+lst_map
+```
+
+Question 8.
+Crop
+```{r}
+LST_raster_crop<-crop(LST_raster, ext(-122.8, -121.5, 37.5, 38.6))
+
+lst_map_crop = tm_shape(LST_raster_crop) +
+  tm_raster(style="cont") +
+  tm_legend(outside = TRUE)
+lst_map_crop
+```
+
+
+Question 9.
+Bring in CAdata
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+Question 10.
+Overlay cancer data and light at night
+```{r}
+st_crs(ca_pts)==st_crs(LST_raster)
+ca_pts_proj<-st_transform(ca_pts, st_crs(LST_raster))
+st_crs(ca_pts_proj)==st_crs(LST_raster)
+st_crs(LST_raster)
+```
+
+Map them!
+```{r}
+NDVI_cancer_map = tm_shape(LST_raster) +
+  tm_raster(style = "cont", title = "Light at night") +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = "red")
+
+NDVI_cancer_map
+```
+

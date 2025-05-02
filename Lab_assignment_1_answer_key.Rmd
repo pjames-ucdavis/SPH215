@@ -2,7 +2,9 @@
 title: "Lab 1 Assignment"
 author: "Peter James"
 date: "2025-04-17"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -66,16 +68,16 @@ innout_pts <- st_as_sf(innout_geo, coords=c("long","lat"), crs=4326)
 
 Question 6. Map the addreses in red below!
 ```{r}
-tmap_mode("view")
-innout_map = tm_shape(innout_pts) + tm_dots(col = "red", size = 0.3, alpha = 0.5)
+tmap_mode("plot")
+innout_map = tm_shape(innout_pts) + tm_dots(col = "red", size = 0.3, alpha = 0.5) + tm_basemap()
 innout_map
 ```
 
 
 Question 7. Map the addreses in blue below!
 ```{r}
-tmap_mode("view")
-innout_map_blue = tm_shape(innout_pts) + tm_dots(col = "blue", size = 0.3, alpha = 0.5)
+tmap_mode("plot")
+innout_map_blue = tm_shape(innout_pts) + tm_dots(col = "blue", size = 0.3, alpha = 0.5) + tm_basemap())
 innout_map_blue
 ```
 
@@ -110,7 +112,7 @@ ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
 
 Question 10. Create a map of the CAdata dataset with points color coded by quintiles of age.
 ```{r}
-cancer_map_age = tm_shape(ca_pts_crs) + tm_dots(col = "AGE", size = 0.3, style = "quantile")
+cancer_map_age = tm_shape(ca_pts_crs) + tm_dots(col = "AGE", size = 0.3, style = "quantile") + tm_basemap()
 cancer_map_age
 ```
 
@@ -118,7 +120,7 @@ cancer_map_age
 
 Question 11. Map by insurance status
 ```{r}
-cancer_map_ins = tm_shape(ca_pts_crs) + tm_dots(col = "INS", size = 0.3, style = "cat")
+cancer_map_ins = tm_shape(ca_pts_crs) + tm_dots(col = "INS", size = 0.3, style = "cat") + tm_basemap()
 cancer_map_ins
 ```
 

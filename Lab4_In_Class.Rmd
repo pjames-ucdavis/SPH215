@@ -1,0 +1,434 @@
+---
+title: "Lab 4"
+author: "Peter James"
+date: "2025-04-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Install packages
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+Bring in ACS data
+```{r}
+ca.tracts <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+```{r}
+ca.tracts
+```
+
+```{r}
+ca.tracts <- ca.tracts %>%
+              separate(NAME, c("Tract", "County", "State"), sep = "; ")
+glimpse(ca.tracts)
+```
+
+
+```{r}
+ca.inc <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+```{r}
+glimpse(ca.inc)
+```
+Join tables
+```{r}
+ca.tracts <- ca.tracts %>%
+  left_join(ca.inc, by = "GEOID")
+
+#take a look to make sure the join worked
+ca.tracts
+```
+
+```{r}
+tmap_mode("plot")
+tract_map <- tm_shape(ca.tracts) +   tm_polygons()
+tract_map
+```
+
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds"
+download.file(url, destfile = "sac.metro.rds", mode = "wb")
+sac.metro <- readRDS("sac.metro.rds")
+glimpse(sac.metro)
+```
+
+Intersect with CA dataset
+```{r}
+sac.metro.tracts.int <- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)
+```
+
+Now map them
+```{r}
+tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +  
+  tm_borders(col = "red")
+```
+
+```{r}
+sac.metro.tracts.w <- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +
+  tm_borders(col = "red")
+```
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))
+```
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = "Median Income Sacramento MSA Tracts") 
+```
+
+Make prettier
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+    labs(title = "Median Income Sacramento MSA Tracts",
+         caption = "Source: American Community Survey") +  
+  theme_bw()
+```
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+```
+
+Map CAData participants
+```{r}
+ggplot(data = ca_pts_crs) +
+  geom_sf(fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+Overlay
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+```{r}
+ca_pts_crs.w <- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+Check CRS
+```{r}
+st_crs(ca_pts_crs)
+st_crs(sac.metro.tracts.w)
+```
+
+Transform
+```{r}
+#create new dataset with transformed CRS
+ca_pts_crs.transformed <- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+
+st_crs(ca_pts_crs.transformed )
+
+st_crs(ca_pts_crs.transformed)==st_crs(sac.metro.tracts.w)
+```
+
+try spatial join again
+```{r}
+ca_pts_crs.w <- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+Map
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+One pretty map
+```{r}
+ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants Overlaid with Median Income of Sacramento Tracts",
+       caption = "Source: American Community Survey and Ovarian Cancer Cases") +
+  theme_bw()
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile")
+```
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",  n=10)
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_borders()
+```
+```{r}
+tm_shape(sac.metro.tracts.w) + 
+  tm_fill("medincE") +
+  tm_borders()
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_fill(col = "medincE", style = "quantile",palette = c("red","blue")) 
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","white", "blue")) 
+```
+```{r}
+display.brewer.pal(6,"BuGn")
+
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette="BuGn")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds", title = "Median Income") 
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.position = c("right", "bottom"))
+```
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(title = "Median Income of Sacramento Tracts", title.size = 0.8, 
+            title.position = c("left","top"),
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+```{r}
+sac.map <- tm_shape(sac.metro.tracts.w, unit = "mi") +
+
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+              
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  
+  tm_layout(main.title = "Median Income of Sacramento tracts", 
+            main.title.size = 1.25, frame = FALSE,
+            main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+sac.map
+tmap_save(sac.map, "sac_city_inc.jpg")
+getwd()
+```
+
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/places_ca_lpa.csv"
+download.file(url, destfile = "places_ca_lpa", mode = "wb")
+places_ca_lpa <- read_csv("places_ca_lpa")
+glimpse(places_ca_lpa)
+```
+
+```{r}
+places_ca_lpa<-rename(places_ca_lpa, GEOID = LocationName)
+glimpse(places_ca_lpa)
+```
+
+```{r}
+ca.tracts.lpa <- ca.tracts %>%
+  left_join(places_ca_lpa, by = "GEOID")
+glimpse(ca.tracts.lpa)
+
+```
+
+```{r}
+tm_shape(ca.tracts.lpa, unit = "mi") +
+  tm_polygons(col = "Data_Value", style = "quantile",palette = "Reds",
+              title = "% Adults No Physical Activity", lwd = 0) +
+  tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
+            main.title.size = 1.25, main.title.position="center")
+```
+
+# Raster
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast.tif"
+download.file(url, destfile = "NDVI_rast.tif", mode = "wb")
+NDVI_raster = rast("NDVI_rast.tif")
+
+## Get summary of raster data
+NDVI_raster
+```
+
+```{r}
+st_crs(NDVI_raster)
+```
+
+Map raster
+```{r}
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(style = "cont") +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+```{r}
+# palette for plotting
+breaks_ndvi <- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
+palette_ndvi <- c("#BFBFBF","#DBDBDB","#FFFFE0","#FFFACC","#EDE8B5","#DED99C","#CCC782","#BDB86B","#B0C261","#A3CC59","#91BF52","#80B347","#70A340","#619636","#4F8A2E","#407D24","#306E1C","#216112","#0F540A","#004500")
+
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(title = "NDVI",
+             style="cont",
+             palette = palette_ndvi
+            ) +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+Crop
+```{r}
+sf_rast<-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
+
+NDVI_sf_map = tm_shape(sf_rast) +
+  tm_raster(title = "NDVI",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+NDVI_sf_map
+```
+
+Bring in CA Data
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+```{r}
+st_crs(ca_pts)==st_crs(NDVI_raster)
+```
+
+```{r}
+ca_pts_proj <- st_transform(ca_pts,st_crs(NDVI_raster))
+st_crs(ca_pts_proj)
+st_crs(ca_pts_proj)==st_crs(NDVI_raster)
+```
+
+Map
+```{r}
+NDVI_cancer_map = tm_shape(NDVI_raster) +
+  tm_raster(style = "cont", title = "NDVI") +
+  tm_legend(outside = TRUE) +
+  
+  tm_shape(ca_pts_proj) + 
+  tm_dots(col="event", size=0.3, alpha=0.5, style="cat")
+
+NDVI_cancer_map
+```
+

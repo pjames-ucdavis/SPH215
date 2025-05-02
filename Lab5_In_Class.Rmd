@@ -1,0 +1,144 @@
+---
+title: "Lab 5 In Class"
+author: "Peter James"
+date: "2025-04-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load packages
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+```
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+# Walkability
+```{r}
+## Reading in the walkability index dataset
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/BayArea_Walkability_Data.rds"
+download.file(url, destfile = "BayArea_Walkability_Data.rds", mode = "wb")
+walkability_tracts = readRDS("BayArea_Walkability_Data.rds")
+
+## Is walkability_tracts spatial?
+head(walkability_tracts)
+```
+Compare CRS
+```{r}
+## Look at the coordinate reference system for the cancer data, and for walkability data
+st_crs(ca_pts)
+```
+
+```{r}
+st_crs(walkability_tracts)
+```
+## Check projection of walkability_transformed
+
+```{r}
+st_crs(walkability_tracts)==st_crs(ca_pts)
+```
+
+# Transform
+
+```{r}
+## Transform the coordinate reference system of the walkability tract data to match that 
+## of the cancer data
+ca_transformed <-st_transform(ca_pts, st_crs(walkability_tracts))  
+
+## Check projection of walkability_transformed
+st_crs(walkability_tracts)==st_crs(ca_transformed)
+```
+
+Map
+```{r}
+tmap_mode("view")
+
+walkability_map <- tm_shape(walkability_tracts) +
+  tm_polygons(
+    col = "Avg_walkin",
+    style = "cont",
+    title = "Walkability Index",
+    lwd = 0,
+    alpha=.95
+  )
+walkability_map
+```
+
+```{r}
+## Make another map adding points for the cancer data to map of polygons
+walkability_cancer_map = walkability_map + 
+  tm_shape(ca_transformed) + 
+  tm_dots(size=0.1, alpha=0.8, col="blue")
+walkability_cancer_map
+```
+
+```{r}
+## Plot both maps side by side
+tmap_arrange(walkability_map, walkability_cancer_map)
+```
+
+# Spatial Join
+```{r}
+## Spatially join the cancer point data to the walkability polygon data
+walkability_cancer = st_join(ca_transformed, walkability_tracts[c("Avg_walkin", "GEOID")]) 
+
+## Take a look at a summary of the values
+summary(walkability_cancer$Avg_walkin)
+glimpse(walkability_cancer)
+```
+
+Get rid of missing values
+```{r}
+walkability_cancer_nomiss <- walkability_cancer %>%
+    subset(!is.na(Avg_walkin))
+
+summary(walkability_cancer_nomiss$Avg_walkin)
+glimpse(walkability_cancer_nomiss)
+hist(walkability_cancer_nomiss$Avg_walkin)
+```
+
+Create quartiles
+```{r}
+walkability_cancer_nomiss <- walkability_cancer_nomiss %>%
+  mutate(walk_quartile = ntile(Avg_walkin, 4))
+
+glimpse(walkability_cancer_nomiss)
+```
+
+Contingency table
+```{r}
+## Create a contingency table of event by walk_quartile
+tab <- table(walkability_cancer_nomiss$walk_quartile, walkability_cancer_nomiss$event)
+tab
+```
+
+Percentages
+```{r}
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+Chi-sq test
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```
+

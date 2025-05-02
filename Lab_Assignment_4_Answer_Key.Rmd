@@ -1,0 +1,129 @@
+---
+title: "Lab Assignment 3 Answer Key"
+author: "Peter James"
+date: "2025-04-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Packages
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+Q1. Bring in CAdata
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+Q2. Bring in raster data
+```{r}
+ndvi_rast <- rast("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast.tif")
+ndvi_rast
+```
+
+Q3. Check projections
+```{r}
+st_crs(ca_pts)==st_crs(ndvi_rast)
+```
+
+Q4. Reproject CAdata to match Census data
+```{r}
+ca_pts_proj<-st_transform(ca_pts,st_crs(ndvi_rast))
+
+st_crs(ca_pts_proj)==st_crs(ndvi_rast)
+```
+
+Q5. Overlap map of CAdata with Census data
+
+```{r}
+ca.inc.map <- tm_shape(ndvi_rast) +
+  tm_raster(style = "cont") +
+      tm_shape(ca_pts_proj) +
+        tm_dots(size=0.25, alpha=0.8, col="blue")
+ca.inc.map
+```
+
+Q6. Spatially join cancer data to census data
+```{r}
+## Spatially join the cancer point data to the walkability polygon data
+ndvi_cancer = data.frame(ca_pts_proj,terra::extract(ndvi_rast, ca_pts_proj))
+glimpse(ndvi_cancer) 
+## Take a look at a summary of the values
+summary(ndvi_cancer$NDVI_BayArea)
+```
+
+
+# Drop missing values
+Alternate approach
+census_cancer_nomiss <- census_cancer %>%
+    subset(!is.na(medincE))
+    
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer %>% drop_na(NDVI_BayArea) 
+
+## Take a look at a summary of the values
+summary(ndvi_cancer_nomiss$NDVI_BayArea)
+glimpse(ndvi_cancer_nomiss)
+```
+
+Q8. Histogram
+```{r}
+ndvi_cancer_nomiss %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=NDVI_BayArea)) 
+
+```
+
+
+Q9. Quartiles
+
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer_nomiss %>%
+  mutate(ndvi_quartile = ntile(NDVI_BayArea, 4))
+
+glimpse(ndvi_cancer_nomiss)
+```
+
+Q10. Tables by event
+```{r}
+## Create a contingency table of event by walk_quartile
+tab <- table(ndvi_cancer_nomiss$ndvi_quartile, ndvi_cancer_nomiss$event)
+tab
+```
+
+\
+
+Hmmm, that's interesting, but let's look at this by percentages instead.
+```{r}
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+Q11. Run Chi-squared test
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```
+
+\
+
+OK, how do we interpret this? Our null hypothesis is that there is no association between mortality at end of follow-up and increasing quartile of median income. Our alternative hypothesis is that there is an association between mortality at end of follow-up and increasing quartile of median income. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of walkability as or more extreme as those produced in these data is 0.716. Since p>0.05, we fail to reject the null hypothesis and conclude that median income is not associated with mortality at end of follow-up (under the assumptions stated above). In other words, we don't see a relationship between census tract median income exposure and our outcome (dying over followup).
+

@@ -1,9 +1,193 @@
 ---
-title: "Lab 5: Spatial Data Processing with Vector and Raster Data"
+title: 'Lab 5: Spatial Data Processing with Vector and Raster Data'
 ---
 
 \
 
-Please check back here for more soon!
+In this lab, we are going to work with vector and raster data, spatially joining point data to vector data 
+
+The objectives of this guide are to teach you:
+
+   1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
+   2. Import a dataset with greenspace across California
+   3. Compare projections of datasets and re-project if needed
+   4. Make maps
+   5. Spatially join the two datasets
+   6. Run a quick statistical analysis on the two datasets combined
+
+Enough talk--let's get coding!
 
 \
+
+# Install packages
+
+First, let's install our packages.
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+\
+
+# Bring in Cancer dataset
+
+We will be using data included in the **MapGAM()** [package](https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf). As a reminder: While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. While this is a cohort with time to mortality, for the purposes of our class, we will conduct simple tabular analyses looking at associations between different spatial exposures with mortality at end of follow-up. 
+
+As another reminder, the *CAdata* dataset contains the following variables:
+
+* time (follow-up time)
+* event (1=dead, 0=censored)
+* X (Latitude)
+* Y (Longitude)
+* AGE (age in years)
+* INS (insurance status, categorical)
+
+\
+
+## Read in Cancer Dataset
+
+Next, we want to read in all of our spatial data. First, we read in the *CAdata* dataset from the **MapGAM** package, and then convert it to a spatial dataset. 
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+\
+
+## Read in Light at Night Data
+
+We then read in the raster for light at night data across California. Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
+
+
+```{r}
+ndvi_rast <- rast("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast.tif")
+ndvi_rast
+```
+
+\
+
+# Check Projections for all Spatial Data
+
+Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our polygon data. When we are done, do the projections of the two datasets match?
+
+
+```{r}
+## Look at the coordinate reference system for the cancer data, and for greenspace data
+st_crs(ca_pts)
+st_crs(ndvi_rast)
+
+## Transform the coordinate reference system of the cancer data to match that 
+## of the greenspace  data
+ca_transformed <-st_transform(ca_pts, st_crs(ndvi_rast))  
+
+## Check projections
+st_crs(ndvi_rast)==st_crs(ca_transformed)
+```
+
+\
+
+# Map The Data
+
+Now, we will visualize our spatial data using **tmap**. We will overlay the greenspace maps with the ovarian cancer data. Do any patterns jump out, or are there any participants living in the middle of the Bay?
+
+```{r}
+ca.ndvi.map <- tm_shape(ndvi_rast) +
+  tm_raster(style = "cont") +
+      tm_shape(ca_transformed) +
+        tm_dots(size=0.25, alpha=0.8, col="blue")
+ca.ndvi.map
+```
+
+\
+
+We find that the most least green areas are in the downtown areas of San Francisco and Oakland, which makes sense. Our cancer cohort data overlaps with the greenspace map, which is reassuring. 
+
+\
+
+# Extract Raster Values to Points
+
+Now that we have visualized our data, let's see if there is an association between greenspace exposure and mortality among ovarian cancer cases. We will first extract the values for greenspace to the cancer dataset (merge the two datasets based on location of cases and the greenspace pixel that they are in) using `terra::extract`. Then we will check the distribution of greenspace exposure in our cancer cases. We will use a two-sided chi-squared test to test our hypothesis of the association between greenspace exposure and mortality among ovarian cancer cases. What do we find?
+
+```{r}
+## Spatially join the cancer point data to the walkability polygon data
+ndvi_cancer = data.frame(ca_transformed,terra::extract(ndvi_rast, ca_transformed))
+glimpse(ndvi_cancer) 
+## Take a look at a summary of the values
+summary(ndvi_cancer$NDVI_BayArea)
+```
+
+\
+
+Looks like we have lots of NA values. That is because some of our participants live outside of the area of our greenspace data. Let's drop those missing values using `drop_na()`, which is slightly different from how we've done this before.
+
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer %>% drop_na(NDVI_BayArea) 
+
+## Take a look at a summary of the values
+summary(ndvi_cancer_nomiss$NDVI_BayArea)
+glimpse(ndvi_cancer_nomiss)
+```
+
+\
+
+# Analyze our Joined Dataset
+OK, we have a dataset with no missingness. Can we look at the distribution of greenspace exposure among participants?
+```{r}
+ndvi_cancer_nomiss %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=NDVI_BayArea)) 
+
+```
+
+\
+
+For the purposes of our analysis, let's divide up our greenspace data into quartiles. We will do this using the `mutate()` function combined with the `ntile()` function. Then we will take a glimpse at our new dataset.
+
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer_nomiss %>%
+  mutate(ndvi_quartile = ntile(NDVI_BayArea, 4))
+
+glimpse(ndvi_cancer_nomiss)
+```
+
+\
+
+OK that looks good. We have created a new variable *ndvi_quartile* that tells us what quartile of greenspace a participant lives in. Let's do a two by two table of greenspace quartiles by *event*, which is whether a participant died over followup.
+```{r}
+## Create a contingency table of event by walk_quartile
+tab <- table(ndvi_cancer_nomiss$ndvi_quartile, ndvi_cancer_nomiss$event)
+tab
+```
+
+\
+
+Hmmm, that's interesting, but let's look at this by percentages instead.
+```{r}
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+\
+
+Do you think the percentages are different by quartile of greenspace? We can run a chi-squared test to be sure. This is a statistical test to see whether there is a difference in the probability of *event*, or whether a participant died over follow-up, by the quartiles of greenspace We do this with the `chisq.test()` function.
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```
+
+\
+
+OK, how do we interpret this? Our null hypothesis is that there is no association between mortality at end of follow-up and increasing quartile of greenspace. Our alternative hypothesis is that there is an association between mortality at end of follow-up and increasing quartile of greenspace. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of greenspace as or more extreme as those produced in these data is 0.716. Since p>0.05, we fail to reject the null hypothesis and conclude that greenspace is not associated with mortality at end of follow-up (under the assumptions stated above). In other words, we don't see a relationship between greenspace exposure and our outcome (dying over followup).
