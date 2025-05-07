@@ -14,6 +14,6 @@ NDVI_map = tm_shape(NDVI_rast) +
   tm_legend(outside = TRUE)
 NDVI_map
 
-writeRaster(NDVI_rast,"/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast.tif", overwrite=TRUE)
+writeRaster(NDVI_rast,"/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast2.tif", overwrite=TRUE)
 #writeRaster(sf_rast,"/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_BayArea.tif", overwrite=TRUE)
 
