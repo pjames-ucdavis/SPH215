@@ -9,7 +9,7 @@ In this lab, we are going to work with vector and raster data, spatially joining
 The objectives of this guide are to teach you:
 
    1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
-   2. Import a dataset with greenspace across California
+   2. Import a dataset with greenspace across the Bay Area
    3. Compare projections of datasets and re-project if needed
    4. Make maps
    5. Spatially join the two datasets
@@ -66,13 +66,16 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 \
 
-## Read in Light at Night Data
+## Read in Greenspace Data
 
-We then read in the raster for light at night data across California. Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
+We then read in the raster for greenspace data across the Bay Area Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
 
 
 ```{r}
-ndvi_rast <- rast("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast.tif")
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif"
+download.file(url, destfile = "NDVI_rast2.tif", mode = "wb")
+ndvi_rast = rast("NDVI_rast2.tif")
+
 ndvi_rast
 ```
 
