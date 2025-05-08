@@ -36,7 +36,7 @@ library(terra)
 
 # Bring in Cancer dataset
 
-We will be using data included in the **MapGAM()** [package](https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf). As a reminder: While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. While this is a cohort with time to mortality, for the purposes of our class, we will conduct simple tabular analyses looking at associations between different spatial exposures with mortality at end of follow-up. 
+We will be using data included in the **MapGAM** [package](https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf). As a reminder: While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. While this is a cohort with time to mortality, for the purposes of our class, we will conduct simple tabular analyses looking at associations between different spatial exposures with mortality at end of follow-up. 
 
 As another reminder, the *CAdata* dataset contains the following variables:
 
