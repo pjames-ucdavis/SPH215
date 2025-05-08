@@ -68,7 +68,7 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 ## Read in Greenspace Data
 
-We then read in the raster for greenspace data across the Bay Area Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
+We then read in the raster for greenspace data across the Bay Area. Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
 
 
 ```{r}
