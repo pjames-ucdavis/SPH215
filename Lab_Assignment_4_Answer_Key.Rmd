@@ -1,5 +1,5 @@
 ---
-title: "Lab Assignment 3 Answer Key"
+title: "Lab Assignment 4 Answer Key"
 author: "Peter James"
 date: "2025-04-30"
 output: html_document
@@ -34,60 +34,63 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 Q2. Bring in raster data
 ```{r}
-ndvi_rast <- rast("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast.tif")
-ndvi_rast
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif"
+download.file(url, destfile = "LST_med_ca.tif", mode = "wb")
+lst_rast = rast("LST_med_ca.tif")
+
+lst_rast
 ```
 
 Q3. Check projections
 ```{r}
-st_crs(ca_pts)==st_crs(ndvi_rast)
+st_crs(ca_pts)==st_crs(lst_rast)
 ```
 
-Q4. Reproject CAdata to match Census data
+Q4. Reproject CAdata to match LST data
 ```{r}
-ca_pts_proj<-st_transform(ca_pts,st_crs(ndvi_rast))
+ca_pts_proj<-st_transform(ca_pts,st_crs(lst_rast))
 
-st_crs(ca_pts_proj)==st_crs(ndvi_rast)
+st_crs(ca_pts_proj)==st_crs(lst_rast)
 ```
 
-Q5. Overlap map of CAdata with Census data
+Q5. Overlap map of CAdata with LST data
 
 ```{r}
-ca.inc.map <- tm_shape(ndvi_rast) +
+ca.lst.map <- tm_shape(lst_rast) +
   tm_raster(style = "cont") +
       tm_shape(ca_pts_proj) +
-        tm_dots(size=0.25, alpha=0.8, col="blue")
-ca.inc.map
+        tm_dots(size=0.25, alpha=0.8, col="red")
+ca.lst.map
 ```
 
-Q6. Spatially join cancer data to census data
+Q6. Extract light at night data to cancer data
 ```{r}
-## Spatially join the cancer point data to the walkability polygon data
-ndvi_cancer = data.frame(ca_pts_proj,terra::extract(ndvi_rast, ca_pts_proj))
-glimpse(ndvi_cancer) 
+
+lst_cancer = data.frame(ca_pts_proj,terra::extract(lst_rast, ca_pts_proj))
+glimpse(lst_cancer) 
 ## Take a look at a summary of the values
-summary(ndvi_cancer$NDVI_BayArea)
+summary(lst_cancer)
 ```
 
 
-# Drop missing values
+Q7. Drop missing values
 Alternate approach
-census_cancer_nomiss <- census_cancer %>%
-    subset(!is.na(medincE))
+lst_cancer_nomiss <- lst_cancer %>%
+    subset(!is.na(LST_Day_1km_median))
     
 ```{r}
-ndvi_cancer_nomiss <- ndvi_cancer %>% drop_na(NDVI_BayArea) 
+lst_cancer_nomiss <- lst_cancer %>% drop_na(LST_Day_1km_median) 
 
 ## Take a look at a summary of the values
-summary(ndvi_cancer_nomiss$NDVI_BayArea)
-glimpse(ndvi_cancer_nomiss)
+summary(lst_cancer_nomiss$LST_Day_1km_median)
+glimpse(lst_cancer_nomiss)
 ```
 
 Q8. Histogram
 ```{r}
-ndvi_cancer_nomiss %>%
+lst_cancer_nomiss %>%
   ggplot() + 
-  geom_histogram(mapping = aes(x=NDVI_BayArea)) 
+  geom_histogram(mapping = aes(x=LST_Day_1km_median)) 
 
 ```
 
@@ -95,16 +98,16 @@ ndvi_cancer_nomiss %>%
 Q9. Quartiles
 
 ```{r}
-ndvi_cancer_nomiss <- ndvi_cancer_nomiss %>%
-  mutate(ndvi_quartile = ntile(NDVI_BayArea, 4))
+lst_cancer_nomiss <- lst_cancer_nomiss %>%
+  mutate(lst_quartile = ntile(LST_Day_1km_median, 4))
 
-glimpse(ndvi_cancer_nomiss)
+glimpse(lst_cancer_nomiss)
 ```
 
 Q10. Tables by event
 ```{r}
 ## Create a contingency table of event by walk_quartile
-tab <- table(ndvi_cancer_nomiss$ndvi_quartile, ndvi_cancer_nomiss$event)
+tab <- table(lst_cancer_nomiss$lst_quartile, lst_cancer_nomiss$event)
 tab
 ```
 
@@ -125,5 +128,5 @@ chisq.test(tab)
 
 \
 
-OK, how do we interpret this? Our null hypothesis is that there is no association between mortality at end of follow-up and increasing quartile of median income. Our alternative hypothesis is that there is an association between mortality at end of follow-up and increasing quartile of median income. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of walkability as or more extreme as those produced in these data is 0.716. Since p>0.05, we fail to reject the null hypothesis and conclude that median income is not associated with mortality at end of follow-up (under the assumptions stated above). In other words, we don't see a relationship between census tract median income exposure and our outcome (dying over followup).
+OK, how do we interpret this? Our null hypothesis is that there is no association between increasing quartile of light at night and mortality at end of follow-up. Our alternative hypothesis is that there is an association between increasing quartile of light at night and mortality at end of follow-up. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of light at night as or more extreme as those produced in these data is 0.004391. Since p<0.05, we  reject the null hypothesis and conclude that light at night exposure is associated with mortality at end of follow-up (under the assumptions stated above). In other words, we DO see a relationship between light at night exposure and our outcome (dying over followup).
 

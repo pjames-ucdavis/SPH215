@@ -1,0 +1,118 @@
+---
+title: "Lab Assignment 4 In Class"
+author: "Peter James"
+date: "2025-05-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install Packages
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+Q1. Cancer dataset
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+
+```
+
+Q2. LAN data
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif"
+download.file(url, destfile = "LST_med_ca.tif", mode = "wb")
+lst_rast = rast("LST_med_ca.tif")
+lst_rast
+```
+
+Q3. Check projections
+```{r}
+st_crs(lst_rast)==st_crs(ca_pts)
+```
+
+Q4. Transform data
+
+```{r}
+ca_transformed <-st_transform(ca_pts, st_crs(lst_rast))  
+
+## Check projections
+st_crs(lst_rast)==st_crs(ca_transformed)
+```
+
+Q5. Map
+
+```{r}
+tmap_mode("plot")
+ca.lst.map <- tm_shape(lst_rast) +
+  tm_raster(style = "cont") +
+      tm_shape(ca_transformed) +
+        tm_dots(size=0.25, alpha=0.8, col="red")
+
+ca.lst.map
+```
+
+Q6. Extract values for LST data
+```{r}
+lst_cancer = data.frame(ca_transformed,terra::extract(lst_rast, ca_transformed))
+glimpse(lst_cancer) 
+```
+
+Q7. Deal with missing
+```{r}
+summary(lst_cancer$LST_Day_1km_median)
+```
+```{r}
+lst_cancer_nomiss <- lst_cancer %>%
+  drop_na(LST_Day_1km_median)
+
+## Take a look at a summary of the values
+summary(lst_cancer_nomiss$LST_Day_1km_median)
+
+glimpse(lst_cancer_nomiss)
+```
+
+Q8. Histogram
+```{r}
+lst_cancer_nomiss %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=LST_Day_1km_median)) 
+```
+
+Q9. Create quartiles
+```{r}
+lst_cancer_nomiss <- lst_cancer_nomiss %>%
+  mutate(lst_quartile = ntile(LST_Day_1km_median, 4))
+
+glimpse(lst_cancer_nomiss)
+```
+
+Q10. Contingency Tables
+```{r}
+tab <- table(lst_cancer_nomiss$lst_quartile, lst_cancer_nomiss$event)
+tab
+
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+Q11. Chi-squared test
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```

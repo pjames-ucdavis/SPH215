@@ -1,0 +1,130 @@
+---
+title: "Lab 5 In Class"
+author: "Peter James"
+date: "2025-05-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install Packages
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+# Bring in cancer dataset
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+
+
+
+```
+
+# Read in Greenspace Data
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif"
+download.file(url, destfile = "NDVI_rast2.tif", mode = "wb")
+ndvi_rast = rast("NDVI_rast2.tif")
+
+ndvi_rast
+```
+
+# Check CRS
+```{r}
+st_crs(ca_pts)
+st_crs(ndvi_rast)==st_crs(ca_pts)
+```
+
+# Reproject
+
+```{r}
+ca_transformed <-st_transform(ca_pts, st_crs(ndvi_rast))  
+
+## Check projections
+st_crs(ndvi_rast)==st_crs(ca_transformed)
+```
+
+# Map
+```{r}
+tmap_mode("view")
+ca.ndvi.map <- tm_shape(ndvi_rast) +
+  tm_raster(style = "cont") +
+      tm_shape(ca_transformed) +
+        tm_dots(size=0.25, alpha=0.8, col="blue")
+
+ca.ndvi.map
+```
+
+# Extract raster to points
+```{r}
+ndvi_cancer = data.frame(ca_transformed,terra::extract(ndvi_rast, ca_transformed))
+glimpse(ndvi_cancer) 
+
+```
+
+# Missing values
+```{r}
+summary(ndvi_cancer$NDVI_BayArea)
+```
+
+# Drop missing values
+
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer %>%
+  drop_na(NDVI_BayArea)
+
+## Take a look at a summary of the values
+summary(ndvi_cancer_nomiss$NDVI_BayArea)
+
+glimpse(ndvi_cancer_nomiss)
+```
+
+# Analyze data
+
+```{r}
+ndvi_cancer_nomiss %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=NDVI_BayArea)) 
+```
+
+# Quartiles
+```{r}
+ndvi_cancer_nomiss <- ndvi_cancer_nomiss %>%
+  mutate(ndvi_quartile = ntile(NDVI_BayArea, 4))
+
+glimpse(ndvi_cancer_nomiss)
+
+```
+
+# Contingency table
+```{r}
+tab <- table(ndvi_cancer_nomiss$ndvi_quartile, ndvi_cancer_nomiss$event)
+tab
+
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+# Chi squared test
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```
+
