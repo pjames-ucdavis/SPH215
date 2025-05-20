@@ -1,5 +1,5 @@
 ---
-title: "Lab 8: Geographically Weighted Regression"
+title: "Lab 8: Future Directions in GIS and Public Health"
 ---
 
 \

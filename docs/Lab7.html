@@ -11,7 +11,7 @@
 
 
 
-<title>Lab 7: Spatial Statistics</title>
+<title>Lab 7: Spatial Statistics and Geographically Weighted Regression in Public Health</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -357,13 +357,10 @@ div.tocify {
       <a href="Lab6.html">Lab 6: Network Analysis</a>
     </li>
     <li>
-      <a href="Lab7.html">Lab 7: Spatial Statistics</a>
+      <a href="Lab7.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
     </li>
     <li>
-      <a href="Lab8.html">Lab 8: Geographically Weighted Regression</a>
-    </li>
-    <li>
-      <a href="Lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+      <a href="Lab8.html">Lab 8: Future Directions in GIS and Public Health</a>
     </li>
   </ul>
 </li>
@@ -395,18 +392,379 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Lab 7: Spatial Statistics</h1>
+<h1 class="title toc-ignore">Lab 7: Spatial Statistics and
+Geographically Weighted Regression in Public Health</h1>
 
 </div>
 
 
 <p><br />
 </p>
-<p>Please check back here for more soon!</p>
+<div id="introduction" class="section level1">
+<h1>🏥 Introduction</h1>
+<p>Welcome to your crash course in spatial statistics for public health!
+We’re going to unravel patterns in space like map-based detectives —
+think Sherlock Holmes meets epidemiology. We’ll explore mapping,
+clustering, and how relationships between variables vary across
+geography. Buckle up!</p>
 <p><br />
 </p>
+</div>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<p>As always, we need to load our packages. We have a couple of new
+friends joining us this week.</p>
+<ul>
+<li><strong><code>spdep</code></strong>: This package handles spatial
+dependence — creating neighborhood structures and calculating statistics
+like Moran’s I and Local Indicators of Spatial Association (LISA). Think
+of it as your go-to for spatial autocorrelation.</li>
+<li><strong><code>GWmodel</code></strong>: A robust package for running
+Geographically Weighted Regression (GWR), including model diagnostics,
+bandwidth selection, and mapping local coefficients. It’s the main
+engine behind spatially varying relationships.</li>
+<li><strong><code>spgwr</code></strong>: A lighter package also used for
+GWR. In this tutorial, we use it mainly for its convenient
+<code>gwr.sel()</code> function to find the best adaptive bandwidth via
+cross-validation.</li>
+</ul>
+<p>Together, these packages help us detect patterns, clusters, and
+relationships that change across space — essential for spatial public
+health analysis.</p>
+<p><br />
+</p>
+</div>
+<div id="data-collection-and-preparation" class="section level1">
+<h1>📦 Data Collection and Preparation</h1>
+<p>First, we need data. We’ll grab county-level diabetes prevalence for
+2021 from the CDC and merge it with county geometries and median
+household income from the American Community Survey 2021. For the
+diabetes data, I downloaded this from the <a
+href="https://gis.cdc.gov/grasp/diabetes/diabetesatlas-surveillance.html#">CDC
+US Diabetes Surveillance System</a>. It comes in a little ugly, so we
+will have to clean up the column names, reformat the FIPS codes, and
+filter to just California counties.</p>
+<pre class="r"><code># Load and clean CDC diabetes CSV
+diab_raw &lt;- read_csv(&quot;/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/DiabetesAtlas_CountyData.csv&quot;, skip = 2) |&gt; 
+  slice(1:(n() - 1))  # remove last row
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDc6IFNwYXRpYWwgU3RhdGlzdGljcyIKLS0tCgpcCgpQbGVhc2UgY2hlY2sgYmFjayBoZXJlIGZvciBtb3JlIHNvb24hCgpc</div>
+# Clean column names
+names(diab_raw) &lt;- str_trim(names(diab_raw))
+
+# Format FIPS codes with leading zeros
+diab_raw &lt;- diab_raw |&gt; 
+  mutate(CountyFIPS = str_pad(as.character(as.integer(CountyFIPS)), 5, pad = &quot;0&quot;))
+
+# Filter for California counties only
+ca_diabetes &lt;- diab_raw |&gt; 
+  filter(str_starts(CountyFIPS, &quot;06&quot;)) |&gt; 
+  mutate(Percentage = as.numeric(Percentage)) |&gt; 
+  select(FIPS = CountyFIPS, County, Diabetes = Percentage)</code></pre>
+<p><br />
+</p>
+<p>Now lets get our good ole median income data from the US Census.
+Because it’s 2021 Diabetes data, we will pull the 2017-2021 five year
+estimates from the ACS.</p>
+<pre class="r"><code># Download median income and geometries for California counties
+ca_geo &lt;- get_acs(
+  geography = &quot;county&quot;,
+  variables = c(income = &quot;B19013_001&quot;),  # Median household income
+  state = &quot;CA&quot;,
+  geometry = TRUE,
+  year = 2021
+) %&gt;%
+  rename(income = estimate) %&gt;%
+  select(GEOID, NAME, income, geometry)</code></pre>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |                                                                      |   1%  |                                                                              |=                                                                     |   1%  |                                                                              |=                                                                     |   2%  |                                                                              |==                                                                    |   2%  |                                                                              |==                                                                    |   3%  |                                                                              |===                                                                   |   4%  |                                                                              |===                                                                   |   5%  |                                                                              |====                                                                  |   5%  |                                                                              |====                                                                  |   6%  |                                                                              |=====                                                                 |   6%  |                                                                              |=====                                                                 |   7%  |                                                                              |=====                                                                 |   8%  |                                                                              |======                                                                |   8%  |                                                                              |======                                                                |   9%  |                                                                              |=======                                                               |   9%  |                                                                              |=======                                                               |  10%  |                                                                              |=======                                                               |  11%  |                                                                              |========                                                              |  11%  |                                                                              |========                                                              |  12%  |                                                                              |=========                                                             |  12%  |                                                                              |=========                                                             |  13%  |                                                                              |=========                                                             |  14%  |                                                                              |==========                                                            |  14%  |                                                                              |==========                                                            |  15%  |                                                                              |===========                                                           |  15%  |                                                                              |===========                                                           |  16%  |                                                                              |============                                                          |  16%  |                                                                              |============                                                          |  17%  |                                                                              |============                                                          |  18%  |                                                                              |=============                                                         |  18%  |                                                                              |=============                                                         |  19%  |                                                                              |==============                                                        |  19%  |                                                                              |==============                                                        |  20%  |                                                                              |==============                                                        |  21%  |                                                                              |===============                                                       |  21%  |                                                                              |===============                                                       |  22%  |                                                                              |================                                                      |  22%  |                                                                              |================                                                      |  23%  |                                                                              |================                                                      |  24%  |                                                                              |=================                                                     |  24%  |                                                                              |=================                                                     |  25%  |                                                                              |==================                                                    |  25%  |                                                                              |==================                                                    |  26%  |                                                                              |===================                                                   |  27%  |                                                                              |===================                                                   |  28%  |                                                                              |====================                                                  |  28%  |                                                                              |====================                                                  |  29%  |                                                                              |=====================                                                 |  29%  |                                                                              |=====================                                                 |  30%  |                                                                              |=====================                                                 |  31%  |                                                                              |======================                                                |  31%  |                                                                              |======================                                                |  32%  |                                                                              |=======================                                               |  32%  |                                                                              |=======================                                               |  33%  |                                                                              |========================                                              |  34%  |                                                                              |========================                                              |  35%  |                                                                              |=========================                                             |  35%  |                                                                              |=========================                                             |  36%  |                                                                              |==========================                                            |  37%  |                                                                              |==========================                                            |  38%  |                                                                              |===========================                                           |  38%  |                                                                              |===========================                                           |  39%  |                                                                              |============================                                          |  39%  |                                                                              |============================                                          |  40%  |                                                                              |============================                                          |  41%  |                                                                              |=============================                                         |  41%  |                                                                              |=============================                                         |  42%  |                                                                              |==============================                                        |  42%  |                                                                              |==============================                                        |  43%  |                                                                              |===============================                                       |  44%  |                                                                              |===============================                                       |  45%  |                                                                              |================================                                      |  45%  |                                                                              |================================                                      |  46%  |                                                                              |=================================                                     |  46%  |                                                                              |=================================                                     |  47%  |                                                                              |=================================                                     |  48%  |                                                                              |==================================                                    |  48%  |                                                                              |==================================                                    |  49%  |                                                                              |===================================                                   |  49%  |                                                                              |===================================                                   |  50%  |                                                                              |===================================                                   |  51%  |                                                                              |====================================                                  |  51%  |                                                                              |====================================                                  |  52%  |                                                                              |=====================================                                 |  52%  |                                                                              |=====================================                                 |  53%  |                                                                              |=====================================                                 |  54%  |                                                                              |======================================                                |  54%  |                                                                              |======================================                                |  55%  |                                                                              |=======================================                               |  55%  |                                                                              |=======================================                               |  56%  |                                                                              |========================================                              |  57%  |                                                                              |========================================                              |  58%  |                                                                              |=========================================                             |  58%  |                                                                              |=========================================                             |  59%  |                                                                              |==========================================                            |  59%  |                                                                              |==========================================                            |  60%  |                                                                              |==========================================                            |  61%  |                                                                              |===========================================                           |  61%  |                                                                              |===========================================                           |  62%  |                                                                              |============================================                          |  62%  |                                                                              |============================================                          |  63%  |                                                                              |============================================                          |  64%  |                                                                              |=============================================                         |  64%  |                                                                              |=============================================                         |  65%  |                                                                              |==============================================                        |  65%  |                                                                              |==============================================                        |  66%  |                                                                              |===============================================                       |  67%  |                                                                              |===============================================                       |  68%  |                                                                              |================================================                      |  68%  |                                                                              |================================================                      |  69%  |                                                                              |=================================================                     |  69%  |                                                                              |=================================================                     |  70%  |                                                                              |=================================================                     |  71%  |                                                                              |==================================================                    |  71%  |                                                                              |==================================================                    |  72%  |                                                                              |===================================================                   |  72%  |                                                                              |===================================================                   |  73%  |                                                                              |====================================================                  |  74%  |                                                                              |====================================================                  |  75%  |                                                                              |=====================================================                 |  75%  |                                                                              |=====================================================                 |  76%  |                                                                              |======================================================                |  77%  |                                                                              |======================================================                |  78%  |                                                                              |=======================================================               |  78%  |                                                                              |=======================================================               |  79%  |                                                                              |========================================================              |  79%  |                                                                              |========================================================              |  80%  |                                                                              |========================================================              |  81%  |                                                                              |=========================================================             |  81%  |                                                                              |=========================================================             |  82%  |                                                                              |==========================================================            |  82%  |                                                                              |==========================================================            |  83%  |                                                                              |===========================================================           |  84%  |                                                                              |===========================================================           |  85%  |                                                                              |============================================================          |  85%  |                                                                              |============================================================          |  86%  |                                                                              |=============================================================         |  86%  |                                                                              |=============================================================         |  87%  |                                                                              |=============================================================         |  88%  |                                                                              |==============================================================        |  88%  |                                                                              |==============================================================        |  89%  |                                                                              |===============================================================       |  89%  |                                                                              |===============================================================       |  90%  |                                                                              |===============================================================       |  91%  |                                                                              |================================================================      |  91%  |                                                                              |================================================================      |  92%  |                                                                              |=================================================================     |  92%  |                                                                              |=================================================================     |  93%  |                                                                              |=================================================================     |  94%  |                                                                              |==================================================================    |  94%  |                                                                              |==================================================================    |  95%  |                                                                              |===================================================================   |  95%  |                                                                              |===================================================================   |  96%  |                                                                              |====================================================================  |  96%  |                                                                              |====================================================================  |  97%  |                                                                              |====================================================================  |  98%  |                                                                              |===================================================================== |  98%  |                                                                              |===================================================================== |  99%  |                                                                              |======================================================================|  99%  |                                                                              |======================================================================| 100%</code></pre>
+<p><br />
+</p>
+</div>
+<div id="exploratory-mapping" class="section level1">
+<h1>🗺️ Exploratory Mapping</h1>
+<p>Let’s make a map and see what diabetes prevalence looks like across
+counties in California.</p>
+<pre class="r"><code># Merge diabetes and ACS income data
+ca_data &lt;- ca_geo |&gt; 
+  left_join(ca_diabetes, by = c(&quot;GEOID&quot; = &quot;FIPS&quot;))
+
+tmap_mode(&quot;plot&quot;)
+cat(&quot;\n### County-Level Diabetes Prevalence in California\n&quot;)</code></pre>
+<pre><code>## 
+## ### County-Level Diabetes Prevalence in California</code></pre>
+<pre class="r"><code>tm_shape(ca_data) +
+  tm_polygons(&quot;Diabetes&quot;, palette = &quot;Reds&quot;, style = &quot;quantile&quot;,
+              title = &quot;% Diagnosed Diabetes&quot;)</code></pre>
+<p><img src="Lab7_files/figure-html/exploratory-mapping-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="spatial-autocorrelation" class="section level1">
+<h1>🧭 Spatial Autocorrelation</h1>
+<p>Now let’s ask: are diabetes rates clustered in space, or scattered
+randomly like confetti in a strong breeze? This is where spatial
+autocorrelation steps in. We’ll start with Moran’s I — the granddaddy of
+spatial pattern detection.</p>
+<p><br />
+</p>
+<div id="global-morans-i" class="section level2">
+<h2>Global Moran’s I</h2>
+<p>Moran’s I is a measure of overall spatial autocorrelation — that is,
+how similar or dissimilar values (like diabetes prevalence) are in
+nearby areas (i.e., in nearby counties).</p>
+<ul>
+<li>Values close to <strong>+1</strong> mean strong positive spatial
+autocorrelation — high values cluster with other high values, and low
+with low (think: like attracts like).</li>
+<li>Values near <strong>0</strong> mean no spatial pattern — just
+noise.</li>
+<li>Values near <strong>-1</strong> mean high and low values are
+actively repelling each other (rare in public health).</li>
+</ul>
+<p>Let’s calculate Moran’s I and find out if diabetes prevalence in
+California follows any spatial logic.</p>
+<pre class="r"><code>nb &lt;- poly2nb(ca_data)
+lw &lt;- nb2listw(nb, style = &quot;W&quot;)
+moran.test(ca_data$Diabetes, lw)</code></pre>
+<pre><code>## 
+##  Moran I test under randomisation
+## 
+## data:  ca_data$Diabetes  
+## weights: lw    
+## 
+## Moran I statistic standard deviate = 3.7581, p-value = 8.559e-05
+## alternative hypothesis: greater
+## sample estimates:
+## Moran I statistic       Expectation          Variance 
+##       0.296544968      -0.017543860       0.006984903</code></pre>
+<p><strong>How to read this:</strong></p>
+<ul>
+<li>A <strong>Moran’s I value of 0.30</strong> means moderate positive
+spatial autocorrelation — counties with similar diabetes rates are near
+each other.</li>
+<li>A <strong>p-value &lt; 0.001</strong> tells us this clustering is
+<strong>statistically significant</strong> — not random.</li>
+<li>The <strong>standard deviate (3.76)</strong> is like a z-score; it’s
+far enough from zero to support strong evidence of spatial
+patterning.</li>
+</ul>
+<p>👉 <strong>Bottom line:</strong> Diabetes rates aren’t randomly
+distributed across California. There are clusters of high and low
+values, and we’ve got statistical proof! This result tells us that there
+is statistically significant spatial clustering of diabetes prevalence
+across California counties. Counties with high diabetes rates tend to be
+near other high-rate counties, and the same is true for low-rate
+counties. The Moran’s I value of ~0.30 indicates moderate positive
+spatial autocorrelation, and the tiny p-value confirms that this pattern
+is not due to chance.</p>
+<p><br />
+</p>
+</div>
+<div id="local-morans-i-lisa" class="section level2">
+<h2>Local Moran’s I (LISA)</h2>
+<p>While Moran’s I tells us whether there’s spatial autocorrelation in
+general, LISA zooms in and tells us <strong>where</strong> it’s
+happening.</p>
+<p>LISA stands for Local Indicators of Spatial Association, and it helps
+us detect: - <strong>High-High clusters</strong>: High diabetes rates
+surrounded by other high-rate counties (hot clusters). - <strong>Low-Low
+clusters</strong>: Healthy zones with low diabetes prevalence. -
+<strong>High-Low or Low-High outliers</strong>: Counties that buck the
+trend — like a donut hole in a cake.</p>
+<p>Mapping LISA helps target interventions more precisely, and explain
+those spatial oddballs.</p>
+<pre class="r"><code>local_moran &lt;- localmoran(ca_data$Diabetes, lw)
+ca_data$Ii &lt;- local_moran[, &quot;Ii&quot;]
+ca_data$Pval &lt;- local_moran[, &quot;Pr(z != E(Ii))&quot;]
+
+# Map LISA
+cat(&quot;\n### Local Spatial Clustering of Diabetes\n&quot;)</code></pre>
+<pre><code>## 
+## ### Local Spatial Clustering of Diabetes</code></pre>
+<pre class="r"><code>tm_shape(ca_data) +
+  tm_polygons(&quot;Ii&quot;, style = &quot;quantile&quot;, palette = &quot;PuOr&quot;, title = &quot;Local Moran&#39;s I&quot;)</code></pre>
+<p><img src="Lab7_files/figure-html/lisa-1.png" width="672" /></p>
+<p><br />
+</p>
+<div id="interpreting-the-lisa-map" class="section level3">
+<h3>🗺️ Interpreting the LISA Map</h3>
+<p>This map shows where spatial clustering of diabetes is strongest —
+not just overall, but <strong>locally</strong>. Here’s how to read
+it:</p>
+<ul>
+<li><strong>Dark purple counties</strong> have strong local clustering —
+likely high-high or low-low patterns. These are areas where diabetes
+rates mirror their neighbors and form significant clusters.</li>
+<li><strong>Orange or tan counties</strong> may be spatial
+<strong>outliers</strong> — places where diabetes rates differ from
+nearby counties. For example, a healthy county surrounded by high-rate
+neighbors.</li>
+<li><strong>Gray or muted tones</strong> indicate weak or
+non-significant clustering.</li>
+<li><strong>White areas</strong> may represent missing or insignificant
+data.</li>
+</ul>
+<p>👉 <strong>In practice:</strong> Counties with strong clustering
+(dark purple) may benefit from regional strategies, while outliers may
+need more localized investigation. This helps tailor public health
+interventions to spatial realities.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="hot-spot-analysis-gi" class="section level2">
+<h2>🔥 Hot Spot Analysis (Gi*)</h2>
+<p>Now we spice things up with the Getis-Ord Gi* statistic — pronounced
+“gee-star.” This method identifies <strong>statistically significant hot
+and cold spots</strong> in the data.</p>
+<ul>
+<li>A <strong>hot spot</strong> is a county with a high value (e.g.,
+diabetes rate) surrounded by other high-value neighbors.</li>
+<li>A <strong>cold spot</strong> is the opposite: a low-value county in
+a sea of low values.</li>
+</ul>
+<p>Gi* doesn’t just look at one value — it considers the neighborhood
+around it too. This is powerful for public health mapping, especially
+when prioritizing interventions or allocating resources.
+<strong>hot</strong> and <strong>cold</strong> spots — areas with
+significantly higher or lower rates than expected.</p>
+<pre class="r"><code>gi_star &lt;- localG(ca_data$Diabetes, lw)
+ca_data$Gi_star &lt;- as.numeric(gi_star)
+
+cat(&quot;\n### Hot and Cold Spots of Diabetes\n&quot;)</code></pre>
+<pre><code>## 
+## ### Hot and Cold Spots of Diabetes</code></pre>
+<pre class="r"><code>tm_shape(ca_data) +
+  tm_polygons(&quot;Gi_star&quot;, palette = &quot;RdBu&quot;, style = &quot;pretty&quot;, title = &quot;Gi* Hot Spots&quot;)</code></pre>
+<p><img src="Lab7_files/figure-html/gi-star-1.png" width="672" /></p>
+<div id="interpreting-the-gi-map" class="section level3">
+<h3>🔥 Interpreting the Gi* Map</h3>
+<p>This map uses the Getis-Ord Gi* statistic to highlight
+<strong>statistically significant spatial clusters</strong> of diabetes
+— also known as hot and cold spots:</p>
+<ul>
+<li><strong>Dark blue counties</strong> (Gi* &gt; 2) are <strong>hot
+spots</strong>: areas with high diabetes prevalence that are also
+surrounded by other high-prevalence counties. These are prime targets
+for regional public health efforts.</li>
+<li><strong>Dark red counties</strong> (Gi* &lt; -2) are <strong>cold
+spots</strong>: clusters of lower-than-average diabetes rates. Great for
+understanding what’s going right.</li>
+<li><strong>Lighter shades</strong> (e.g., peach or sky blue) represent
+less intense clustering — not as statistically extreme.</li>
+</ul>
+<p>👉 <strong>In practice:</strong> The blue-hot lower half of the state
+(e.g., San Bernardino, Imperial, Tulare) may benefit from coordinated,
+regional interventions, while red-cold northern counties may offer
+models of prevention or service delivery worth emulating.</p>
+<p><br />
+</p>
+</div>
+</div>
+</div>
+<div id="geographically-weighted-regression-gwr" class="section level1">
+<h1>📉 Geographically Weighted Regression (GWR)</h1>
+<p>Ready for some spatial wizardry? GWR — Geographically Weighted
+Regression — is like regular regression but with a magic twist: the
+coefficients can change depending on <strong>where</strong> you are.</p>
+<p>Traditional regression assumes one-size-fits-all relationships. But
+in public health, the impact of income on diabetes may differ from San
+Francisco to Fresno.</p>
+<p>GWR: - Fits a separate regression model–no more assuming
+one-size-fits-all models!</p>
+<pre class="r"><code>coords &lt;- st_coordinates(st_centroid(ca_data))
+ca_data$X &lt;- coords[, 1]
+ca_data$Y &lt;- coords[, 2]
+
+bw &lt;- gwr.sel(Diabetes ~ income, data = ca_data, coords = coords, adapt = TRUE)</code></pre>
+<pre><code>## Adaptive q: 0.381966 CV score: 64.59459 
+## Adaptive q: 0.618034 CV score: 67.46468 
+## Adaptive q: 0.236068 CV score: 60.33242 
+## Adaptive q: 0.145898 CV score: 54.84612 
+## Adaptive q: 0.09016994 CV score: 51.36862 
+## Adaptive q: 0.05572809 CV score: 52.55573 
+## Adaptive q: 0.0889909 CV score: 51.25455 
+## Adaptive q: 0.07731792 CV score: 51.04182 
+## Adaptive q: 0.06907134 CV score: 51.67776 
+## Adaptive q: 0.08166285 CV score: 50.95911 
+## Adaptive q: 0.08136232 CV score: 50.96031 
+## Adaptive q: 0.08205407 CV score: 50.95845 
+## Adaptive q: 0.08210682 CV score: 50.95844 
+## Adaptive q: 0.08214751 CV score: 50.95844 
+## Adaptive q: 0.08210682 CV score: 50.95844</code></pre>
+<pre class="r"><code># Run GWR using adaptive bandwidth
+model &lt;- gwr(Diabetes ~ income, data = ca_data, coords = coords, 
+             adapt = bw, hatmatrix = TRUE)
+
+ca_data$gwr_income &lt;- model$SDF$income</code></pre>
+<p>📌 INTERPRETATION: The output shows the model testing different
+‘adaptive q’ values, which represent the proportion of neighboring
+counties used in each local model. It chooses the q value with the
+lowest cross-validation (CV) score — best predictive fit. For example: q
+= 0.082 means ~8% of counties (≈5 counties) are used in each local
+regression. Lower CV = better model. It’s finding the ‘just right’
+neighborhood size for each regression.</p>
+<p><br />
+</p>
+<div id="map-local-gwr-coefficients" class="section level2">
+<h2>🗾 Map Local GWR Coefficients</h2>
+<p>Let’s map those locally varying regression coefficients and see where
+income matters more (or less) for diabetes.</p>
+<pre class="r"><code>tm_shape(ca_data) +
+  tm_polygons(&quot;gwr_income&quot;, palette = &quot;RdYlGn&quot;, style = &quot;quantile&quot;, title = &quot;GWR: Income Effect&quot;)</code></pre>
+<p><img src="Lab7_files/figure-html/gwr-map-1.png" width="672" /></p>
+<p><br />
+</p>
+<div id="interpreting-the-gwr-map" class="section level4">
+<h4>🧩 Interpreting the GWR Map</h4>
+<p>This map shows how the relationship between income and diabetes
+<strong>varies across California</strong> — it’s a spatial view of the
+regression coefficient between income and diabetes.</p>
+<ul>
+<li><p>All the values are <strong>negative</strong>, meaning higher
+income is associated with <strong>lower diabetes prevalence</strong> —
+but <strong>how strongly</strong> this is true varies across
+space.</p></li>
+<li><p><strong>Dark red counties</strong> (most negative values): These
+are the places where income has the <strong>strongest inverse
+relationship</strong> with diabetes. In other words, improving economic
+conditions here could have a <strong>big public health
+payoff</strong>.</p></li>
+<li><p><strong>Lighter yellow to green counties</strong>: These areas
+still show a negative relationship, but it’s <strong>weaker</strong>.
+That might mean other social or environmental factors are playing a
+bigger role in these counties.</p></li>
+<li><p><strong>Dark green areas</strong>: The weakest negative
+associations — here, income might matter less for diabetes prevention,
+or other factors dominate.</p></li>
+</ul>
+<p>👉 <strong>In practice:</strong> This map helps public health
+professionals tailor interventions. In counties where income is a strong
+driver of diabetes, economic support programs might reduce prevalence.
+In others, different strategies may be needed.</p>
+<p><br />
+</p>
+</div>
+</div>
+</div>
+<div id="take-home" class="section level1">
+<h1>🧠 Take home</h1>
+<ul>
+<li><strong>Moran’s I</strong>: Measures overall spatial autocorrelation
+(think: is there a pattern?).</li>
+<li><strong>LISA/Gi</strong>*: Reveal local clusters and hot/cold spots
+(where’s the action?).</li>
+<li><strong>GWR</strong>: Shows where the income-diabetes relationship
+is strong, weak, or flipping direction.</li>
+</ul>
+</div>
+<div id="summary" class="section level1">
+<h1>✅ Summary</h1>
+<p>Boom! You just crunched real public health data using cutting-edge
+spatial tools. From maps to models, you’ve uncovered spatial
+inequalities in health. Go forth and map responsibly!</p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDc6IFNwYXRpYWwgU3RhdGlzdGljcyBhbmQgR2VvZ3JhcGhpY2FsbHkgV2VpZ2h0ZWQgUmVncmVzc2lvbiBpbiBQdWJsaWMgSGVhbHRoIgotLS0KClwKCiMg8J+PpSBJbnRyb2R1Y3Rpb24KCldlbGNvbWUgdG8geW91ciBjcmFzaCBjb3Vyc2UgaW4gc3BhdGlhbCBzdGF0aXN0aWNzIGZvciBwdWJsaWMgaGVhbHRoISBXZSdyZSBnb2luZyB0byB1bnJhdmVsIHBhdHRlcm5zIGluIHNwYWNlIGxpa2UgbWFwLWJhc2VkIGRldGVjdGl2ZXMg4oCUIHRoaW5rIFNoZXJsb2NrIEhvbG1lcyBtZWV0cyBlcGlkZW1pb2xvZ3kuIFdlJ2xsIGV4cGxvcmUgbWFwcGluZywgY2x1c3RlcmluZywgYW5kIGhvdyByZWxhdGlvbnNoaXBzIGJldHdlZW4gdmFyaWFibGVzIHZhcnkgYWNyb3NzIGdlb2dyYXBoeS4gQnVja2xlIHVwIQoKXAoKIyBMb2FkIHBhY2thZ2VzCgpBcyBhbHdheXMsIHdlIG5lZWQgdG8gbG9hZCBvdXIgcGFja2FnZXMuIFdlIGhhdmUgYSBjb3VwbGUgb2YgbmV3IGZyaWVuZHMgam9pbmluZyB1cyB0aGlzIHdlZWsuCgotICoqYHNwZGVwYCoqOiBUaGlzIHBhY2thZ2UgaGFuZGxlcyBzcGF0aWFsIGRlcGVuZGVuY2Ug4oCUIGNyZWF0aW5nIG5laWdoYm9yaG9vZCBzdHJ1Y3R1cmVzIGFuZCBjYWxjdWxhdGluZyBzdGF0aXN0aWNzIGxpa2UgTW9yYW4ncyBJIGFuZCBMb2NhbCBJbmRpY2F0b3JzIG9mIFNwYXRpYWwgQXNzb2NpYXRpb24gKExJU0EpLiBUaGluayBvZiBpdCBhcyB5b3VyIGdvLXRvIGZvciBzcGF0aWFsIGF1dG9jb3JyZWxhdGlvbi4KLSAqKmBHV21vZGVsYCoqOiBBIHJvYnVzdCBwYWNrYWdlIGZvciBydW5uaW5nIEdlb2dyYXBoaWNhbGx5IFdlaWdodGVkIFJlZ3Jlc3Npb24gKEdXUiksIGluY2x1ZGluZyBtb2RlbCBkaWFnbm9zdGljcywgYmFuZHdpZHRoIHNlbGVjdGlvbiwgYW5kIG1hcHBpbmcgbG9jYWwgY29lZmZpY2llbnRzLiBJdOKAmXMgdGhlIG1haW4gZW5naW5lIGJlaGluZCBzcGF0aWFsbHkgdmFyeWluZyByZWxhdGlvbnNoaXBzLgotICoqYHNwZ3dyYCoqOiBBIGxpZ2h0ZXIgcGFja2FnZSBhbHNvIHVzZWQgZm9yIEdXUi4gSW4gdGhpcyB0dXRvcmlhbCwgd2UgdXNlIGl0IG1haW5seSBmb3IgaXRzIGNvbnZlbmllbnQgYGd3ci5zZWwoKWAgZnVuY3Rpb24gdG8gZmluZCB0aGUgYmVzdCBhZGFwdGl2ZSBiYW5kd2lkdGggdmlhIGNyb3NzLXZhbGlkYXRpb24uCgpUb2dldGhlciwgdGhlc2UgcGFja2FnZXMgaGVscCB1cyBkZXRlY3QgcGF0dGVybnMsIGNsdXN0ZXJzLCBhbmQgcmVsYXRpb25zaGlwcyB0aGF0IGNoYW5nZSBhY3Jvc3Mgc3BhY2Ug4oCUIGVzc2VudGlhbCBmb3Igc3BhdGlhbCBwdWJsaWMgaGVhbHRoIGFuYWx5c2lzLgoKCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUsIHdhcm5pbmc9RkFMU0UsIG1lc3NhZ2U9RkFMU0UpCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRpZHljZW5zdXMpCmxpYnJhcnkoc2YpCmxpYnJhcnkoc3BkZXApCmxpYnJhcnkoR1dtb2RlbCkKbGlicmFyeShzcGd3cikKbGlicmFyeSh0bWFwKQpgYGAKCgpcCgojIPCfk6YgRGF0YSBDb2xsZWN0aW9uIGFuZCBQcmVwYXJhdGlvbgoKRmlyc3QsIHdlIG5lZWQgZGF0YS4gV2UnbGwgZ3JhYiBjb3VudHktbGV2ZWwgZGlhYmV0ZXMgcHJldmFsZW5jZSBmb3IgMjAyMSBmcm9tIHRoZSBDREMgYW5kIG1lcmdlIGl0IHdpdGggY291bnR5IGdlb21ldHJpZXMgYW5kIG1lZGlhbiBob3VzZWhvbGQgaW5jb21lIGZyb20gdGhlIEFtZXJpY2FuIENvbW11bml0eSBTdXJ2ZXkgMjAyMS4gRm9yIHRoZSBkaWFiZXRlcyBkYXRhLCBJIGRvd25sb2FkZWQgdGhpcyBmcm9tIHRoZSBbQ0RDIFVTIERpYWJldGVzIFN1cnZlaWxsYW5jZSBTeXN0ZW1dKGh0dHBzOi8vZ2lzLmNkYy5nb3YvZ3Jhc3AvZGlhYmV0ZXMvZGlhYmV0ZXNhdGxhcy1zdXJ2ZWlsbGFuY2UuaHRtbCMpLiBJdCBjb21lcyBpbiBhIGxpdHRsZSB1Z2x5LCBzbyB3ZSB3aWxsIGhhdmUgdG8gY2xlYW4gdXAgdGhlIGNvbHVtbiBuYW1lcywgcmVmb3JtYXQgdGhlIEZJUFMgY29kZXMsIGFuZCBmaWx0ZXIgdG8ganVzdCBDYWxpZm9ybmlhIGNvdW50aWVzLgoKYGBge3IgbG9hZC1kYXRhfQojIExvYWQgYW5kIGNsZWFuIENEQyBkaWFiZXRlcyBDU1YKZGlhYl9yYXcgPC0gcmVhZF9jc3YoIi9Vc2Vycy9wamFtZXMxL0Ryb3Bib3gvVUMgRGF2aXMgRm9sZGVycy9TUEggMjE1IEdJUyBhbmQgUHVibGljIEhlYWx0aC9HaXRodWJfV2Vic2l0ZS9TUEgyMTUvRGlhYmV0ZXNBdGxhc19Db3VudHlEYXRhLmNzdiIsIHNraXAgPSAyKSB8PiAKICBzbGljZSgxOihuKCkgLSAxKSkgICMgcmVtb3ZlIGxhc3Qgcm93CgojIENsZWFuIGNvbHVtbiBuYW1lcwpuYW1lcyhkaWFiX3JhdykgPC0gc3RyX3RyaW0obmFtZXMoZGlhYl9yYXcpKQoKIyBGb3JtYXQgRklQUyBjb2RlcyB3aXRoIGxlYWRpbmcgemVyb3MKZGlhYl9yYXcgPC0gZGlhYl9yYXcgfD4gCiAgbXV0YXRlKENvdW50eUZJUFMgPSBzdHJfcGFkKGFzLmNoYXJhY3Rlcihhcy5pbnRlZ2VyKENvdW50eUZJUFMpKSwgNSwgcGFkID0gIjAiKSkKCiMgRmlsdGVyIGZvciBDYWxpZm9ybmlhIGNvdW50aWVzIG9ubHkKY2FfZGlhYmV0ZXMgPC0gZGlhYl9yYXcgfD4gCiAgZmlsdGVyKHN0cl9zdGFydHMoQ291bnR5RklQUywgIjA2IikpIHw+IAogIG11dGF0ZShQZXJjZW50YWdlID0gYXMubnVtZXJpYyhQZXJjZW50YWdlKSkgfD4gCiAgc2VsZWN0KEZJUFMgPSBDb3VudHlGSVBTLCBDb3VudHksIERpYWJldGVzID0gUGVyY2VudGFnZSkKYGBgCgpcCgpOb3cgbGV0cyBnZXQgb3VyIGdvb2Qgb2xlIG1lZGlhbiBpbmNvbWUgZGF0YSBmcm9tIHRoZSBVUyBDZW5zdXMuIEJlY2F1c2UgaXQncyAyMDIxIERpYWJldGVzIGRhdGEsIHdlIHdpbGwgcHVsbCB0aGUgMjAxNy0yMDIxIGZpdmUgeWVhciBlc3RpbWF0ZXMgZnJvbSB0aGUgQUNTLgpgYGB7ciBnZXQtYWNzfQojIERvd25sb2FkIG1lZGlhbiBpbmNvbWUgYW5kIGdlb21ldHJpZXMgZm9yIENhbGlmb3JuaWEgY291bnRpZXMKY2FfZ2VvIDwtIGdldF9hY3MoCiAgZ2VvZ3JhcGh5ID0gImNvdW50eSIsCiAgdmFyaWFibGVzID0gYyhpbmNvbWUgPSAiQjE5MDEzXzAwMSIpLCAgIyBNZWRpYW4gaG91c2Vob2xkIGluY29tZQogIHN0YXRlID0gIkNBIiwKICBnZW9tZXRyeSA9IFRSVUUsCiAgeWVhciA9IDIwMjEKKSAlPiUKICByZW5hbWUoaW5jb21lID0gZXN0aW1hdGUpICU+JQogIHNlbGVjdChHRU9JRCwgTkFNRSwgaW5jb21lLCBnZW9tZXRyeSkKYGBgCgpcCgojIPCfl7rvuI8gRXhwbG9yYXRvcnkgTWFwcGluZwoKTGV0J3MgbWFrZSBhIG1hcCBhbmQgc2VlIHdoYXQgZGlhYmV0ZXMgcHJldmFsZW5jZSBsb29rcyBsaWtlIGFjcm9zcyBjb3VudGllcyBpbiBDYWxpZm9ybmlhLiAKCmBgYHtyIGV4cGxvcmF0b3J5LW1hcHBpbmd9CiMgTWVyZ2UgZGlhYmV0ZXMgYW5kIEFDUyBpbmNvbWUgZGF0YQpjYV9kYXRhIDwtIGNhX2dlbyB8PiAKICBsZWZ0X2pvaW4oY2FfZGlhYmV0ZXMsIGJ5ID0gYygiR0VPSUQiID0gIkZJUFMiKSkKCnRtYXBfbW9kZSgicGxvdCIpCmNhdCgiXG4jIyMgQ291bnR5LUxldmVsIERpYWJldGVzIFByZXZhbGVuY2UgaW4gQ2FsaWZvcm5pYVxuIikKdG1fc2hhcGUoY2FfZGF0YSkgKwogIHRtX3BvbHlnb25zKCJEaWFiZXRlcyIsIHBhbGV0dGUgPSAiUmVkcyIsIHN0eWxlID0gInF1YW50aWxlIiwKICAgICAgICAgICAgICB0aXRsZSA9ICIlIERpYWdub3NlZCBEaWFiZXRlcyIpCmBgYAoKXAoKIyDwn6etIFNwYXRpYWwgQXV0b2NvcnJlbGF0aW9uCgpOb3cgbGV04oCZcyBhc2s6IGFyZSBkaWFiZXRlcyByYXRlcyBjbHVzdGVyZWQgaW4gc3BhY2UsIG9yIHNjYXR0ZXJlZCByYW5kb21seSBsaWtlIGNvbmZldHRpIGluIGEgc3Ryb25nIGJyZWV6ZT8gVGhpcyBpcyB3aGVyZSBzcGF0aWFsIGF1dG9jb3JyZWxhdGlvbiBzdGVwcyBpbi4gV2UnbGwgc3RhcnQgd2l0aCBNb3JhbuKAmXMgSSDigJQgdGhlIGdyYW5kZGFkZHkgb2Ygc3BhdGlhbCBwYXR0ZXJuIGRldGVjdGlvbi4KClwKCiMjIEdsb2JhbCBNb3JhbuKAmXMgSQoKTW9yYW7igJlzIEkgaXMgYSBtZWFzdXJlIG9mIG92ZXJhbGwgc3BhdGlhbCBhdXRvY29ycmVsYXRpb24g4oCUIHRoYXQgaXMsIGhvdyBzaW1pbGFyIG9yIGRpc3NpbWlsYXIgdmFsdWVzIChsaWtlIGRpYWJldGVzIHByZXZhbGVuY2UpIGFyZSBpbiBuZWFyYnkgYXJlYXMgKGkuZS4sIGluIG5lYXJieSBjb3VudGllcykuIAoKLSBWYWx1ZXMgY2xvc2UgdG8gKiorMSoqIG1lYW4gc3Ryb25nIHBvc2l0aXZlIHNwYXRpYWwgYXV0b2NvcnJlbGF0aW9uIOKAlCBoaWdoIHZhbHVlcyBjbHVzdGVyIHdpdGggb3RoZXIgaGlnaCB2YWx1ZXMsIGFuZCBsb3cgd2l0aCBsb3cgKHRoaW5rOiBsaWtlIGF0dHJhY3RzIGxpa2UpLgotIFZhbHVlcyBuZWFyICoqMCoqIG1lYW4gbm8gc3BhdGlhbCBwYXR0ZXJuIOKAlCBqdXN0IG5vaXNlLgotIFZhbHVlcyBuZWFyICoqLTEqKiBtZWFuIGhpZ2ggYW5kIGxvdyB2YWx1ZXMgYXJlIGFjdGl2ZWx5IHJlcGVsbGluZyBlYWNoIG90aGVyIChyYXJlIGluIHB1YmxpYyBoZWFsdGgpLgoKTGV0J3MgY2FsY3VsYXRlIE1vcmFu4oCZcyBJIGFuZCBmaW5kIG91dCBpZiBkaWFiZXRlcyBwcmV2YWxlbmNlIGluIENhbGlmb3JuaWEgZm9sbG93cyBhbnkgc3BhdGlhbCBsb2dpYy4KCmBgYHtyIG1vcmFucy1pfQpuYiA8LSBwb2x5Mm5iKGNhX2RhdGEpCmx3IDwtIG5iMmxpc3R3KG5iLCBzdHlsZSA9ICJXIikKbW9yYW4udGVzdChjYV9kYXRhJERpYWJldGVzLCBsdykKYGBgCgoqKkhvdyB0byByZWFkIHRoaXM6KioKCi0gQSAqKk1vcmFu4oCZcyBJIHZhbHVlIG9mIDAuMzAqKiBtZWFucyBtb2RlcmF0ZSBwb3NpdGl2ZSBzcGF0aWFsIGF1dG9jb3JyZWxhdGlvbiDigJQgY291bnRpZXMgd2l0aCBzaW1pbGFyIGRpYWJldGVzIHJhdGVzIGFyZSBuZWFyIGVhY2ggb3RoZXIuCi0gQSAqKnAtdmFsdWUgPCAwLjAwMSoqIHRlbGxzIHVzIHRoaXMgY2x1c3RlcmluZyBpcyAqKnN0YXRpc3RpY2FsbHkgc2lnbmlmaWNhbnQqKiDigJQgbm90IHJhbmRvbS4KLSBUaGUgKipzdGFuZGFyZCBkZXZpYXRlICgzLjc2KSoqIGlzIGxpa2UgYSB6LXNjb3JlOyBpdCdzIGZhciBlbm91Z2ggZnJvbSB6ZXJvIHRvIHN1cHBvcnQgc3Ryb25nIGV2aWRlbmNlIG9mIHNwYXRpYWwgcGF0dGVybmluZy4KCvCfkYkgKipCb3R0b20gbGluZToqKiBEaWFiZXRlcyByYXRlcyBhcmVu4oCZdCByYW5kb21seSBkaXN0cmlidXRlZCBhY3Jvc3MgQ2FsaWZvcm5pYS4gVGhlcmUgYXJlIGNsdXN0ZXJzIG9mIGhpZ2ggYW5kIGxvdyB2YWx1ZXMsIGFuZCB3ZeKAmXZlIGdvdCBzdGF0aXN0aWNhbCBwcm9vZiEgVGhpcyByZXN1bHQgdGVsbHMgdXMgdGhhdCB0aGVyZSBpcyBzdGF0aXN0aWNhbGx5IHNpZ25pZmljYW50IHNwYXRpYWwgY2x1c3RlcmluZyBvZiBkaWFiZXRlcyBwcmV2YWxlbmNlIGFjcm9zcyBDYWxpZm9ybmlhIGNvdW50aWVzLiBDb3VudGllcyB3aXRoIGhpZ2ggZGlhYmV0ZXMgcmF0ZXMgdGVuZCB0byBiZSBuZWFyIG90aGVyIGhpZ2gtcmF0ZSBjb3VudGllcywgYW5kIHRoZSBzYW1lIGlzIHRydWUgZm9yIGxvdy1yYXRlIGNvdW50aWVzLiBUaGUgTW9yYW7igJlzIEkgdmFsdWUgb2YgfjAuMzAgaW5kaWNhdGVzIG1vZGVyYXRlIHBvc2l0aXZlIHNwYXRpYWwgYXV0b2NvcnJlbGF0aW9uLCBhbmQgdGhlIHRpbnkgcC12YWx1ZSBjb25maXJtcyB0aGF0IHRoaXMgcGF0dGVybiBpcyBub3QgZHVlIHRvIGNoYW5jZS4KClwKCiMjIExvY2FsIE1vcmFu4oCZcyBJIChMSVNBKQoKV2hpbGUgTW9yYW7igJlzIEkgdGVsbHMgdXMgd2hldGhlciB0aGVyZSdzIHNwYXRpYWwgYXV0b2NvcnJlbGF0aW9uIGluIGdlbmVyYWwsIExJU0Egem9vbXMgaW4gYW5kIHRlbGxzIHVzICoqd2hlcmUqKiBpdCdzIGhhcHBlbmluZy4gCgpMSVNBIHN0YW5kcyBmb3IgTG9jYWwgSW5kaWNhdG9ycyBvZiBTcGF0aWFsIEFzc29jaWF0aW9uLCBhbmQgaXQgaGVscHMgdXMgZGV0ZWN0OgotICoqSGlnaC1IaWdoIGNsdXN0ZXJzKio6IEhpZ2ggZGlhYmV0ZXMgcmF0ZXMgc3Vycm91bmRlZCBieSBvdGhlciBoaWdoLXJhdGUgY291bnRpZXMgKGhvdCBjbHVzdGVycykuCi0gKipMb3ctTG93IGNsdXN0ZXJzKio6IEhlYWx0aHkgem9uZXMgd2l0aCBsb3cgZGlhYmV0ZXMgcHJldmFsZW5jZS4KLSAqKkhpZ2gtTG93IG9yIExvdy1IaWdoIG91dGxpZXJzKio6IENvdW50aWVzIHRoYXQgYnVjayB0aGUgdHJlbmQg4oCUIGxpa2UgYSBkb251dCBob2xlIGluIGEgY2FrZS4KCk1hcHBpbmcgTElTQSBoZWxwcyB0YXJnZXQgaW50ZXJ2ZW50aW9ucyBtb3JlIHByZWNpc2VseSwgYW5kIGV4cGxhaW4gdGhvc2Ugc3BhdGlhbCBvZGRiYWxscy4KCmBgYHtyIGxpc2F9CmxvY2FsX21vcmFuIDwtIGxvY2FsbW9yYW4oY2FfZGF0YSREaWFiZXRlcywgbHcpCmNhX2RhdGEkSWkgPC0gbG9jYWxfbW9yYW5bLCAiSWkiXQpjYV9kYXRhJFB2YWwgPC0gbG9jYWxfbW9yYW5bLCAiUHIoeiAhPSBFKElpKSkiXQoKIyBNYXAgTElTQQpjYXQoIlxuIyMjIExvY2FsIFNwYXRpYWwgQ2x1c3RlcmluZyBvZiBEaWFiZXRlc1xuIikKdG1fc2hhcGUoY2FfZGF0YSkgKwogIHRtX3BvbHlnb25zKCJJaSIsIHN0eWxlID0gInF1YW50aWxlIiwgcGFsZXR0ZSA9ICJQdU9yIiwgdGl0bGUgPSAiTG9jYWwgTW9yYW4ncyBJIikKYGBgCgpcCgojIyMg8J+Xuu+4jyBJbnRlcnByZXRpbmcgdGhlIExJU0EgTWFwCgpUaGlzIG1hcCBzaG93cyB3aGVyZSBzcGF0aWFsIGNsdXN0ZXJpbmcgb2YgZGlhYmV0ZXMgaXMgc3Ryb25nZXN0IOKAlCBub3QganVzdCBvdmVyYWxsLCBidXQgKipsb2NhbGx5KiouIEhlcmUncyBob3cgdG8gcmVhZCBpdDoKCi0gKipEYXJrIHB1cnBsZSBjb3VudGllcyoqIGhhdmUgc3Ryb25nIGxvY2FsIGNsdXN0ZXJpbmcg4oCUIGxpa2VseSBoaWdoLWhpZ2ggb3IgbG93LWxvdyBwYXR0ZXJucy4gVGhlc2UgYXJlIGFyZWFzIHdoZXJlIGRpYWJldGVzIHJhdGVzIG1pcnJvciB0aGVpciBuZWlnaGJvcnMgYW5kIGZvcm0gc2lnbmlmaWNhbnQgY2x1c3RlcnMuCi0gKipPcmFuZ2Ugb3IgdGFuIGNvdW50aWVzKiogbWF5IGJlIHNwYXRpYWwgKipvdXRsaWVycyoqIOKAlCBwbGFjZXMgd2hlcmUgZGlhYmV0ZXMgcmF0ZXMgZGlmZmVyIGZyb20gbmVhcmJ5IGNvdW50aWVzLiBGb3IgZXhhbXBsZSwgYSBoZWFsdGh5IGNvdW50eSBzdXJyb3VuZGVkIGJ5IGhpZ2gtcmF0ZSBuZWlnaGJvcnMuCi0gKipHcmF5IG9yIG11dGVkIHRvbmVzKiogaW5kaWNhdGUgd2VhayBvciBub24tc2lnbmlmaWNhbnQgY2x1c3RlcmluZy4KLSAqKldoaXRlIGFyZWFzKiogbWF5IHJlcHJlc2VudCBtaXNzaW5nIG9yIGluc2lnbmlmaWNhbnQgZGF0YS4KCvCfkYkgKipJbiBwcmFjdGljZToqKiBDb3VudGllcyB3aXRoIHN0cm9uZyBjbHVzdGVyaW5nIChkYXJrIHB1cnBsZSkgbWF5IGJlbmVmaXQgZnJvbSByZWdpb25hbCBzdHJhdGVnaWVzLCB3aGlsZSBvdXRsaWVycyBtYXkgbmVlZCBtb3JlIGxvY2FsaXplZCBpbnZlc3RpZ2F0aW9uLiBUaGlzIGhlbHBzIHRhaWxvciBwdWJsaWMgaGVhbHRoIGludGVydmVudGlvbnMgdG8gc3BhdGlhbCByZWFsaXRpZXMuCgpcCgojIyDwn5SlIEhvdCBTcG90IEFuYWx5c2lzIChHaSopCgpOb3cgd2Ugc3BpY2UgdGhpbmdzIHVwIHdpdGggdGhlIEdldGlzLU9yZCBHaSogc3RhdGlzdGljIOKAlCBwcm9ub3VuY2VkICJnZWUtc3Rhci4iIFRoaXMgbWV0aG9kIGlkZW50aWZpZXMgKipzdGF0aXN0aWNhbGx5IHNpZ25pZmljYW50IGhvdCBhbmQgY29sZCBzcG90cyoqIGluIHRoZSBkYXRhLgoKLSBBICoqaG90IHNwb3QqKiBpcyBhIGNvdW50eSB3aXRoIGEgaGlnaCB2YWx1ZSAoZS5nLiwgZGlhYmV0ZXMgcmF0ZSkgc3Vycm91bmRlZCBieSBvdGhlciBoaWdoLXZhbHVlIG5laWdoYm9ycy4KLSBBICoqY29sZCBzcG90KiogaXMgdGhlIG9wcG9zaXRlOiBhIGxvdy12YWx1ZSBjb3VudHkgaW4gYSBzZWEgb2YgbG93IHZhbHVlcy4KCkdpKiBkb2Vzbid0IGp1c3QgbG9vayBhdCBvbmUgdmFsdWUg4oCUIGl0IGNvbnNpZGVycyB0aGUgbmVpZ2hib3Job29kIGFyb3VuZCBpdCB0b28uIFRoaXMgaXMgcG93ZXJmdWwgZm9yIHB1YmxpYyBoZWFsdGggbWFwcGluZywgZXNwZWNpYWxseSB3aGVuIHByaW9yaXRpemluZyBpbnRlcnZlbnRpb25zIG9yIGFsbG9jYXRpbmcgcmVzb3VyY2VzLiAqKmhvdCoqIGFuZCAqKmNvbGQqKiBzcG90cyDigJQgYXJlYXMgd2l0aCBzaWduaWZpY2FudGx5IGhpZ2hlciBvciBsb3dlciByYXRlcyB0aGFuIGV4cGVjdGVkLgoKYGBge3IgZ2ktc3Rhcn0KZ2lfc3RhciA8LSBsb2NhbEcoY2FfZGF0YSREaWFiZXRlcywgbHcpCmNhX2RhdGEkR2lfc3RhciA8LSBhcy5udW1lcmljKGdpX3N0YXIpCgpjYXQoIlxuIyMjIEhvdCBhbmQgQ29sZCBTcG90cyBvZiBEaWFiZXRlc1xuIikKdG1fc2hhcGUoY2FfZGF0YSkgKwogIHRtX3BvbHlnb25zKCJHaV9zdGFyIiwgcGFsZXR0ZSA9ICJSZEJ1Iiwgc3R5bGUgPSAicHJldHR5IiwgdGl0bGUgPSAiR2kqIEhvdCBTcG90cyIpCmBgYAoKIyMjIPCflKUgSW50ZXJwcmV0aW5nIHRoZSBHaSogTWFwCgpUaGlzIG1hcCB1c2VzIHRoZSBHZXRpcy1PcmQgR2kqIHN0YXRpc3RpYyB0byBoaWdobGlnaHQgKipzdGF0aXN0aWNhbGx5IHNpZ25pZmljYW50IHNwYXRpYWwgY2x1c3RlcnMqKiBvZiBkaWFiZXRlcyDigJQgYWxzbyBrbm93biBhcyBob3QgYW5kIGNvbGQgc3BvdHM6CgotICoqRGFyayBibHVlIGNvdW50aWVzKiogKEdpKiA+IDIpIGFyZSAqKmhvdCBzcG90cyoqOiBhcmVhcyB3aXRoIGhpZ2ggZGlhYmV0ZXMgcHJldmFsZW5jZSB0aGF0IGFyZSBhbHNvIHN1cnJvdW5kZWQgYnkgb3RoZXIgaGlnaC1wcmV2YWxlbmNlIGNvdW50aWVzLiBUaGVzZSBhcmUgcHJpbWUgdGFyZ2V0cyBmb3IgcmVnaW9uYWwgcHVibGljIGhlYWx0aCBlZmZvcnRzLgotICoqRGFyayByZWQgY291bnRpZXMqKiAoR2kqIDwgLTIpIGFyZSAqKmNvbGQgc3BvdHMqKjogY2x1c3RlcnMgb2YgbG93ZXItdGhhbi1hdmVyYWdlIGRpYWJldGVzIHJhdGVzLiBHcmVhdCBmb3IgdW5kZXJzdGFuZGluZyB3aGF04oCZcyBnb2luZyByaWdodC4KLSAqKkxpZ2h0ZXIgc2hhZGVzKiogKGUuZy4sIHBlYWNoIG9yIHNreSBibHVlKSByZXByZXNlbnQgbGVzcyBpbnRlbnNlIGNsdXN0ZXJpbmcg4oCUIG5vdCBhcyBzdGF0aXN0aWNhbGx5IGV4dHJlbWUuCgrwn5GJICoqSW4gcHJhY3RpY2U6KiogVGhlIGJsdWUtaG90IGxvd2VyIGhhbGYgb2YgdGhlIHN0YXRlIChlLmcuLCBTYW4gQmVybmFyZGlubywgSW1wZXJpYWwsIFR1bGFyZSkgbWF5IGJlbmVmaXQgZnJvbSBjb29yZGluYXRlZCwgcmVnaW9uYWwgaW50ZXJ2ZW50aW9ucywgd2hpbGUgcmVkLWNvbGQgbm9ydGhlcm4gY291bnRpZXMgbWF5IG9mZmVyIG1vZGVscyBvZiBwcmV2ZW50aW9uIG9yIHNlcnZpY2UgZGVsaXZlcnkgd29ydGggZW11bGF0aW5nLgoKXAoKIyDwn5OJIEdlb2dyYXBoaWNhbGx5IFdlaWdodGVkIFJlZ3Jlc3Npb24gKEdXUikKClJlYWR5IGZvciBzb21lIHNwYXRpYWwgd2l6YXJkcnk/IEdXUiDigJQgR2VvZ3JhcGhpY2FsbHkgV2VpZ2h0ZWQgUmVncmVzc2lvbiDigJQgaXMgbGlrZSByZWd1bGFyIHJlZ3Jlc3Npb24gYnV0IHdpdGggYSBtYWdpYyB0d2lzdDogdGhlIGNvZWZmaWNpZW50cyBjYW4gY2hhbmdlIGRlcGVuZGluZyBvbiAqKndoZXJlKiogeW91IGFyZS4KClRyYWRpdGlvbmFsIHJlZ3Jlc3Npb24gYXNzdW1lcyBvbmUtc2l6ZS1maXRzLWFsbCByZWxhdGlvbnNoaXBzLiBCdXQgaW4gcHVibGljIGhlYWx0aCwgdGhlIGltcGFjdCBvZiBpbmNvbWUgb24gZGlhYmV0ZXMgbWF5IGRpZmZlciBmcm9tIFNhbiBGcmFuY2lzY28gdG8gRnJlc25vLgoKR1dSOgotIEZpdHMgYSBzZXBhcmF0ZSByZWdyZXNzaW9uIG1vZGVsLS1ubyBtb3JlIGFzc3VtaW5nIG9uZS1zaXplLWZpdHMtYWxsIG1vZGVscyEKCmBgYHtyIGd3cn0KY29vcmRzIDwtIHN0X2Nvb3JkaW5hdGVzKHN0X2NlbnRyb2lkKGNhX2RhdGEpKQpjYV9kYXRhJFggPC0gY29vcmRzWywgMV0KY2FfZGF0YSRZIDwtIGNvb3Jkc1ssIDJdCgpidyA8LSBnd3Iuc2VsKERpYWJldGVzIH4gaW5jb21lLCBkYXRhID0gY2FfZGF0YSwgY29vcmRzID0gY29vcmRzLCBhZGFwdCA9IFRSVUUpCgojIFJ1biBHV1IgdXNpbmcgYWRhcHRpdmUgYmFuZHdpZHRoCm1vZGVsIDwtIGd3cihEaWFiZXRlcyB+IGluY29tZSwgZGF0YSA9IGNhX2RhdGEsIGNvb3JkcyA9IGNvb3JkcywgCiAgICAgICAgICAgICBhZGFwdCA9IGJ3LCBoYXRtYXRyaXggPSBUUlVFKQoKY2FfZGF0YSRnd3JfaW5jb21lIDwtIG1vZGVsJFNERiRpbmNvbWUKYGBgCvCfk4wgSU5URVJQUkVUQVRJT046ClRoZSBvdXRwdXQgc2hvd3MgdGhlIG1vZGVsIHRlc3RpbmcgZGlmZmVyZW50ICdhZGFwdGl2ZSBxJyB2YWx1ZXMsIHdoaWNoIHJlcHJlc2VudCB0aGUgcHJvcG9ydGlvbiBvZiBuZWlnaGJvcmluZyBjb3VudGllcyB1c2VkIGluIGVhY2ggbG9jYWwgbW9kZWwuIEl0IGNob29zZXMgdGhlIHEgdmFsdWUgd2l0aCB0aGUgbG93ZXN0IGNyb3NzLXZhbGlkYXRpb24gKENWKSBzY29yZSDigJQgYmVzdCBwcmVkaWN0aXZlIGZpdC4gRm9yIGV4YW1wbGU6IHEgPSAwLjA4MiBtZWFucyB+OCUgb2YgY291bnRpZXMgKOKJiDUgY291bnRpZXMpIGFyZSB1c2VkIGluIGVhY2ggbG9jYWwgcmVncmVzc2lvbi4gTG93ZXIgQ1YgPSBiZXR0ZXIgbW9kZWwuIEl0J3MgZmluZGluZyB0aGUgJ2p1c3QgcmlnaHQnIG5laWdoYm9yaG9vZCBzaXplIGZvciBlYWNoIHJlZ3Jlc3Npb24uCgpcCgojIyDwn5e+IE1hcCBMb2NhbCBHV1IgQ29lZmZpY2llbnRzCgpMZXTigJlzIG1hcCB0aG9zZSBsb2NhbGx5IHZhcnlpbmcgcmVncmVzc2lvbiBjb2VmZmljaWVudHMgYW5kIHNlZSB3aGVyZSBpbmNvbWUgbWF0dGVycyBtb3JlIChvciBsZXNzKSBmb3IgZGlhYmV0ZXMuCgpgYGB7ciBnd3ItbWFwfQp0bV9zaGFwZShjYV9kYXRhKSArCiAgdG1fcG9seWdvbnMoImd3cl9pbmNvbWUiLCBwYWxldHRlID0gIlJkWWxHbiIsIHN0eWxlID0gInF1YW50aWxlIiwgdGl0bGUgPSAiR1dSOiBJbmNvbWUgRWZmZWN0IikKYGBgCgpcCgojIyMjIPCfp6kgSW50ZXJwcmV0aW5nIHRoZSBHV1IgTWFwCgpUaGlzIG1hcCBzaG93cyBob3cgdGhlIHJlbGF0aW9uc2hpcCBiZXR3ZWVuIGluY29tZSBhbmQgZGlhYmV0ZXMgKip2YXJpZXMgYWNyb3NzIENhbGlmb3JuaWEqKiDigJQgaXQncyBhIHNwYXRpYWwgdmlldyBvZiB0aGUgcmVncmVzc2lvbiBjb2VmZmljaWVudCBiZXR3ZWVuIGluY29tZSBhbmQgZGlhYmV0ZXMuCgotIEFsbCB0aGUgdmFsdWVzIGFyZSAqKm5lZ2F0aXZlKiosIG1lYW5pbmcgaGlnaGVyIGluY29tZSBpcyBhc3NvY2lhdGVkIHdpdGggKipsb3dlciBkaWFiZXRlcyBwcmV2YWxlbmNlKiog4oCUIGJ1dCAqKmhvdyBzdHJvbmdseSoqIHRoaXMgaXMgdHJ1ZSB2YXJpZXMgYWNyb3NzIHNwYWNlLgoKLSAqKkRhcmsgcmVkIGNvdW50aWVzKiogKG1vc3QgbmVnYXRpdmUgdmFsdWVzKTogVGhlc2UgYXJlIHRoZSBwbGFjZXMgd2hlcmUgaW5jb21lIGhhcyB0aGUgKipzdHJvbmdlc3QgaW52ZXJzZSByZWxhdGlvbnNoaXAqKiB3aXRoIGRpYWJldGVzLiBJbiBvdGhlciB3b3JkcywgaW1wcm92aW5nIGVjb25vbWljIGNvbmRpdGlvbnMgaGVyZSBjb3VsZCBoYXZlIGEgKipiaWcgcHVibGljIGhlYWx0aCBwYXlvZmYqKi4KCi0gKipMaWdodGVyIHllbGxvdyB0byBncmVlbiBjb3VudGllcyoqOiBUaGVzZSBhcmVhcyBzdGlsbCBzaG93IGEgbmVnYXRpdmUgcmVsYXRpb25zaGlwLCBidXQgaXQncyAqKndlYWtlcioqLiBUaGF0IG1pZ2h0IG1lYW4gb3RoZXIgc29jaWFsIG9yIGVudmlyb25tZW50YWwgZmFjdG9ycyBhcmUgcGxheWluZyBhIGJpZ2dlciByb2xlIGluIHRoZXNlIGNvdW50aWVzLgoKLSAqKkRhcmsgZ3JlZW4gYXJlYXMqKjogVGhlIHdlYWtlc3QgbmVnYXRpdmUgYXNzb2NpYXRpb25zIOKAlCBoZXJlLCBpbmNvbWUgbWlnaHQgbWF0dGVyIGxlc3MgZm9yIGRpYWJldGVzIHByZXZlbnRpb24sIG9yIG90aGVyIGZhY3RvcnMgZG9taW5hdGUuCgrwn5GJICoqSW4gcHJhY3RpY2U6KiogVGhpcyBtYXAgaGVscHMgcHVibGljIGhlYWx0aCBwcm9mZXNzaW9uYWxzIHRhaWxvciBpbnRlcnZlbnRpb25zLiBJbiBjb3VudGllcyB3aGVyZSBpbmNvbWUgaXMgYSBzdHJvbmcgZHJpdmVyIG9mIGRpYWJldGVzLCBlY29ub21pYyBzdXBwb3J0IHByb2dyYW1zIG1pZ2h0IHJlZHVjZSBwcmV2YWxlbmNlLiBJbiBvdGhlcnMsIGRpZmZlcmVudCBzdHJhdGVnaWVzIG1heSBiZSBuZWVkZWQuCgpcCgojIPCfp6AgVGFrZSBob21lCgotICoqTW9yYW4ncyBJKio6IE1lYXN1cmVzIG92ZXJhbGwgc3BhdGlhbCBhdXRvY29ycmVsYXRpb24gKHRoaW5rOiBpcyB0aGVyZSBhIHBhdHRlcm4/KS4KLSAqKkxJU0EvR2kqKio6IFJldmVhbCBsb2NhbCBjbHVzdGVycyBhbmQgaG90L2NvbGQgc3BvdHMgKHdoZXJl4oCZcyB0aGUgYWN0aW9uPykuCi0gKipHV1IqKjogU2hvd3Mgd2hlcmUgdGhlIGluY29tZS1kaWFiZXRlcyByZWxhdGlvbnNoaXAgaXMgc3Ryb25nLCB3ZWFrLCBvciBmbGlwcGluZyBkaXJlY3Rpb24uCgojIOKchSBTdW1tYXJ5CgpCb29tISBZb3UganVzdCBjcnVuY2hlZCByZWFsIHB1YmxpYyBoZWFsdGggZGF0YSB1c2luZyBjdXR0aW5nLWVkZ2Ugc3BhdGlhbCB0b29scy4gRnJvbSBtYXBzIHRvIG1vZGVscywgeW91J3ZlIHVuY292ZXJlZCBzcGF0aWFsIGluZXF1YWxpdGllcyBpbiBoZWFsdGguIEdvIGZvcnRoIGFuZCBtYXAgcmVzcG9uc2libHkhCg==</div>
 
 
 </div>

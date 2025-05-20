@@ -44,7 +44,7 @@ Below you will find links to data sources that contain spatial data and health d
 
 - [CalEnviroScreen](https://oehha.ca.gov/calenviroscreen/report/calenviroscreen-version-20) The Office of Environmental Health Hazard Assessment (OEHHA), on behalf of the California Environmental Protection Agency (CalEPA), announces the availability of the California Communities Environmental Health Screening Tool: CalEnviroScreen Version 2.0 (CalEnviroScreen 2.0). CalEnviroScreen is a screening methodology that can be used to help identify California communities that are disproportionately burdened by multiple sources of pollution. CalEPA has used the tool to designate California communities as disadvantaged pursuant to Senate Bill 535. It uses environmental, health, and socioeconomic information to produce scores for every census tract in the state.
 
--[Food Environment Atlas from the USDA](https://www.ers.usda.gov/foodatlas/) Assembles statistics on food environment indicators to stimulate research on the determinants of food choices and diet quality, and provides a spatial overview of a community's ability to access healthy food and its success in doing so. Download data: xls.
+- [Food Environment Atlas from the USDA](https://www.ers.usda.gov/foodatlas/) Assembles statistics on food environment indicators to stimulate research on the determinants of food choices and diet quality, and provides a spatial overview of a community's ability to access healthy food and its success in doing so. Download data: xls.
 
 \
 
