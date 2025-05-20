@@ -1,0 +1,145 @@
+---
+title: "Lab6_In_Class"
+author: "Peter James"
+date: "2025-05-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load packages
+```{r}
+library(tidygeocoder)
+library(sf)
+library(tmap)
+library(osrm)
+library(tidyverse)
+```
+
+# Bring in fast food
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv", destfile = "fast_food_davis_ca.csv", mode = "wb")
+
+ff <- read_csv("fast_food_davis_ca.csv")
+glimpse(ff)
+```
+
+# Geocode
+```{r}
+ff_geo      <- geocode(ff, address = "Address",
+                          method = "arcgis")
+summary(ff_geo$lat)
+summary(ff_geo$long)
+st_crs(ff_geo)
+```
+
+# Add CRS
+```{r}
+ff_pts <- st_as_sf(ff_geo, coords=c("long","lat"), crs=4326)
+st_crs(ff_pts)
+```
+
+# osrmTrip
+```{r}
+trip <- osrmTrip(ff_pts, osrm.profile = "bike")
+glimpse(trip)
+```
+
+# Map it
+```{r}
+# Extract the linestring route (as an sf object)
+trip_sf <- trip[[1]]$trip
+
+# Set tmap to interactive mode
+tmap_mode("view")
+
+# Plot with tmap
+tm <- tm_shape(trip_sf) +
+  tm_lines(lwd = 3, col = "blue") +
+  tm_shape(ff_pts) +
+  tm_bubbles(size = 0.5, col = "red") + 
+  tm_text("Restaurant Name", size=1, xmod = 0.25, ymod=0.25) 
+
+tm
+```
+
+# Summary
+```{r}
+leg_summary <- trip_sf %>%
+  mutate(duration = round(duration, 1),
+         distance = round(distance, 1))
+
+leg_summary
+```
+
+```{r}
+trip_summary <- trip[[1]]$summary
+trip_summary
+```
+
+# osrmTable
+```{r}
+ff_table <- osrmTable(ff_pts,
+                      osrm.profile = "bike")
+glimpse(ff_table)
+ff_table$duration
+```
+
+Add restaurant names
+```{r}
+# Extract restaurant names
+rest_names <- ff_pts[["Restaurant Name"]]  # or ff_pts$`Restaurant Name`
+
+# Assign names to rows and columns of distance and duration matrices
+rownames(ff_table$duration) <- rest_names
+colnames(ff_table$duration) <- rest_names
+
+# Travel times in minutes
+ff_table$duration
+```
+
+# isoChrones
+```{r}
+loc <- c("lon" = -121.7617, "lat" = 38.5382)
+loc_sf <- st_sf(name = "Medical Sciences 1-B",
+                geometry = st_sfc(st_point(loc), crs = 4326))
+```
+
+```{r}
+iso <- osrmIsochrone(loc = loc_sf,
+                     breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
+                     res = 50, # Lower res for faster requests
+                     osrm.profile = "bike")  # mode bicycle
+
+glimpse(iso)
+```
+# Map
+```{r}
+# Create factor column for time intervals
+iso$bike_times <- factor(
+  paste(iso$isomin, "to", iso$isomax, "min"),
+  levels = c("0 to 5 min", "5 to 10 min", "10 to 15 min", 
+             "15 to 20 min", "20 to 25 min", "25 to 30 min")
+)
+
+
+# Plot using tmap
+tm <- tm_shape(iso) +
+  tm_polygons(col = "bike_times",
+              palette = (heat.colors(6)),  # reverse for same effect
+              border.col = "black",
+              lwd = 0.5,
+              alpha = 0.3,
+              title = "Biking Duration") +
+  tm_shape(loc_sf) +
+  tm_bubbles(size = 0.3, col = "blue") +
+  tm_text("name", size = 1, ymod = -0.5) 
+tm
+```
+
+```{r}
+help(package="crimedata")
+```
+

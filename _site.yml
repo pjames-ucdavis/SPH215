@@ -19,12 +19,10 @@ navbar:
           href: Lab5.html
         - text: "Lab 6: Network Analysis"
           href: Lab6.html
-        - text: "Lab 7: Spatial Statistics"
+        - text: "Lab 7: Spatial Statistics and Geographically Weighted Regression"
           href: Lab7.html
-        - text: "Lab 8: Geographically Weighted Regression"
+        - text: "Lab 8: Future Directions in GIS and Public Health"
           href: Lab8.html
-        - text: "Lab 9: Future Directions in GIS and Public Health"
-          href: Lab9.html
     - text: "Assignment Guide"
       href: Assignments.html
     - text: "Data Sources"
