@@ -82,12 +82,12 @@ Let's make a map and see what diabetes prevalence looks like across counties in 
 
 ```{r exploratory-mapping}
 # Merge diabetes and ACS income data
-ca_data <- ca_geo |> 
+ca_diab_data <- ca_geo |> 
   left_join(ca_diabetes, by = c("GEOID" = "FIPS"))
 
 tmap_mode("plot")
 cat("\n### County-Level Diabetes Prevalence in California\n")
-tm_shape(ca_data) +
+tm_shape(ca_diab_data) +
   tm_polygons("Diabetes", palette = "Reds", style = "quantile",
               title = "% Diagnosed Diabetes")
 ```
@@ -111,9 +111,9 @@ Moran’s I is a measure of overall spatial autocorrelation — that is, how sim
 Let's calculate Moran’s I and find out if diabetes prevalence in California follows any spatial logic.
 
 ```{r morans-i}
-nb <- poly2nb(ca_data)
+nb <- poly2nb(ca_diab_data)
 lw <- nb2listw(nb, style = "W")
-moran.test(ca_data$Diabetes, lw)
+moran.test(ca_diab_data$Diabetes, lw)
 ```
 
 **How to read this:**
@@ -138,13 +138,13 @@ LISA stands for Local Indicators of Spatial Association, and it helps us detect:
 Mapping LISA helps target interventions more precisely, and explain those spatial oddballs.
 
 ```{r lisa}
-local_moran <- localmoran(ca_data$Diabetes, lw)
-ca_data$Ii <- local_moran[, "Ii"]
-ca_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
+local_moran <- localmoran(ca_diab_data$Diabetes, lw)
+ca_diab_data$Ii <- local_moran[, "Ii"]
+ca_diab_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
 
 # Map LISA
 cat("\n### Local Spatial Clustering of Diabetes\n")
-tm_shape(ca_data) +
+tm_shape(ca_diab_data) +
   tm_polygons("Ii", style = "quantile", palette = "PuOr", title = "Local Moran's I")
 ```
 
@@ -165,7 +165,7 @@ This map shows where spatial clustering of diabetes is strongest — not just ov
 
 ## 🔥 Hot Spot Analysis (Gi*)
 
-Now we spice things up with the Getis-Ord Gi* statistic — pronounced "gee-star." This method identifies **statistically significant hot and cold spots** in the data.
+Now we spice things up with the Getis-Ord Gi* statistic — pronounced "gee-eye-star." This method identifies **statistically significant hot and cold spots** in the data.
 
 - A **hot spot** is a county with a high value (e.g., diabetes rate) surrounded by other high-value neighbors.
 - A **cold spot** is the opposite: a low-value county in a sea of low values.
@@ -173,11 +173,11 @@ Now we spice things up with the Getis-Ord Gi* statistic — pronounced "gee-star
 Gi* doesn't just look at one value — it considers the neighborhood around it too. This is powerful for public health mapping, especially when prioritizing interventions or allocating resources. **hot** and **cold** spots — areas with significantly higher or lower rates than expected.
 
 ```{r gi-star}
-gi_star <- localG(ca_data$Diabetes, lw)
-ca_data$Gi_star <- as.numeric(gi_star)
+gi_star <- localG(ca_diab_data$Diabetes, lw)
+ca_diab_data$Gi_star <- as.numeric(gi_star)
 
 cat("\n### Hot and Cold Spots of Diabetes\n")
-tm_shape(ca_data) +
+tm_shape(ca_diab_data) +
   tm_polygons("Gi_star", palette = "RdBu", style = "pretty", title = "Gi* Hot Spots")
 ```
 
@@ -202,22 +202,22 @@ Traditional regression assumes one-size-fits-all relationships. But in public he
 GWR fits a separate regression model--no more assuming one relationship is consistent across all areas in your analysis!
 
 ```{r gwr}
-coords <- st_coordinates(st_centroid(ca_data))
-ca_data$X <- coords[, 1]
-ca_data$Y <- coords[, 2]
+coords <- st_coordinates(st_centroid(ca_diab_data))
+ca_diab_data$X <- coords[, 1]
+ca_diab_data$Y <- coords[, 2]
 
-bw <- gwr.sel(Diabetes ~ income, data = ca_data, coords = coords, adapt = TRUE)
+bw <- gwr.sel(Diabetes ~ income, data = ca_diab_data, coords = coords, adapt = TRUE)
 
 # Run GWR using adaptive bandwidth
-model <- gwr(Diabetes ~ income, data = ca_data, coords = coords, 
+model <- gwr(Diabetes ~ income, data = ca_diab_data, coords = coords, 
              adapt = bw, hatmatrix = TRUE)
 
-ca_data$gwr_income <- model$SDF$income
+ca_diab_data$gwr_income <- model$SDF$income
 ```
 
 \
 
-📌 INTERPRETATION:
+## 📌 Interpreting the GWR results:
 The output shows the model testing different 'adaptive q' values, which represent the proportion of neighboring counties used in each local model. It chooses the q value with the lowest cross-validation (CV) score — best predictive fit. For example: q = 0.082 means ~8% of counties (≈5 counties) are used in each local regression. Lower CV = better model. It's finding the 'just right' neighborhood size for each regression.
 
 \
@@ -227,7 +227,7 @@ The output shows the model testing different 'adaptive q' values, which represen
 Let’s map those locally varying regression coefficients and see where income matters more (or less) for diabetes.
 
 ```{r gwr-map}
-tm_shape(ca_data) +
+tm_shape(ca_diab_data) +
   tm_polygons("gwr_income", palette = "RdYlGn", style = "quantile", title = "GWR: Income Effect")
 ```
 
@@ -237,24 +237,25 @@ tm_shape(ca_data) +
 
 This map shows how the relationship between income and diabetes **varies across California** — it's a spatial view of the regression coefficient between income and diabetes.
 
-- All the values are **negative**, meaning higher income is associated with **lower diabetes prevalence** — but **how strongly** this is true varies across space.
+- All the values are **negative**, meaning higher income is associated with **lower diabetes prevalence** — but **the strength** of this relationship varies across space.
 
 - **Dark red counties** (most negative values): These are the places where income has the **strongest inverse relationship** with diabetes. In other words, improving economic conditions here could have a **big public health payoff**.
 
-- **Lighter yellow to green counties**: These areas still show a negative relationship, but it's **weaker**. That might mean other social or environmental factors are playing a bigger role in these counties.
+- **Lighter yellow to green counties**: These areas still show a negative relationship, but it's **weaker**. That might mean other social or environmental factors are playing a bigger role than income in these counties.
 
-- **Dark green areas**: The weakest negative associations — here, income might matter less for diabetes prevention, or other factors dominate.
+- **Dark green areas**: The weakest negative associations — here, income might matter less for diabetes prevention, or other factors may dominate.
 
-👉 **In practice:** This map helps public health professionals tailor interventions. In counties where income is a strong driver of diabetes, economic support programs might reduce prevalence. In others, different strategies may be needed.
+👉 **In practice**: This map helps public health professionals tailor interventions. In counties where income is a strong driver of diabetes, economic support programs might reduce prevalence. In others, different strategies may be needed.
+
 
 \
 
 # 🧠 Take home
 
-- **Moran's I**: Measures overall spatial autocorrelation (think: is there a pattern?).
+- **Moran's I**: Measures overall spatial autocorrelation (is there a pattern?).
 - **LISA/Gi***: Reveal local clusters and hot/cold spots (where’s the action?).
 - **GWR**: Shows where the income-diabetes relationship is strong, weak, or flipping direction.
 
 # ✅ Summary
 
-Boom! You just crunched real public health data using cutting-edge spatial tools. From maps to models, you've uncovered spatial inequalities in health. Go forth and map responsibly!
+Boom! You just crunched real public health data using cutting-edge spatial tools. From maps to models, you've uncovered spatial inequalities in health. Well done!
