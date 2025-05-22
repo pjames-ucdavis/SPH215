@@ -4,7 +4,7 @@ title: 'Lab 6: Network Analysis'
 
 In this lab, we will be using spatial data to run a network analysis. We will be playing around with data from Davis, including geocoding fast food restaurants in our fair city, then mapping the most efficient route to bike between all fast food establishments. Next, we will estimate the travel time between all fast food establishments in Davis. Finally, we are going to create a cool visualization of the travel times from the building that we are sitting in! This is all intended to explain how you can use spatial data to understand how different spatial features relate using the road networks that we travel on.
 
-The objectives of this guide are to teach you:
+The objectives of this guide are to teach you to:
 
 1. Use the **osrm** package to map the optimal trip between multiple points
 2. Get a matrix of travel times between multiple points

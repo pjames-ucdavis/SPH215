@@ -8,6 +8,12 @@ title: "Lab 7: Spatial Statistics and Geographically Weighted Regression in Publ
 
 Welcome to your crash course in spatial statistics for public health! We're going to cover a lot today in terms of analysis of spatial data. We'll explore mapping, clustering, and how relationships between variables vary across geography. Buckle up!
 
+The objectives of this guide are to teach you to:
+
+1. Use multiple methods to identify spatial autocorrelation
+2. Account for spatial autcorrelation in regression using spatial lag models
+3. Conduct geographically weighted regression to model how associations vary across space
+
 \
 
 # Load packages
@@ -141,6 +147,7 @@ moran.test(ca_diab_data$Diabetes, lw)
 While Moran’s I tells us whether there's spatial autocorrelation in general, LISA zooms in and tells us **where** it's happening. 
 
 LISA stands for Local Indicators of Spatial Association, and it helps us detect:
+
 - **High-High clusters**: High diabetes rates surrounded by other high-rate counties (hot clusters).
 - **Low-Low clusters**: Healthy zones with low diabetes prevalence.
 - **High-Low or Low-High outliers**: Counties that buck the trend — like a donut hole in a cake.
