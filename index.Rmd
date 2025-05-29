@@ -32,7 +32,7 @@ On Canvas you will find:
 \
 
 # About the Class
-This 3-unit course introduces the concepts and components of a geographic information system (GIS) for public health. It also teaches the essential skills of operating a functional GIS through the use of R, which is free and open-source software. By completing this course, students will understand the operational processes of spatial data acquisition, editing and QA/QC, spatial data visualization, geocoding, spatial joins and extractions to create exposure metrics, network analysis, spatial clustering analyses, and geographically weighted regression.
+This 3-unit course introduces the concepts and components of a geographic information system (GIS) for public health. It also teaches the essential skills of operating a functional GIS through the use of R, which is free and open-source software. By completing this course, students will understand the operational processes of spatial data acquisition, editing and QA/QC, spatial data visualization, geocoding, spatial joins and extractions to create exposure metrics, network analysis, spatial clustering analyses, spatial lag analyses, and geographically weighted regression.
 
 \
 
