@@ -1,807 +1,349 @@
 ---
-title: "Lab 2: Geocoding, Vector Data, and Census Data 2026 TEST"
+title: "Lab 2: Data Wrangling in R"
 ---
 
-In this lab, we are going to work with vector data, which we've talked about last week. We are going to work with a dataset of cancer patients across California, as well as Census data on socioeconomic factors. We will also talk about geocoding addresses and will discuss how to visualize data. 
 
-The objectives of this guide are to teach you:
+# Data Wrangling
 
-1. How to geocode addresses
-2. How to bring in and visualize point data
-3. How to download Census data using the Census API
-4. How to conduct exploratory data analysis
+So this might be the most important thing you learn about R, and about working with data. It is rare that the data work on are in exactly the right form for analysis. For example, you might want to discard certain variables from the dataset to reduce clutter. Or you need to create new variables from existing ones. Or you encounter missing data. The process of gathering data in its raw form and molding it into a form that is suitable for its end use is known as data wrangling. What’s great about the **tidyverse** package is its suite of functions make data wrangling relatively easy, straight forward, and transparent.
 
-Let's get cracking!
+In this lab, we won’t have time to go through all of the methods and functions in R that are associated with the data wrangling process. We will cover more in later labs and many methods you will have to learn on your own given the specific tasks you will need to accomplish. In the rest of this guide, we’ll go through some of the basic data wrangling techniques using the functions found in the package **dplyr**, which was automatically installed and loaded when you brought in the **tidyverse** package. These functions can be used for either tibbles or regular data frames.
 
 \
 
-# Open up an R Markdown file
+## Reading in data
 
-We hopefully remember some of this from last week in [Lab 1](lab1.html), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 2”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+The dataset *nycflights13* was included in an R package. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
+
+To read in a csv file, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension. The two files are up on the GitHub for this course, so you can read them in directly from there. We’ll name these objects *ca1* and *ca2*.
+
+```{r}
+ca1 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset1.csv")
+ca2 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset2.csv")
+```
 
 \
 
-# What packages do we need?
+You should see two tibbles *ca1* and *ca2* pop up in your Environment window (top right). Every time you bring a dataset into R for the first time, look at it to make sure you understand its structure. You can do this a number of ways. One is to use the function `glimpse()`, which gives you a succinct summary of your data.
 
-Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
+```{r}
+glimpse(ca1)
+```
 
+\
 
-```{r, message=FALSE}
-library(tidygeocoder)
+```{r}
+glimpse(ca2)
+```
+
+\
+
+If you like viewing your data through an Excel style worksheet, type in `View(ca1)`, and *ca1*
+should pop up in the top left window of your R Studio interface. Scroll up and down, left and right. 
+
+We’ll learn how to summarize your data using descriptive statistics and graphs in the next lab.
+
+By learning how to read in data the tidy way, I think you’ve earned another badge! Woot woot!
+![Your Readr Badge](readr.png)
+\
+
+## Renaming variables
+
+More often than you think, you will encounter a column / variable with a name that is not descriptive. The more descriptive the variable names, the more efficient your analysis will be and the less likely you are going to make a mistake. To see the names of variables in your dataset, use the `names()` command.
+
+```{r}
+names(ca1)
+```
+
+\
+
+The name *Estimated median income of a household, between 2014-2018.* is a doozy! Just a little long. Use the command `rename()` to - you guessed it - rename a variable! Let’s rename *Estimated median income of a household, between 2014-2018.* to *medinc*.
+
+```{r}
+rename(ca1, medinc = "Estimated median income of a household, between 2014-2018.")
+```
+
+\
+
+Note that you can rename multiple variables within the same `rename()` command. For example, we can also rename *Formatted FIPS* to *GEOID*. Make this permanent by assigning it back to *ca1* using the arrow operator `<-`
+
+```{r}
+ca1 <- rename(ca1, 
+        medinc = "Estimated median income of a household, between 2014-2018.",
+        GEOID = "Formatted FIPS")
+names(ca1)
+
+```
+
+And we can see our variable names have changed! We are doing things.
+
+\
+
+# Selecting variables
+
+In practice, most of the data files you will download will contain variables you don’t need. It is easier to work with a smaller dataset as it reduces clutter and clears up memory space, which is important if you are executing complex tasks on a large number of observations. Use the command `select()` to keep variables by name. Visually, we are doing the following (taken from the RStudio [cheatsheet](http://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)).
+![Subsetting columns](subsetcols.png)
+
+\
+
+Let’s take a look at the variables we have in the ca2 dataset.
+
+```{r}
+names(ca2)
+```
+
+We’ll go into more detail what these variables mean in another lab when we cover the U.S. Census, but we only want to keep the variables *GEOID*, which is the county FIPS code (a unique numeric identifier), and *tpoprE*, *nhwhiteE*, *nhblkE*, *nhasnE*, and *hispE*, which are the total, white, black, Asian and Hispanic population counts.
+
+```{r}
+ca2 <- select(ca2, GEOID, tpoprE, nhwhiteE, nhblkE, nhasnE, hispE)
+```
+
+\
+
+Here, we provide the data object first, followed by the variables we want to keep separated by commas.
+
+Let’s keep *County*, *GEOID*, and *medinc* from the *ca1* dataset. Rather than listing all the variables we want to keep like we did above, a shortcut way of doing this is to use the `:` operator.
+
+```{r}
+select(ca1, County:medinc)
+```
+
+\
+
+The `:` operator tells R to select all the variables from *County* to *medinc*. This operator is useful when you’ve got a lot of variables to keep and they all happen to be ordered sequentially.
+
+You can use also use `select()` command to keep variables except for the ones you designate. For example, to keep all variables in *ca1* except *FIPS Code* and save this back into *ca1*, type in:
+
+```{r}
+ca1 <- select(ca1, -"FIPS Code")
+```
+
+\
+
+The negative sign tells R to exclude the variable. Notice we need to use quotes around *FIPS Code* because it contains a space. You can delete multiple variables. For example, if you wanted to keep all variables except *FIPS Code* and *County*, you would type in `select(ca1, -"FIPS Code", -County)`.
+
+Take a glimpse and see if it looks how we think it should.
+```{r}
+glimpse(ca1)
+```
+Try *ca2* and let us know how it looks.
+
+\
+
+## Creating new variables
+
+The `mutate()` function (strange name, huh?) allows you to create new variables within your dataset. This is important when you need to transform variables in some way - for example, calculating a ratio or adding two variables together. Visually, you are doing this:
+![mutate](mutate.png)
+
+\
+
+You can use the `mutate()` command to generate as many new variables as you would like. For example, let’s construct four new variables in *ca2* - the percent of residents who are non-Hispanic white, non-Hispanic Asian, non-Hispanic black, and Hispanic. Name these variables *pwhite*, *pasian*, *pblack*, and *phisp*, respectively.
+
+```{r}
+mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE)
+```
+
+\
+
+Note that you can create new variables based on the variables you just created in the same line of code. For example, you can create a categorical variable called *mhisp* yielding “Majority” if the tract is majority Hispanic and “Not Majority” otherwise after creating the percent Hispanic variable *phisp* within the same `mutate()` command. Let’s save these changes back into *ca2*.
+
+```{r}
+ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+              mhisp = case_when(phisp > 0.5 ~ "Majority",
+                                TRUE ~ "Not Majority"))
+```
+
+We used the function `case_when()` to create *mhisp* - the function tells R that if the condition *phisp* > 0.5 is met, the tract’s value for the variable *mhisp* will be “Majority”, otherwise (designated by `TRUE`) it will be “Not Majority”.
+
+Take a look at our data. Pay attention to *phisp* and *mhisp*. Did our calculation work?
+
+```{r}
+glimpse(ca2)
+```
+
+\
+
+## Joining Tables
+
+Rather than working on two separate datasets, we should join the two datasets *ca1* and *ca2*, because we may want to examine the relationship between median household income, which is in *ca1*, and racial/ethnic composition, which is in *ca2*. To do this, we need a unique ID that connects the tracts across the two files. The unique Census ID for a county combines the county and state IDs. The Census ID is named *GEOID* in both files. The IDs should be the same data class. Let's check if they are!
+
+```{r}
+class(ca1$GEOID)
+```
+
+```{r}
+class(ca2$GEOID)
+```
+
+\
+
+Lookin good! Note: If they are not the same class, we can coerce them using the `as.numeric()` or `as.character()` function described earlier.
+
+To merge the datasets together, use the function `left_join()`, which matches pairs of observations whenever their keys or IDs are equal. We match on the variable GEOID and save the merged data set into a new object called *cacounty*.
+
+```{r}
+cacounty <- left_join(ca1, ca2, by = "GEOID")
+```
+
+\
+
+We want to merge *ca2* into *ca1*, so that’s why the sequence is `ca1, ca2`. The argument *by* tells R which variable(s) to match rows on, in this case *GEOID.* You can match on multiple variables and you can also match on a single variable with different variable names (see the `left_join()` help documentation for how to do this). The number of columns in *cacounty* equals the number of columns in *ca1* plus the number of columns in *ca2* minus the ID variable you merged on.
+
+Note that if you have two variables with the same name in both files, R will attach a *.x* to the variable name in *ca1* and a *.y* to the variable name in *ca1*. For example, if you have a variable named *Robert* in both files, *cacounty* will contain both variables and name it *Robert.x* (the variable in *ca1*) and *Robert.y* (the variable in *ca1*). Try to avoid having variables with the same names in the two files you want to merge.
+
+Let’s use `select()` to keep the necessary variables.
+
+```{r}
+cacounty <- select(cacounty, GEOID, County, pwhite, pasian, pblack, phisp, mhisp, medinc)
+```
+
+\
+
+## Filtering
+
+Filtering means selecting rows/observations based on their values. To filter in R, use the command `filter()`. Visually, filtering rows looks like.
+
+![Filtering](subsetrows.png)
+The first argument in the parentheses of this command is the name of the data frame. The second and any subsequent arguments (separated by commas) are the expressions that filter the data frame. For example, we can select Sacramento county using its [FIPS code](https://www.nrcs.usda.gov/wps/portal/nrcs/detail/ca/home/?cid=nrcs143_013697). A FIPS code is a unique ID for every geographic unit in the US. This will come up often!
+
+```{r}
+filter(cacounty, GEOID == "06067")
+```
+
+\
+
+The double equal operator `==` means equal to. We can also explicitly exclude cases and keep everything else by using the not equal operator `!=`. Conversely, the following code *excludes* Sacramento county.
+
+\
+
+```{r}
+filter(cacounty, GEOID != "06067")
+```
+
+\
+
+What about filtering if a county has a value greater than a specified value? For example, counties with a percent white greater than 0.5 (50%).
+
+```{r}
+filter(cacounty, pwhite > 0.5)
+```
+
+\
+
+What about less than 0.5 (50%)?
+
+```{r}
+filter(cacounty, pwhite < 0.5)
+```
+
+\
+
+Both lines of code do not include counties that have a percent white equal to 0.5. We include it by using the less than or equal operator `<=` or greater than or equal operator `>=`.
+```{r}
+filter(cacounty, pwhite <= 0.5)
+```
+
+\
+
+In addition to comparison operators, filtering may also utilize logical operators that make multiple selections. There are three basic logical operators: `&` (and), `|` is (or), and `!` is (not). We can keep counties with *phisp* greater than 0.5 **and** *medinc* greater than 50000 percent using `&`.
+```{r}
+filter(cacounty, phisp > 0.5 & medinc > 50000)
+```
+
+\
+
+Use `|` to keep counties with a *GEOID* of 06067 (Sacramento) **or** 06113 (Yolo) **or** 06075 (San Francisco).
+```{r}
+filter(cacounty, GEOID == "06067" | GEOID == "06113" | GEOID == "06075")
+```
+
+\
+
+Phew. That's a lot! You’ve gone through some of the basic data wrangling functions offered by tidyverse. Can we get another Tidy badge? Oh yeah. Congratulations!
+![Your dplyr Badge](dplyr.png)
+
+\
+
+# R Markdown
+
+In running the lines of code above, we’ve asked you to work directly in the R Console and issue commands in an interactive way. That is, you type a command after `>`, you hit enter/return, R responds, you type the next command, hit enter/return, R responds, and so on. Instead of writing the command directly into the console, you should write it in a script. The process is now: Type your command in the script. Run the code from the script. R responds. You get results. You can write two commands in a script. Run both simultaneously. R responds. You get results. This is the basic flow.
+
+One way to do this is to use the default R Script, which is covered in the [assignment guidelines](Assignments.html). In your homework assignments, we will be asking you to submit code in another type of script: the R Markdown file. R Markdown allows you to create documents that serve as a neat record of your analysis. Think of it as a word document file, but instead of sentences in an essay, you are writing code for a data analysis.
+
+When going through lab guides, I would recommend not copying and pasting code directly into the R Console, but saving and running it in an R Markdown file. This will give you good practice in the R Markdown environment. Now is a good time to read through the class [assignment guidelines](Assignments.html) as they go through the basics of R Markdown files.
+
+To open an R Markdown file, click on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 1”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+
+\
+
+![R Markdown](rmarkdown.png) 
+
+\
+
+Don’t change anything inside the YAML (the stuff at the top in between the `---`). Also keep the grey chunk after the YAML.
+
+Delete everything else. Save this file (*File* -> *Save*) in an appropriate folder. It’s best to set up a clean and efficient file management structure (e.g., SPH215>Labs>Lab1) but you do what works for you.
+
+Follow the directions in the [assignment guidelines](Assignments.html) to add this lab’s code in your Lab 1 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
+
+Although the lab guides and course textbooks should get you through a lot of the functions that are needed to successfully accomplish tasks for this class, there are a number of useful online resources on R and RStudio that you can look into if you get stuck or want to learn more. We outline these resources in the [R Help](r_help.html) section of the website. If you ever get stuck, check this resource out first to troubleshoot before immediately asking a friend or the instructor.
+
+\
+
+# Practice makes perfect
+
+Here are a few practice questions. You don’t need to submit these, but it’s good practice to answer these questions in R Markdown, producing a knitted file (html, pdf or docx).
+
+1. Look up the help documentation for the function `rep()`. Use this function to create the following 3 vectors.
+  a. [1] 0 0 0 0 0
+  a. [1] 1 2 3 1 2 3 1 2 3 1 2 3
+  a. [1] 4 5 5 6 6 6
+  
+2. Explain what is the problem in each line of code below. Fix the code so it will run properly.
+  a. my variable <- 3
+  b. seq(1, 10 by = 2)
+  c. Library(cars)
+
+3. Look up the help documentation for the function `cut()`.
+  a. Describe the purpose of this function. What kind of data type(s) does this function accept? Which arguments/options are required? Which arguments are not required and what are their default value(s)?
+  b. Create an example vector and use the `cut()` function on it. Explain your results.
+
+4. Load the *mtcars* dataset by using the code `data(mtcars)`. Find the minimum, mean, median and maximum of the variable *mpg* in the *mtcars* dataset using just one line of code. We have not covered a function that does this yet, so the main point 1. of this question is to get you used to using the resources you have available to find an answer. Describe the process you used (searched online? used the class textbook?) to find the answer.
+
+5. Look up the functions `arrange()` and `relocate()`. Input the variable *phisp* from *cacounty* in each function. What are the functions doing?
+
+6. Use the function `bind_rows()` to create a new dataset called *cacounty_brows* that combines *ca1* and *ca2*. Describe the structure of this new dataset. Do the same for the function `bind_cols()` (name the new dataset *cacounty_bcols*). How is `bind_cols()` different from `left_join()`?
+
+\
+
+# But wait, we didn't make a map!
+
+This lab is a foundation for all of the work we will do moving forward in R. But what kind of GIS course would this be if we didn't make a map? Remember that dataset we brought in earlier on cancer cases across CA called *cancer*? Let's plot that real quick. We will talk more about it next week!
+
+```{r}
+## Let's view the data
+head(cancer)
+table(cancer$event)
+## Install packages we need to map these data
+install.packages("sf") # for analysis using vector data
+install.packages("tmap") # to show pretty maps
+
+## Load these packages
 library(sf)
-library(MapGAM)
-library(tidyverse)
-library(tidycensus)
-library(flextable)
 library(tmap)
-```
 
-\
+## Setting coordinate reference system (CRS) to North American Datum 1983 (NAD83)--we will discuss more next week!
+cancer_projected = st_as_sf(cancer, crs=4269)
 
-# Geocoding
-
-First, we are going to tackle how we take addresses and convert them to spatial data (latitude and longitude). So, let's say we wanted to map all of the marijuana dispensaries across San Francisco. Let's download a .csv of these addresses from the Github site, then take a look at the dataset.
-
-```{r}
-download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/san_francisco_active_marijuana_retailers.csv", "san_francisco_active_marijuana_retailers.csv", mode = "wb")
-
-sf_mj <- read_csv("san_francisco_active_marijuana_retailers.csv")
-
-head(sf_mj)                  
-
-```
-
-\
-
-OK, some interesting columns there, and we have *Premise Address* as a column that we might want to make spatial. Let's look closer at that.
-
-
-```{r}
-head(sf_mj$`Premise Address`)
-```
-
-\
-
-OK that column looks like what we want to geocode. But how do we take these addresses and make them into spatial information? We have to geocode them! To do so, we will use the **tidygeocoder** package in R. But first, we see that the addresses look a little strange. The address county is always "County: SAN FRANCISCO" so we will `gsub()` out that entire string.
-```{r}
-sf_mj$`Premise Address` <- gsub(" County: SAN FRANCISCO",
-                                  "", sf_mj$`Premise Address`)
-head(sf_mj$`Premise Address`)
-```
-That looks much better.
-
-\
-
-Now let's give a try to geocoding these addresses with the **tidygeocoder** package. We will use the `geocode()` function to add a latitude and longitude to each of our addresses in the *Premise Address* column. We will use the Open Street Map address database by specifying `method = "osm"`. This will take about a minute to run, so be patient! 
-```{r}
-sf_mj_geo      <- geocode(sf_mj, "Premise Address",
-                          method = "osm")
-head(sf_mj_geo)
-```
-
-\
-
-Hmm, looks like some of our addresses have an `NA` for their lat and long. Let's take a closer look.
-
-```{r}
-summary(sf_mj_geo$lat)
-summary(sf_mj_geo$long)
-```
-
-\
-
-Looks like we have 10 addresses missing *lat* and 10 missing *long*. Let's try this again using a different geocoding database called *arcgis*.
-
-```{r}
-sf_mj_geo_arc      <- geocode(sf_mj, "Premise Address",
-                          method = "arcgis")
-head(sf_mj_geo_arc)
-summary(sf_mj_geo_arc$lat)
-summary(sf_mj_geo_arc$long)
-```
-
-\
-
-Woohoo! No missingness. Love to see it. OK, let's plot these data and see how they look. 
-
-```{r}
-plot(sf_mj_geo_arc$long, sf_mj_geo_arc$lat)
-```
-
-\
-
-We are in business! We have taken addresses and converted them into latitude and longitude! I think we need a badge!
-![tidygeocoder Badge](tidygeocoder_hex.png) 
-
-\
-
-Bonus exercise! Let's take these addresses and *reverse geocode them*. That's just a fancy way of saying that we will take latitude and longitude data and convert it into readable addresses. We use the aptly named function `reverse_geocode` and specify which columns to look at (*lat* and *long*), the method we want for geocoding,  and what we want the *address* column to be named. Then we `select` out some columns that we aren't really interested in. Remember, we are doing this the **tidy** way so we are using `%>%` pipes.
-
-```{r}
-reverse <- sf_mj_geo_arc %>%
-  reverse_geocode(lat = lat, long = long, method = 'arcgis',
-                  address = address_found) %>%
-  select(-`Business Owner`,-`Business Structure`,-`License Number`,-`License Type`,-Status,-`Issue Date`,-`Expiration Date`,-Activities,-`Adult-Use/Medicinal`)
-head(reverse)
-```
-
-Looking at *Premise Address* and *address_found* we can see that we did pretty well! Not perfect, but most are the right address or a few doors down. Well done!
-
-\
-
-# sf: Our go to package for vector data
-
-Although there are a few ways to work with vector spatial data in R, we will focus on the **sf** package in this course. The majority of spatial folks in R have shifted to **sf** for vector data, and so it makes sense to focus on it in the class.
-
-Processing spatial data is very similar to nonspatial data thanks to the package **sf**, which is tidy friendly. **sf** stands for simple features. The [Simple Features standard](https://en.wikipedia.org/wiki/Simple_Features) defines a simple feature as a representation of a real world object by a point or points that may or may not be connected by straight line segments to form lines or polygons. A feature is thought of as a thing, or an object in the real world, such as a building or a tree. A county can be a feature. As can a city and a neighborhood. Features have a geometry describing where on Earth the features are located, and they have attributes, which describe other properties. 
-
-Now let's get our hands dirty working with some spatial data.
-
-\
-
-# Vectors: Import Cancer Point Data
-
-For this lab, we will primarily be working with the [*MapGAM* package](https://cran.r-project.org/web/packages/MapGAM/index.html). If you go to the link, you can read the reference manual on the various datasets available in the package. For this lab, we will mainly be working with the *CAdata* dataset. While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. This is a cohort with **time to mortality** measured, but for the purposes of our class, we will conduct simple tabular analyses looking at associations between spatial exposures with mortality at end of follow-up.
-
-The *CAdata* dataset contains the following variables
-
-- *time* (follow-up time to either event of being censored)
-- *event* (1=dead, 0=censored)
-- *X* (Latitude)
-- *Y* (Longitude)
-- *AGE* (age in years)
-- *INS* (insurance status, categorical)
-
-\
-
-So let's bring in the *CAdata* dataset and have a look at it. 
-
-```{r}
-#Load CAdata dataset from MapGAM package
-data(CAdata)
-ca_pts <- CAdata
-summary(ca_pts)
-```
-
-\
-
-OK, so the variables look great. Is it a spatial dataset that can be recognized by R? Not just yet. We know that *X* is likely some sort of longitude column and *Y* is likely some sort of latitude column, although they don't exactly look right. We have to tell R that the X and Y coordinates are spatial data using the `st_as_sf` function in **sf**. With this command, we can specify which coordinates R should look at for longitude and latitude with the `coords=c()` function.
-
-\
-
-```{r}
-ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
-```
-
-\
-
-Let's check the coordinate reference system (CRS) using the `st_crs` command in the **sf** package.
-
-```{r}
-st_crs(ca_pts)
-```
-
-Hmmm, NA. That still doesn't look good. So how do we make this a spatial file? We will need to add a CRS. 
-
-\
-
-## Add coordinate reference system
-
-Let's add a CRS by using `st_set_sf` from the **sf** package. We get the CRS for this dataset from the MapGAM documentation (don't worry--it took me forever to find this, but usually this is much easier to find). Then we will double check the CRS.
-
-```{r}
-#Load the projection into an object called ca_proj
-
-ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
-             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
-             +y_0=500000.0000000002 +ellps=GRS80 
-             +datum=NAD83 +units=m +no_defs"
-
-#Set CRS
-ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
-
-#Look at dataset
-summary(ca_pts_crs) 
-
-#Check the CRS
-st_crs(ca_pts_crs)
-```
-
-\
-
-# tmap: Mapping vector data
-
-Nice! We have a spatial dataset. That *geometry* column is how **sf** stores the geographic data, and latitude and longitude there are looking a bit more like we would expect. And we definitely have a full CRS with all sorts of info. OK, let's plot our data to make sure they look spatial! We will use the **tmap** package to plot the points. We will first specify the `tmap_mode` of "view" which is interactive. There's also a "plot" option which is nice for making exportable figures. We will then create an object called *cancer_map* and then add a layer with `tm_shape()`. This allows us to combine several maps into one, or to add layers on top of each other. Then we have to specify a level of that layer to display. Here we will use `tm_dots()` to to plot the points. In our options, we specify the size with `size=`. 
-```{r}
+## Plot the data--will also discuss more!
 tmap_mode("view")
-cancer_map = tm_shape(ca_pts_crs) + tm_dots(size=0.5)
+cancer_map = tm_shape(cancer_projected) + tm_dots(size=0.5,alpha=0.8, col="event",style="cat")
 cancer_map
 ```
 
-\
+OK we made a pretty map! Blue dots mean they didn't have the "event" and green means they did. We are going to dive much deeper on this next week. I think this is enough for today! Get outside and enjoy the rest of your day!
 
-Let's play around with some of the options. We can change the color with the `col=` option. We can make the dots smaller by specifying the `size=` option. And we can change the transparency of the points with the `alpha=` option.
-```{r}
-cancer_map_small = tm_shape(ca_pts_crs) + tm_dots(col = "blue", size = 0.3, alpha = 0.5)
-cancer_map_small
-```
-
-\
-
-Let's map the points color coded by the variable *event*, or whether or not the participant died over followup. We do that by specifying that the color (`col=`) is based on the column *event*. We have to specify that *event* is a categorical variable with `style="cat"`. 
-```{r}
-cancer_map_events = tm_shape(ca_pts_crs) + tm_dots(size=0.3, col="event", style="cat")
-cancer_map_events
-```
-
-\
-
-Let's see if we can change up the color scheme.
-```{r}
-cancer_map_events_rg = tm_shape(ca_pts_crs) + tm_dots(col = "event", palette = c("0" = "gray", "1" = "red"), style="cat")
-cancer_map_events_rg
-```
-
-\
-
-Looking good! You earned yourself a tmap badge. Now get yourself a [cookie](https://youtu.be/3soC6VADpcw?si=4njBib3jWPsUYaES).
-
-\
-
-![tmap Badge](tmaplogo.png)
-
-\
-
-# Downloading Census Data
-
-One of the primary sources of data that we’ll be using in this class is the United States Decennial Census and the American Community Survey. There are two ways to bring Census data into R: Using and API or downloading it from an online source.
-
-**Note that we will gather ACS data from all sources. Census boundaries changed in 2020, which means that 2016-2020 and later data will not completely merge with ACS data before 2020. So make sure you merge 2020 data only with 2020 data (but you can merge 2019 data with data between 2010-2019). This is especially important for tract data, with many new tracts created in 2020 and existing tracts experiencing dramatic changes in their boundaries between 2010 and 2020. See the impact of tract boundary changes between 2000 and 2010 [here](https://crd230.github.io/censusgeography.html).** You may also explore the [Neighborhood Change Database](https://search.library.ucdavis.edu/view/action/uresolver.do?operation=resolveService&package_service_id=28104223860003126&institutionId=3126&customerId=3125&VE=true) which is available through the UC Davis library, and is a dataset that incorporates tract boundary changes over time. We are working on acquiring the 2020 data there!
-
-\
-
-## Download Census data from an online source
-
-The first way to obtain Census data is to download them directly from the web onto your hard drive. There are several websites where you can download Census data including [Social Explorer](https://www.socialexplorer.com/) and [PolicyMap](https://ucdavis.policymap.com/maps), which we have free access to as UC Davis affiliates, and the [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/), which is free for everyone. To find out how to download data from PolicyMap and NHGIS, check out tutorials [here](https://policymap.helpdocs.io/data-download) and [here](https://www.nhgis.org/user-resources/users-guide).
-
-\
-
-## Use the Census API and tidycensus
-
-The other way to bring Census data into R is to use the [Census Application Program Interface (API)](https://www.census.gov/data/developers/guidance/api-user-guide.What_is_the_API.html). An API allows for direct requests for data in machine-readable form. That is, rather than you having to navigate to some website, scroll around to find a dataset, download that dataset once you find it, save that data onto your hard drive, and then bring the data into R, you just tell R to retrieve data directly from the source using one or two lines of code.
-
-In order to directly download data from the Census API, you need a key. You can sign up for a free key [here](http://api.census.gov/data/key_signup.html), which you should have already done before the lab. Type your key in quotes using the census_api_key() command.
-```{r, eval = FALSE}
-census_api_key("YOUR API KEY GOES HERE", install = TRUE)
-```
-
-```{r, echo=FALSE, eval=FALSE}
-census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overwrite=TRUE)
-```
-
-\
-
-The option `install = TRUE` saves the API key in your R environment, which means you don’t have to run `census_api_key()` every single time. The function for downloading American Community Survey (ACS) Census data is `get_acs()`. The command for downloading decennial Census data is `get_decennial()`. Both functions come from the **tidycensus** package, which allows users to interface with the US Census Bureau’s decennial Census and American Community Survey APIs. Getting variables using the Census API requires knowing the variable ID - and there are thousands of variables (and thus thousands of IDs) across the different Census files. To rapidly search for variables, use the commands `load_variables()` and `View()`. Because we’ll be using the ACS in this guide, let’s check the variables in the most recent 2023 5-year ACS (2019-2023) using the following commands.
-```{r}
-acs2023 <- load_variables(2023, "acs5", cache = TRUE)
-View(acs2023)
-```
-
-\
-
-A window should have popped up showing you a record layout of the 2019-2023 ACS. To search for specific data, select “Filter” located at the top left of this window and use the search boxes that pop up. For example, type in “Hispanic” in the box under “Label”. You should see near the top of the list the first set of variables we’ll want to download - race/ethnicity. Another way of finding variable names is to search them using [Social Explorer](https://www.socialexplorer.com/data/metadata/). Click on the appropriate survey data year and then “American Community Survey Tables”, which will take you to a list of variables with their Census IDs.
-
-Let’s extract race/ethnicity data and total population for [California counties](https://en.wikipedia.org/wiki/List_of_counties_in_California) using the `get_acs()` command.
-
-\
-
-```{r}
-ca <- get_acs(geography = "county", 
-              year = 2023,
-              variables = c(tpopr = "B03002_001", 
-                            nhwhite = "B03002_003", nhblk = "B03002_004", 
-                            nhasn = "B03002_006", hisp = "B03002_012"), 
-              state = "CA",
-              survey = "acs5",
-              output = "wide")
-
-```
-
-\
-
-In the above code, we specified the following arguments
-
-- `geography`: The level of geography we want the data in; in our case, the county. Other geographic options can be found [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus).
-- `year`: The end year of the data (because we want 2016-2020, we use 2020).
-- `variables`: The variables we want to bring in as specified in a vector you create using the function `c()`. Note that we created variable names of our own (e.g. “nhwhite”) and we put the ACS IDs in quotes (“B03002_003”). Had we not done this, the variable names will come in as they are named in the ACS, which are not very descriptive.
-- `state`: We can filter the counties to those in a specific state. Here it is “CA” for California. If we don’t specify this, we get all counties in the United States.
-- `survey`: The specific Census survey were extracting data from. We want data from the 5-year American Community Survey, so we specify “acs5”. The ACS comes in 1- and 5-year - varieties.
-- `output`: The argument tells R to return a wide dataset as opposed to a long dataset (see this vignette for more info).
-
-Another useful option to set is `cache_table = TRUE`, so you don’t have to re-download after you’ve downloaded successfully the first time. Type in `? get_acs()` to see the full list of options.
-
-\
-
-As you learned in [Lab 1](lab1.html), whenever you bring in a dataset, the first thing you should always do is view it to get a sense of its structure and to make sure you got what you expected. One way of doing this is to use the `glimpse()` command
-
-```{r}
-glimpse(ca)
-```
-
-\
-
-You get a quick, compact summary of your tibble. You can also use the `head()` command, which shows you the first several rows of your data object (`tail()` will give you the last several rows).
-
-```{r}
-head(ca)
-```
-
-\
-
-The tibble contains counties with their estimates for race/ethnicity. These variables end with the letter “E”. It also contains the [margins of error](https://walker-data.com/tidycensus/articles/margins-of-error.html) for each estimate. These variables end with the letter “M”.
-
-**tidycensus** is a game changer in being able to bring in Census data into R in a convenient, fast, efficient and tidy friendly way. We’ll be using this package in the next lab to bring in Census spatial data. And congratulations! You’ve just earned another badge. Fantastic!
-
-\
-
-![tidycensus Badge](tidycensus_sticker.png)
-
-\
-
-# Reading in data
-## PolicyMap
-
-To save us time, I’ve uploaded a PolicyMap ([link to .csv](https://github.com/pjames-ucdavis/SPH215/blob/main/PolicyMap%20Data%202025-03-27%20192555%20UTC.csv)) on the Github for you to use in this lab. Save this file in the same folder where your Lab 2 R Markdown file resides. To read in a .csv file, first make sure that R is pointed to the folder you saved your data into. Type in `getwd()` to find out the current directory and `setwd("directory name")` to set the directory to the folder containing the data. 
-
-From a Mac laptop, I type in the following command to set the directory to the folder containing my data.
-
-```{r}
-setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
-```
-
-\
-
-For a Windows system, you can find the pathway of a file by right clicking on it and selecting Properties. You will find that instead of a forward slash like in a Mac, a windows pathway will be indicated by a single back slash \. R doesn’t like this because it thinks of a single back slash as an escape character. Use instead two back slashes \\
-
-```{r eval=FALSE}
-setwd("C:\\Users\\pjames\\Documents\\UCD\\Spring2025\\SPH215\\Labs\\Lab 2")
-```
-or a forward slash /.
-
-```{r eval=FALSE}
-setwd("C:/Users/pjames/Documents/UCD/Spring2025/SPH215/Labs/Lab 2")
-```
-
-You can also manually set the working directory by clicking on Session -> Set Working Directory -> Choose Directory from the menu.
-
-\
-
-Once you’ve set your directory, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension.
-
-```{r}
-ca.pm <- read_csv("PolicyMap Data 2025-03-27 192555 UTC.csv", skip = 1)
-```
-
-\
-
-The option `skip = 1` tells R to skip the first row of the file when bringing it in. This is done because there are two rows of column names. The first row contains the extended version, while the second is the abridged version. Above we keep the abridged version.
-
-You should see a tibble *ca.pm* pop up in your Environment window (top right). What does our data set look like?
-
-```{r}
-glimpse(ca.pm)
-```
-
-\
-
-If you like viewing your data through an Excel style worksheet, type in `View(ca.pm)`, and *ca.pm* should pop up in the top left window of your R Studio interface.
-
-\
-
-# More data wrangling
-
-We learned about the various data wrangling related functions from the **tidyverse** package in [Lab 1](lab1.html). Let’s employ some of those functions to create a single county level dataset that joins the datasets we downloaded from the Census API and PolicyMap.
-
-We are going to combine these datasets using the county FIPS codes. In the Census API and PolicyMap, these are contained in the variables GEOID and GeoID, respectively. Let’s make sure they are in the same class.
-
-```{r}
-class(ca.pm$GeoID)
-class(ca$GEOID)
-```
-
-\
-
-## Piping
-
-One of the important innovations from the tidyverse is the pipe operator `%>%`. You use the pipe operator when you want to combine multiple operations into one line of continuous code. Let’s create our final data object *cacounty* using our brand new friend the pipe. Let's put together a lot of what we've done over the past few weeks into one step! Now we are cooking with gas!
-
-```{r}
-cacounty <- ca %>% 
-      left_join(ca.pm, by = c("GEOID" = "GeoID")) %>%
-      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
-              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
-             mhisp = case_when(phisp > 0.5 ~ "Majority",
-                               TRUE ~ "Not Majority")) %>%
-      rename(County = GeoID_Name) %>%
-      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
-glimpse(cacounty)
-```
-
-Let’s break down what the pipe is doing here. First, you start out with your dataset ca. You “pipe” that into the command `left_join()`. Notice that you didn’t have to type in ca inside that command - `%>%` pipes that in for you. The command joins the data object *ca.pm* to *ca*. The result of this function gets piped into the `mutate()` function, which creates the percent race/ethnicity (from the Census API), and majority Hispanic variables. This gets piped into the `rename()` function, which renames the ambiguous variable name *GeoID_Name* to the more descriptive name *County*. This then gets piped into the final function, `select()`, which keeps the necessary variables. Finally, the code saves the result into cacounty which we designated at the beginning with the arrow operator.
-
-Piping makes code clearer, and simultaneously gets rid of the need to define any intermediate objects that you would have needed to keep track of while reading the code. PIPE, Pipe, and pipe whenever you can. We need some stinkin badges!
-
-\
-
-![pipe Badge!](pipe.png)
-
-\
-
-## Saving data
-
-If you want to save your data frame or tibble as a csv file on your hard drive, use the command `write_csv()`. Before you save a file, make sure R is pointed to the appropriate folder on your hard drive by using the function `getwd()`. If it’s not pointed to the right folder, use the function `setwd()` to set the appropriate working directory.
-
-```{r}
-write_csv(cacounty, "lab2_file.csv")
-```
-
-The first argument is the name of the R object you want to save. The second argument is the name of the csv file in quotes. Make sure to add the .csv extension. The file is saved in your current working directory.
-
-\
-
-# Exploratory data analysis
-
-The functions above help us bring in and clean data. The next set of functions covered in this section will help us summarize the data. Data refer to pieces of information that describe a status or a measure of magnitude. A variable is a set of observations on a particular characteristic. The distribution of a variable is a listing showing all the possible values of the data for that variable and how often they occur. Exploratory Data Analysis (EDA) encompasses a set of methods (some would say a framework or perspective) for summarizing a variable’s distribution, and the relationship between the distributions of two or more variables. We will cover two general approaches to summarizing your data: descriptive statistics and visualization via graphs and charts.
-
-\
-
-## Descriptive statistics
-
-When describing a distribution, your quantitative message is often best communicated by reducing data to a few summary numbers. These numbers are meant to summarize the “typical” value in the distribution (e.g., mean, median, mode) and the variation or “spread” in the distribution (e.g., minimum/maximum, interquartile range, standard deviation). These summary numbers are known as descriptive statistics.
-
-We can use the function summarize() to get descriptive statistics of our data. For example, let’s calculate the mean household income in California counties. The first argument inside summarize() is the data object cacounty and the second argument is the function calculating the specific summary statistic, in this case mean().
-
-```{r}
-cacounty %>%
-  summarize(Mean = mean(mhhinc))
-```
-
-The average county median household income is $87,001. If the variable *mhhinc* contained missing values, we would have gotten *NA* as a result. To omit missing values from the calculation, you need to add `rm = TRUE` to `mean()`.
-
-We can calculate more than one summary statistic within `summarize()`. What is the spread of the distribution? We can add to `summarize()` the function `sd()` to calculate the standard deviation.
-\
-
-```{r}
-cacounty %>%
-  summarize(Mean = mean(mhhinc), SD = sd(mhhinc))
-```
-
-\
-
-Does the average income differ by California region? First, let’s create a new variable region designating each county as Bay Area, Southern California, Central Valley, Capital Region and the Rest of California using the `case_when()` function within the `mutate()` function.
-
-```{r}
-cacounty <- cacounty %>%
-    mutate(region = case_when(County == "Sonoma" | County == "Napa" | 
-                              County == "Solano" | County == "Marin" | 
-                              County == "Contra Costa" | County == "San Francisco" |
-                              County == "San Mateo" | County == "Alameda" | 
-                              County == "Santa Clara" ~ "Bay Area",
-                              County == "Imperial" | County == "Los Angeles" | 
-                              County == "Orange" | County == "Riverside" |
-                              County == "San Diego" | County == "San Bernardino" |
-                              County == "Ventura" ~ "Southern California",
-                              County == "Fresno" | County == "Madera" | 
-                              County == "Mariposa" | County == "Merced" | 
-                              County == "Tulare" | 
-                              County == "Kings" ~ "Central Valley",
-                              County == "Alpine" | County == "Colusa" |
-                              County == "El Dorado" | County == "Glenn" |
-                              County == "Placer" | County == "Sacramento" |
-                              County == "Sutter" | County == "Yolo" |
-                              County == "Yuba" ~ "Capital Region",
-                              TRUE ~ "Rest"))
-```
-
-\
-
-Next, we need to pair `summarize()` with the function `group_by()`. The function `group_by()` tells R to run subsequent functions on the data object by a group characteristic (such as gender, educational attainment, or in this case, region). We’ll need to use our new best friend %>% to accomplish this task.
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc))
-```
-
-The first pipe sends cacounty into the function `group_by()`, which tells R to group *cacounty* by the variable *region*.
-
-How do you know the tibble is grouped? Because it tells you!
-
-```{r}
-cacounty %>%
-  group_by(region) 
-```
-
-\
-
-The second pipe takes this grouped dataset and sends it into the `summarize()` command, which calculates the mean income (by region, because the dataset is grouped by region).
-
-To get the mean, median and standard deviation of median income, its correlation with percent Hispanic, and give column labels for the variables in the resulting summary table, we type in:
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc),
-            Median = median(mhhinc),
-            SD = sd(mhhinc),
-            Correlation = cor(mhhinc, phisp))
-```
-
-\
-
-The variable *mhhinc* is numeric. How do we summarize categorical variables? We usually summarize categorical variables by examining a frequency table. To get the percent of counties that have a majority Hispanic population mhisp, you’ll need to combine the functions *group_by()*, *summarize()* and *mutate()* using `%>%`.
-
-```{r}
-cacounty %>%
-  group_by(mhisp) %>%
-  summarize(n = n()) %>%
-  mutate(freq = n / sum(n))
-```
-
-\
-
-The code `group_by(mhisp)` separates the counties by the categories of mhisp (Majority, Not Majority). We then used `summarize()` to count the number of counties that are Majority and Not Majority. The function to get a count is `n()`, and we saved this count in a variable named *n*. Next, we used `mutate()` on this table to get the proportion of counties by Majority Hispanic designation. The code `sum(n)` adds the values of *n*. We then divide the value of each n by this sum. That yields the final frequency table.
-
-Instead of calculating descriptive statistics one at a time using `summarize()`, you can obtain a set of summary statistics for one or all the numeric variables in your dataset using the `summary()` function.
-
-```{r}
-summary(cacounty)
-```
-
-\
-
-## Tables for presentation
-
-The output from the descriptive statistics we’ve ran so far is not presentation ready. For example, taking a screenshot of the following results table produces unnecessary information that is confusing and messy.
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc),
-            Median = median(mhhinc),
-            SD = sd(mhhinc),
-            Correlation = cor(mhhinc, phisp))
-```
-
-Furthermore, you would like to show a table, say, in a manuscript that does not require you to take a screenshot or copying and pasting into Excel, but instead can be produced via code, that way it can be fixed if there is an issue, and is reproducible.
-
-One way of producing presentation tables in R is through the **flextable** package. First, you will need to save the tibble or data frame of results into an object. For example, let’s save the above results into an object named *region.summary*
-
-```{r}
-region.summary <- cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc),
-            Median = median(mhhinc),
-            SD = sd(mhhinc),
-            Correlation = cor(mhhinc, phisp))
-```
-
-You then input the object into the function `flextable()`. Save it into an object called *my_table*
-
-```{r}
-my_table <- flextable(region.summary)
-my_table
-```
-
-\
-
-You should see a relatively clean table pop up either in your console or Viewer window.
-
-\
-
-What kind of object is *my_table*?
-```{r}
-class(my_table)
-```
-
-\
-
-After doing this, we can progressively pipe the *my_table* object through more **flextable** formatting functions. For example, you can change the column header names using the function `set_header_labels()` and center the header names using the function `align()`.
-
-```{r}
-my_table <- my_table %>%
-          set_header_labels(
-            region = "Region",
-            Mean = "Mean",
-            Median = "Median",
-            SD = "Standard Deviation",
-            Correlation = "Correlation") %>%
-              flextable::align(align = "center", part = "all")
-
-my_table
-```
-
-Well doesn't that look spiffy! There are a slew of options for formatting your table, including adding footnotes, borders, shade and other features. Check out this [useful tutorial](https://ardata-fr.github.io/flextable-book/) for an explanation of some of these features.
-
-Once you’re done formatting your table, you can then export it to Word, PowerPoint or HTML or as an image (PNG) files. To do this, use one of the following functions: `save_as_docx()`, `save_as_pptx()`, `save_as_image()`, and `save_as_html()`. 
-
-Use the `save_as_image()` function to save your table as an image.
-
-```{r}
-save_as_image(my_table, path = "reg_income.png")
-```
-
-You first put in the table my_table, and set the file name with the .png extension. Check your working directory. You should see the file *reg_income.png*.
-
-\
-
-## Data visualization
-
-Another way of summarizing variables and their relationships is through graphs and charts. The main package for R graphing is *ggplot2* which is a part of the *tidyverse* package. The graphing function is `ggplot()` and it takes on the basic template
-```{r, eval=FALSE}
-ggplot(data = <DATA>) +
-      <GEOM_FUNCTION>(mapping = aes(x, y)) +
-      <OPTIONS>()
-```
-
-\
-
-1. `ggplot()` is the base function where you specify your dataset using the data = <DATA> argument.
-2. You then need to build on this base by using the plus operator + and <GEOM_FUNCTION>() where <GEOM_FUNCTION>() is a unique geom function indicating the type of graph you want to plot. Each unique function has its unique set of mapping arguments which you specify using the mapping = aes() argument. Charts and graphs have an x-axis, y-axis, or both. Check this ggplot cheat sheet for all possible geoms.
-3. `<OPTIONS>()` are a set of functions you can specify to change the look of the graph, for example relabeling the axes or adding a title.
-
-The basic idea is that a ggplot graphic layers geometric objects (circles, lines, etc), themes, and scales on top of data.
-
-You first start out with the base layer. It represents the empty *ggplot* layer defined by the `ggplot()` function.
-```{r}
-cacounty %>%
-  ggplot()
-```
-
-We get an empty plot. We haven’t told `ggplot()` what type of geometric object(s) we want to plot, nor how the variables should be mapped to the geometric objects, so we just have a blank plot. We have `geoms` to paint the blank canvas.
-
-From here, we add a “`geom`” layer to the ggplot object. Layers are added to ggplot objects using `+`, instead of `%>%`, since you are not explicitly piping an object into each subsequent layer, but adding layers on top of one another. Each `geom` is associated with a specific type of graph.
-
-Let’s go through some of the more common and popular graphs for visualizing your data.
-
-\
-
-### Histogram
-
-A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for <GEOM_FUNCTION()>. Let’s create a histogram of median household income. Note that we don’t need to specify the `y=` here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
-
-```{r}
-cacounty %>%
-  ggplot() + 
-  geom_histogram(mapping = aes(x=mhhinc)) 
-```
-
-We can continue to add layers to the plot. For example, we use the argument `xlab("Median household income")` to label the x-axis as “Median household income”.
-
-```{r}
-cacounty %>%
-  ggplot() + 
-  geom_histogram(mapping = aes(x=mhhinc)) +
-  xlab("Median household income")
-```
-
-Note the message produced with the plot. It tells us that we can use the `bins =` argument to change the number of bins used to produce the histogram. You can increase the number of bins to make the bins narrower and thus get a finer grain of detail. Or you can decrease the number of bins to get a broader visual summary of the shape of the variable’s distribution. Compare bins = 10 to bins = 50.
-
-\
-
-```{r}
-cacounty %>%
-  ggplot() + 
-  geom_histogram(mapping = aes(x=mhhinc), bins=10) +
-  xlab("Median household income")
-```
-
-\
-
-### Boxplot
-
-We can use a *boxplot* to visually summarize the distribution of a single numeric variable or the relationship between a categorical and numeric variable. Use `geom_boxplot()` for <GEOM_FUNCTION()> to create a boxplot. Let’s examine median household income. Note that a boxplot uses y= rather than x= to specify where mhhinc goes. We also provide a descriptive y-axis label using the `ylab()` function.
-
-```{r}
-cacounty %>%
-  ggplot() +
-    geom_boxplot(mapping = aes(y = mhhinc)) +
-    ylab("Median household income")
-```
-
-\
-
-Let’s examine the distribution of median income by *mhisp.* Because we are examining the association between two variables, we need to specify x and y variables in `aes()` (we also specify both x- and y-axis labels).
-
-```{r}
-cacounty %>%
-  ggplot() +
-    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
-    xlab("Majority Hispanic") +
-    ylab("Median household income")
-```
-
-The top and bottom of a boxplot represent the 75th and 25th percentiles, respectively. The line in the middle of the box is the 50th percentile. Points outside the whiskers represent outliers. Outliers are defined as having values that are either larger than the 75th percentile plus 1.5 times the IQR or smaller than the 25th percentile minus 1.5 times the IQR.
-
-\
-
-The boxplot is for all counties combined. Use the `facet_wrap()` function to separate by region. Notice the tilde ~ before the variable region inside `facet_wrap()`.
-
-```{r}
-cacounty %>%
-  ggplot() +
-    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
-    xlab("Majority Hispanic") +
-    ylab("Median household income") +
-    facet_wrap(~region) 
-```
-
-\
-
-### Bar chart
-
-The primary purpose of a bar chart is to illustrate and compare the values for a categorical variable. Bar charts show either the number or frequency of each category. To create a bar chart, use `geom_bar()` for <GEOM_FUNCTION>(). Let’s show a bar chart of median household income by region. We’ll borrow from code above that generated a tibble of mean household income by region, and pipe that into `ggplot()`.
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc)) %>%
-  ggplot(aes(x=region, y = Mean)) +
-  geom_bar(stat = "Identity") +
-  xlab("Region") +
-  ylab("Average household income")
-```
-
-\
-
-Right now the bars are ordered based on the region names. We can order the bars in descending order based on household income by using the `reorder()` function. Notice the negative sign in front of Mean to order by descending order.
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc)) %>%
-  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
-  geom_bar(stat = "Identity") +
-  xlab("Region") +
-  ylab("Average household income")
-```
-
-\
-
-We can flip the axes using the function `coord_flip()`.
-
-```{r}
-cacounty %>%
-  group_by(region) %>%
-  summarize(Mean = mean(mhhinc)) %>%
-  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
-  geom_bar(stat = "Identity") +
-  xlab("Region") +
-  ylab("Average household income") +
-  coord_flip()
-```
-
-\
-
-Well aren't we fancy? `ggplot()` is a powerful function, and you can make a lot of visually captivating graphs. We have just scratched the surface of its functions and features. You can also make your graphs really “pretty” and professional looking by altering graphing features, including colors, labels, titles and axes. For a list of `ggplot()` functions that alter various features of a graph, check out Chapter 28 in [RDS](https://r4ds.hadley.nz/).
-
-Here’s your **ggplot2** badge. Wear it with pride! OK, we've done a lot today. Get outside and get some fresh air!
-
-\
-
-![ggplot2 Badge](ggplot2.png){width=20%, height=20%}
-
-
-\
-
-# Other US Government datasets
-
-Check out the [Data Sources](Other.html) link for more links to US Government Data
-
-\
-
-# Acknowledgements
-
-Major acknowledgements to Noli Brazil (as always) and [Crime by the Numbers](https://crimebythenumbers.com/geocoding.html). 
 
 
