@@ -30,13 +30,13 @@ R is a free, open source statistical programming language. It is useful for data
 
 \
 
-The next question you may have is “I love Excel [or insert your favorite program]. Why can’t I use that and forget your stupid R?” Here are some reasons:
+The next question you may have is “I love Excel or SAS or SPSS or Stata [or insert your favorite program]. Why can’t I use that and forget your stupid R?” Here are some reasons:
 
 1. R is free. Most programs are not.
 2. R is open source. Which means the software is community supported. This allows you to get help not from some big corporation (e.g. Microsoft with Excel), but people all around the world who are using R. And R has **a lot** of users, which means that if you have a problem, and you pose it to the user community, someone will help you.
 3. R is powerful and extensible (meaning that procedures for analyzing data that don’t currently exist can be readily developed);
 4. R has the capability for mapping data, an asset not generally available in other statistical software.
-5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields.
+5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields, including for many CA DPH positions.
 
 \
 
@@ -78,7 +78,6 @@ I am skipping over many details, but the above steps outline the general work fl
 2. If you make a mistake in a data analysis step, you can go back, change a few lines of code, and **poof**, you’ve fixed your problem.
 3. It is more efficient. In particular, cleaning data can encompass a lot of tedious work that can be streamlined using statistical programming.
 
-
 Hopefully, I’ve convinced you that statistical programming and R are worthwhile to learn. Now let's talk about getting R on your computer!
 
 \
@@ -104,9 +103,9 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 \
 
 ## Windows
-1. On the “R for Windows” page, click on the “base” link, which should take you to the “R-4.4.3 for Windows” page
+1. On the “R for Windows” page, click on the “base” link, which should take you to the “R-4.5.2 for Windows” page
 
-2. On this page, click “Download R 4.4.3 for Windows”, and save the .exe file to your hard disk when prompted. Saving to the desktop is fine.
+2. On this page, click “Download R-4.5.2 for Windows”, and save the .exe file to your hard disk when prompted. Saving to the desktop is fine.
 
 3. To begin the installation, double-click on the downloaded file. Don’t be alarmed if you get unknown publisher type warnings. Window’s User Account Control will also worry about an unidentified program wanting access to your computer. Click on “Run”.
 
@@ -209,9 +208,9 @@ A logical takes on two values: FALSE or TRUE. Logicals are usually constructed w
 
 \
 
-This gives you a true. What about the following?
+This gives you a `TRUE` What about the following?
 ```{r r4}
-"jacob" == "catherine"
+"declan" == "catherine"
 ```
 
 \
@@ -268,10 +267,10 @@ c(4, 16, 9)
 
 You can also have a vector of character values
 ```{r}
-c("jacob", "anne", "gwen")
+c("catherine", "declan", "gwen")
 ```
 
-The above code does not actually “save” the values 4, 16, and 9 or jacob, anne, gwen -- it just presents it on the screen in a vector. If you want to use these values again without having to type out `c(4, 16, 9)`, you can save it in a data **object**. At the heart of almost everything you will do (or are ever likely to do) in R is the concept that everything in R is an object. These objects can be almost anything, from a single number or character string (like a word) to highly complex structures like the output of a plot, a map, a summary of your statistical analysis or a set of R commands that perform a specific task.
+The above code does not actually “save” the values 4, 16, and 9 or catherine, declan, gwen -- it just presents it on the screen in a vector. If you want to use these values again without having to type out `c(4, 16, 9)`, you can save it in a data **object**. At the heart of almost everything you will do (or are ever likely to do) in R is the concept that everything in R is an object. These objects can be almost anything, from a single number or character string (like a word) to highly complex structures like the output of a plot, a map, a summary of your statistical analysis or a set of R commands that perform a specific task.
 
 You assign data to an object using the arrow sign `<-`. This will create an object in R’s memory that can be called back into the command window at any time. For example, you can save “hello world” to a vector called *b* by typing in
 ```{r}
@@ -498,7 +497,7 @@ See -- we can do hard things!
 \
 
 # Functions
-Let’s take a step back and talk about functions (also known as commands). An R function is a packaged recipe that converts one or more inputs (called arguments) into a single output. You execute all of your tasks in R using functions. We have already used a couple of functions above including `typeof()` and `colnames()`. Every function in R will have the following basic format
+Let’s take a step back and talk about functions (also known as commands or macros (in SAS)). An R function is a packaged recipe that converts one or more inputs (called arguments) into a single output. You execute all of your tasks in R using functions. We have already used a couple of functions above including `typeof()` and `colnames()`. Every function in R will have the following basic format
 
 `functionName(arg1 = val1, arg2 = val2, ...)`
 
@@ -534,6 +533,7 @@ Functions do not exist in a vacuum, but exist within [R packages](https://r-pkgs
 In order to use functions in a new package, you first need to install the package using the `install.packages()` command. For example, we will be using commands from the package **tidyverse** in this lab.
 
 ```{r}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 install.packages("tidyverse")
 ```
 You should see a bunch of gibberish roll through your console screen. Don’t worry, that’s just R downloading all of the other packages and applications that **tidyverse** relies on. These are known as [dependencies.](https://r-pkgs.org/dependencies-mindset-background.html) Unless you get a message in red that indicates there is an error (like we saw when we typed in “hello world” without quotes), you should be fine.
