@@ -11,3 +11,7 @@
 # Spatial rasters (large)
 *.tif
 *.tiff
+
+# Raw data (not tracked)
+data_raw/
+
