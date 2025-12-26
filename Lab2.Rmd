@@ -17,7 +17,7 @@ Let's get cracking!
 
 # Open up an R Markdown file
 
-We hopefully remember some of this from last week in [Lab 1](lab1.rmd), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 2”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+We hopefully remember some of this from last week in [Lab 1](Lab1.html), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 2”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
 
 \
 
