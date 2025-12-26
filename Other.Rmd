@@ -32,9 +32,7 @@ Below you will find links to data sources that contain spatial data and health d
 
 - [California Department of Public Health GIS Open Data](https://data-cdphdata.opendata.arcgis.com/) Search or browse for GIS data from the CA Department of Public Health.
 
-- [California Health Interview Survey](https://healthpolicy.ucla.edu/our-work/california-health-interview-survey-chis) The largest state health survey in the nation, the premier source of data on the health of Californians. The California Health Interview Survey — also known as CHIS or the California Health Survey — is a leading source of credible and comprehensive data on the health and health care needs of California’s large and diverse population. CHIS helps to target resources and interventions where they are needed most, ultimately improving health outcomes for all Californians.
-
-Each year, CHIS interviews more than 20,000 households on a wide range of health matters, from use of and access to health care, to health conditions and behaviors, to a range of topics that influence health: public program participation, housing, income and employment, climate change, food, gun violence, adverse childhood experiences, and much more. 
+- [California Health Interview Survey](https://healthpolicy.ucla.edu/our-work/california-health-interview-survey-chis) The largest state health survey in the nation, the premier source of data on the health of Californians. The California Health Interview Survey — also known as CHIS or the California Health Survey — is a leading source of credible and comprehensive data on the health and health care needs of California’s large and diverse population. CHIS helps to target resources and interventions where they are needed most, ultimately improving health outcomes for all Californians. Each year, CHIS interviews more than 20,000 households on a wide range of health matters, from use of and access to health care, to health conditions and behaviors, to a range of topics that influence health: public program participation, housing, income and employment, climate change, food, gun violence, adverse childhood experiences, and much more. 
 
 \
 
@@ -63,6 +61,7 @@ A useful package for working with Census Bureau data is the lehdr R package, whi
 Let’s grab a dataset that contains 2018 tract-to-tract commute flows broken down by a variety of characteristics in Nevada, referenced in the LODES documentation.
 
 ```{r}
+library(dplyr)
 library(lehdr)
 nv_lodes_od <- grab_lodes(
   state = "nv",
