@@ -12,24 +12,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \
 
-The following is an abridged version of the course syllabus. A full course syllabus can be found on the [Canvas class website](https://canvas.ucdavis.edu/courses/996070).
+The following is an abridged version of the course syllabus. A full course syllabus can be found on the [Canvas class website](https://canvas.ucdavis.edu/courses/1064227).
 
 # Lecture and Lab
-**Lecture:** Thursdays 8a-8:55a
-**Lab:** Thursdays 9-11a
+**Lecture:** Mondays 3:50p-5:20p
+**Lab:** Wednesdays 3:50p-5:20p
 
 Lecture and Lab are held in person.
 
 **Instructor**
 Dr. Peter James
 
-Contact: pjames.at.ucdavis.edu
+Contact: pjames.at.health.ucdavis.edu
 Office: Medical Sciences 1C Room 138
 Office hours: By appointment over Zoom. Please email any time to set up a meeting!
 
 **Teaching Assistant**
-Taotao Lu
-Contact: ttalu.at.ucdavis.edu
+Sidney Parel
+Contact: skparel.at.ucdavis.edu
 Office hours: By appointment over Zoom. Please email any time to set up a meeting!
 
 \
@@ -48,10 +48,15 @@ In this course, students will gain
 \
 
 # Course Format
-Most classes will adhere to the following format: 
-1. An hour or so lecture / discussion about that week's topic -- Feel free to interrupt me to ask questions! 
-2. An hour or so walk through of the lab 
-3. A hands on lab where we apply the methods learned in lecture/discussion/lab using real data in R. 
+Lecture sessions will adhere to the following format: 
+1. 45 minute or so lecture / discussion about that week's topic -- Feel free to interrupt me to ask questions! 
+2. Short break
+3. 40 minute or so student-led discussion of the week's reading.
+
+\
+
+Lab Sessions will adhere to the following format:
+- A hands on lab where we apply the methods learned in lecture/discussion using real data in R. 
 
 \
 
@@ -60,17 +65,16 @@ All students are expected to actively participate in all components of the cours
 \
 
 # Required Readings
-Required reading material is composed of a combination of the following
+Required reading material is composed of a combination of the following:
 
-Journal articles and research reports.
-There is no single official textbook for the course. Instead, I’ve selected journal articles and research reports.
+- Journal articles and research reports.
 
 \
 
 # Handouts
 For most topics, in lieu of an article or book chapter, I will provide lecture handouts on Canvas in advance of the assigned class.
 
-There are also a set of weekly optional readings listed at the end of the syllabus that provide applications of the methods.
+There are also a set of weekly readings listed in the syllabus that provide applications of the methods.
 
 \
 
@@ -98,21 +102,25 @@ R is the only statistical language used in this course, as it has become an incr
  
 \
  
-## Lab Assignments (4 x 10%: 40%):
-Students will be expected to submit their completed GIS lab assignments. These assignments will be posted Thursday morning and due the following Tuesday 11:59p. Each assignment will be 10% of the final grade, with four lab assignments making up a total of 40% of the final grade.
+## Homework Assignments (4 x 10%: 40%):
+Students will be expected to submit their completed GIS lab assignments. These assignments will be posted Wednesday mornings and due the following Monday before class. Each assignment will be 10% of the final grade, with four lab assignments making up a total of 40% of the final grade.
 
 \
 
-## Mid-Term Case Study (20%): 
+## Mid-Term Exam (20%): 
 Students will be given a case study based on the use of GIS within a specific public health situation.  The students will write a response to the way they would utilize GIS to aid in the resolution of the case presented.  This will include the policy, procedures, technical aspects and other knowledge gained throughout the course. The mid-term case study will be 20% of the final grade.
 
 \
 
-## Final Project (30% Final Paper + 10% Final Presentation):
+## Final Project (20% Final Paper + 10% Final Presentation):
 The course will end with a final project where the students will be able to apply the skills they have learned in the course to a project that involves either creating a map relevant to public health (e.g., a choropleth map of asthma rates across counties in California) or conducting an analysis with spatial data (e.g., examining the correlation between air pollution levels and cardiovascular disease rates across counties in California). All projects will have to contain at least one map. Each student will propose their own project midway through the course, and they will have to identify datasets (public or privately-owned) to visualize in their project. Students will prepare a final paper (6-8 pages double-spaced) that will be in the format of a manuscript. This manuscript could be a preliminary analysis of secondary data, a preliminary analysis of primary data, or a commentary / public opinion piece translating research to the public. The final paper will be 30% of the final grade. Participants will also present on their topic during the last week of class. The final presentation will be 10% of the final grade.
 
 \
 
+## Class Participation (10%):
+All students are expected to be active participants in class, speaking and contributing to class discussion on most days. On Mondays, during the second half of class there will be student-led discussions of readings. Each student will participate in leading a group discussion on the reading assignments. Students will sign up to lead the classes in groups of 1-3 and will be expected to facilitate class discussion. These discussions can involve presentations, or other interactive approaches to involve students in discussion of the paper (I’d even accept interpretive dance). Class discussions are an important teaching component of the course. Overall class participation will make up 10% of the final grade.
+
+\
 # Course Agenda
 
 The schedule is subject to revision throughout the quarter. Please see the full syllabus for a more detailed version of the agenda.
