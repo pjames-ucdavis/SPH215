@@ -1,318 +1,218 @@
 ---
-title: "Lab 7: Spatial Statistics and Geographically Weighted Regression in Public Health"
+title: 'Lab 7: Network Analysis'
 ---
 
-\
-
-# Introduction
-
-Welcome to your crash course in spatial statistics for public health! We're going to cover a lot today in terms of analysis of spatial data. We'll explore mapping, clustering, and how relationships between variables vary across geography. Buckle up!
+In this lab, we will be using spatial data to run a network analysis. We will be playing around with data from Davis, including geocoding fast food restaurants in our fair city, then mapping the most efficient route to bike between all fast food establishments. Next, we will estimate the travel time between all fast food establishments in Davis. Finally, we are going to create a cool visualization of the travel times from the building that we are sitting in! This is all intended to explain how you can use spatial data to understand how different spatial features relate using the road networks that we travel on.
 
 The objectives of this guide are to teach you to:
 
-1. Use multiple methods to identify spatial autocorrelation
-2. Account for spatial autcorrelation in regression using spatial lag models
-3. Conduct geographically weighted regression to model how associations vary across space
+1. Use the **osrm** package to map the optimal trip between multiple points
+2. Get a matrix of travel times between multiple points
+3. Create an isochrone to map travel times from one location
+
+Let's get rollin...
 
 \
 
-# Load packages
-
-As always, we need to load our packages. We have a couple of new friends joining us this week.
-
-- **`spdep`**: This package handles spatial dependence — creating neighborhood structures and calculating statistics like Moran's I and Local Indicators of Spatial Association (LISA). Think of it as your go-to for spatial autocorrelation.
-- **`spatialreg`**: This package builds on **spdep** and provides maximum likelihood estimation for spatial regression models like spatial lag and spatial error models. It's your go-to tool for formal spatial regressions in R.
-- **`GWmodel`**: A robust package for running Geographically Weighted Regression (GWR), including model diagnostics, bandwidth selection, and mapping local coefficients. It’s the main engine behind spatially varying relationships.
-- **`spgwr`**: A lighter package also used for GWR. In this tutorial, we use it mainly for its convenient `gwr.sel()` function to find the best adaptive bandwidth via cross-validation.
-
-Together, these packages help us detect patterns, clusters, and relationships that change across space — essential for spatial health analysis.
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
-library(tidyverse)
-library(tidycensus)
+# Load Packages
+First, we always gotta remember to load our packages.
+```{r}
+library(tidygeocoder)
 library(sf)
 library(tmap)
-library(spdep)
-library(GWmodel)
-library(spatialreg)
-library(spgwr)
-```
-
-
-\
-
-# Data Collection and Preparation
-
-First, we need data. We'll grab county-level diabetes prevalence for 2021 from the CDC and merge it with county geometries and median household income from the American Community Survey 2021. For the diabetes data, I downloaded this from the [CDC US Diabetes Surveillance System](https://gis.cdc.gov/grasp/diabetes/diabetesatlas-surveillance.html#). It comes in a little ugly, so we will have to clean up the column names, reformat the FIPS codes, and filter to just California counties.
-
-```{r load-data}
-# Load and clean CDC diabetes CSV
-download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/DiabetesAtlas_CountyData.csv", destfile = "DiabetesAtlas_CountyData.csv", mode = "wb")
-diab_raw <- read_csv("DiabetesAtlas_CountyData.csv", skip = 2) |> 
-  slice(1:(n() - 1))  # remove last row
-
-# Clean column names
-names(diab_raw) <- str_trim(names(diab_raw))
-
-# Format FIPS codes with leading zeros
-diab_raw <- diab_raw |> 
-  mutate(CountyFIPS = str_pad(as.character(as.integer(CountyFIPS)), 5, pad = "0"))
-
-# Filter for California counties only
-ca_diabetes <- diab_raw |> 
-  filter(str_starts(CountyFIPS, "06")) |> 
-  mutate(Percentage = as.numeric(Percentage)) |> 
-  select(FIPS = CountyFIPS, County, Diabetes = Percentage)
+library(osrm)
+library(tidyverse)
 ```
 
 \
 
-Now lets get our good ole median income data from the US Census. Because it's 2021 Diabetes data, we will pull the 2017-2021 five year estimates from the ACS.
-```{r get-acs}
-# Download median income and geometries for California counties
-ca_geo <- get_acs(
-  geography = "county",
-  variables = c(income = "B19013_001"),  # Median household income
-  state = "CA",
-  geometry = TRUE,
-  year = 2021
-) %>%
-  rename(income = estimate) %>%
-  select(GEOID, NAME, income, geometry)
-```
+# osrm package for network analysis in R
+R offers a few packages for network analysis. We will be using the **osrm** package because it is fast and open source. It is an interface between R and the Open Street Map-Based Routing Service. It has a number of options, including:
+
+- `osrmTrip`: Build and send an OSRM API query to get the shortest travel geometry between multiple unordered points. This function interfaces the trip OSRM service. Use this function to resolve the travelling salesman problem.
+- `osrmTable`: Build and send OSRM API queries to get travel time matrices between points. This function interfaces the table OSRM service.
+- `osrmIsochrone`: This function computes areas that are reachable within a given time span from a point and returns the reachable regions as polygons. These areas of equal travel time are called isochrones.
+- `osrmRoute`: Build and send an OSRM API query to get the travel geometry between two points. This function interfaces with the route OSRM service.
+- `osrmNearest`: Build and send an OSRM API query to get the nearest point on the street network. This function interfaces the nearest OSRM service.
+- `osrmIsodistance`: This function computes areas that are reachable within a given road distance from a point and returns the reachable regions as polygons. These areas of equal travel distance are called isodistances.
 
 \
 
-Now let's join our diabetes dataset with our income dataset at the county level. Then we will take a quick look at our data.
+Note that there are other options for network analyses in R, including **gmapsdistance**, which uses the Google Maps API, **stplanr**, and others. But many of these require an API key and may even cost money if you use them too much! So for now, we will stick to **osrm**.
+
+\
+
+# Bring in fast food establishments in Davis, CA
+Similar to what we did in one of our first labs, let's bring in the addresses of all fast food establishments in Davis and geocode them! We will first read in the .csv from the website using `read_csv` from the **tidyverse** package.
 ```{r}
-# Merge diabetes and ACS income data
-ca_diab_data <- ca_geo |> 
-  left_join(ca_diabetes, by = c("GEOID" = "FIPS"))
-glimpse(ca_diab_data)
-summary(ca_diab_data$Diabetes)
-summary(ca_diab_data$income)
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv", destfile = "fast_food_davis_ca.csv", mode = "wb")
+ff <- read_csv("fast_food_davis_ca.csv")
+
+glimpse(ff)
 ```
 
 \
 
-# 🗺️ Exploratory Mapping
+OK, so looks like *Address* is the variable we want to focus on. Let's geocode the Davis fast food data using the the `geocode()` function in **tidygeocoder**. And let's specify that we want to use the "arcgis" geocoder.
+```{r}
+ff_geo      <- geocode(ff, address = "Address",
+                          method = "arcgis")
+```
 
-Let's make a map and see what diabetes prevalence looks like across counties in California. 
+\
 
-```{r exploratory-mapping}
+Alrighty that ran! Now let's check our data and make sure there's no missingness in our *lat* and *long* fields.
+```{r}
+summary(ff_geo$lat)
+summary(ff_geo$long)
+```
 
+\
+
+Looks like there's no missingness! No NAs! OK, now we use `st_as_sf` from the **sf** package to make the dataset spatial and we use the CRS of 4326 because we have longitude and latitude.
+```{r}
+ff_pts <- st_as_sf(ff_geo, coords=c("long","lat"), crs=4326)
+```
+
+\
+
+# osrmTrip to map the optimal trip between all fast food establishments
+
+Now let's use the **osrm** package to calculate an optimal trip between all fast food establishments in Davis, then let's take a look at the output. This means we are estimating the shortest travel geometry between all fast food establishments in Davis. And we are in Davis, so of course we will estimate this on bike! Maybe useful for an SPH 215 pub crawl in the future?
+```{r}
+trip <- osrmTrip(ff_pts, osrm.profile = "bike")
+glimpse(trip)
+```
+
+\
+
+OK, it ran! Some good info in there. Looks like we have a *List* with an sf dataset, a data.frame, and a list of duration and distance. Now, let's visualize what this path might look like using the **tmap** package. We will pull out the route as an **sf** object and store it as *trip_sf*. Then we will map that and specify that we want the lines to be the route in blue, and then we want to see the location of our fast food establishments *ff_pts* in red bubbles. We also can label the restaurants using `tm_text` and set an offset with `xmod` and `ymod` options.
+```{r}
+# Extract the linestring route (as an sf object)
+trip_sf <- trip[[1]]$trip
+
+# Set tmap to interactive mode
 tmap_mode("view")
-tm_shape(ca_diab_data) +
-  tm_polygons("Diabetes", palette = "Reds", style = "quantile",
-              title = "% Diagnosed Diabetes")
+
+# Plot with tmap
+tm <- tm_shape(trip_sf) +
+  tm_lines(lwd = 3, col = "blue") +
+  tm_shape(ff_pts) +
+  tm_bubbles(size = 0.5, col = "red") + 
+  tm_text("Restaurant Name", size=1, xmod = 0.25, ymod=0.25) 
+
+tm
+
 ```
 
 \
 
-# Methods to Identify Spatial Autocorrelation
+Spectacular! Let's now get some summary stats for each leg of our fast food extravaganza. We can use the `mutate()` function from **tidyverse** to get this info.
+```{r}
+leg_summary <- trip_sf %>%
+  mutate(duration = round(duration, 1),
+         distance = round(distance, 1))
 
-Now let’s ask: are diabetes rates clustered in space, or scattered randomly like confetti in a strong breeze? This is where spatial autocorrelation steps in. We'll start with Moran’s I — the granddaddy of spatial pattern detection.
-
-\
-
-## Global Moran’s I
-
-Moran’s I is a measure of overall spatial autocorrelation — that is, how similar or dissimilar values (like diabetes prevalence) are in nearby areas (i.e., in nearby counties). 
-
-- Values close to **+1** mean strong positive spatial autocorrelation — high values cluster with other high values, and low with low (think: like attracts like).
-- Values near **0** mean no spatial pattern — just noise.
-- Values near **-1** mean high and low values are actively repelling each other (rare in public health).
-
-Let's calculate Moran’s I and find out if diabetes prevalence in California follows any spatial logic. First, we use `poly2nb()` in the **spdep** package to figure out which polygons are neighbors--that is which counties are adjacent to each other. Next, we use `nb2listw()` from **spdep** to create a spatial weights object. We are basically giving weights to each neighbor. Then we run the Moran's I test using `moran.test()` and the weights we just created. 
-
-```{r morans-i}
-nb <- poly2nb(ca_diab_data) 
-lw <- nb2listw(nb, style = "W")
-moran.test(ca_diab_data$Diabetes, lw)
-```
-
-### Interpreting Moran's I
-
-- A **Moran’s I value of ~0.3** means moderate positive spatial autocorrelation — counties with similar diabetes rates are near each other.
-- A **p-value < 0.001** tells us this clustering is **statistically significant** — not random.
-
-👉 **Take home:** Diabetes rates aren’t randomly distributed across California. There are clusters of high and low values, and we’ve got statistical proof! This result tells us that there is statistically significant spatial clustering of diabetes prevalence across California counties. Counties with high diabetes rates tend to be near other high-rate counties, and the same is true for low-rate counties. The Moran’s I value of ~0.3 indicates moderate positive spatial autocorrelation, and the tiny p-value confirms that this pattern is not due to chance.
-
-\
-
-## Local Moran’s I (LISA)
-
-While Moran’s I tells us whether there's spatial autocorrelation in general, LISA zooms in and tells us **where** it's happening. 
-
-LISA stands for Local Indicators of Spatial Association, and it helps us detect:
-
-- **High-High clusters**: High diabetes rates surrounded by other high-rate counties (hot clusters).
-- **Low-Low clusters**: Healthy zones with low diabetes prevalence.
-- **High-Low or Low-High outliers**: Counties that buck the trend — like a donut hole in a cake.
-
-Mapping LISA helps target interventions more precisely, and explain those spatial oddballs.
-
-To run LISA, we use the weights we just created, but now use the function `localmoran()`. We will then pull out *Ii*, which is the local Moran's I statistic for each county — a measure of local spatial autocorrelation. A high positive value indicates strong clustering with neighbors (e.g., a high-rate county surrounded by other high-rate counties). We also pull out *Pval*, which gives the p-value for that local statistic, testing whether the observed local clustering is statistically significant. Small p-values suggest that the clustering is unlikely due to random chance.
-
-```{r lisa}
-local_moran <- localmoran(ca_diab_data$Diabetes, lw)
-ca_diab_data$Ii <- local_moran[, "Ii"]
-ca_diab_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
-
-# Map LISA
-cat("\n### Local Spatial Clustering of Diabetes\n")
-tm_shape(ca_diab_data) +
-  tm_polygons("Ii", style = "quantile", palette = "PuOr", title = "Local Moran's I")
+leg_summary
 ```
 
 \
 
-###️ Interpreting the LISA Map
-
-This map shows where spatial clustering of diabetes is strongest — not just overall, but **locally**. Here's how to read it:
-
-- **Dark purple counties** have strong local clustering — likely high-high or low-low patterns. These are areas where diabetes rates mirror their neighbors and form significant clusters.
-- **Orange or tan counties** may be spatial **outliers** — places where diabetes rates differ from nearby counties. For example, a healthy county surrounded by high-rate neighbors.
-- **Gray or muted tones** indicate weak or non-significant clustering.
-- **White areas** may represent missing or insignificant data.
-
-👉 **Take home:** Counties with strong clustering (dark purple) may benefit from regional strategies, while outliers may need more localized investigation. This helps tailor public health interventions to spatial realities.
-
-\
-
-## 🔥 Hot Spot Analysis (Gi*)
-
-Now we spice things up with the Getis-Ord Gi* statistic — pronounced "gee-eye-star." This method identifies **statistically significant hot and cold spots** in the data.
-
-- A **hot spot** is a county with a high value (e.g., diabetes rate) surrounded by other high-value neighbors.
-- A **cold spot** is the opposite: a low-value county in a sea of low values.
-
-Gi* doesn't just look at one value — it considers the neighborhood around each observation too. This is powerful for public health mapping, especially when prioritizing interventions or allocating resources. **Hot** and **cold** spots are areas with significantly higher or lower rates than expected.
-
-We run Gi* by using the function `localG()` from the **spdep** package and using the same weights as before. We can then map the *gi_star* values by county.
-
-```{r gi-star}
-gi_star <- localG(ca_diab_data$Diabetes, lw)
-ca_diab_data$Gi_star <- as.numeric(gi_star)
-
-tm_shape(ca_diab_data) +
-  tm_polygons("Gi_star", palette = "-RdBu", style = "pretty", title = "Gi* Hot Spots")
+OK, we we have the duration and distance for each trip. Let's get the summary of the whole trip in minutes and kilometers.
+```{r}
+trip_summary <- trip[[1]]$summary
+trip_summary
 ```
-
-### Interpreting the Gi* Map
-
-This map uses the Getis-Ord Gi* statistic to highlight **statistically significant spatial clusters** of diabetes — also known as hot and cold spots:
-
-- **Dark red counties** (Gi* > 2) are **hot spots**: areas with high diabetes prevalence that are also surrounded by other high-prevalence counties. These are prime targets for regional public health efforts.
-- **Lighter shades** (e.g., peach or sky blue) represent less intense clustering — not as statistically extreme.
-- **Dark blue counties** (Gi* < -2) are **cold spots**: clusters of lower-than-average diabetes rates. Great for understanding what’s going right.
-
-
-👉 **Take home:** The red-hot lower half of the state (e.g., Inyo, Orange) may benefit from coordinated, regional interventions, while blue-cold northern counties may offer models of prevention or service delivery worth emulating.
-
 \
 
-# Spatial Lag Model
+# osrmTable to get a matrix of travel times between all fast food establishments in Davis
 
-Now that we've explored autocorrelation and hot spots, let’s try a classic spatial regression: the **Spatial Lag Model**. This model is useful when the outcome in one location might be influenced by nearby locations — like diabetes in one county being affected by its neighbors, which we have seen above!
+So it was nice to get an optimal route, but what if I wanted the travel times between all of the fast food establishments in Davis? You could imagine doing this with addresses of geocoded participants and fast food establishments to create a dataset with distance to the closest fast food establishment.
 
-Based on the exploratory mapping, Moran scatterplot, and the global Moran’s I, there appears to be spatial autocorrelation in diabetes. This means that if there is a spatial lag process going on and we fit a normal regression model our coefficients will be biased and inefficient. That is, the coefficient sizes and signs are not close to their true value and its standard errors are underestimated. This means trouble. Big trouble. Real big trouble.
+```{r}
+ff_table <- osrmTable(ff_pts,
+                      osrm.profile = "bike")
+glimpse(ff_table)
 
-In a spatial lag model, we include a **spatially lagged dependent variable** as a predictor:
-- It captures the "spillover" effect of nearby values.
-- It helps address spatial dependence that ordinary regression would miss.
-
-We'll use the `lagsarlm()` function from the `spatialreg` package and will use the same spatial weights as before.
-
-```{r spatial-lag-model}
-# Define neighbors and spatial weights
-nb <- poly2nb(ca_diab_data)
-lw <- nb2listw(nb, style = "W")
-
-# Run spatial lag model
-lag_model <- lagsarlm(Diabetes ~ income, data = ca_diab_data, listw = lw)
-summary(lag_model)
-```
-
-## Interpreting the Spatial Lag Model
-
-Let’s break down the results of our spatial lag model:
-
-- The **spatial lag coefficient (rho)** is about **0.48** and statistically significant (*p < 0.001*). That means diabetes rates in a county are **strongly influenced by neighboring counties** — there's real spatial autocorrelation.
-- The **income coefficient** is **negative**, suggesting that higher income is associated with lower diabetes, but it’s **not statistically significant** (*p = 0.171*). So, in this model, income alone doesn't explain much variation in diabetes once spatial effects are accounted for.
-- The **AIC (Akaike Information Criterion)** is lower for the spatial lag model than for the regular OLS model (176 vs. 184), suggesting that the spatial lag model is a better fit--this means we really should be accounting for spatial autocorrelation!
-- The **residual autocorrelation test** is not significant (*p = 0.85*), which means the model has successfully addressed spatial dependence in the residuals.
-
-👉 **Take home:** There is strong spatial dependence in diabetes rates, and including spatial effects accounts for this spatial autocorrelation. However, income may not be a key driver of diabetes once those spatial influences are considered.
-
-\
-
-# 📉 Geographically Weighted Regression (GWR)
-
-GWR — Geographically Weighted Regression — is like regular regression but with a twist: the coefficients can change depending on **where** you are.
-
-Traditional regression assumes one-size-fits-all relationships. But in public health, the impact of income on diabetes may differ from San Francisco to Fresno.
-
-GWR fits a separate regression model--no more assuming one relationship is consistent across all areas in your analysis!
-
-We will run GWR first by setting up our data to have the geometric centroid of each county using `st_centroid()` from the **sf** package. Then, we will use the `gwr.sel()` function from **spgwr** and will use the geometric centroid of our counties to find the optimal bandwidth for our GWR model. We will then model the GWR using the `gwr()` function from the **GWmodel** package. We will use the bandwidths and centroids that we set up in the previous steps.
-
-```{r gwr}
-coords <- st_coordinates(st_centroid(ca_diab_data))
-ca_diab_data$X <- coords[, 1]
-ca_diab_data$Y <- coords[, 2]
-
-bw <- gwr.sel(Diabetes ~ income, data = ca_diab_data, coords = coords, adapt = TRUE)
-
-# Run GWR using adaptive bandwidth
-model <- gwr(Diabetes ~ income, data = ca_diab_data, coords = coords, 
-             adapt = bw, hatmatrix = TRUE)
-
-ca_diab_data$gwr_income <- model$SDF$income # Store model coefficients
 ```
 
 \
 
-## Interpreting the GWR results
-
-The output shows the model testing different 'adaptive q' values, which represent the proportion of neighboring counties used in each local model. It chooses the q value with the lowest cross-validation (CV) score — best predictive fit. For example: q = 0.082 means ~8% of counties (≈5 counties) are used in each local regression. Lower CV = better model. It's finding the 'just right' neighborhood size for each regression.
-
-\
-
-## 🗾 Map Local GWR Coefficients
-
-Let’s map those locally varying regression coefficients and see where income matters more (or less) for diabetes.
-
-```{r gwr-map}
-tm_shape(ca_diab_data) +
-  tm_polygons("gwr_income", palette = "RdYlGn", style = "quantile", title = "GWR: Income-Diabetes Association")
+Great. Now let's look at the *duration* matrix.
+```{r}
+ff_table$duration
 ```
 
 \
 
-### 🧩 Interpreting the GWR Map
+That's a little confusing. Let's keep the restaurant names and take a look at this again. We will print it as a massive table.
+```{r}
+# Extract restaurant names
+rest_names <- ff_pts[["Restaurant Name"]]  # or ff_pts$`Restaurant Name`
 
-This map shows how the relationship between income and diabetes **varies across California** — it's a spatial view of the regression coefficient between income and diabetes.
+# Assign names to rows and columns of distance and duration matrices
+rownames(ff_table$duration) <- rest_names
+colnames(ff_table$duration) <- rest_names
 
-- All the values are **negative**, meaning higher income is associated with **lower diabetes prevalence** — but **the strength** of this relationship varies across space.
+# Travel times in minutes
+ff_table$duration
+```
 
-- **Dark red counties** (most negative values): These are the places where income has the **strongest inverse relationship** with diabetes. In other words, improving economic conditions here could have a **big public health payoff**.
-- **Lighter yellow to green counties**: These areas still show a negative relationship, but it's **weaker**. That might mean other social or environmental factors are playing a bigger role than income in these counties.
-- **Dark green areas**: The weakest negative associations — here, income might matter less for diabetes prevention, or other factors may dominate.
+# osrmIsochrone to create isochrones
 
-👉 **Take home**: This map helps public health professionals tailor interventions. In counties where income is a strong driver of diabetes, economic support programs might reduce prevalence. In others, different strategies may be needed.
+So let's try something different with network analyses. What if I wanted to create a map that would show me all the locations I could reach within a given number of minutes of biking? This is called an **isochrone** and you betcha the **osrm** package can do this!
+
+First, let's set this up to be centered around the building we all know and love, the one that we are in right now. That's right--the epically named Medical Sciences 1-B. I've clearly memorized the longitude and latitude for this building, which we paste in below, and then store as an **sf** object.
+```{r}
+loc <- c("lon" = -121.7617, "lat" = 38.5382)
+loc_sf <- st_sf(name = "Medical Sciences 1-B",
+                geometry = st_sfc(st_point(loc), crs = 4326))
+```
 
 \
 
-# Take home
+Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, the *res* or resolution will be 30, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
+```{r}
+iso <- osrmIsochrone(loc = loc_sf,
+                     breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
+                     res = 30, # Lower res for faster requests
+                     osrm.profile = "bike")  # mode bicycle
 
-- **Moran's I**: Measures overall spatial autocorrelation (is there a pattern?).
-- **LISA/Gi**: Reveal local clusters and hot/cold spots (where’s the action?).
-- **Spatial Lag Model**: Quantifies spatial autocorrelation and adjusts for spatial autocorrelation in regression models.
-- **GWR**: Shows where exposure-outcome relationships are strong, weak, or flipping direction.
+glimpse(iso)
+```
 
-# Summary
+\
 
-Boom! You just crunched real public health data using cutting-edge spatial tools to look at spatial clustering / autocorrelation. And we even learned some regression approaches to account for spatial autocorrelation. Well done! We've just scratched the surface on these spatial statistics approaches, but we've come so far from Week 1! I'm proud of you!
+OK, so now we can see we have *isomin* and *isomax* as our columns for our time bins. And our dataset is a *MULTIPOLYGON*, so it's spatial. Let's map this! First, we will create a categorical variable called *run_times*. Then we will use **tmap** to plot our isochrones. We will use a palette of heat colors for our ischrones, and we will also plot Medical Sciences 1-B in there just so we never forget our beautiful home base.
+```{r}
+# Create factor column for time intervals
+iso$run_times <- factor(
+  paste(iso$isomin, "to", iso$isomax, "min"),
+  levels = c("0 to 5 min", "5 to 10 min", "10 to 15 min", 
+             "15 to 20 min", "20 to 25 min", "25 to 30 min")
+)
+
+
+# Plot using tmap
+tm <- tm_shape(iso) +
+  tm_polygons(col = "run_times",
+              palette = rev(heat.colors(6)),  # reverse for same effect
+              border.col = "black",
+              lwd = 0.5,
+              alpha = 0.3,
+              title = "Biking Duration") +
+  tm_shape(loc_sf) +
+  tm_bubbles(size = 0.3, col = "blue") +
+  tm_text("name", size = 1, ymod = -0.5) 
+
+tm
+
+```
+
+\
+
+Would you look at that! It's like a work of art. Georgia O'Keefe, eat your heart out. Click around and explore where you could bike to in 10 minutes once class gets out! And you've earned that **osrm** badge! Get biking somewhere--you know the route now!
+
+\
+
+![Your osrm Badge!!](osrm.png)---

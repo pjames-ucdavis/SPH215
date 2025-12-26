@@ -1,7 +1,6 @@
 ---
 title: 'Lab 3: Geocoding, Vector Data, and Census Data Polygons and Rasters'
 ---
-Lab 3.
 
 In this lab, we are going to work with vector data, which we've talked about last week. We are going to work with a dataset of cancer patients across California, as well as Census data on socioeconomic factors. We will also talk about geocoding addresses and will discuss how to visualize data. 
 
@@ -18,7 +17,7 @@ Let's get cracking!
 
 # Open up an R Markdown file
 
-We hopefully remember some of this from last week in [Lab 1](lab1.html), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 2”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+We hopefully remember some of this from last week in [Lab 2](Lab2.html), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 3”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
 
 \
 
@@ -323,7 +322,7 @@ Another useful option to set is `cache_table = TRUE`, so you don’t have to re-
 
 \
 
-As you learned in [Lab 1](lab1.html), whenever you bring in a dataset, the first thing you should always do is view it to get a sense of its structure and to make sure you got what you expected. One way of doing this is to use the `glimpse()` command
+As you learned in [Lab 1](lab1.html) and [Lab 2](Lab2.html), whenever you bring in a dataset, the first thing you should always do is view it to get a sense of its structure and to make sure you got what you expected. One way of doing this is to use the `glimpse()` command
 
 ```{r}
 glimpse(ca)
@@ -365,12 +364,12 @@ setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Git
 For a Windows system, you can find the pathway of a file by right clicking on it and selecting Properties. You will find that instead of a forward slash like in a Mac, a windows pathway will be indicated by a single back slash \. R doesn’t like this because it thinks of a single back slash as an escape character. Use instead two back slashes \\
 
 ```{r eval=FALSE}
-setwd("C:\\Users\\pjames\\Documents\\UCD\\Spring2025\\SPH215\\Labs\\Lab 2")
+setwd("C:\\Users\\pjames\\Documents\\UCD\\SPH215\\Labs\\Lab 3")
 ```
 or a forward slash /.
 
 ```{r eval=FALSE}
-setwd("C:/Users/pjames/Documents/UCD/Spring2025/SPH215/Labs/Lab 2")
+setwd("C:/Users/pjames/Documents/UCD/SPH215/Labs/Lab 3")
 ```
 
 You can also manually set the working directory by clicking on Session -> Set Working Directory -> Choose Directory from the menu.

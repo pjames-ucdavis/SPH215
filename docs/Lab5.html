@@ -11,7 +11,7 @@
 
 
 
-<title>Lab 5: Spatial Data Processing with Vector and Raster Data</title>
+<title>Lab 5: Working with Raster data, Join geocoded addresses to polygon data to create exposure metrics</title>
 
 <script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -324,7 +324,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2026</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -357,13 +357,10 @@ div.tocify {
       <a href="Lab6.html">Lab 6: Network Analysis</a>
     </li>
     <li>
-      <a href="Lab7.html">Lab 7: Spatial Statistics</a>
+      <a href="Lab7.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
     </li>
     <li>
-      <a href="Lab8.html">Lab 8: Geographically Weighted Regression</a>
-    </li>
-    <li>
-      <a href="Lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+      <a href="Lab8.html">Lab 8: Future Directions in GIS and Public Health</a>
     </li>
   </ul>
 </li>
@@ -395,18 +392,17 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Lab 5: Spatial Data Processing with Vector
-and Raster Data</h1>
+<h1 class="title toc-ignore">Lab 5: Working with Raster data, Join
+geocoded addresses to polygon data to create exposure metrics</h1>
 
 </div>
 
 
-<p><br />
-</p>
 <p>In this lab, we are going to work with vector and raster data,
 spatially joining point data to vector data</p>
 <p>The objectives of this guide are to teach you:</p>
 <ol style="list-style-type: decimal">
+<li>Introduce raster data</li>
 <li>Import our dataset with simulated geocoded addresses and mortality
 data from an ovarian cancer cohort</li>
 <li>Import a dataset with greenspace across the Bay Area</li>
@@ -417,28 +413,385 @@ data from an ovarian cancer cohort</li>
 </ol>
 <p>Enough talk–let’s get coding!</p>
 <p><br />
-</p>
-<div id="install-packages" class="section level1">
-<h1>Install packages</h1>
-<p>First, let’s install our packages.</p>
+# Load packages</p>
+<pre class="r"><code>library(terra)</code></pre>
+<pre><code>## terra 1.8.29</code></pre>
 <pre class="r"><code>library(sf)</code></pre>
 <pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
-<pre class="r"><code>library(MapGAM)</code></pre>
+<pre class="r"><code>library(tmap)
+library(MapGAM)</code></pre>
 <pre><code>## Loading required package: sp</code></pre>
 <pre><code>## Loading required package: gam</code></pre>
 <pre><code>## Loading required package: splines</code></pre>
 <pre><code>## Loading required package: foreach</code></pre>
 <pre><code>## Loaded gam 1.22-5</code></pre>
 <pre><code>## Loading required package: survival</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
+<div id="rasters" class="section level1">
+<h1>Rasters</h1>
+<p>Raster datasets are simply an array of pixels/cells organized into
+rows and columns (or a grid) where each cell contains a value
+representing information, such as temperature, vegetation, land use, air
+pollution, etc. Raster maps usually represent continuous phenomena such
+as elevation, temperature, or population density. Discrete features such
+as soil type or land-cover classes can also be represented in the raster
+data model. Rasters are aerial photographs, imagery from satellites,
+Google Street View images, etc. A few things to note.</p>
+<ul>
+<li>Raster datasets are always rectangular (rows x col) similar to
+matrices. Irregular boundaries are created by using
+<code>NAs</code>.</li>
+<li>Rasters have to contain values of the same type (int, float,
+boolean) throughout the raster, just like matrices and unlike data
+frames.</li>
+<li>The size of the raster depends on the <strong>resolution</strong>
+and the <strong>extent</strong> of the raster. As such many rasters are
+large and often cannot be held in memory completely.</li>
+</ul>
+<p>The workhorse package for working with rasters in R is the
+<strong>terra</strong> package by Robert Hijmans. <strong>terra</strong>
+has functions for creating, reading, manipulating, and writing raster
+data. The package also implements raster algebra and many other
+functions for raster data manipulation. The package works with
+<code>SpatRaster</code> objects. The <code>rast()</code> function is
+used to create these objects.</p>
+<p>Typically you will bring in a raster dataset directly from a file.
+These files come in many different forms, typically .tif, .img, and
+.grd.</p>
+<p><br />
+</p>
+<p>We’ll bring in the file NDVI_rast.tif. The file contains normalized
+difference vegetation index (NDVI) data for the Bay Area. These data are
+taken from Landsat satellite data that I downloaded from Google Earth
+Engine. We use the function <code>rast()</code> to bring in data in
+raster form, then take a look at the dataset.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif&quot;
+download.file(url, destfile = &quot;NDVI_rast2.tif&quot;, mode = &quot;wb&quot;)
+NDVI_raster = rast(&quot;NDVI_rast2.tif&quot;)
+
+## Get summary of raster data
+NDVI_raster</code></pre>
+<pre><code>## class       : SpatRaster 
+## dimensions  : 1856, 1485, 1  (nrow, ncol, nlyr)
+## resolution  : 0.0002694946, 0.0002694946  (x, y)
+## extent      : -122.6001, -122.1999, 37.59988, 38.10007  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 (EPSG:4326) 
+## source      : NDVI_rast2.tif 
+## name        : NDVI_BayArea 
+## min value   :   -1.0000000 
+## max value   :    0.8533574</code></pre>
+<p><br />
+</p>
+<p>Does it have a CRS?</p>
+<pre class="r"><code>## Check CRS
+st_crs(NDVI_raster)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>OK we have what looks like a raster. We see our resolution and our
+extent, and we have a CRS. Nice! Shall we plot this?</p>
+<pre class="r"><code>## Plot the raster on a map
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
+## ℹ toggle with `tmap::ttm()`</code></pre>
+<pre class="r"><code>NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(style = &quot;cont&quot;) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.</code></pre>
+<pre class="r"><code>NDVI_map</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_legend()`: use &#39;tm_legend()&#39; inside a layer function, e.g.
+## &#39;tm_polygons(..., fill.legend = tm_legend())&#39;
+## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.
+## 
+## This message is displayed once every 8 hours.</code></pre>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Looks pretty cool! Seems to be the Bay Area, and we have some nice
+variability. But we let’s see if we can make this fancier.</p>
+<pre class="r"><code># palette for plotting
+breaks_ndvi &lt;- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
+palette_ndvi &lt;- c(&quot;#BFBFBF&quot;,&quot;#DBDBDB&quot;,&quot;#FFFFE0&quot;,&quot;#FFFACC&quot;,&quot;#EDE8B5&quot;,&quot;#DED99C&quot;,&quot;#CCC782&quot;,&quot;#BDB86B&quot;,&quot;#B0C261&quot;,&quot;#A3CC59&quot;,&quot;#91BF52&quot;,&quot;#80B347&quot;,&quot;#70A340&quot;,&quot;#619636&quot;,&quot;#4F8A2E&quot;,&quot;#407D24&quot;,&quot;#306E1C&quot;,&quot;#216112&quot;,&quot;#0F540A&quot;,&quot;#004500&quot;)
+
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(title = &quot;NDVI&quot;,
+             style=&quot;cont&quot;,
+             palette = palette_ndvi
+            ) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.
+## ℹ Migrate the argument(s) &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_continuous(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_raster()`: migrate the argument(s) related to the legend of the
+## visual variable `col` namely &#39;title&#39; to &#39;col.legend = tm_legend(&lt;HERE&gt;)&#39;</code></pre>
+<pre class="r"><code>NDVI_map</code></pre>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><br />
+</p>
+<div id="crop" class="section level2">
+<h2>Crop</h2>
+<p>OK, let’s see if we can crop this to focus on San Francisco. I’ve
+googled the lat and long for the area around San Francisco, and I’ll put
+these right into my <code>crop()</code> function. I can use the
+<code>tmap_mode("view")</code> now because the raster is small enough
+for R to make interactive.</p>
+<pre class="r"><code>sf_rast&lt;-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
+
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
+<pre class="r"><code>NDVI_sf_map = tm_shape(sf_rast) +
+  tm_raster(title = &quot;NDVI&quot;,
+             style=&quot;cont&quot;,
+            ) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.[v3-&gt;v4] `tm_raster()`: migrate the argument(s) related to the legend of the
+## visual variable `col` namely &#39;title&#39; to &#39;col.legend = tm_legend(&lt;HERE&gt;)&#39;</code></pre>
+<pre class="r"><code>NDVI_sf_map</code></pre>
+<pre><code>## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.</code></pre>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="classify" class="section level2">
+<h2>Classify</h2>
+<p>So negative values of NDVI represent water. Let’s set all negative
+values to -1, and that will help us to distinguish water from land
+easier.</p>
+<pre class="r"><code>sf_rast_neg &lt;- app(sf_rast, fun=function(x){ x[x &lt;= 0] &lt;- -1; return(x)} )
+
+NDVI_sf_map_neg = tm_shape(sf_rast_neg) +
+  tm_raster(title = &quot;NDVI&quot;,
+             style=&quot;cont&quot;,
+            ) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.
+## [v3-&gt;v4] `tm_raster()`: migrate the argument(s) related to the legend of the
+## visual variable `col` namely &#39;title&#39; to &#39;col.legend = tm_legend(&lt;HERE&gt;)&#39;</code></pre>
+<pre class="r"><code>NDVI_sf_map_neg</code></pre>
+<pre><code>## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.</code></pre>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>Nice. What do we notice? The coast of San Francisco might have some
+cloud cover errors! Satellite data isn’t perfect! But the good news is,
+we’ve learned how to bring in raster data! I think we need a
+badge!!!!</p>
+<p><br />
+</p>
+<div class="float">
+<img src="terra.png" alt="terra Badge" />
+<div class="figcaption">terra Badge</div>
+</div>
+<p><br />
+</p>
+<p>One last step. Let’s put all our knowledge together and map our old
+friend CAdata on top of the NDVI data in San Francisco. First, let’s
+bring in the CAdata dataset on ovarian cancer cases again.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p><br />
+</p>
+<p>Let’s check the CRS and compare it to our NDVI dataset.</p>
+<pre class="r"><code>st_crs(ca_pts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(sf_rast_neg)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>Hmmm, let’s make sure they are the same projection.</p>
+<pre class="r"><code>ca_pts_proj&lt;-st_transform(ca_pts,st_crs(sf_rast_neg))
+st_crs(ca_pts_proj)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>They should be good to go now. Let’s map these addresses on top of
+the raster data!</p>
+<pre class="r"><code>tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
+<pre class="r"><code>NDVI_cancer_map = tm_shape(sf_rast_neg) +
+  tm_raster(style = &quot;cont&quot;, title = &quot;NDVI&quot;) +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = &quot;blue&quot;)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.[v3-&gt;v4] `tm_raster()`: migrate the argument(s) related to the legend of the
+## visual variable `col` namely &#39;title&#39; to &#39;col.legend = tm_legend(&lt;HERE&gt;)&#39;[v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).[v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>NDVI_cancer_map</code></pre>
+<pre><code>## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.</code></pre>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><br />
+</p>
+<p>That is one fine looking map.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="install-packages" class="section level1">
+<h1>Install packages</h1>
+<p>First, let’s install our packages.</p>
+<pre class="r"><code>library(sf)
+library(MapGAM)
+library(tidyverse)</code></pre>
 <pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
 ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
 ## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-## ✔ purrr     1.0.4</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ purrr::accumulate() masks foreach::accumulate()
+## ✖ tidyr::extract()    masks terra::extract()
 ## ✖ dplyr::filter()     masks stats::filter()
 ## ✖ dplyr::lag()        masks stats::lag()
 ## ✖ purrr::when()       masks foreach::when()
@@ -449,21 +802,14 @@ data from an ovarian cancer cohort</li>
 ## 
 ## The following object is masked from &#39;package:purrr&#39;:
 ## 
-##     compose</code></pre>
+##     compose
+## 
+## The following objects are masked from &#39;package:terra&#39;:
+## 
+##     align, colorize, rotate, width</code></pre>
 <pre class="r"><code>library(RColorBrewer)
 library(tmap)
 library(terra)</code></pre>
-<pre><code>## terra 1.8.29
-## 
-## Attaching package: &#39;terra&#39;
-## 
-## The following objects are masked from &#39;package:flextable&#39;:
-## 
-##     align, colorize, rotate, width
-## 
-## The following object is masked from &#39;package:tidyr&#39;:
-## 
-##     extract</code></pre>
 <p><br />
 </p>
 </div>
@@ -642,12 +988,10 @@ the Bay?</p>
 <pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
 <pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
 ## `tm_scale_continuous()`.
-## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
-## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).
 ## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
 <pre class="r"><code>ca.ndvi.map</code></pre>
 <pre><code>## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.</code></pre>
-<p><img src="Lab5_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p><br />
 </p>
 <p>We find that the most least green areas are in the downtown areas of
@@ -717,7 +1061,7 @@ distribution of greenspace exposure among participants?</p>
   ggplot() + 
   geom_histogram(mapping = aes(x=NDVI_BayArea)) </code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="Lab5_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="Lab5_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 <p><br />
 </p>
 <p>For the purposes of our analysis, let’s divide up our greenspace data
@@ -798,7 +1142,7 @@ stated above). In other words, we don’t see a relationship between
 greenspace exposure and our outcome (dying over followup).</p>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDU6IFNwYXRpYWwgRGF0YSBQcm9jZXNzaW5nIHdpdGggVmVjdG9yIGFuZCBSYXN0ZXIgRGF0YScKLS0tCgpcCgpJbiB0aGlzIGxhYiwgd2UgYXJlIGdvaW5nIHRvIHdvcmsgd2l0aCB2ZWN0b3IgYW5kIHJhc3RlciBkYXRhLCBzcGF0aWFsbHkgam9pbmluZyBwb2ludCBkYXRhIHRvIHZlY3RvciBkYXRhIAoKVGhlIG9iamVjdGl2ZXMgb2YgdGhpcyBndWlkZSBhcmUgdG8gdGVhY2ggeW91OgoKICAgMS4gSW1wb3J0IG91ciBkYXRhc2V0IHdpdGggc2ltdWxhdGVkIGdlb2NvZGVkIGFkZHJlc3NlcyBhbmQgbW9ydGFsaXR5IGRhdGEgZnJvbSBhbiBvdmFyaWFuIGNhbmNlciBjb2hvcnQKICAgMi4gSW1wb3J0IGEgZGF0YXNldCB3aXRoIGdyZWVuc3BhY2UgYWNyb3NzIHRoZSBCYXkgQXJlYQogICAzLiBDb21wYXJlIHByb2plY3Rpb25zIG9mIGRhdGFzZXRzIGFuZCByZS1wcm9qZWN0IGlmIG5lZWRlZAogICA0LiBNYWtlIG1hcHMKICAgNS4gU3BhdGlhbGx5IGpvaW4gdGhlIHR3byBkYXRhc2V0cwogICA2LiBSdW4gYSBxdWljayBzdGF0aXN0aWNhbCBhbmFseXNpcyBvbiB0aGUgdHdvIGRhdGFzZXRzIGNvbWJpbmVkCgpFbm91Z2ggdGFsay0tbGV0J3MgZ2V0IGNvZGluZyEKClwKCiMgSW5zdGFsbCBwYWNrYWdlcwoKRmlyc3QsIGxldCdzIGluc3RhbGwgb3VyIHBhY2thZ2VzLgpgYGB7cn0KbGlicmFyeShzZikKbGlicmFyeShNYXBHQU0pCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KGZsZXh0YWJsZSkKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkodG1hcCkKbGlicmFyeSh0ZXJyYSkKYGBgCgpcCgojIEJyaW5nIGluIENhbmNlciBkYXRhc2V0CgpXZSB3aWxsIGJlIHVzaW5nIGRhdGEgaW5jbHVkZWQgaW4gdGhlICoqTWFwR0FNKiogW3BhY2thZ2VdKGh0dHBzOi8vY3Jhbi5yLXByb2plY3Qub3JnL3dlYi9wYWNrYWdlcy9NYXBHQU0vTWFwR0FNLnBkZikuIEFzIGEgcmVtaW5kZXI6IFdoaWxlIHRoZXkgYXJlIGJhc2VkIG9uIHJlYWwgcGF0dGVybnMgZXhwZWN0ZWQgaW4gb2JzZXJ2YXRpb25hbCBlcGlkZW1pb2xvZ2ljIHN0dWRpZXMsIHRoZXNlIGRhdGEgaGF2ZSBiZWVuIHNpbXVsYXRlZCBhbmQgYXJlIGZvciB0ZWFjaGluZyBwdXJwb3NlcyBvbmx5LiBUaGUgZGF0YSBjb250YWluIDUwMDAgc2ltdWxhdGVkIG92YXJpYW4gY2FuY2VyIGNhc2VzLiBXaGlsZSB0aGlzIGlzIGEgY29ob3J0IHdpdGggdGltZSB0byBtb3J0YWxpdHksIGZvciB0aGUgcHVycG9zZXMgb2Ygb3VyIGNsYXNzLCB3ZSB3aWxsIGNvbmR1Y3Qgc2ltcGxlIHRhYnVsYXIgYW5hbHlzZXMgbG9va2luZyBhdCBhc3NvY2lhdGlvbnMgYmV0d2VlbiBkaWZmZXJlbnQgc3BhdGlhbCBleHBvc3VyZXMgd2l0aCBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cC4gCgpBcyBhbm90aGVyIHJlbWluZGVyLCB0aGUgKkNBZGF0YSogZGF0YXNldCBjb250YWlucyB0aGUgZm9sbG93aW5nIHZhcmlhYmxlczoKCiogdGltZSAoZm9sbG93LXVwIHRpbWUpCiogZXZlbnQgKDE9ZGVhZCwgMD1jZW5zb3JlZCkKKiBYIChMYXRpdHVkZSkKKiBZIChMb25naXR1ZGUpCiogQUdFIChhZ2UgaW4geWVhcnMpCiogSU5TIChpbnN1cmFuY2Ugc3RhdHVzLCBjYXRlZ29yaWNhbCkKClwKCiMjIFJlYWQgaW4gQ2FuY2VyIERhdGFzZXQKCk5leHQsIHdlIHdhbnQgdG8gcmVhZCBpbiBhbGwgb2Ygb3VyIHNwYXRpYWwgZGF0YS4gRmlyc3QsIHdlIHJlYWQgaW4gdGhlICpDQWRhdGEqIGRhdGFzZXQgZnJvbSB0aGUgKipNYXBHQU0qKiBwYWNrYWdlLCBhbmQgdGhlbiBjb252ZXJ0IGl0IHRvIGEgc3BhdGlhbCBkYXRhc2V0LiAKCmBgYHtyfQpkYXRhKENBZGF0YSkKY2FfcHRzIDwtIENBZGF0YQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpLCBjcnM9Y2FfcHJvaikKYGBgCgpcCgojIyBSZWFkIGluIEdyZWVuc3BhY2UgRGF0YQoKV2UgdGhlbiByZWFkIGluIHRoZSByYXN0ZXIgZm9yIGdyZWVuc3BhY2UgZGF0YSBhY3Jvc3MgdGhlIEJheSBBcmVhLiBGaW5hbGx5LCB3ZSBjaGVjayB0aGUgZmlsZSB0byBtYWtlIHN1cmUgaXQgd2FzIHJlYWQgY29ycmVjdGx5LiBEb2VzIGl0IGhhdmUgYSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0/CgoKYGBge3J9CnVybCA8LSAiaHR0cHM6Ly9naXRodWIuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yYXcvbWFpbi9ORFZJX3Jhc3QyLnRpZiIKZG93bmxvYWQuZmlsZSh1cmwsIGRlc3RmaWxlID0gIk5EVklfcmFzdDIudGlmIiwgbW9kZSA9ICJ3YiIpCm5kdmlfcmFzdCA9IHJhc3QoIk5EVklfcmFzdDIudGlmIikKCm5kdmlfcmFzdApgYGAKClwKCiMgQ2hlY2sgUHJvamVjdGlvbnMgZm9yIGFsbCBTcGF0aWFsIERhdGEKCkZpbmFsbHksIHdlIGNoZWNrIHRoZSBwcm9qZWN0aW9ucy4gKipUaGlzIGlzIHRoZSBtb3N0IGltcG9ydGFudCBzdGVwIGFuZCBpcyBndWFyYW50ZWVkIHRvIG1ha2UgbGlmZSBlYXNpZXIgd2l0aCB5b3VyIGdlb3NwYXRpYWwgYW5hbHlzaXMhKiogV2hlbiB5b3UgaGF2ZSBmaWxlcyBpbiBkaWZmZXJlbnQgcHJvamVjdGlvbnMsIHRoaXMgY2FuIGJlIGEgbWFqb3IgcHJvYmxlbSBiZWNhdXNlIHdoZW4gd2UgdHJ5IHRvIG92ZXJsYXkgdGhlIHR3byBmaWxlcyB0aGV5IG1heSBub3Qgb3ZlcmxhcC4gRmlyc3Qgd2UgY2hlY2sgdGhlIGNvb3JkaW5hdGUgcmVmZXJlbmNlIHN5c3RlbXMgZm9yIGVhY2ggZGF0YXNldCB1c2luZyBgc3RfY3JzKClgLiBXZSB0aGVuIHVzZSB0aGUgYHN0X3RyYW5zZm9ybSgpYCBmdW5jdGlvbiB0byBjb252ZXJ0IHRoZSBwcm9qZWN0aW9uIGZvciBvdXIgcG9pbnQgZGF0YSB0byBtYXRjaCB0aGF0IG9mIG91ciBwb2x5Z29uIGRhdGEuIFdoZW4gd2UgYXJlIGRvbmUsIGRvIHRoZSBwcm9qZWN0aW9ucyBvZiB0aGUgdHdvIGRhdGFzZXRzIG1hdGNoPwoKCmBgYHtyfQojIyBMb29rIGF0IHRoZSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0gZm9yIHRoZSBjYW5jZXIgZGF0YSwgYW5kIGZvciBncmVlbnNwYWNlIGRhdGEKc3RfY3JzKGNhX3B0cykKc3RfY3JzKG5kdmlfcmFzdCkKCiMjIFRyYW5zZm9ybSB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtIG9mIHRoZSBjYW5jZXIgZGF0YSB0byBtYXRjaCB0aGF0IAojIyBvZiB0aGUgZ3JlZW5zcGFjZSAgZGF0YQpjYV90cmFuc2Zvcm1lZCA8LXN0X3RyYW5zZm9ybShjYV9wdHMsIHN0X2NycyhuZHZpX3Jhc3QpKSAgCgojIyBDaGVjayBwcm9qZWN0aW9ucwpzdF9jcnMobmR2aV9yYXN0KT09c3RfY3JzKGNhX3RyYW5zZm9ybWVkKQpgYGAKClwKCiMgTWFwIFRoZSBEYXRhCgpOb3csIHdlIHdpbGwgdmlzdWFsaXplIG91ciBzcGF0aWFsIGRhdGEgdXNpbmcgKip0bWFwKiouIFdlIHdpbGwgb3ZlcmxheSB0aGUgZ3JlZW5zcGFjZSBtYXBzIHdpdGggdGhlIG92YXJpYW4gY2FuY2VyIGRhdGEuIERvIGFueSBwYXR0ZXJucyBqdW1wIG91dCwgb3IgYXJlIHRoZXJlIGFueSBwYXJ0aWNpcGFudHMgbGl2aW5nIGluIHRoZSBtaWRkbGUgb2YgdGhlIEJheT8KCmBgYHtyfQpjYS5uZHZpLm1hcCA8LSB0bV9zaGFwZShuZHZpX3Jhc3QpICsKICB0bV9yYXN0ZXIoc3R5bGUgPSAiY29udCIpICsKICAgICAgdG1fc2hhcGUoY2FfdHJhbnNmb3JtZWQpICsKICAgICAgICB0bV9kb3RzKHNpemU9MC4yNSwgYWxwaGE9MC44LCBjb2w9ImJsdWUiKQpjYS5uZHZpLm1hcApgYGAKClwKCldlIGZpbmQgdGhhdCB0aGUgbW9zdCBsZWFzdCBncmVlbiBhcmVhcyBhcmUgaW4gdGhlIGRvd250b3duIGFyZWFzIG9mIFNhbiBGcmFuY2lzY28gYW5kIE9ha2xhbmQsIHdoaWNoIG1ha2VzIHNlbnNlLiBPdXIgY2FuY2VyIGNvaG9ydCBkYXRhIG92ZXJsYXBzIHdpdGggdGhlIGdyZWVuc3BhY2UgbWFwLCB3aGljaCBpcyByZWFzc3VyaW5nLiAKClwKCiMgRXh0cmFjdCBSYXN0ZXIgVmFsdWVzIHRvIFBvaW50cwoKTm93IHRoYXQgd2UgaGF2ZSB2aXN1YWxpemVkIG91ciBkYXRhLCBsZXQncyBzZWUgaWYgdGhlcmUgaXMgYW4gYXNzb2NpYXRpb24gYmV0d2VlbiBncmVlbnNwYWNlIGV4cG9zdXJlIGFuZCBtb3J0YWxpdHkgYW1vbmcgb3ZhcmlhbiBjYW5jZXIgY2FzZXMuIFdlIHdpbGwgZmlyc3QgZXh0cmFjdCB0aGUgdmFsdWVzIGZvciBncmVlbnNwYWNlIHRvIHRoZSBjYW5jZXIgZGF0YXNldCAobWVyZ2UgdGhlIHR3byBkYXRhc2V0cyBiYXNlZCBvbiBsb2NhdGlvbiBvZiBjYXNlcyBhbmQgdGhlIGdyZWVuc3BhY2UgcGl4ZWwgdGhhdCB0aGV5IGFyZSBpbikgdXNpbmcgYHRlcnJhOjpleHRyYWN0YC4gVGhlbiB3ZSB3aWxsIGNoZWNrIHRoZSBkaXN0cmlidXRpb24gb2YgZ3JlZW5zcGFjZSBleHBvc3VyZSBpbiBvdXIgY2FuY2VyIGNhc2VzLiBXZSB3aWxsIHVzZSBhIHR3by1zaWRlZCBjaGktc3F1YXJlZCB0ZXN0IHRvIHRlc3Qgb3VyIGh5cG90aGVzaXMgb2YgdGhlIGFzc29jaWF0aW9uIGJldHdlZW4gZ3JlZW5zcGFjZSBleHBvc3VyZSBhbmQgbW9ydGFsaXR5IGFtb25nIG92YXJpYW4gY2FuY2VyIGNhc2VzLiBXaGF0IGRvIHdlIGZpbmQ/CgpgYGB7cn0KIyMgU3BhdGlhbGx5IGpvaW4gdGhlIGNhbmNlciBwb2ludCBkYXRhIHRvIHRoZSB3YWxrYWJpbGl0eSBwb2x5Z29uIGRhdGEKbmR2aV9jYW5jZXIgPSBkYXRhLmZyYW1lKGNhX3RyYW5zZm9ybWVkLHRlcnJhOjpleHRyYWN0KG5kdmlfcmFzdCwgY2FfdHJhbnNmb3JtZWQpKQpnbGltcHNlKG5kdmlfY2FuY2VyKSAKIyMgVGFrZSBhIGxvb2sgYXQgYSBzdW1tYXJ5IG9mIHRoZSB2YWx1ZXMKc3VtbWFyeShuZHZpX2NhbmNlciRORFZJX0JheUFyZWEpCmBgYAoKXAoKTG9va3MgbGlrZSB3ZSBoYXZlIGxvdHMgb2YgTkEgdmFsdWVzLiBUaGF0IGlzIGJlY2F1c2Ugc29tZSBvZiBvdXIgcGFydGljaXBhbnRzIGxpdmUgb3V0c2lkZSBvZiB0aGUgYXJlYSBvZiBvdXIgZ3JlZW5zcGFjZSBkYXRhLiBMZXQncyBkcm9wIHRob3NlIG1pc3NpbmcgdmFsdWVzIHVzaW5nIGBkcm9wX25hKClgLCB3aGljaCBpcyBzbGlnaHRseSBkaWZmZXJlbnQgZnJvbSBob3cgd2UndmUgZG9uZSB0aGlzIGJlZm9yZS4KCmBgYHtyfQpuZHZpX2NhbmNlcl9ub21pc3MgPC0gbmR2aV9jYW5jZXIgJT4lIGRyb3BfbmEoTkRWSV9CYXlBcmVhKSAKCiMjIFRha2UgYSBsb29rIGF0IGEgc3VtbWFyeSBvZiB0aGUgdmFsdWVzCnN1bW1hcnkobmR2aV9jYW5jZXJfbm9taXNzJE5EVklfQmF5QXJlYSkKZ2xpbXBzZShuZHZpX2NhbmNlcl9ub21pc3MpCmBgYAoKXAoKIyBBbmFseXplIG91ciBKb2luZWQgRGF0YXNldApPSywgd2UgaGF2ZSBhIGRhdGFzZXQgd2l0aCBubyBtaXNzaW5nbmVzcy4gQ2FuIHdlIGxvb2sgYXQgdGhlIGRpc3RyaWJ1dGlvbiBvZiBncmVlbnNwYWNlIGV4cG9zdXJlIGFtb25nIHBhcnRpY2lwYW50cz8KYGBge3J9Cm5kdmlfY2FuY2VyX25vbWlzcyAlPiUKICBnZ3Bsb3QoKSArIAogIGdlb21faGlzdG9ncmFtKG1hcHBpbmcgPSBhZXMoeD1ORFZJX0JheUFyZWEpKSAKCmBgYAoKXAoKRm9yIHRoZSBwdXJwb3NlcyBvZiBvdXIgYW5hbHlzaXMsIGxldCdzIGRpdmlkZSB1cCBvdXIgZ3JlZW5zcGFjZSBkYXRhIGludG8gcXVhcnRpbGVzLiBXZSB3aWxsIGRvIHRoaXMgdXNpbmcgdGhlIGBtdXRhdGUoKWAgZnVuY3Rpb24gY29tYmluZWQgd2l0aCB0aGUgYG50aWxlKClgIGZ1bmN0aW9uLiBUaGVuIHdlIHdpbGwgdGFrZSBhIGdsaW1wc2UgYXQgb3VyIG5ldyBkYXRhc2V0LgoKYGBge3J9Cm5kdmlfY2FuY2VyX25vbWlzcyA8LSBuZHZpX2NhbmNlcl9ub21pc3MgJT4lCiAgbXV0YXRlKG5kdmlfcXVhcnRpbGUgPSBudGlsZShORFZJX0JheUFyZWEsIDQpKQoKZ2xpbXBzZShuZHZpX2NhbmNlcl9ub21pc3MpCmBgYAoKXAoKT0sgdGhhdCBsb29rcyBnb29kLiBXZSBoYXZlIGNyZWF0ZWQgYSBuZXcgdmFyaWFibGUgKm5kdmlfcXVhcnRpbGUqIHRoYXQgdGVsbHMgdXMgd2hhdCBxdWFydGlsZSBvZiBncmVlbnNwYWNlIGEgcGFydGljaXBhbnQgbGl2ZXMgaW4uIExldCdzIGRvIGEgdHdvIGJ5IHR3byB0YWJsZSBvZiBncmVlbnNwYWNlIHF1YXJ0aWxlcyBieSAqZXZlbnQqLCB3aGljaCBpcyB3aGV0aGVyIGEgcGFydGljaXBhbnQgZGllZCBvdmVyIGZvbGxvd3VwLgpgYGB7cn0KIyMgQ3JlYXRlIGEgY29udGluZ2VuY3kgdGFibGUgb2YgZXZlbnQgYnkgd2Fsa19xdWFydGlsZQp0YWIgPC0gdGFibGUobmR2aV9jYW5jZXJfbm9taXNzJG5kdmlfcXVhcnRpbGUsIG5kdmlfY2FuY2VyX25vbWlzcyRldmVudCkKdGFiCmBgYAoKXAoKSG1tbSwgdGhhdCdzIGludGVyZXN0aW5nLCBidXQgbGV0J3MgbG9vayBhdCB0aGlzIGJ5IHBlcmNlbnRhZ2VzIGluc3RlYWQuCmBgYHtyfQojIyBDb252ZXJ0IHRvIHBlcmNlbnRhZ2VzIGJ5IGNvbHVtbgp0YWJfY29sX3BlcmMgPC0gcHJvcC50YWJsZSh0YWIsIG1hcmdpbiA9IDIpICogMTAwCnJvdW5kKHRhYl9jb2xfcGVyYywgMSkKYGBgCgpcCgpEbyB5b3UgdGhpbmsgdGhlIHBlcmNlbnRhZ2VzIGFyZSBkaWZmZXJlbnQgYnkgcXVhcnRpbGUgb2YgZ3JlZW5zcGFjZT8gV2UgY2FuIHJ1biBhIGNoaS1zcXVhcmVkIHRlc3QgdG8gYmUgc3VyZS4gVGhpcyBpcyBhIHN0YXRpc3RpY2FsIHRlc3QgdG8gc2VlIHdoZXRoZXIgdGhlcmUgaXMgYSBkaWZmZXJlbmNlIGluIHRoZSBwcm9iYWJpbGl0eSBvZiAqZXZlbnQqLCBvciB3aGV0aGVyIGEgcGFydGljaXBhbnQgZGllZCBvdmVyIGZvbGxvdy11cCwgYnkgdGhlIHF1YXJ0aWxlcyBvZiBncmVlbnNwYWNlIFdlIGRvIHRoaXMgd2l0aCB0aGUgYGNoaXNxLnRlc3QoKWAgZnVuY3Rpb24uCmBgYHtyfQojIyBDaGktc3F1YXJlZCB0ZXN0CmNoaXNxLnRlc3QodGFiKQpgYGAKClwKCk9LLCBob3cgZG8gd2UgaW50ZXJwcmV0IHRoaXM/IE91ciBudWxsIGh5cG90aGVzaXMgaXMgdGhhdCB0aGVyZSBpcyBubyBhc3NvY2lhdGlvbiBiZXR3ZWVuIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwIGFuZCBpbmNyZWFzaW5nIHF1YXJ0aWxlIG9mIGdyZWVuc3BhY2UuIE91ciBhbHRlcm5hdGl2ZSBoeXBvdGhlc2lzIGlzIHRoYXQgdGhlcmUgaXMgYW4gYXNzb2NpYXRpb24gYmV0d2VlbiBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cCBhbmQgaW5jcmVhc2luZyBxdWFydGlsZSBvZiBncmVlbnNwYWNlLiBXZSB1c2UgYSB0d28tc2lkZWQgY2hpLXNxdWFyZWQgdGVzdCB3aXRoIGFscGhhPTAuMDUuIEFzc3VtaW5nIG5vIHNvdXJjZXMgb2YgYmlhcyBhbmQgdGhhdCB0aGUgbnVsbCBoeXBvdGhlc2lzIGlzIHRydWUsIHRoZSBwcm9iYWJpbGl0eSBvZiBvYnNlcnZpbmcgaW5jcmVhc2VzIGluIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwIHdpdGggaW5jcmVhc2luZyBxdWFydGlsZXMgb2YgZ3JlZW5zcGFjZSBhcyBvciBtb3JlIGV4dHJlbWUgYXMgdGhvc2UgcHJvZHVjZWQgaW4gdGhlc2UgZGF0YSBpcyAwLjcxNi4gU2luY2UgcD4wLjA1LCB3ZSBmYWlsIHRvIHJlamVjdCB0aGUgbnVsbCBoeXBvdGhlc2lzIGFuZCBjb25jbHVkZSB0aGF0IGdyZWVuc3BhY2UgaXMgbm90IGFzc29jaWF0ZWQgd2l0aCBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cCAodW5kZXIgdGhlIGFzc3VtcHRpb25zIHN0YXRlZCBhYm92ZSkuIEluIG90aGVyIHdvcmRzLCB3ZSBkb24ndCBzZWUgYSByZWxhdGlvbnNoaXAgYmV0d2VlbiBncmVlbnNwYWNlIGV4cG9zdXJlIGFuZCBvdXIgb3V0Y29tZSAoZHlpbmcgb3ZlciBmb2xsb3d1cCkuCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDU6IFdvcmtpbmcgd2l0aCBSYXN0ZXIgZGF0YSwgSm9pbiBnZW9jb2RlZCBhZGRyZXNzZXMgdG8gcG9seWdvbiBkYXRhIHRvIGNyZWF0ZSBleHBvc3VyZSBtZXRyaWNzJwotLS0KCkluIHRoaXMgbGFiLCB3ZSBhcmUgZ29pbmcgdG8gd29yayB3aXRoIHZlY3RvciBhbmQgcmFzdGVyIGRhdGEsIHNwYXRpYWxseSBqb2luaW5nIHBvaW50IGRhdGEgdG8gdmVjdG9yIGRhdGEgCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3U6CgogICAxLiBJbnRyb2R1Y2UgcmFzdGVyIGRhdGEgCiAgIDIuIEltcG9ydCBvdXIgZGF0YXNldCB3aXRoIHNpbXVsYXRlZCBnZW9jb2RlZCBhZGRyZXNzZXMgYW5kIG1vcnRhbGl0eSBkYXRhIGZyb20gYW4gb3ZhcmlhbiBjYW5jZXIgY29ob3J0CiAgIDMuIEltcG9ydCBhIGRhdGFzZXQgd2l0aCBncmVlbnNwYWNlIGFjcm9zcyB0aGUgQmF5IEFyZWEKICAgNC4gQ29tcGFyZSBwcm9qZWN0aW9ucyBvZiBkYXRhc2V0cyBhbmQgcmUtcHJvamVjdCBpZiBuZWVkZWQKICAgNS4gTWFrZSBtYXBzCiAgIDYuIFNwYXRpYWxseSBqb2luIHRoZSB0d28gZGF0YXNldHMKICAgNy4gUnVuIGEgcXVpY2sgc3RhdGlzdGljYWwgYW5hbHlzaXMgb24gdGhlIHR3byBkYXRhc2V0cyBjb21iaW5lZAoKRW5vdWdoIHRhbGstLWxldCdzIGdldCBjb2RpbmchCgpcCiMgTG9hZCBwYWNrYWdlcwpgYGB7cn0KbGlicmFyeSh0ZXJyYSkKbGlicmFyeShzZikKbGlicmFyeSh0bWFwKQpsaWJyYXJ5KE1hcEdBTSkKYGBgCiAgICAgICAgCiMgUmFzdGVycwoKUmFzdGVyIGRhdGFzZXRzIGFyZSBzaW1wbHkgYW4gYXJyYXkgb2YgcGl4ZWxzL2NlbGxzIG9yZ2FuaXplZCBpbnRvIHJvd3MgYW5kIGNvbHVtbnMgKG9yIGEgZ3JpZCkgd2hlcmUgZWFjaCBjZWxsIGNvbnRhaW5zIGEgdmFsdWUgcmVwcmVzZW50aW5nIGluZm9ybWF0aW9uLCBzdWNoIGFzIHRlbXBlcmF0dXJlLCB2ZWdldGF0aW9uLCBsYW5kIHVzZSwgYWlyIHBvbGx1dGlvbiwgZXRjLiBSYXN0ZXIgbWFwcyB1c3VhbGx5IHJlcHJlc2VudCBjb250aW51b3VzIHBoZW5vbWVuYSBzdWNoIGFzIGVsZXZhdGlvbiwgdGVtcGVyYXR1cmUsIG9yIHBvcHVsYXRpb24gZGVuc2l0eS4gRGlzY3JldGUgZmVhdHVyZXMgc3VjaCBhcyBzb2lsIHR5cGUgb3IgbGFuZC1jb3ZlciBjbGFzc2VzIGNhbiBhbHNvIGJlIHJlcHJlc2VudGVkIGluIHRoZSByYXN0ZXIgZGF0YSBtb2RlbC4gUmFzdGVycyBhcmUgYWVyaWFsIHBob3RvZ3JhcGhzLCBpbWFnZXJ5IGZyb20gc2F0ZWxsaXRlcywgR29vZ2xlIFN0cmVldCBWaWV3IGltYWdlcywgZXRjLiBBIGZldyB0aGluZ3MgdG8gbm90ZS4KCiAtIFJhc3RlciBkYXRhc2V0cyBhcmUgYWx3YXlzIHJlY3Rhbmd1bGFyIChyb3dzIHggY29sKSBzaW1pbGFyIHRvIG1hdHJpY2VzLiBJcnJlZ3VsYXIgYm91bmRhcmllcyBhcmUgY3JlYXRlZCBieSB1c2luZyBgTkFzYC4KIC0gUmFzdGVycyBoYXZlIHRvIGNvbnRhaW4gdmFsdWVzIG9mIHRoZSBzYW1lIHR5cGUgKGludCwgZmxvYXQsIGJvb2xlYW4pIHRocm91Z2hvdXQgdGhlIHJhc3RlciwganVzdCBsaWtlIG1hdHJpY2VzIGFuZCB1bmxpa2UgZGF0YSBmcmFtZXMuCiAtIFRoZSBzaXplIG9mIHRoZSByYXN0ZXIgZGVwZW5kcyBvbiB0aGUgKipyZXNvbHV0aW9uKiogYW5kIHRoZSAqKmV4dGVudCoqIG9mIHRoZSByYXN0ZXIuIEFzIHN1Y2ggbWFueSByYXN0ZXJzIGFyZSBsYXJnZSBhbmQgb2Z0ZW4gY2Fubm90IGJlIGhlbGQgaW4gbWVtb3J5IGNvbXBsZXRlbHkuCiAKIApUaGUgd29ya2hvcnNlIHBhY2thZ2UgZm9yIHdvcmtpbmcgd2l0aCByYXN0ZXJzIGluIFIgaXMgdGhlICoqdGVycmEqKiBwYWNrYWdlIGJ5IFJvYmVydCBIaWptYW5zLiAqKnRlcnJhKiogaGFzIGZ1bmN0aW9ucyBmb3IgY3JlYXRpbmcsIHJlYWRpbmcsIG1hbmlwdWxhdGluZywgYW5kIHdyaXRpbmcgcmFzdGVyIGRhdGEuIFRoZSBwYWNrYWdlIGFsc28gaW1wbGVtZW50cyByYXN0ZXIgYWxnZWJyYSBhbmQgbWFueSBvdGhlciBmdW5jdGlvbnMgZm9yIHJhc3RlciBkYXRhIG1hbmlwdWxhdGlvbi4gVGhlIHBhY2thZ2Ugd29ya3Mgd2l0aCBgU3BhdFJhc3RlcmAgb2JqZWN0cy4gVGhlIGByYXN0KClgIGZ1bmN0aW9uIGlzIHVzZWQgdG8gY3JlYXRlIHRoZXNlIG9iamVjdHMuIAoKVHlwaWNhbGx5IHlvdSB3aWxsIGJyaW5nIGluIGEgcmFzdGVyIGRhdGFzZXQgZGlyZWN0bHkgZnJvbSBhIGZpbGUuIFRoZXNlIGZpbGVzIGNvbWUgaW4gbWFueSBkaWZmZXJlbnQgZm9ybXMsIHR5cGljYWxseSAudGlmLCAuaW1nLCBhbmQgLmdyZC4KClwKCldl4oCZbGwgYnJpbmcgaW4gdGhlIGZpbGUgTkRWSV9yYXN0LnRpZi4gVGhlIGZpbGUgY29udGFpbnMgbm9ybWFsaXplZCBkaWZmZXJlbmNlIHZlZ2V0YXRpb24gaW5kZXggKE5EVkkpIGRhdGEgZm9yIHRoZSBCYXkgQXJlYS4gVGhlc2UgZGF0YSBhcmUgdGFrZW4gZnJvbSBMYW5kc2F0IHNhdGVsbGl0ZSBkYXRhIHRoYXQgSSBkb3dubG9hZGVkIGZyb20gR29vZ2xlIEVhcnRoIEVuZ2luZS4gV2UgdXNlIHRoZSBmdW5jdGlvbiBgcmFzdCgpYCB0byBicmluZyBpbiBkYXRhIGluIHJhc3RlciBmb3JtLCB0aGVuIHRha2UgYSBsb29rIGF0IHRoZSBkYXRhc2V0LgoKYGBge3J9CgoKdXJsIDwtICJodHRwczovL2dpdGh1Yi5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3Jhdy9tYWluL05EVklfcmFzdDIudGlmIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiTkRWSV9yYXN0Mi50aWYiLCBtb2RlID0gIndiIikKTkRWSV9yYXN0ZXIgPSByYXN0KCJORFZJX3Jhc3QyLnRpZiIpCgojIyBHZXQgc3VtbWFyeSBvZiByYXN0ZXIgZGF0YQpORFZJX3Jhc3RlcgpgYGAKClwKCkRvZXMgaXQgaGF2ZSBhIENSUz8KYGBge3J9CgojIyBDaGVjayBDUlMKc3RfY3JzKE5EVklfcmFzdGVyKQoKYGBgCgpcCgpPSyB3ZSBoYXZlIHdoYXQgbG9va3MgbGlrZSBhIHJhc3Rlci4gV2Ugc2VlIG91ciByZXNvbHV0aW9uIGFuZCBvdXIgZXh0ZW50LCBhbmQgd2UgaGF2ZSBhIENSUy4gTmljZSEgU2hhbGwgd2UgcGxvdCB0aGlzPwoKYGBge3J9CiMjIFBsb3QgdGhlIHJhc3RlciBvbiBhIG1hcAp0bWFwX21vZGUoInBsb3QiKQpORFZJX21hcCA9IHRtX3NoYXBlKE5EVklfcmFzdGVyKSArCiAgdG1fcmFzdGVyKHN0eWxlID0gImNvbnQiKSArCiAgdG1fbGVnZW5kKG91dHNpZGUgPSBUUlVFKQpORFZJX21hcApgYGAKClwKCkxvb2tzIHByZXR0eSBjb29sISBTZWVtcyB0byBiZSB0aGUgQmF5IEFyZWEsIGFuZCB3ZSBoYXZlIHNvbWUgbmljZSB2YXJpYWJpbGl0eS4gQnV0IHdlIGxldCdzIHNlZSBpZiB3ZSBjYW4gbWFrZSB0aGlzIGZhbmNpZXIuCgpgYGB7cn0KIyBwYWxldHRlIGZvciBwbG90dGluZwpicmVha3NfbmR2aSA8LSBjKC0xLC0wLjIsLTAuMSwwLDAuMDI1ICwwLjA1LDAuMDc1LDAuMSwwLjEyNSwwLjE1LDAuMTc1LDAuMiAsMC4yNSAsMC4zICwwLjM1LDAuNCwwLjQ1LDAuNSwwLjU1LDAuNiwxKQpwYWxldHRlX25kdmkgPC0gYygiI0JGQkZCRiIsIiNEQkRCREIiLCIjRkZGRkUwIiwiI0ZGRkFDQyIsIiNFREU4QjUiLCIjREVEOTlDIiwiI0NDQzc4MiIsIiNCREI4NkIiLCIjQjBDMjYxIiwiI0EzQ0M1OSIsIiM5MUJGNTIiLCIjODBCMzQ3IiwiIzcwQTM0MCIsIiM2MTk2MzYiLCIjNEY4QTJFIiwiIzQwN0QyNCIsIiMzMDZFMUMiLCIjMjE2MTEyIiwiIzBGNTQwQSIsIiMwMDQ1MDAiKQoKTkRWSV9tYXAgPSB0bV9zaGFwZShORFZJX3Jhc3RlcikgKwogIHRtX3Jhc3Rlcih0aXRsZSA9ICJORFZJIiwKICAgICAgICAgICAgIHN0eWxlPSJjb250IiwKICAgICAgICAgICAgIHBhbGV0dGUgPSBwYWxldHRlX25kdmkKICAgICAgICAgICAgKSArCiAgdG1fbGVnZW5kKG91dHNpZGUgPSBUUlVFKQpORFZJX21hcApgYGAKClwKCiMjIENyb3AKCk9LLCBsZXQncyBzZWUgaWYgd2UgY2FuIGNyb3AgdGhpcyB0byBmb2N1cyBvbiBTYW4gRnJhbmNpc2NvLiBJJ3ZlIGdvb2dsZWQgdGhlIGxhdCBhbmQgbG9uZyBmb3IgdGhlIGFyZWEgYXJvdW5kIFNhbiBGcmFuY2lzY28sIGFuZCBJJ2xsIHB1dCB0aGVzZSByaWdodCBpbnRvIG15IGBjcm9wKClgIGZ1bmN0aW9uLiBJIGNhbiB1c2UgdGhlIGB0bWFwX21vZGUoInZpZXciKWAgbm93IGJlY2F1c2UgdGhlIHJhc3RlciBpcyBzbWFsbCBlbm91Z2ggZm9yIFIgdG8gbWFrZSBpbnRlcmFjdGl2ZS4KCmBgYHtyfQpzZl9yYXN0PC1jcm9wKE5EVklfcmFzdGVyLCBleHQoLTEyMi41NSwgLTEyMi4zNSwgMzcuNywgMzcuODMpKQoKdG1hcF9tb2RlKCJwbG90IikKTkRWSV9zZl9tYXAgPSB0bV9zaGFwZShzZl9yYXN0KSArCiAgdG1fcmFzdGVyKHRpdGxlID0gIk5EVkkiLAogICAgICAgICAgICAgc3R5bGU9ImNvbnQiLAogICAgICAgICAgICApICsKICB0bV9sZWdlbmQob3V0c2lkZSA9IFRSVUUpCgpORFZJX3NmX21hcApgYGAKClwKCiMjIENsYXNzaWZ5CgpTbyBuZWdhdGl2ZSB2YWx1ZXMgb2YgTkRWSSByZXByZXNlbnQgd2F0ZXIuIExldCdzIHNldCBhbGwgbmVnYXRpdmUgdmFsdWVzIHRvIC0xLCBhbmQgdGhhdCB3aWxsIGhlbHAgdXMgdG8gZGlzdGluZ3Vpc2ggd2F0ZXIgZnJvbSBsYW5kIGVhc2llci4KCmBgYHtyfQpzZl9yYXN0X25lZyA8LSBhcHAoc2ZfcmFzdCwgZnVuPWZ1bmN0aW9uKHgpeyB4W3ggPD0gMF0gPC0gLTE7IHJldHVybih4KX0gKQoKTkRWSV9zZl9tYXBfbmVnID0gdG1fc2hhcGUoc2ZfcmFzdF9uZWcpICsKICB0bV9yYXN0ZXIodGl0bGUgPSAiTkRWSSIsCiAgICAgICAgICAgICBzdHlsZT0iY29udCIsCiAgICAgICAgICAgICkgKwogIHRtX2xlZ2VuZChvdXRzaWRlID0gVFJVRSkKCk5EVklfc2ZfbWFwX25lZwpgYGAKClwKCk5pY2UuIFdoYXQgZG8gd2Ugbm90aWNlPyBUaGUgY29hc3Qgb2YgU2FuIEZyYW5jaXNjbyBtaWdodCBoYXZlIHNvbWUgY2xvdWQgY292ZXIgZXJyb3JzISBTYXRlbGxpdGUgZGF0YSBpc24ndCBwZXJmZWN0ISBCdXQgdGhlIGdvb2QgbmV3cyBpcywgd2UndmUgbGVhcm5lZCBob3cgdG8gYnJpbmcgaW4gcmFzdGVyIGRhdGEhIEkgdGhpbmsgd2UgbmVlZCBhIGJhZGdlISEhIQoKXAoKIVt0ZXJyYSBCYWRnZV0odGVycmEucG5nKQoKXAoKT25lIGxhc3Qgc3RlcC4gTGV0J3MgcHV0IGFsbCBvdXIga25vd2xlZGdlIHRvZ2V0aGVyIGFuZCBtYXAgb3VyIG9sZCBmcmllbmQgQ0FkYXRhIG9uIHRvcCBvZiB0aGUgTkRWSSBkYXRhIGluIFNhbiBGcmFuY2lzY28uIEZpcnN0LCBsZXQncyBicmluZyBpbiB0aGUgQ0FkYXRhIGRhdGFzZXQgb24gb3ZhcmlhbiBjYW5jZXIgY2FzZXMgYWdhaW4uIAoKYGBge3J9CgpkYXRhKENBZGF0YSkKY2FfcHRzIDwtIENBZGF0YQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpLCBjcnM9Y2FfcHJvaikKYGBgCgpcCgpMZXQncyBjaGVjayB0aGUgQ1JTIGFuZCBjb21wYXJlIGl0IHRvIG91ciBORFZJIGRhdGFzZXQuCgpgYGB7cn0Kc3RfY3JzKGNhX3B0cykKc3RfY3JzKHNmX3Jhc3RfbmVnKQpgYGAKClwKCkhtbW0sIGxldCdzIG1ha2Ugc3VyZSB0aGV5IGFyZSB0aGUgc2FtZSBwcm9qZWN0aW9uLgoKYGBge3J9CmNhX3B0c19wcm9qPC1zdF90cmFuc2Zvcm0oY2FfcHRzLHN0X2NycyhzZl9yYXN0X25lZykpCnN0X2NycyhjYV9wdHNfcHJvaikKYGBgCgpcCgpUaGV5IHNob3VsZCBiZSBnb29kIHRvIGdvIG5vdy4gTGV0J3MgbWFwIHRoZXNlIGFkZHJlc3NlcyBvbiB0b3Agb2YgdGhlIHJhc3RlciBkYXRhIQoKYGBge3J9CnRtYXBfbW9kZSgicGxvdCIpCk5EVklfY2FuY2VyX21hcCA9IHRtX3NoYXBlKHNmX3Jhc3RfbmVnKSArCiAgdG1fcmFzdGVyKHN0eWxlID0gImNvbnQiLCB0aXRsZSA9ICJORFZJIikgKwogIHRtX2xlZ2VuZChvdXRzaWRlID0gVFJVRSkgKwogIHRtX3NoYXBlKGNhX3B0c19wcm9qKSArIAogIHRtX2RvdHMoc2l6ZT0wLjMsIGFscGhhPTAuNSwgY29sID0gImJsdWUiKQpORFZJX2NhbmNlcl9tYXAKYGBgCgpcCgpUaGF0IGlzIG9uZSBmaW5lIGxvb2tpbmcgbWFwLgoKXAoKIyBJbnN0YWxsIHBhY2thZ2VzCgpGaXJzdCwgbGV0J3MgaW5zdGFsbCBvdXIgcGFja2FnZXMuCmBgYHtyfQpsaWJyYXJ5KHNmKQpsaWJyYXJ5KE1hcEdBTSkKbGlicmFyeSh0aWR5dmVyc2UpCmxpYnJhcnkoZmxleHRhYmxlKQpsaWJyYXJ5KFJDb2xvckJyZXdlcikKbGlicmFyeSh0bWFwKQpsaWJyYXJ5KHRlcnJhKQpgYGAKClwKCiMgQnJpbmcgaW4gQ2FuY2VyIGRhdGFzZXQKCldlIHdpbGwgYmUgdXNpbmcgZGF0YSBpbmNsdWRlZCBpbiB0aGUgKipNYXBHQU0qKiBbcGFja2FnZV0oaHR0cHM6Ly9jcmFuLnItcHJvamVjdC5vcmcvd2ViL3BhY2thZ2VzL01hcEdBTS9NYXBHQU0ucGRmKS4gQXMgYSByZW1pbmRlcjogV2hpbGUgdGhleSBhcmUgYmFzZWQgb24gcmVhbCBwYXR0ZXJucyBleHBlY3RlZCBpbiBvYnNlcnZhdGlvbmFsIGVwaWRlbWlvbG9naWMgc3R1ZGllcywgdGhlc2UgZGF0YSBoYXZlIGJlZW4gc2ltdWxhdGVkIGFuZCBhcmUgZm9yIHRlYWNoaW5nIHB1cnBvc2VzIG9ubHkuIFRoZSBkYXRhIGNvbnRhaW4gNTAwMCBzaW11bGF0ZWQgb3ZhcmlhbiBjYW5jZXIgY2FzZXMuIFdoaWxlIHRoaXMgaXMgYSBjb2hvcnQgd2l0aCB0aW1lIHRvIG1vcnRhbGl0eSwgZm9yIHRoZSBwdXJwb3NlcyBvZiBvdXIgY2xhc3MsIHdlIHdpbGwgY29uZHVjdCBzaW1wbGUgdGFidWxhciBhbmFseXNlcyBsb29raW5nIGF0IGFzc29jaWF0aW9ucyBiZXR3ZWVuIGRpZmZlcmVudCBzcGF0aWFsIGV4cG9zdXJlcyB3aXRoIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwLiAKCkFzIGFub3RoZXIgcmVtaW5kZXIsIHRoZSAqQ0FkYXRhKiBkYXRhc2V0IGNvbnRhaW5zIHRoZSBmb2xsb3dpbmcgdmFyaWFibGVzOgoKKiB0aW1lIChmb2xsb3ctdXAgdGltZSkKKiBldmVudCAoMT1kZWFkLCAwPWNlbnNvcmVkKQoqIFggKExhdGl0dWRlKQoqIFkgKExvbmdpdHVkZSkKKiBBR0UgKGFnZSBpbiB5ZWFycykKKiBJTlMgKGluc3VyYW5jZSBzdGF0dXMsIGNhdGVnb3JpY2FsKQoKXAoKIyMgUmVhZCBpbiBDYW5jZXIgRGF0YXNldAoKTmV4dCwgd2Ugd2FudCB0byByZWFkIGluIGFsbCBvZiBvdXIgc3BhdGlhbCBkYXRhLiBGaXJzdCwgd2UgcmVhZCBpbiB0aGUgKkNBZGF0YSogZGF0YXNldCBmcm9tIHRoZSAqKk1hcEdBTSoqIHBhY2thZ2UsIGFuZCB0aGVuIGNvbnZlcnQgaXQgdG8gYSBzcGF0aWFsIGRhdGFzZXQuIAoKYGBge3J9CmRhdGEoQ0FkYXRhKQpjYV9wdHMgPC0gQ0FkYXRhCmNhX3Byb2ogPC0gIitwcm9qPWxjYyArbGF0XzE9NDAgK2xhdF8yPTQxLjY2NjY2NjY2NjY2NjY2IAogICAgICAgICAgICAgK2xhdF8wPTM5LjMzMzMzMzMzMzMzMzM0ICtsb25fMD0tMTIyICt4XzA9MjAwMDAwMCAKICAgICAgICAgICAgICt5XzA9NTAwMDAwLjAwMDAwMDAwMDIgK2VsbHBzPUdSUzgwIAogICAgICAgICAgICAgK2RhdHVtPU5BRDgzICt1bml0cz1tICtub19kZWZzIgoKY2FfcHRzIDwtIHN0X2FzX3NmKENBZGF0YSwgY29vcmRzPWMoIlgiLCJZIiksIGNycz1jYV9wcm9qKQpgYGAKClwKCiMjIFJlYWQgaW4gR3JlZW5zcGFjZSBEYXRhCgpXZSB0aGVuIHJlYWQgaW4gdGhlIHJhc3RlciBmb3IgZ3JlZW5zcGFjZSBkYXRhIGFjcm9zcyB0aGUgQmF5IEFyZWEuIEZpbmFsbHksIHdlIGNoZWNrIHRoZSBmaWxlIHRvIG1ha2Ugc3VyZSBpdCB3YXMgcmVhZCBjb3JyZWN0bHkuIERvZXMgaXQgaGF2ZSBhIGNvb3JkaW5hdGUgcmVmZXJlbmNlIHN5c3RlbT8KCgpgYGB7cn0KdXJsIDwtICJodHRwczovL2dpdGh1Yi5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3Jhdy9tYWluL05EVklfcmFzdDIudGlmIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiTkRWSV9yYXN0Mi50aWYiLCBtb2RlID0gIndiIikKbmR2aV9yYXN0ID0gcmFzdCgiTkRWSV9yYXN0Mi50aWYiKQoKbmR2aV9yYXN0CmBgYAoKXAoKIyBDaGVjayBQcm9qZWN0aW9ucyBmb3IgYWxsIFNwYXRpYWwgRGF0YQoKRmluYWxseSwgd2UgY2hlY2sgdGhlIHByb2plY3Rpb25zLiAqKlRoaXMgaXMgdGhlIG1vc3QgaW1wb3J0YW50IHN0ZXAgYW5kIGlzIGd1YXJhbnRlZWQgdG8gbWFrZSBsaWZlIGVhc2llciB3aXRoIHlvdXIgZ2Vvc3BhdGlhbCBhbmFseXNpcyEqKiBXaGVuIHlvdSBoYXZlIGZpbGVzIGluIGRpZmZlcmVudCBwcm9qZWN0aW9ucywgdGhpcyBjYW4gYmUgYSBtYWpvciBwcm9ibGVtIGJlY2F1c2Ugd2hlbiB3ZSB0cnkgdG8gb3ZlcmxheSB0aGUgdHdvIGZpbGVzIHRoZXkgbWF5IG5vdCBvdmVybGFwLiBGaXJzdCB3ZSBjaGVjayB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtcyBmb3IgZWFjaCBkYXRhc2V0IHVzaW5nIGBzdF9jcnMoKWAuIFdlIHRoZW4gdXNlIHRoZSBgc3RfdHJhbnNmb3JtKClgIGZ1bmN0aW9uIHRvIGNvbnZlcnQgdGhlIHByb2plY3Rpb24gZm9yIG91ciBwb2ludCBkYXRhIHRvIG1hdGNoIHRoYXQgb2Ygb3VyIHBvbHlnb24gZGF0YS4gV2hlbiB3ZSBhcmUgZG9uZSwgZG8gdGhlIHByb2plY3Rpb25zIG9mIHRoZSB0d28gZGF0YXNldHMgbWF0Y2g/CgoKYGBge3J9CiMjIExvb2sgYXQgdGhlIGNvb3JkaW5hdGUgcmVmZXJlbmNlIHN5c3RlbSBmb3IgdGhlIGNhbmNlciBkYXRhLCBhbmQgZm9yIGdyZWVuc3BhY2UgZGF0YQpzdF9jcnMoY2FfcHRzKQpzdF9jcnMobmR2aV9yYXN0KQoKIyMgVHJhbnNmb3JtIHRoZSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0gb2YgdGhlIGNhbmNlciBkYXRhIHRvIG1hdGNoIHRoYXQgCiMjIG9mIHRoZSBncmVlbnNwYWNlICBkYXRhCmNhX3RyYW5zZm9ybWVkIDwtc3RfdHJhbnNmb3JtKGNhX3B0cywgc3RfY3JzKG5kdmlfcmFzdCkpICAKCiMjIENoZWNrIHByb2plY3Rpb25zCnN0X2NycyhuZHZpX3Jhc3QpPT1zdF9jcnMoY2FfdHJhbnNmb3JtZWQpCmBgYAoKXAoKIyBNYXAgVGhlIERhdGEKCk5vdywgd2Ugd2lsbCB2aXN1YWxpemUgb3VyIHNwYXRpYWwgZGF0YSB1c2luZyAqKnRtYXAqKi4gV2Ugd2lsbCBvdmVybGF5IHRoZSBncmVlbnNwYWNlIG1hcHMgd2l0aCB0aGUgb3ZhcmlhbiBjYW5jZXIgZGF0YS4gRG8gYW55IHBhdHRlcm5zIGp1bXAgb3V0LCBvciBhcmUgdGhlcmUgYW55IHBhcnRpY2lwYW50cyBsaXZpbmcgaW4gdGhlIG1pZGRsZSBvZiB0aGUgQmF5PwoKYGBge3J9CmNhLm5kdmkubWFwIDwtIHRtX3NoYXBlKG5kdmlfcmFzdCkgKwogIHRtX3Jhc3RlcihzdHlsZSA9ICJjb250IikgKwogICAgICB0bV9zaGFwZShjYV90cmFuc2Zvcm1lZCkgKwogICAgICAgIHRtX2RvdHMoc2l6ZT0wLjI1LCBhbHBoYT0wLjgsIGNvbD0iYmx1ZSIpCmNhLm5kdmkubWFwCmBgYAoKXAoKV2UgZmluZCB0aGF0IHRoZSBtb3N0IGxlYXN0IGdyZWVuIGFyZWFzIGFyZSBpbiB0aGUgZG93bnRvd24gYXJlYXMgb2YgU2FuIEZyYW5jaXNjbyBhbmQgT2FrbGFuZCwgd2hpY2ggbWFrZXMgc2Vuc2UuIE91ciBjYW5jZXIgY29ob3J0IGRhdGEgb3ZlcmxhcHMgd2l0aCB0aGUgZ3JlZW5zcGFjZSBtYXAsIHdoaWNoIGlzIHJlYXNzdXJpbmcuIAoKXAoKIyBFeHRyYWN0IFJhc3RlciBWYWx1ZXMgdG8gUG9pbnRzCgpOb3cgdGhhdCB3ZSBoYXZlIHZpc3VhbGl6ZWQgb3VyIGRhdGEsIGxldCdzIHNlZSBpZiB0aGVyZSBpcyBhbiBhc3NvY2lhdGlvbiBiZXR3ZWVuIGdyZWVuc3BhY2UgZXhwb3N1cmUgYW5kIG1vcnRhbGl0eSBhbW9uZyBvdmFyaWFuIGNhbmNlciBjYXNlcy4gV2Ugd2lsbCBmaXJzdCBleHRyYWN0IHRoZSB2YWx1ZXMgZm9yIGdyZWVuc3BhY2UgdG8gdGhlIGNhbmNlciBkYXRhc2V0IChtZXJnZSB0aGUgdHdvIGRhdGFzZXRzIGJhc2VkIG9uIGxvY2F0aW9uIG9mIGNhc2VzIGFuZCB0aGUgZ3JlZW5zcGFjZSBwaXhlbCB0aGF0IHRoZXkgYXJlIGluKSB1c2luZyBgdGVycmE6OmV4dHJhY3RgLiBUaGVuIHdlIHdpbGwgY2hlY2sgdGhlIGRpc3RyaWJ1dGlvbiBvZiBncmVlbnNwYWNlIGV4cG9zdXJlIGluIG91ciBjYW5jZXIgY2FzZXMuIFdlIHdpbGwgdXNlIGEgdHdvLXNpZGVkIGNoaS1zcXVhcmVkIHRlc3QgdG8gdGVzdCBvdXIgaHlwb3RoZXNpcyBvZiB0aGUgYXNzb2NpYXRpb24gYmV0d2VlbiBncmVlbnNwYWNlIGV4cG9zdXJlIGFuZCBtb3J0YWxpdHkgYW1vbmcgb3ZhcmlhbiBjYW5jZXIgY2FzZXMuIFdoYXQgZG8gd2UgZmluZD8KCmBgYHtyfQojIyBTcGF0aWFsbHkgam9pbiB0aGUgY2FuY2VyIHBvaW50IGRhdGEgdG8gdGhlIHdhbGthYmlsaXR5IHBvbHlnb24gZGF0YQpuZHZpX2NhbmNlciA9IGRhdGEuZnJhbWUoY2FfdHJhbnNmb3JtZWQsdGVycmE6OmV4dHJhY3QobmR2aV9yYXN0LCBjYV90cmFuc2Zvcm1lZCkpCmdsaW1wc2UobmR2aV9jYW5jZXIpIAojIyBUYWtlIGEgbG9vayBhdCBhIHN1bW1hcnkgb2YgdGhlIHZhbHVlcwpzdW1tYXJ5KG5kdmlfY2FuY2VyJE5EVklfQmF5QXJlYSkKYGBgCgpcCgpMb29rcyBsaWtlIHdlIGhhdmUgbG90cyBvZiBOQSB2YWx1ZXMuIFRoYXQgaXMgYmVjYXVzZSBzb21lIG9mIG91ciBwYXJ0aWNpcGFudHMgbGl2ZSBvdXRzaWRlIG9mIHRoZSBhcmVhIG9mIG91ciBncmVlbnNwYWNlIGRhdGEuIExldCdzIGRyb3AgdGhvc2UgbWlzc2luZyB2YWx1ZXMgdXNpbmcgYGRyb3BfbmEoKWAsIHdoaWNoIGlzIHNsaWdodGx5IGRpZmZlcmVudCBmcm9tIGhvdyB3ZSd2ZSBkb25lIHRoaXMgYmVmb3JlLgoKYGBge3J9Cm5kdmlfY2FuY2VyX25vbWlzcyA8LSBuZHZpX2NhbmNlciAlPiUgZHJvcF9uYShORFZJX0JheUFyZWEpIAoKIyMgVGFrZSBhIGxvb2sgYXQgYSBzdW1tYXJ5IG9mIHRoZSB2YWx1ZXMKc3VtbWFyeShuZHZpX2NhbmNlcl9ub21pc3MkTkRWSV9CYXlBcmVhKQpnbGltcHNlKG5kdmlfY2FuY2VyX25vbWlzcykKYGBgCgpcCgojIEFuYWx5emUgb3VyIEpvaW5lZCBEYXRhc2V0Ck9LLCB3ZSBoYXZlIGEgZGF0YXNldCB3aXRoIG5vIG1pc3NpbmduZXNzLiBDYW4gd2UgbG9vayBhdCB0aGUgZGlzdHJpYnV0aW9uIG9mIGdyZWVuc3BhY2UgZXhwb3N1cmUgYW1vbmcgcGFydGljaXBhbnRzPwpgYGB7cn0KbmR2aV9jYW5jZXJfbm9taXNzICU+JQogIGdncGxvdCgpICsgCiAgZ2VvbV9oaXN0b2dyYW0obWFwcGluZyA9IGFlcyh4PU5EVklfQmF5QXJlYSkpIAoKYGBgCgpcCgpGb3IgdGhlIHB1cnBvc2VzIG9mIG91ciBhbmFseXNpcywgbGV0J3MgZGl2aWRlIHVwIG91ciBncmVlbnNwYWNlIGRhdGEgaW50byBxdWFydGlsZXMuIFdlIHdpbGwgZG8gdGhpcyB1c2luZyB0aGUgYG11dGF0ZSgpYCBmdW5jdGlvbiBjb21iaW5lZCB3aXRoIHRoZSBgbnRpbGUoKWAgZnVuY3Rpb24uIFRoZW4gd2Ugd2lsbCB0YWtlIGEgZ2xpbXBzZSBhdCBvdXIgbmV3IGRhdGFzZXQuCgpgYGB7cn0KbmR2aV9jYW5jZXJfbm9taXNzIDwtIG5kdmlfY2FuY2VyX25vbWlzcyAlPiUKICBtdXRhdGUobmR2aV9xdWFydGlsZSA9IG50aWxlKE5EVklfQmF5QXJlYSwgNCkpCgpnbGltcHNlKG5kdmlfY2FuY2VyX25vbWlzcykKYGBgCgpcCgpPSyB0aGF0IGxvb2tzIGdvb2QuIFdlIGhhdmUgY3JlYXRlZCBhIG5ldyB2YXJpYWJsZSAqbmR2aV9xdWFydGlsZSogdGhhdCB0ZWxscyB1cyB3aGF0IHF1YXJ0aWxlIG9mIGdyZWVuc3BhY2UgYSBwYXJ0aWNpcGFudCBsaXZlcyBpbi4gTGV0J3MgZG8gYSB0d28gYnkgdHdvIHRhYmxlIG9mIGdyZWVuc3BhY2UgcXVhcnRpbGVzIGJ5ICpldmVudCosIHdoaWNoIGlzIHdoZXRoZXIgYSBwYXJ0aWNpcGFudCBkaWVkIG92ZXIgZm9sbG93dXAuCmBgYHtyfQojIyBDcmVhdGUgYSBjb250aW5nZW5jeSB0YWJsZSBvZiBldmVudCBieSB3YWxrX3F1YXJ0aWxlCnRhYiA8LSB0YWJsZShuZHZpX2NhbmNlcl9ub21pc3MkbmR2aV9xdWFydGlsZSwgbmR2aV9jYW5jZXJfbm9taXNzJGV2ZW50KQp0YWIKYGBgCgpcCgpIbW1tLCB0aGF0J3MgaW50ZXJlc3RpbmcsIGJ1dCBsZXQncyBsb29rIGF0IHRoaXMgYnkgcGVyY2VudGFnZXMgaW5zdGVhZC4KYGBge3J9CiMjIENvbnZlcnQgdG8gcGVyY2VudGFnZXMgYnkgY29sdW1uCnRhYl9jb2xfcGVyYyA8LSBwcm9wLnRhYmxlKHRhYiwgbWFyZ2luID0gMikgKiAxMDAKcm91bmQodGFiX2NvbF9wZXJjLCAxKQpgYGAKClwKCkRvIHlvdSB0aGluayB0aGUgcGVyY2VudGFnZXMgYXJlIGRpZmZlcmVudCBieSBxdWFydGlsZSBvZiBncmVlbnNwYWNlPyBXZSBjYW4gcnVuIGEgY2hpLXNxdWFyZWQgdGVzdCB0byBiZSBzdXJlLiBUaGlzIGlzIGEgc3RhdGlzdGljYWwgdGVzdCB0byBzZWUgd2hldGhlciB0aGVyZSBpcyBhIGRpZmZlcmVuY2UgaW4gdGhlIHByb2JhYmlsaXR5IG9mICpldmVudCosIG9yIHdoZXRoZXIgYSBwYXJ0aWNpcGFudCBkaWVkIG92ZXIgZm9sbG93LXVwLCBieSB0aGUgcXVhcnRpbGVzIG9mIGdyZWVuc3BhY2UgV2UgZG8gdGhpcyB3aXRoIHRoZSBgY2hpc3EudGVzdCgpYCBmdW5jdGlvbi4KYGBge3J9CiMjIENoaS1zcXVhcmVkIHRlc3QKY2hpc3EudGVzdCh0YWIpCmBgYAoKXAoKT0ssIGhvdyBkbyB3ZSBpbnRlcnByZXQgdGhpcz8gT3VyIG51bGwgaHlwb3RoZXNpcyBpcyB0aGF0IHRoZXJlIGlzIG5vIGFzc29jaWF0aW9uIGJldHdlZW4gbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgYW5kIGluY3JlYXNpbmcgcXVhcnRpbGUgb2YgZ3JlZW5zcGFjZS4gT3VyIGFsdGVybmF0aXZlIGh5cG90aGVzaXMgaXMgdGhhdCB0aGVyZSBpcyBhbiBhc3NvY2lhdGlvbiBiZXR3ZWVuIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwIGFuZCBpbmNyZWFzaW5nIHF1YXJ0aWxlIG9mIGdyZWVuc3BhY2UuIFdlIHVzZSBhIHR3by1zaWRlZCBjaGktc3F1YXJlZCB0ZXN0IHdpdGggYWxwaGE9MC4wNS4gQXNzdW1pbmcgbm8gc291cmNlcyBvZiBiaWFzIGFuZCB0aGF0IHRoZSBudWxsIGh5cG90aGVzaXMgaXMgdHJ1ZSwgdGhlIHByb2JhYmlsaXR5IG9mIG9ic2VydmluZyBpbmNyZWFzZXMgaW4gbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgd2l0aCBpbmNyZWFzaW5nIHF1YXJ0aWxlcyBvZiBncmVlbnNwYWNlIGFzIG9yIG1vcmUgZXh0cmVtZSBhcyB0aG9zZSBwcm9kdWNlZCBpbiB0aGVzZSBkYXRhIGlzIDAuNzE2LiBTaW5jZSBwPjAuMDUsIHdlIGZhaWwgdG8gcmVqZWN0IHRoZSBudWxsIGh5cG90aGVzaXMgYW5kIGNvbmNsdWRlIHRoYXQgZ3JlZW5zcGFjZSBpcyBub3QgYXNzb2NpYXRlZCB3aXRoIG1vcnRhbGl0eSBhdCBlbmQgb2YgZm9sbG93LXVwICh1bmRlciB0aGUgYXNzdW1wdGlvbnMgc3RhdGVkIGFib3ZlKS4gSW4gb3RoZXIgd29yZHMsIHdlIGRvbid0IHNlZSBhIHJlbGF0aW9uc2hpcCBiZXR3ZWVuIGdyZWVuc3BhY2UgZXhwb3N1cmUgYW5kIG91ciBvdXRjb21lIChkeWluZyBvdmVyIGZvbGxvd3VwKS4K</div>
 
 
 </div>

@@ -1,6 +1,6 @@
-name: "SPH 215: GIS and Public Health Spring 2026"
+name: "SPH 215: GIS and Public Health Winter 2026"
 navbar:
-  title: "SPH 215: GIS and Public Health Spring 2026"
+  title: "SPH 215: GIS and Public Health Winter 2026"
   left:
     - text: "Syllabus"
       href: Syllabus.html
@@ -9,20 +9,22 @@ navbar:
       menu:
         - text: "Lab 1: Intro to R"
           href: lab1.html
-        - text: "Lab 2: Geocoding, Vector Data, and Census Data "
+        - text: "Lab 2: Understanding Packages and Wrangling Data in R"
           href: Lab2.html
-        - text: "Lab 3: Polygons and Rasters"
+        - text: "Lab 3: Geocoding, Vector Data, and Census Data"
           href: Lab3.html
         - text: "Lab 4: Spatial Data Processing with Vector Data"
           href: Lab4.html
-        - text: "Lab 5: Spatial Data Processing with Vector and Raster Data"
+        - text: "Lab 5: Spatial Data Processing"
           href: Lab5.html
-        - text: "Lab 6: Network Analysis"
+        - text: "Lab 6: Spatial Data Processing with Vector and Raster Data"
           href: Lab6.html
-        - text: "Lab 7: Spatial Statistics and Geographically Weighted Regression"
+        - text: "Lab 7: Network Analysis"
           href: Lab7.html
-        - text: "Lab 8: Future Directions in GIS and Public Health"
+        - text: "Lab 8: Spatial Statistics and Geographically Weighted Regression"
           href: Lab8.html
+        - text: "Lab 9: Future Directions in GIS and Public Health"
+          href: Lab9.html
     - text: "Assignment Guide"
       href: Assignments.html
     - text: "Data Sources"

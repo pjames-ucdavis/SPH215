@@ -324,7 +324,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2026</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -357,13 +357,10 @@ div.tocify {
       <a href="Lab6.html">Lab 6: Network Analysis</a>
     </li>
     <li>
-      <a href="Lab7.html">Lab 7: Spatial Statistics</a>
+      <a href="Lab7.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
     </li>
     <li>
-      <a href="Lab8.html">Lab 8: Geographically Weighted Regression</a>
-    </li>
-    <li>
-      <a href="Lab9.html">Lab 9: Future Directions in GIS and Public Health</a>
+      <a href="Lab8.html">Lab 8: Future Directions in GIS and Public Health</a>
     </li>
   </ul>
 </li>
@@ -418,11 +415,36 @@ level</li>
 <p><br />
 </p>
 <p>First, let’s install our packages.</p>
-<pre class="r"><code>library(sf)
-library(MapGAM)
-library(tidyverse)
-library(flextable)
-library(RColorBrewer)
+<pre class="r"><code>library(sf)</code></pre>
+<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## Loading required package: gam</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.22-5</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ purrr::accumulate() masks foreach::accumulate()
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ dplyr::lag()        masks stats::lag()
+## ✖ purrr::when()       masks foreach::when()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose</code></pre>
+<pre class="r"><code>library(RColorBrewer)
 library(tmap)
 #library(gtools)
 #library(gmodels)</code></pre>
@@ -642,7 +664,8 @@ then make a choropleth map of walkability indices. Do any patterns jump
 out, or are there any outliers?</p>
 <pre class="r"><code>## Make a choropleth map of polygons colored by levels of walkability
 tmap_mode(&quot;plot&quot;)</code></pre>
-<pre><code>## ℹ tmap mode set to &quot;plot&quot;.</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
+## ℹ toggle with `tmap::ttm()`</code></pre>
 <pre class="r"><code>walkability_map &lt;- tm_shape(walkability_tracts) +
   tm_polygons(
     col = &quot;Avg_walkin&quot;,
@@ -652,11 +675,11 @@ tmap_mode(&quot;plot&quot;)</code></pre>
     alpha=.95
   )</code></pre>
 <pre><code>## 
-## ── tmap v3 code detected ────────────────────────────────────────────────────
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
 ## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;cont&quot;`, use fill.scale =
-## `tm_scale_continuous()`.[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.[v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of
-## the visual variable `fill` namely &#39;title&#39; to &#39;fill.legend =
-## tm_legend(&lt;HERE&gt;)&#39;</code></pre>
+## `tm_scale_continuous()`.[v3-&gt;v4] `tm_polygons()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).[v3-&gt;v4] `tm_polygons()`: use `fill_alpha` instead of `alpha`.[v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;</code></pre>
 <pre class="r"><code>## Make another map adding points for the cancer data to map of polygons
 walkability_cancer_map = walkability_map + 
   tm_shape(ca_transformed) + 

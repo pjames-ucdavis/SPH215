@@ -1,9 +1,30 @@
 ---
-title: 'Lab 5: Spatial Data Processing with Vector and Raster Data'
+title: 'Lab 5: Working with Raster data, Join geocoded addresses to polygon data to create exposure metrics'
 ---
 
-\
+In this lab, we are going to work with vector and raster data, spatially joining point data to vector data 
 
+The objectives of this guide are to teach you:
+
+   1. Introduce raster data 
+   2. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
+   3. Import a dataset with greenspace across the Bay Area
+   4. Compare projections of datasets and re-project if needed
+   5. Make maps
+   6. Spatially join the two datasets
+   7. Run a quick statistical analysis on the two datasets combined
+
+Enough talk--let's get coding!
+
+\
+# Load packages
+```{r}
+library(terra)
+library(sf)
+library(tmap)
+library(MapGAM)
+```
+        
 # Rasters
 
 Raster datasets are simply an array of pixels/cells organized into rows and columns (or a grid) where each cell contains a value representing information, such as temperature, vegetation, land use, air pollution, etc. Raster maps usually represent continuous phenomena such as elevation, temperature, or population density. Discrete features such as soil type or land-cover classes can also be represented in the raster data model. Rasters are aerial photographs, imagery from satellites, Google Street View images, etc. A few things to note.
@@ -22,6 +43,8 @@ Typically you will bring in a raster dataset directly from a file. These files c
 We’ll bring in the file NDVI_rast.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
 
 ```{r}
+
+
 url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif"
 download.file(url, destfile = "NDVI_rast2.tif", mode = "wb")
 NDVI_raster = rast("NDVI_rast2.tif")
@@ -121,6 +144,7 @@ Nice. What do we notice? The coast of San Francisco might have some cloud cover 
 One last step. Let's put all our knowledge together and map our old friend CAdata on top of the NDVI data in San Francisco. First, let's bring in the CAdata dataset on ovarian cancer cases again. 
 
 ```{r}
+
 data(CAdata)
 ca_pts <- CAdata
 ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
@@ -165,22 +189,7 @@ NDVI_cancer_map
 
 \
 
-That is one fine looking map. Go get yourself a snack! Treat yourself!
-
-\
-
-In this lab, we are going to work with vector and raster data, spatially joining point data to vector data 
-
-The objectives of this guide are to teach you:
-
-   1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
-   2. Import a dataset with greenspace across the Bay Area
-   3. Compare projections of datasets and re-project if needed
-   4. Make maps
-   5. Spatially join the two datasets
-   6. Run a quick statistical analysis on the two datasets combined
-
-Enough talk--let's get coding!
+That is one fine looking map.
 
 \
 

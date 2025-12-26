@@ -11,9 +11,18 @@ In this lab, we won’t have time to go through all of the methods and functions
 
 \
 
+## Install packages
+Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
+
+
+```{r, message=FALSE}
+library(tidyverse)
+library(tmap)
+```
+
 ## Reading in data
 
-The dataset *nycflights13* was included in an R package. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
+The dataset *nycflights13* was included in Lab 1 in an R package called **nycflights13**. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
 
 To read in a csv file, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension. The two files are up on the GitHub for this course, so you can read them in directly from there. We’ll name these objects *ca1* and *ca2*.
 
@@ -323,12 +332,15 @@ Here are a few practice questions. You don’t need to submit these, but it’s 
 This lab is a foundation for all of the work we will do moving forward in R. But what kind of GIS course would this be if we didn't make a map? Remember that dataset we brought in earlier on cancer cases across CA called *cancer*? Let's plot that real quick. We will talk more about it next week!
 
 ```{r}
+#Download Cancer Dataset
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+
+#Read in Cancer Dataset
+cancer <- readRDS("ca_cancer.rds")
+
 ## Let's view the data
 head(cancer)
 table(cancer$event)
-## Install packages we need to map these data
-install.packages("sf") # for analysis using vector data
-install.packages("tmap") # to show pretty maps
 
 ## Load these packages
 library(sf)
