@@ -1,8 +1,13 @@
-.Rproj.user
+# RStudio / R
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
-docs/NDVI_BayArea.tif
-merged_gps_data.rds
+*.rds
+
+# macOS
 .DS_Store
-.DS_Store
+
+# Spatial rasters (large)
+*.tif
+*.tiff
