@@ -1,5 +1,5 @@
 ---
-title: "Lab 2: Geocoding, Vector Data, and Census Data 2026"
+title: "Lab 2: Geocoding, Vector Data, and Census Data 2026 TEST"
 ---
 
 In this lab, we are going to work with vector data, which we've talked about last week. We are going to work with a dataset of cancer patients across California, as well as Census data on socioeconomic factors. We will also talk about geocoding addresses and will discuss how to visualize data. 
