@@ -1,0 +1,95 @@
+---
+title: "Lab 8 In Class"
+author: "Peter James"
+date: "2025-05-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Load packages
+```{r}
+library(dplyr)        
+library(readr)        
+library(terra)        
+library(sf)           
+library(tmap)         
+
+#New Packages this week!
+library(lubridate)    
+library(leaflet)      
+```
+
+# Bring in GPS data
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/gps_apr25_30.csv", destfile = "gps_apr25_30.csv", mode = "wb")
+gps_data_raw <- read_csv("gps_apr25_30.csv")
+glimpse(gps_data_raw)
+```
+
+# Clean data
+```{r}
+# Clean it up and extract useful time info
+gps_data <- gps_data_raw %>%
+  mutate(
+    time = ymd_hms(`UTC time`),
+    time_label = format(time, "%Y-%m-%d %H:%M:%S"),
+    rounded_minute = floor_date(time, unit = "minute")
+  ) %>%
+  arrange(time)
+glimpse(gps_data)
+```
+
+# Map with leaflet
+```{r}
+leaflet(gps_data) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolylines(lng = ~longitude, lat = ~latitude, color = "blue", weight = 2) %>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 1,
+    color = "red",
+    popup = ~paste("Time:", time_label),
+    label = ~time_label
+  )
+```
+
+# Bring in NDVI data
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/NDVI_rast_boston.tif", destfile = "NDVI_rast_boston.tif", mode = "wb")
+ndvi_raster <- rast("NDVI_rast_boston.tif")
+```
+
+# Map with tmap
+```{r}
+tmap_mode("view") 
+
+# Reproject GPS to match raster
+gps_sf <- st_as_sf(gps_data, coords = c("longitude", "latitude"), crs = 4326)
+gps_proj <- st_transform(gps_sf, crs = crs(ndvi_raster))
+
+
+# Map it!
+tm_shape(ndvi_raster) +
+  tm_raster(style = "cont", palette = "YlGn", alpha = 0.4, title = "NDVI") +
+  tm_shape(gps_proj) +
+  tm_dots(col = "blue", size = 0.5, border.col = NA) +
+  tm_layout(title = "Where We've Been (with a little green)", legend.outside = TRUE)
+```
+
+# Extract NDVI data
+```{r}
+ndvi_values <- terra::extract(ndvi_raster, vect(gps_proj))
+
+```
+
+# Look at data
+```{r}
+summary(ndvi_values$NDVI_mean)
+hist(ndvi_values$NDVI_mean)
+```
+

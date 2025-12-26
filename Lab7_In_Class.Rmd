@@ -1,0 +1,148 @@
+---
+title: "Lab_7_In_Class"
+author: "Peter James"
+date: "2025-05-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load packages
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(tmap)
+library(spdep)
+library(GWmodel)
+library(spatialreg)
+library(spgwr)
+```
+
+Bring in Diabetes data
+```{r}
+# Load and clean CDC diabetes CSV
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/DiabetesAtlas_CountyData.csv", destfile = "DiabetesAtlas_CountyData.csv", mode = "wb")
+diab_raw <- read_csv("DiabetesAtlas_CountyData.csv", skip = 2) |> 
+  slice(1:(n() - 1))  # remove last row
+
+# Clean column names
+names(diab_raw) <- str_trim(names(diab_raw))
+
+# Format FIPS codes with leading zeros
+diab_raw <- diab_raw |> 
+  mutate(CountyFIPS = str_pad(as.character(as.integer(CountyFIPS)), 5, pad = "0"))
+
+# Filter for California counties only
+ca_diabetes <- diab_raw |> 
+  filter(str_starts(CountyFIPS, "06")) |> 
+  mutate(Percentage = as.numeric(Percentage)) |> 
+  select(FIPS = CountyFIPS, County, Diabetes = Percentage)
+```
+Look at data
+```{r}
+glimpse(ca_diabetes)
+```
+
+Get median income
+```{r}
+ca_geo <- get_acs(
+  geography = "county",
+  variables = c(income = "B19013_001"),  # Median household income
+  state = "CA",
+  geometry = TRUE,
+  year = 2021
+) %>%
+  rename(income = estimate) %>%
+  select(GEOID, NAME, income, geometry)
+```
+```{r}
+glimpse(ca_geo)
+```
+Merge data
+```{r}
+ca_diab_data <- ca_geo |> 
+  left_join(ca_diabetes, by = c("GEOID" = "FIPS"))
+glimpse(ca_diab_data)
+summary(ca_diab_data$Diabetes)
+summary(ca_diab_data$income)
+```
+
+Map it
+```{r}
+tmap_mode("view")
+tm_shape(ca_diab_data) +
+  tm_polygons("Diabetes", palette = "Reds", style = "quantile",
+              title = "% Diagnosed Diabetes")
+```
+
+Moran's I
+```{r}
+nb <- poly2nb(ca_diab_data) 
+lw <- nb2listw(nb, style = "W")
+moran.test(ca_diab_data$Diabetes, lw)
+```
+LISA
+```{r}
+local_moran <- localmoran(ca_diab_data$Diabetes, lw)
+ca_diab_data$Ii <- local_moran[, "Ii"]
+ca_diab_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
+
+```
+
+Map it
+```{r}
+
+# Map LISA
+cat("\n### Local Spatial Clustering of Diabetes\n")
+tm_shape(ca_diab_data) +
+  tm_polygons("Ii", style = "quantile", palette = "PuOr", title = "Local Moran's I")
+```
+
+Gi*
+```{r}
+gi_star <- localG(ca_diab_data$Diabetes, lw)
+ca_diab_data$Gi_star <- as.numeric(gi_star)
+
+tm_shape(ca_diab_data) +
+  tm_polygons("Gi_star", palette = "-RdBu", style = "pretty", title = "Gi* Hot Spots")
+```
+
+```{r}
+# Define neighbors and spatial weights
+nb <- poly2nb(ca_diab_data)
+lw <- nb2listw(nb, style = "W")
+
+# Run spatial lag model
+lag_model <- lagsarlm(Diabetes ~ income, data = ca_diab_data, listw = lw)
+summary(lag_model)
+```
+
+# GWR
+```{r}
+coords <- st_coordinates(st_centroid(ca_diab_data))
+ca_diab_data$X <- coords[, 1]
+ca_diab_data$Y <- coords[, 2]
+
+bw <- gwr.sel(Diabetes ~ income, data = ca_diab_data, coords = coords, adapt = TRUE)
+```
+
+```{r}
+# Run GWR using adaptive bandwidth
+model <- gwr(Diabetes ~ income, data = ca_diab_data, coords = coords, 
+             adapt = bw, hatmatrix = TRUE)
+
+ca_diab_data$gwr_income <- model$SDF$income # Store model coefficients
+
+
+
+```
+
+Map local GWR coefficients
+```{r}
+tm_shape(ca_diab_data) +
+  tm_polygons("gwr_income", palette = "RdYlGn", style = "quantile", title = "GWR: Income-Diabetes Association")
+```
+

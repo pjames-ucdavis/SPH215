@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Peter James" />
+
+<meta name="date" content="2025-04-24" />
+
+<title>Lab Assignment 2</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="lab1.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2.html">Lab 2: Geocoding, Vector Data, and Census Data </a>
+    </li>
+    <li>
+      <a href="Lab3.html">Lab 3: Polygons and Rasters</a>
+    </li>
+    <li>
+      <a href="Lab4.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5.html">Lab 5: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab6.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab7.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab8.html">Lab 8: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab Assignment 2</h1>
+<h4 class="author">Peter James</h4>
+<h4 class="date">2025-04-24</h4>
+
+</div>
+
+
+<pre class="r"><code>library(sf)</code></pre>
+<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## Loading required package: gam</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.22-5</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ purrr::accumulate() masks foreach::accumulate()
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ dplyr::lag()        masks stats::lag()
+## ✖ purrr::when()       masks foreach::when()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(tidycensus)
+library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose</code></pre>
+<pre class="r"><code>library(RColorBrewer)
+library(tmap)
+library(terra)</code></pre>
+<pre><code>## terra 1.8.29
+## 
+## Attaching package: &#39;terra&#39;
+## 
+## The following objects are masked from &#39;package:flextable&#39;:
+## 
+##     align, colorize, rotate, width
+## 
+## The following object is masked from &#39;package:tidyr&#39;:
+## 
+##     extract</code></pre>
+<p>Question 1.</p>
+<pre class="r"><code>ca.county &lt;- get_acs(geography = &quot;county&quot;, 
+              year = 2023,
+              variables = c(medinc = &quot;B19013_001&quot;), 
+              state = &quot;CA&quot;,
+              output = &quot;wide&quot;,
+              survey = &quot;acs5&quot;,
+              geometry = TRUE,
+              cb = FALSE)</code></pre>
+<pre><code>##   |                                                                              |                                                                      |   0%  |                                                                              |                                                                      |   1%  |                                                                              |=                                                                     |   1%  |                                                                              |=                                                                     |   2%  |                                                                              |==                                                                    |   2%  |                                                                              |==                                                                    |   3%  |                                                                              |==                                                                    |   4%  |                                                                              |===                                                                   |   4%  |                                                                              |===                                                                   |   5%  |                                                                              |====                                                                  |   5%  |                                                                              |====                                                                  |   6%  |                                                                              |=====                                                                 |   6%  |                                                                              |=====                                                                 |   7%  |                                                                              |=====                                                                 |   8%  |                                                                              |======                                                                |   8%  |                                                                              |======                                                                |   9%  |                                                                              |=======                                                               |   9%  |                                                                              |=======                                                               |  10%  |                                                                              |=======                                                               |  11%  |                                                                              |========                                                              |  11%  |                                                                              |========                                                              |  12%  |                                                                              |=========                                                             |  12%  |                                                                              |=========                                                             |  13%  |                                                                              |=========                                                             |  14%  |                                                                              |==========                                                            |  14%  |                                                                              |==========                                                            |  15%  |                                                                              |===========                                                           |  15%  |                                                                              |===========                                                           |  16%  |                                                                              |============                                                          |  16%  |                                                                              |============                                                          |  17%  |                                                                              |============                                                          |  18%  |                                                                              |=============                                                         |  18%  |                                                                              |=============                                                         |  19%  |                                                                              |==============                                                        |  19%  |                                                                              |==============                                                        |  20%  |                                                                              |==============                                                        |  21%  |                                                                              |===============                                                       |  21%  |                                                                              |===============                                                       |  22%  |                                                                              |================                                                      |  22%  |                                                                              |================                                                      |  23%  |                                                                              |================                                                      |  24%  |                                                                              |=================                                                     |  24%  |                                                                              |=================                                                     |  25%  |                                                                              |==================                                                    |  25%  |                                                                              |==================                                                    |  26%  |                                                                              |===================                                                   |  26%  |                                                                              |===================                                                   |  27%  |                                                                              |===================                                                   |  28%  |                                                                              |====================                                                  |  28%  |                                                                              |====================                                                  |  29%  |                                                                              |=====================                                                 |  29%  |                                                                              |=====================                                                 |  30%  |                                                                              |=====================                                                 |  31%  |                                                                              |======================                                                |  31%  |                                                                              |======================                                                |  32%  |                                                                              |=======================                                               |  32%  |                                                                              |=======================                                               |  33%  |                                                                              |=======================                                               |  34%  |                                                                              |========================                                              |  34%  |                                                                              |========================                                              |  35%  |                                                                              |=========================                                             |  35%  |                                                                              |=========================                                             |  36%  |                                                                              |==========================                                            |  36%  |                                                                              |==========================                                            |  37%  |                                                                              |==========================                                            |  38%  |                                                                              |===========================                                           |  38%  |                                                                              |===========================                                           |  39%  |                                                                              |============================                                          |  39%  |                                                                              |============================                                          |  40%  |                                                                              |============================                                          |  41%  |                                                                              |=============================                                         |  41%  |                                                                              |=============================                                         |  42%  |                                                                              |==============================                                        |  42%  |                                                                              |==============================                                        |  43%  |                                                                              |==============================                                        |  44%  |                                                                              |===============================                                       |  44%  |                                                                              |===============================                                       |  45%  |                                                                              |================================                                      |  45%  |                                                                              |================================                                      |  46%  |                                                                              |=================================                                     |  46%  |                                                                              |=================================                                     |  47%  |                                                                              |=================================                                     |  48%  |                                                                              |==================================                                    |  48%  |                                                                              |==================================                                    |  49%  |                                                                              |===================================                                   |  49%  |                                                                              |===================================                                   |  50%  |                                                                              |===================================                                   |  51%  |                                                                              |====================================                                  |  51%  |                                                                              |====================================                                  |  52%  |                                                                              |=====================================                                 |  52%  |                                                                              |=====================================                                 |  53%  |                                                                              |=====================================                                 |  54%  |                                                                              |======================================                                |  54%  |                                                                              |======================================                                |  55%  |                                                                              |=======================================                               |  55%  |                                                                              |=======================================                               |  56%  |                                                                              |========================================                              |  56%  |                                                                              |========================================                              |  57%  |                                                                              |========================================                              |  58%  |                                                                              |=========================================                             |  58%  |                                                                              |=========================================                             |  59%  |                                                                              |==========================================                            |  59%  |                                                                              |==========================================                            |  60%  |                                                                              |==========================================                            |  61%  |                                                                              |===========================================                           |  61%  |                                                                              |===========================================                           |  62%  |                                                                              |============================================                          |  62%  |                                                                              |============================================                          |  63%  |                                                                              |============================================                          |  64%  |                                                                              |=============================================                         |  64%  |                                                                              |=============================================                         |  65%  |                                                                              |==============================================                        |  65%  |                                                                              |==============================================                        |  66%  |                                                                              |===============================================                       |  66%  |                                                                              |===============================================                       |  67%  |                                                                              |===============================================                       |  68%  |                                                                              |================================================                      |  68%  |                                                                              |================================================                      |  69%  |                                                                              |=================================================                     |  69%  |                                                                              |=================================================                     |  70%  |                                                                              |=================================================                     |  71%  |                                                                              |==================================================                    |  71%  |                                                                              |==================================================                    |  72%  |                                                                              |===================================================                   |  72%  |                                                                              |===================================================                   |  73%  |                                                                              |===================================================                   |  74%  |                                                                              |====================================================                  |  74%  |                                                                              |====================================================                  |  75%  |                                                                              |=====================================================                 |  75%  |                                                                              |=====================================================                 |  76%  |                                                                              |======================================================                |  76%  |                                                                              |======================================================                |  77%  |                                                                              |======================================================                |  78%  |                                                                              |=======================================================               |  78%  |                                                                              |=======================================================               |  79%  |                                                                              |========================================================              |  79%  |                                                                              |========================================================              |  80%  |                                                                              |========================================================              |  81%  |                                                                              |=========================================================             |  81%  |                                                                              |=========================================================             |  82%  |                                                                              |==========================================================            |  82%  |                                                                              |==========================================================            |  83%  |                                                                              |==========================================================            |  84%  |                                                                              |===========================================================           |  84%  |                                                                              |===========================================================           |  85%  |                                                                              |============================================================          |  85%  |                                                                              |============================================================          |  86%  |                                                                              |=============================================================         |  86%  |                                                                              |=============================================================         |  87%  |                                                                              |=============================================================         |  88%  |                                                                              |==============================================================        |  88%  |                                                                              |==============================================================        |  89%  |                                                                              |===============================================================       |  89%  |                                                                              |===============================================================       |  90%  |                                                                              |===============================================================       |  91%  |                                                                              |================================================================      |  91%  |                                                                              |================================================================      |  92%  |                                                                              |=================================================================     |  92%  |                                                                              |=================================================================     |  93%  |                                                                              |=================================================================     |  94%  |                                                                              |==================================================================    |  94%  |                                                                              |==================================================================    |  95%  |                                                                              |===================================================================   |  95%  |                                                                              |===================================================================   |  96%  |                                                                              |====================================================================  |  96%  |                                                                              |====================================================================  |  97%  |                                                                              |====================================================================  |  98%  |                                                                              |===================================================================== |  98%  |                                                                              |===================================================================== |  99%  |                                                                              |======================================================================|  99%  |                                                                              |======================================================================| 100%</code></pre>
+<p>Question 2.</p>
+<pre class="r"><code>glimpse(ca.county)</code></pre>
+<pre><code>## Rows: 58
+## Columns: 5
+## $ GEOID    &lt;chr&gt; &quot;06091&quot;, &quot;06067&quot;, &quot;06083&quot;, &quot;06009&quot;, &quot;06111&quot;, &quot;06037&quot;, &quot;06097&quot;…
+## $ NAME     &lt;chr&gt; &quot;Sierra County, California&quot;, &quot;Sacramento County, California&quot;,…
+## $ medincE  &lt;dbl&gt; 60000, 88724, 95977, 79877, 107327, 87760, 102840, 68750, 102…
+## $ medincM  &lt;dbl&gt; 17579, 986, 1875, 4638, 1391, 463, 2032, 2976, 899, 1891, 257…
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-120.5559 3..., MULTIPOLYGON (((…</code></pre>
+<p>Question 3. Map</p>
+<pre class="r"><code>tm_shape(ca.county) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39; to &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Question 4. Change color palette</p>
+<pre class="r"><code>tm_shape(ca.county) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;, palette = &quot;pink&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Question 5. Add title and legend</p>
+<pre class="r"><code>tm_shape(ca.county) +
+  tm_polygons(col = &quot;medincE&quot;, style = &quot;quantile&quot;, palette = &quot;pink&quot;, title = &quot;Median Income&quot;) +
+  tm_layout(main.title = &quot;Median Income of California Counties&quot;, title.size = 0.8, legend.outside = TRUE)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_polygons()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
+## `tm_scale_intervals()`.
+## ℹ Migrate the argument(s) &#39;style&#39;, &#39;palette&#39; (rename to &#39;values&#39;) to
+##   &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_polygons()`: migrate the argument(s) related to the legend of the
+## visual variable `fill` namely &#39;title&#39; to &#39;fill.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(title = )`
+## [v3-&gt;v4] `tm_layout()`: use `tm_title()` instead of `tm_layout(main.title = )`</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<div id="raster-data" class="section level1">
+<h1>Raster Data</h1>
+<p>Question 6.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif&quot;
+download.file(url, destfile = &quot;LST_med_ca.tif&quot;, mode = &quot;wb&quot;)
+LST_raster = rast(&quot;LST_med_ca.tif&quot;)</code></pre>
+<p>Question 7. Map</p>
+<pre class="r"><code>lst_map = tm_shape(LST_raster) +
+  tm_raster(style=&quot;cont&quot;) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.</code></pre>
+<pre class="r"><code>lst_map</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_legend()`: use &#39;tm_legend()&#39; inside a layer function, e.g.
+## &#39;tm_polygons(..., fill.legend = tm_legend())&#39;
+## This message is displayed once every 8 hours.</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Question 8. Crop</p>
+<pre class="r"><code>LST_raster_crop&lt;-crop(LST_raster, ext(-122.8, -121.5, 37.5, 38.6))
+
+lst_map_crop = tm_shape(LST_raster_crop) +
+  tm_raster(style=&quot;cont&quot;) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.</code></pre>
+<pre class="r"><code>lst_map_crop</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Question 9. Bring in CAdata</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p>Question 10. Overlay cancer data and light at night</p>
+<pre class="r"><code>st_crs(ca_pts)==st_crs(LST_raster)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>ca_pts_proj&lt;-st_transform(ca_pts, st_crs(LST_raster))
+st_crs(ca_pts_proj)==st_crs(LST_raster)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>st_crs(LST_raster)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p>Map them!</p>
+<pre class="r"><code>NDVI_cancer_map = tm_shape(LST_raster) +
+  tm_raster(style = &quot;cont&quot;, title = &quot;Light at night&quot;) +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = &quot;red&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.
+## [v3-&gt;v4] `tm_raster()`: migrate the argument(s) related to the legend of the
+## visual variable `col` namely &#39;title&#39; to &#39;col.legend = tm_legend(&lt;HERE&gt;)&#39;
+## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>NDVI_cancer_map</code></pre>
+<p><img src="Lab_Assignment_2_key_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIEFzc2lnbm1lbnQgMiIKYXV0aG9yOiAiUGV0ZXIgSmFtZXMiCmRhdGU6ICIyMDI1LTA0LTI0IgpvdXRwdXQ6IGh0bWxfZG9jdW1lbnQKLS0tCgpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFKQpgYGAKYGBge3J9CmxpYnJhcnkoc2YpCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeSh0aWR5Y2Vuc3VzKQpsaWJyYXJ5KGZsZXh0YWJsZSkKbGlicmFyeShSQ29sb3JCcmV3ZXIpCmxpYnJhcnkodG1hcCkKbGlicmFyeSh0ZXJyYSkKYGBgCgpRdWVzdGlvbiAxLgpgYGB7ciwgbWVzc2FnZT1GQUxTRX0KY2EuY291bnR5IDwtIGdldF9hY3MoZ2VvZ3JhcGh5ID0gImNvdW50eSIsIAogICAgICAgICAgICAgIHllYXIgPSAyMDIzLAogICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGMobWVkaW5jID0gIkIxOTAxM18wMDEiKSwgCiAgICAgICAgICAgICAgc3RhdGUgPSAiQ0EiLAogICAgICAgICAgICAgIG91dHB1dCA9ICJ3aWRlIiwKICAgICAgICAgICAgICBzdXJ2ZXkgPSAiYWNzNSIsCiAgICAgICAgICAgICAgZ2VvbWV0cnkgPSBUUlVFLAogICAgICAgICAgICAgIGNiID0gRkFMU0UpCmBgYAoKUXVlc3Rpb24gMi4KYGBge3J9CmdsaW1wc2UoY2EuY291bnR5KQpgYGAKUXVlc3Rpb24gMy4KTWFwCmBgYHtyfQp0bV9zaGFwZShjYS5jb3VudHkpICsKICB0bV9wb2x5Z29ucyhjb2wgPSAibWVkaW5jRSIsIHN0eWxlID0gInF1YW50aWxlIikKYGBgCgpRdWVzdGlvbiA0LgpDaGFuZ2UgY29sb3IgcGFsZXR0ZQpgYGB7cn0KdG1fc2hhcGUoY2EuY291bnR5KSArCiAgdG1fcG9seWdvbnMoY29sID0gIm1lZGluY0UiLCBzdHlsZSA9ICJxdWFudGlsZSIsIHBhbGV0dGUgPSAicGluayIpCmBgYAoKUXVlc3Rpb24gNS4KQWRkIHRpdGxlIGFuZCBsZWdlbmQKYGBge3J9CnRtX3NoYXBlKGNhLmNvdW50eSkgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJtZWRpbmNFIiwgc3R5bGUgPSAicXVhbnRpbGUiLCBwYWxldHRlID0gInBpbmsiLCB0aXRsZSA9ICJNZWRpYW4gSW5jb21lIikgKwogIHRtX2xheW91dChtYWluLnRpdGxlID0gIk1lZGlhbiBJbmNvbWUgb2YgQ2FsaWZvcm5pYSBDb3VudGllcyIsIHRpdGxlLnNpemUgPSAwLjgsIGxlZ2VuZC5vdXRzaWRlID0gVFJVRSkKYGBgCgojIFJhc3RlciBEYXRhCgpRdWVzdGlvbiA2LgpgYGB7cn0KdXJsIDwtICJodHRwczovL2dpdGh1Yi5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3Jhdy9tYWluL0xTVF9tZWRfY2EudGlmIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiTFNUX21lZF9jYS50aWYiLCBtb2RlID0gIndiIikKTFNUX3Jhc3RlciA9IHJhc3QoIkxTVF9tZWRfY2EudGlmIikKYGBgCgpRdWVzdGlvbiA3LgpNYXAKYGBge3J9CmxzdF9tYXAgPSB0bV9zaGFwZShMU1RfcmFzdGVyKSArCiAgdG1fcmFzdGVyKHN0eWxlPSJjb250IikgKwogIHRtX2xlZ2VuZChvdXRzaWRlID0gVFJVRSkKbHN0X21hcApgYGAKClF1ZXN0aW9uIDguCkNyb3AKYGBge3J9CkxTVF9yYXN0ZXJfY3JvcDwtY3JvcChMU1RfcmFzdGVyLCBleHQoLTEyMi44LCAtMTIxLjUsIDM3LjUsIDM4LjYpKQoKbHN0X21hcF9jcm9wID0gdG1fc2hhcGUoTFNUX3Jhc3Rlcl9jcm9wKSArCiAgdG1fcmFzdGVyKHN0eWxlPSJjb250IikgKwogIHRtX2xlZ2VuZChvdXRzaWRlID0gVFJVRSkKbHN0X21hcF9jcm9wCmBgYAoKClF1ZXN0aW9uIDkuCkJyaW5nIGluIENBZGF0YQoKYGBge3J9CmRhdGEoQ0FkYXRhKQpjYV9wdHMgPC0gQ0FkYXRhCmNhX3Byb2ogPC0gIitwcm9qPWxjYyArbGF0XzE9NDAgK2xhdF8yPTQxLjY2NjY2NjY2NjY2NjY2IAogICAgICAgICAgICAgK2xhdF8wPTM5LjMzMzMzMzMzMzMzMzM0ICtsb25fMD0tMTIyICt4XzA9MjAwMDAwMCAKICAgICAgICAgICAgICt5XzA9NTAwMDAwLjAwMDAwMDAwMDIgK2VsbHBzPUdSUzgwIAogICAgICAgICAgICAgK2RhdHVtPU5BRDgzICt1bml0cz1tICtub19kZWZzIgoKY2FfcHRzIDwtIHN0X2FzX3NmKENBZGF0YSwgY29vcmRzPWMoIlgiLCJZIiksIGNycz1jYV9wcm9qKQpgYGAKClF1ZXN0aW9uIDEwLgpPdmVybGF5IGNhbmNlciBkYXRhIGFuZCBsaWdodCBhdCBuaWdodApgYGB7cn0Kc3RfY3JzKGNhX3B0cyk9PXN0X2NycyhMU1RfcmFzdGVyKQpjYV9wdHNfcHJvajwtc3RfdHJhbnNmb3JtKGNhX3B0cywgc3RfY3JzKExTVF9yYXN0ZXIpKQpzdF9jcnMoY2FfcHRzX3Byb2opPT1zdF9jcnMoTFNUX3Jhc3RlcikKc3RfY3JzKExTVF9yYXN0ZXIpCmBgYAoKTWFwIHRoZW0hCmBgYHtyfQpORFZJX2NhbmNlcl9tYXAgPSB0bV9zaGFwZShMU1RfcmFzdGVyKSArCiAgdG1fcmFzdGVyKHN0eWxlID0gImNvbnQiLCB0aXRsZSA9ICJMaWdodCBhdCBuaWdodCIpICsKICB0bV9sZWdlbmQob3V0c2lkZSA9IFRSVUUpICsKICB0bV9zaGFwZShjYV9wdHNfcHJvaikgKyAKICB0bV9kb3RzKHNpemU9MC4zLCBhbHBoYT0wLjUsIGNvbCA9ICJyZWQiKQoKTkRWSV9jYW5jZXJfbWFwCmBgYAoK</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab_Assignment_2_key.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

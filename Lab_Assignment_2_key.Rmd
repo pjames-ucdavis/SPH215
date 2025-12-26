@@ -54,9 +54,7 @@ Add title and legend
 ```{r}
 tm_shape(ca.county) +
   tm_polygons(col = "medincE", style = "quantile", palette = "pink", title = "Median Income") +
-  tm_layout(main.title = "Median Income of California Counties", title.size = 0.8, 
-            title.position = "center",
-            legend.outside = TRUE, legend.outside.position = "right")
+  tm_layout(main.title = "Median Income of California Counties", title.size = 0.8, legend.outside = TRUE)
 ```
 
 # Raster Data

@@ -1,0 +1,187 @@
+---
+title: "Lab 8: Future Directions in GIS and Public Health"
+---
+
+# Read in Packages
+```{r}
+library(dplyr)
+library(readr)
+library(purrr)
+library(ggplot2)
+library(gganimate)
+library(lubridate)
+library(shiny)
+library(leaflet)
+library(terra)
+library(sf)
+library(tmap)
+
+```
+
+
+# Load our GPS data
+```{r}
+
+gps_data_raw <- read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/GPS/gps/Apr/Apr20_30/Compiled/gps_apr25_30.csv")
+
+# Convert time and create label
+gps_data <- gps_data_raw %>%
+  mutate(
+    time = ymd_hms(`UTC time`),
+    time_label = format(time, "%Y-%m-%d %H:%M:%S")
+  ) %>%
+  arrange(time)
+
+# Now use gps_data (not gps_data_raw!)
+leaflet(gps_data) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolylines(lng = ~longitude, lat = ~latitude, color = "blue", weight = 2) %>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 4,
+    color = "red",
+    popup = ~paste("Time:", time_label),
+    label = ~time_label
+  )
+
+```
+
+\
+
+Let's look at this with the same dataset, but let's try to animate our data.
+```{r}
+
+
+# Load and process the data once
+gps_data_raw <- read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/GPS/gps/Apr/Apr20_30/Compiled/gps_apr25_30.csv")
+
+gps_data <- gps_data_raw %>%
+  mutate(
+    time = ymd_hms(`UTC time`),
+    time_label = format(time, "%Y-%m-%d %H:%M:%S"),
+    rounded_minute = floor_date(time, unit = "minute")
+  ) %>%
+  arrange(time) %>%
+  group_by(rounded_minute) %>%
+  slice(1) %>%    # keep only the first observation per minute
+  ungroup()
+
+# UI
+ui <- fluidPage(
+  titlePanel("Animated GPS Data"),
+  leafletOutput("map", height = 600),
+  sliderInput("time", "Select Time", 
+              min = min(gps_data$time), 
+              max = max(gps_data$time), 
+              value = min(gps_data$time),
+              timeFormat = "%Y-%m-%d %H:%M:%S",
+              step = 600,  # use seconds; here it jumps in 600-second chunks
+              animate = animationOptions(interval = 100, loop = TRUE),
+              width = "100%")
+)
+
+# Server
+server <- function(input, output, session) {
+  filtered_data <- reactive({
+    gps_data %>% filter(time <= input$time)
+  })
+  
+output$map <- renderLeaflet({
+  leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    fitBounds(
+      lng1 = min(gps_data$longitude, na.rm = TRUE),
+      lat1 = min(gps_data$latitude, na.rm = TRUE),
+      lng2 = max(gps_data$longitude, na.rm = TRUE),
+      lat2 = max(gps_data$latitude, na.rm = TRUE)
+    )
+})
+  
+  observe({
+    leafletProxy("map", data = filtered_data()) %>%
+      clearMarkers() %>%
+      clearShapes() %>%
+      addPolylines(lng = ~longitude, lat = ~latitude, color = "blue") %>%
+      addCircleMarkers(
+        lng = ~longitude,
+        lat = ~latitude,
+        radius = 4,
+        color = "red",
+        label = ~time_label,
+        popup = ~paste("Time:", time_label)
+      )
+  })
+}
+
+# Run the app
+shinyApp(ui, server)
+
+```
+
+# Extract GPS points to an NDVI layer
+```{r}
+gps_sf <- st_as_sf(gps_data, coords = c("longitude", "latitude"), crs = 4326)
+
+```
+
+# Bring in raster
+```{r}
+ndvi_raster <- rast("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/GPS/NewEngland_270_2021-07-01.tif")
+
+# Downsample by a factor of 2 (you can increase to 4, 5, etc. for more compression)
+ndvi_reduced <- aggregate(ndvi_raster, fact = 30, fun = mean)
+```
+
+# Check projections
+```{r}
+gps_proj <- st_transform(gps_sf, crs(ndvi_reduced))
+st_crs(gps_proj)
+```
+
+# Map
+
+```{r}
+# Get bounding box from GPS data (in EPSG:4326)
+bbox <- st_bbox(gps_sf)
+
+# Approximate 500m buffer in degrees
+lat_buffer <- 0.0045
+lon_buffer <- 0.0055
+
+# Expand the bbox
+bbox_buffered <- bbox
+bbox_buffered["xmin"] <- bbox["xmin"] - lon_buffer
+bbox_buffered["xmax"] <- bbox["xmax"] + lon_buffer
+bbox_buffered["ymin"] <- bbox["ymin"] - lat_buffer
+bbox_buffered["ymax"] <- bbox["ymax"] + lat_buffer
+
+# Convert bbox to terra extent
+bbox_ext <- ext(bbox_buffered)
+
+# Crop NDVI raster
+ndvi_crop <- crop(ndvi_raster, bbox_ext)
+
+tmap_mode("view") 
+
+tm_shape(ndvi_crop) +
+  tm_raster(style = "cont", palette = "YlGn", alpha = 0.01, title = "NDVI") +
+tm_shape(gps_proj) +
+  tm_dots(col = "blue", size = 0.5, border.col = NA) +
+  tm_layout(title = "GPS Points over NDVI", legend.outside = FALSE)
+
+```
+
+# Extract NDVI values to GPS data
+```{r}
+ndvi_values <- terra::extract(ndvi_raster, vect(gps_proj))
+
+```
+
+# Look at ndvi_values
+```{r}
+summary(ndvi_values$NDVI_mean)
+hist(ndvi_values$NDVI_mean)
+```
+
+
