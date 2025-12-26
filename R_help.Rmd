@@ -2,7 +2,7 @@
 title: "R Help"
 ---
 
-## SPH 215: GIS and Public Health
+## SPH 215: GIS for Public Health
 
 #### All credit goes to Noli Brazil and his [CRD 230 website](https://crd230.github.io/index.html) for this section
 
