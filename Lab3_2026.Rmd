@@ -1,0 +1,1484 @@
+---
+title: 'Lab 3: Geocoding, Vector Data, and Census Data Polygons and Rasters'
+---
+
+In this lab, we are going to work with vector data, which we've talked about last week. We are going to work with a dataset of cancer patients across California, as well as Census data on socioeconomic factors. We will also talk about geocoding addresses and will discuss how to visualize data. 
+
+The objectives of this guide are to teach you:
+
+1. How to geocode addresses
+2. How to bring in and visualize point data
+3. How to download Census data using the Census API
+4. How to conduct exploratory data analysis
+
+Let's get cracking!
+
+\
+
+# Open up an R Markdown file
+
+We hopefully remember some of this from last week in [Lab 2](Lab2.html), but let's open an R Markdown file by clicking on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 3”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+
+\
+
+# What packages do we need?
+
+Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
+
+
+```{r, message=FALSE}
+library(tidygeocoder)
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(tmap)
+```
+
+\
+
+# Geocoding
+
+First, we are going to tackle how we take addresses and convert them to spatial data (latitude and longitude). So, let's say we wanted to map all of the marijuana dispensaries across San Francisco. Let's download a .csv of these addresses from the Github site, then take a look at the dataset.
+
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/san_francisco_active_marijuana_retailers.csv", "san_francisco_active_marijuana_retailers.csv", mode = "wb")
+
+sf_mj <- read_csv("san_francisco_active_marijuana_retailers.csv")
+
+head(sf_mj)                  
+
+```
+
+\
+
+OK, some interesting columns there, and we have *Premise Address* as a column that we might want to make spatial. Let's look closer at that.
+
+
+```{r}
+head(sf_mj$`Premise Address`)
+```
+
+\
+
+OK that column looks like what we want to geocode. But how do we take these addresses and make them into spatial information? We have to geocode them! To do so, we will use the **tidygeocoder** package in R. But first, we see that the addresses look a little strange. The address county is always "County: SAN FRANCISCO" so we will `gsub()` out that entire string.
+```{r}
+sf_mj$`Premise Address` <- gsub(" County: SAN FRANCISCO",
+                                  "", sf_mj$`Premise Address`)
+head(sf_mj$`Premise Address`)
+```
+That looks much better.
+
+\
+
+Now let's give a try to geocoding these addresses with the **tidygeocoder** package. We will use the `geocode()` function to add a latitude and longitude to each of our addresses in the *Premise Address* column. We will use the Open Street Map address database by specifying `method = "osm"`. This will take about a minute to run, so be patient! 
+```{r}
+sf_mj_geo      <- geocode(sf_mj, "Premise Address",
+                          method = "osm")
+head(sf_mj_geo)
+```
+
+\
+
+Hmm, looks like some of our addresses have an `NA` for their lat and long. Let's take a closer look.
+
+```{r}
+summary(sf_mj_geo$lat)
+summary(sf_mj_geo$long)
+```
+
+\
+
+Looks like we have 10 addresses missing *lat* and 10 missing *long*. Let's try this again using a different geocoding database called *arcgis*.
+
+```{r}
+sf_mj_geo_arc      <- geocode(sf_mj, "Premise Address",
+                          method = "arcgis")
+head(sf_mj_geo_arc)
+summary(sf_mj_geo_arc$lat)
+summary(sf_mj_geo_arc$long)
+```
+
+\
+
+Woohoo! No missingness. Love to see it. OK, let's plot these data and see how they look. 
+
+```{r}
+plot(sf_mj_geo_arc$long, sf_mj_geo_arc$lat)
+```
+
+\
+
+We are in business! We have taken addresses and converted them into latitude and longitude! I think we need a badge!
+![tidygeocoder Badge](tidygeocoder_hex.png) 
+
+\
+
+Bonus exercise! Let's take these addresses and *reverse geocode them*. That's just a fancy way of saying that we will take latitude and longitude data and convert it into readable addresses. We use the aptly named function `reverse_geocode` and specify which columns to look at (*lat* and *long*), the method we want for geocoding,  and what we want the *address* column to be named. Then we `select` out some columns that we aren't really interested in. Remember, we are doing this the **tidy** way so we are using `%>%` pipes.
+
+```{r}
+reverse <- sf_mj_geo_arc %>%
+  reverse_geocode(lat = lat, long = long, method = 'arcgis',
+                  address = address_found) %>%
+  select(-`Business Owner`,-`Business Structure`,-`License Number`,-`License Type`,-Status,-`Issue Date`,-`Expiration Date`,-Activities,-`Adult-Use/Medicinal`)
+head(reverse)
+```
+
+Looking at *Premise Address* and *address_found* we can see that we did pretty well! Not perfect, but most are the right address or a few doors down. Well done!
+
+\
+
+# sf: Our go to package for vector data
+
+Although there are a few ways to work with vector spatial data in R, we will focus on the **sf** package in this course. The majority of spatial folks in R have shifted to **sf** for vector data, and so it makes sense to focus on it in the class.
+
+Processing spatial data is very similar to nonspatial data thanks to the package **sf**, which is tidy friendly. **sf** stands for simple features. The [Simple Features standard](https://en.wikipedia.org/wiki/Simple_Features) defines a simple feature as a representation of a real world object by a point or points that may or may not be connected by straight line segments to form lines or polygons. A feature is thought of as a thing, or an object in the real world, such as a building or a tree. A county can be a feature. As can a city and a neighborhood. Features have a geometry describing where on Earth the features are located, and they have attributes, which describe other properties. 
+
+Now let's get our hands dirty working with some spatial data.
+
+\
+
+# Vectors: Import Cancer Point Data
+
+For this lab, we will primarily be working with the [*MapGAM* package](https://cran.r-project.org/web/packages/MapGAM/index.html). If you go to the link, you can read the reference manual on the various datasets available in the package. For this lab, we will mainly be working with the *CAdata* dataset. While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. This is a cohort with **time to mortality** measured, but for the purposes of our class, we will conduct simple tabular analyses looking at associations between spatial exposures with mortality at end of follow-up.
+
+The *CAdata* dataset contains the following variables
+
+- *time* (follow-up time to either event of being censored)
+- *event* (1=dead, 0=censored)
+- *X* (Latitude)
+- *Y* (Longitude)
+- *AGE* (age in years)
+- *INS* (insurance status, categorical)
+
+\
+
+So let's bring in the *CAdata* dataset and have a look at it. 
+
+```{r}
+#Load CAdata dataset from MapGAM package
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+```
+
+\
+
+OK, so the variables look great. Is it a spatial dataset that can be recognized by R? Not just yet. We know that *X* is likely some sort of longitude column and *Y* is likely some sort of latitude column, although they don't exactly look right. We have to tell R that the X and Y coordinates are spatial data using the `st_as_sf` function in **sf**. With this command, we can specify which coordinates R should look at for longitude and latitude with the `coords=c()` function.
+
+\
+
+```{r}
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+```
+
+\
+
+Let's check the coordinate reference system (CRS) using the `st_crs` command in the **sf** package.
+
+```{r}
+st_crs(ca_pts)
+```
+
+Hmmm, NA. That still doesn't look good. So how do we make this a spatial file? We will need to add a CRS. 
+
+\
+
+## Add coordinate reference system
+
+Let's add a CRS by using `st_set_sf` from the **sf** package. We get the CRS for this dataset from the MapGAM documentation (don't worry--it took me forever to find this, but usually this is much easier to find). Then we will double check the CRS.
+
+```{r}
+#Load the projection into an object called ca_proj
+
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+
+#Look at dataset
+summary(ca_pts_crs) 
+
+#Check the CRS
+st_crs(ca_pts_crs)
+```
+
+\
+
+# tmap: Mapping vector data
+
+Nice! We have a spatial dataset. That *geometry* column is how **sf** stores the geographic data, and latitude and longitude there are looking a bit more like we would expect. And we definitely have a full CRS with all sorts of info. OK, let's plot our data to make sure they look spatial! We will use the **tmap** package to plot the points. We will first specify the `tmap_mode` of "view" which is interactive. There's also a "plot" option which is nice for making exportable figures. We will then create an object called *cancer_map* and then add a layer with `tm_shape()`. This allows us to combine several maps into one, or to add layers on top of each other. Then we have to specify a level of that layer to display. Here we will use `tm_dots()` to to plot the points. In our options, we specify the size with `size=`. 
+```{r}
+tmap_mode("view")
+cancer_map = tm_shape(ca_pts_crs) + tm_dots(size=0.5)
+cancer_map
+```
+
+\
+
+Let's play around with some of the options. We can change the color with the `col=` option. We can make the dots smaller by specifying the `size=` option. And we can change the transparency of the points with the `alpha=` option.
+```{r}
+cancer_map_small = tm_shape(ca_pts_crs) + tm_dots(col = "blue", size = 0.3, alpha = 0.5)
+cancer_map_small
+```
+
+\
+
+Let's map the points color coded by the variable *event*, or whether or not the participant died over followup. We do that by specifying that the color (`col=`) is based on the column *event*. We have to specify that *event* is a categorical variable with `style="cat"`. 
+```{r}
+cancer_map_events = tm_shape(ca_pts_crs) + tm_dots(size=0.3, col="event", style="cat")
+cancer_map_events
+```
+
+\
+
+Let's see if we can change up the color scheme.
+```{r}
+cancer_map_events_rg = tm_shape(ca_pts_crs) + tm_dots(col = "event", palette = c("0" = "gray", "1" = "red"), style="cat")
+cancer_map_events_rg
+```
+
+\
+
+Looking good! You earned yourself a tmap badge. Now get yourself a [cookie](https://youtu.be/3soC6VADpcw?si=4njBib3jWPsUYaES).
+
+\
+
+![tmap Badge](tmaplogo.png)
+
+\
+
+# Downloading Census Data
+
+One of the primary sources of data that we’ll be using in this class is the United States Decennial Census and the American Community Survey. There are two ways to bring Census data into R: Using and API or downloading it from an online source.
+
+**Note that we will gather ACS data from all sources. Census boundaries changed in 2020, which means that 2016-2020 and later data will not completely merge with ACS data before 2020. So make sure you merge 2020 data only with 2020 data (but you can merge 2019 data with data between 2010-2019). This is especially important for tract data, with many new tracts created in 2020 and existing tracts experiencing dramatic changes in their boundaries between 2010 and 2020. See the impact of tract boundary changes between 2000 and 2010 [here](https://crd230.github.io/censusgeography.html).** You may also explore the [Neighborhood Change Database](https://search.library.ucdavis.edu/view/action/uresolver.do?operation=resolveService&package_service_id=28104223860003126&institutionId=3126&customerId=3125&VE=true) which is available through the UC Davis library, and is a dataset that incorporates tract boundary changes over time. We are working on acquiring the 2020 data there!
+
+\
+
+## Download Census data from an online source
+
+The first way to obtain Census data is to download them directly from the web onto your hard drive. There are several websites where you can download Census data including [Social Explorer](https://www.socialexplorer.com/) and [PolicyMap](https://ucdavis.policymap.com/maps), which we have free access to as UC Davis affiliates, and the [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/), which is free for everyone. To find out how to download data from PolicyMap and NHGIS, check out tutorials [here](https://policymap.helpdocs.io/data-download) and [here](https://www.nhgis.org/user-resources/users-guide).
+
+\
+
+## Use the Census API and tidycensus
+
+The other way to bring Census data into R is to use the [Census Application Program Interface (API)](https://www.census.gov/data/developers/guidance/api-user-guide.What_is_the_API.html). An API allows for direct requests for data in machine-readable form. That is, rather than you having to navigate to some website, scroll around to find a dataset, download that dataset once you find it, save that data onto your hard drive, and then bring the data into R, you just tell R to retrieve data directly from the source using one or two lines of code.
+
+In order to directly download data from the Census API, you need a key. You can sign up for a free key [here](http://api.census.gov/data/key_signup.html), which you should have already done before the lab. Type your key in quotes using the census_api_key() command.
+```{r, eval = FALSE}
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overwrite=TRUE)
+```
+
+\
+
+The option `install = TRUE` saves the API key in your R environment, which means you don’t have to run `census_api_key()` every single time. The function for downloading American Community Survey (ACS) Census data is `get_acs()`. The command for downloading decennial Census data is `get_decennial()`. Both functions come from the **tidycensus** package, which allows users to interface with the US Census Bureau’s decennial Census and American Community Survey APIs. Getting variables using the Census API requires knowing the variable ID - and there are thousands of variables (and thus thousands of IDs) across the different Census files. To rapidly search for variables, use the commands `load_variables()` and `View()`. Because we’ll be using the ACS in this guide, let’s check the variables in the most recent 2023 5-year ACS (2019-2023) using the following commands.
+```{r}
+acs2023 <- load_variables(2023, "acs5", cache = TRUE)
+View(acs2023)
+```
+
+\
+
+A window should have popped up showing you a record layout of the 2019-2023 ACS. To search for specific data, select “Filter” located at the top left of this window and use the search boxes that pop up. For example, type in “Hispanic” in the box under “Label”. You should see near the top of the list the first set of variables we’ll want to download - race/ethnicity. Another way of finding variable names is to search them using [Social Explorer](https://www.socialexplorer.com/data/metadata/). Click on the appropriate survey data year and then “American Community Survey Tables”, which will take you to a list of variables with their Census IDs.
+
+Let’s extract race/ethnicity data and total population for [California counties](https://en.wikipedia.org/wiki/List_of_counties_in_California) using the `get_acs()` command.
+
+\
+
+```{r}
+ca <- get_acs(geography = "county", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+
+```
+
+\
+
+In the above code, we specified the following arguments
+
+- `geography`: The level of geography we want the data in; in our case, the county. Other geographic options can be found [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus).
+- `year`: The end year of the data (because we want 2016-2020, we use 2020).
+- `variables`: The variables we want to bring in as specified in a vector you create using the function `c()`. Note that we created variable names of our own (e.g. “nhwhite”) and we put the ACS IDs in quotes (“B03002_003”). Had we not done this, the variable names will come in as they are named in the ACS, which are not very descriptive.
+- `state`: We can filter the counties to those in a specific state. Here it is “CA” for California. If we don’t specify this, we get all counties in the United States.
+- `survey`: The specific Census survey were extracting data from. We want data from the 5-year American Community Survey, so we specify “acs5”. The ACS comes in 1- and 5-year - varieties.
+- `output`: The argument tells R to return a wide dataset as opposed to a long dataset (see this vignette for more info).
+
+Another useful option to set is `cache_table = TRUE`, so you don’t have to re-download after you’ve downloaded successfully the first time. Type in `? get_acs()` to see the full list of options.
+
+\
+
+As you learned in [Lab 1](lab1.html) and [Lab 2](Lab2.html), whenever you bring in a dataset, the first thing you should always do is view it to get a sense of its structure and to make sure you got what you expected. One way of doing this is to use the `glimpse()` command
+
+```{r}
+glimpse(ca)
+```
+
+\
+
+You get a quick, compact summary of your tibble. You can also use the `head()` command, which shows you the first several rows of your data object (`tail()` will give you the last several rows).
+
+```{r}
+head(ca)
+```
+
+\
+
+The tibble contains counties with their estimates for race/ethnicity. These variables end with the letter “E”. It also contains the [margins of error](https://walker-data.com/tidycensus/articles/margins-of-error.html) for each estimate. These variables end with the letter “M”.
+
+**tidycensus** is a game changer in being able to bring in Census data into R in a convenient, fast, efficient and tidy friendly way. We’ll be using this package in the next lab to bring in Census spatial data. And congratulations! You’ve just earned another badge. Fantastic!
+
+\
+
+![tidycensus Badge](tidycensus_sticker.png)
+
+\
+
+# Reading in data
+## PolicyMap
+
+To save us time, I’ve uploaded a PolicyMap ([link to .csv](https://github.com/pjames-ucdavis/SPH215/blob/main/PolicyMap%20Data%202025-03-27%20192555%20UTC.csv)) on the Github for you to use in this lab. Save this file in the same folder where your Lab 2 R Markdown file resides. To read in a .csv file, first make sure that R is pointed to the folder you saved your data into. Type in `getwd()` to find out the current directory and `setwd("directory name")` to set the directory to the folder containing the data. 
+
+From a Mac laptop, I type in the following command to set the directory to the folder containing my data.
+
+```{r}
+setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
+```
+
+\
+
+For a Windows system, you can find the pathway of a file by right clicking on it and selecting Properties. You will find that instead of a forward slash like in a Mac, a windows pathway will be indicated by a single back slash \. R doesn’t like this because it thinks of a single back slash as an escape character. Use instead two back slashes \\
+
+```{r eval=FALSE}
+setwd("C:\\Users\\pjames\\Documents\\UCD\\SPH215\\Labs\\Lab 3")
+```
+or a forward slash /.
+
+```{r eval=FALSE}
+setwd("C:/Users/pjames/Documents/UCD/SPH215/Labs/Lab 3")
+```
+
+You can also manually set the working directory by clicking on Session -> Set Working Directory -> Choose Directory from the menu.
+
+\
+
+Once you’ve set your directory, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension.
+
+```{r}
+ca.pm <- read_csv("PolicyMap Data 2025-03-27 192555 UTC.csv", skip = 1)
+```
+
+\
+
+The option `skip = 1` tells R to skip the first row of the file when bringing it in. This is done because there are two rows of column names. The first row contains the extended version, while the second is the abridged version. Above we keep the abridged version.
+
+You should see a tibble *ca.pm* pop up in your Environment window (top right). What does our data set look like?
+
+```{r}
+glimpse(ca.pm)
+```
+
+\
+
+If you like viewing your data through an Excel style worksheet, type in `View(ca.pm)`, and *ca.pm* should pop up in the top left window of your R Studio interface.
+
+\
+
+# More data wrangling
+
+We learned about the various data wrangling related functions from the **tidyverse** package in [Lab 1](lab1.html). Let’s employ some of those functions to create a single county level dataset that joins the datasets we downloaded from the Census API and PolicyMap.
+
+We are going to combine these datasets using the county FIPS codes. In the Census API and PolicyMap, these are contained in the variables GEOID and GeoID, respectively. Let’s make sure they are in the same class.
+
+```{r}
+class(ca.pm$GeoID)
+class(ca$GEOID)
+```
+
+\
+
+## Piping
+
+One of the important innovations from the tidyverse is the pipe operator `%>%`. You use the pipe operator when you want to combine multiple operations into one line of continuous code. Let’s create our final data object *cacounty* using our brand new friend the pipe. Let's put together a lot of what we've done over the past few weeks into one step! Now we are cooking with gas!
+
+```{r}
+cacounty <- ca %>% 
+      left_join(ca.pm, by = c("GEOID" = "GeoID")) %>%
+      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+             mhisp = case_when(phisp > 0.5 ~ "Majority",
+                               TRUE ~ "Not Majority")) %>%
+      rename(County = GeoID_Name) %>%
+      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
+glimpse(cacounty)
+```
+
+Let’s break down what the pipe is doing here. First, you start out with your dataset ca. You “pipe” that into the command `left_join()`. Notice that you didn’t have to type in ca inside that command - `%>%` pipes that in for you. The command joins the data object *ca.pm* to *ca*. The result of this function gets piped into the `mutate()` function, which creates the percent race/ethnicity (from the Census API), and majority Hispanic variables. This gets piped into the `rename()` function, which renames the ambiguous variable name *GeoID_Name* to the more descriptive name *County*. This then gets piped into the final function, `select()`, which keeps the necessary variables. Finally, the code saves the result into cacounty which we designated at the beginning with the arrow operator.
+
+Piping makes code clearer, and simultaneously gets rid of the need to define any intermediate objects that you would have needed to keep track of while reading the code. PIPE, Pipe, and pipe whenever you can. We need some stinkin badges!
+
+\
+
+![pipe Badge!](pipe.png)
+
+\
+
+## Saving data
+
+If you want to save your data frame or tibble as a csv file on your hard drive, use the command `write_csv()`. Before you save a file, make sure R is pointed to the appropriate folder on your hard drive by using the function `getwd()`. If it’s not pointed to the right folder, use the function `setwd()` to set the appropriate working directory.
+
+```{r}
+write_csv(cacounty, "lab2_file.csv")
+```
+
+The first argument is the name of the R object you want to save. The second argument is the name of the csv file in quotes. Make sure to add the .csv extension. The file is saved in your current working directory.
+
+\
+
+# Exploratory data analysis
+
+The functions above help us bring in and clean data. The next set of functions covered in this section will help us summarize the data. Data refer to pieces of information that describe a status or a measure of magnitude. A variable is a set of observations on a particular characteristic. The distribution of a variable is a listing showing all the possible values of the data for that variable and how often they occur. Exploratory Data Analysis (EDA) encompasses a set of methods (some would say a framework or perspective) for summarizing a variable’s distribution, and the relationship between the distributions of two or more variables. We will cover two general approaches to summarizing your data: descriptive statistics and visualization via graphs and charts.
+
+\
+
+## Descriptive statistics
+
+When describing a distribution, your quantitative message is often best communicated by reducing data to a few summary numbers. These numbers are meant to summarize the “typical” value in the distribution (e.g., mean, median, mode) and the variation or “spread” in the distribution (e.g., minimum/maximum, interquartile range, standard deviation). These summary numbers are known as descriptive statistics.
+
+We can use the function summarize() to get descriptive statistics of our data. For example, let’s calculate the mean household income in California counties. The first argument inside summarize() is the data object cacounty and the second argument is the function calculating the specific summary statistic, in this case mean().
+
+```{r}
+cacounty %>%
+  summarize(Mean = mean(mhhinc))
+```
+
+The average county median household income is $87,001. If the variable *mhhinc* contained missing values, we would have gotten *NA* as a result. To omit missing values from the calculation, you need to add `rm = TRUE` to `mean()`.
+
+We can calculate more than one summary statistic within `summarize()`. What is the spread of the distribution? We can add to `summarize()` the function `sd()` to calculate the standard deviation.
+\
+
+```{r}
+cacounty %>%
+  summarize(Mean = mean(mhhinc), SD = sd(mhhinc))
+```
+
+\
+
+Does the average income differ by California region? First, let’s create a new variable region designating each county as Bay Area, Southern California, Central Valley, Capital Region and the Rest of California using the `case_when()` function within the `mutate()` function.
+
+```{r}
+cacounty <- cacounty %>%
+    mutate(region = case_when(County == "Sonoma" | County == "Napa" | 
+                              County == "Solano" | County == "Marin" | 
+                              County == "Contra Costa" | County == "San Francisco" |
+                              County == "San Mateo" | County == "Alameda" | 
+                              County == "Santa Clara" ~ "Bay Area",
+                              County == "Imperial" | County == "Los Angeles" | 
+                              County == "Orange" | County == "Riverside" |
+                              County == "San Diego" | County == "San Bernardino" |
+                              County == "Ventura" ~ "Southern California",
+                              County == "Fresno" | County == "Madera" | 
+                              County == "Mariposa" | County == "Merced" | 
+                              County == "Tulare" | 
+                              County == "Kings" ~ "Central Valley",
+                              County == "Alpine" | County == "Colusa" |
+                              County == "El Dorado" | County == "Glenn" |
+                              County == "Placer" | County == "Sacramento" |
+                              County == "Sutter" | County == "Yolo" |
+                              County == "Yuba" ~ "Capital Region",
+                              TRUE ~ "Rest"))
+```
+
+\
+
+Next, we need to pair `summarize()` with the function `group_by()`. The function `group_by()` tells R to run subsequent functions on the data object by a group characteristic (such as gender, educational attainment, or in this case, region). We’ll need to use our new best friend %>% to accomplish this task.
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc))
+```
+
+The first pipe sends cacounty into the function `group_by()`, which tells R to group *cacounty* by the variable *region*.
+
+How do you know the tibble is grouped? Because it tells you!
+
+```{r}
+cacounty %>%
+  group_by(region) 
+```
+
+\
+
+The second pipe takes this grouped dataset and sends it into the `summarize()` command, which calculates the mean income (by region, because the dataset is grouped by region).
+
+To get the mean, median and standard deviation of median income, its correlation with percent Hispanic, and give column labels for the variables in the resulting summary table, we type in:
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+\
+
+The variable *mhhinc* is numeric. How do we summarize categorical variables? We usually summarize categorical variables by examining a frequency table. To get the percent of counties that have a majority Hispanic population mhisp, you’ll need to combine the functions *group_by()*, *summarize()* and *mutate()* using `%>%`.
+
+```{r}
+cacounty %>%
+  group_by(mhisp) %>%
+  summarize(n = n()) %>%
+  mutate(freq = n / sum(n))
+```
+
+\
+
+The code `group_by(mhisp)` separates the counties by the categories of mhisp (Majority, Not Majority). We then used `summarize()` to count the number of counties that are Majority and Not Majority. The function to get a count is `n()`, and we saved this count in a variable named *n*. Next, we used `mutate()` on this table to get the proportion of counties by Majority Hispanic designation. The code `sum(n)` adds the values of *n*. We then divide the value of each n by this sum. That yields the final frequency table.
+
+Instead of calculating descriptive statistics one at a time using `summarize()`, you can obtain a set of summary statistics for one or all the numeric variables in your dataset using the `summary()` function.
+
+```{r}
+summary(cacounty)
+```
+
+\
+
+## Tables for presentation
+
+The output from the descriptive statistics we’ve ran so far is not presentation ready. For example, taking a screenshot of the following results table produces unnecessary information that is confusing and messy.
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+Furthermore, you would like to show a table, say, in a manuscript that does not require you to take a screenshot or copying and pasting into Excel, but instead can be produced via code, that way it can be fixed if there is an issue, and is reproducible.
+
+One way of producing presentation tables in R is through the **flextable** package. First, you will need to save the tibble or data frame of results into an object. For example, let’s save the above results into an object named *region.summary*
+
+```{r}
+region.summary <- cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+You then input the object into the function `flextable()`. Save it into an object called *my_table*
+
+```{r}
+my_table <- flextable(region.summary)
+my_table
+```
+
+\
+
+You should see a relatively clean table pop up either in your console or Viewer window.
+
+\
+
+What kind of object is *my_table*?
+```{r}
+class(my_table)
+```
+
+\
+
+After doing this, we can progressively pipe the *my_table* object through more **flextable** formatting functions. For example, you can change the column header names using the function `set_header_labels()` and center the header names using the function `align()`.
+
+```{r}
+my_table <- my_table %>%
+          set_header_labels(
+            region = "Region",
+            Mean = "Mean",
+            Median = "Median",
+            SD = "Standard Deviation",
+            Correlation = "Correlation") %>%
+              flextable::align(align = "center", part = "all")
+
+my_table
+```
+
+Well doesn't that look spiffy! There are a slew of options for formatting your table, including adding footnotes, borders, shade and other features. Check out this [useful tutorial](https://ardata-fr.github.io/flextable-book/) for an explanation of some of these features.
+
+Once you’re done formatting your table, you can then export it to Word, PowerPoint or HTML or as an image (PNG) files. To do this, use one of the following functions: `save_as_docx()`, `save_as_pptx()`, `save_as_image()`, and `save_as_html()`. 
+
+Use the `save_as_image()` function to save your table as an image.
+
+```{r}
+save_as_image(my_table, path = "reg_income.png")
+```
+
+You first put in the table my_table, and set the file name with the .png extension. Check your working directory. You should see the file *reg_income.png*.
+
+\
+
+## Data visualization
+
+Another way of summarizing variables and their relationships is through graphs and charts. The main package for R graphing is *ggplot2* which is a part of the *tidyverse* package. The graphing function is `ggplot()` and it takes on the basic template
+```{r, eval=FALSE}
+ggplot(data = <DATA>) +
+      <GEOM_FUNCTION>(mapping = aes(x, y)) +
+      <OPTIONS>()
+```
+
+\
+
+1. `ggplot()` is the base function where you specify your dataset using the data = <DATA> argument.
+2. You then need to build on this base by using the plus operator + and <GEOM_FUNCTION>() where <GEOM_FUNCTION>() is a unique geom function indicating the type of graph you want to plot. Each unique function has its unique set of mapping arguments which you specify using the mapping = aes() argument. Charts and graphs have an x-axis, y-axis, or both. Check this ggplot cheat sheet for all possible geoms.
+3. `<OPTIONS>()` are a set of functions you can specify to change the look of the graph, for example relabeling the axes or adding a title.
+
+The basic idea is that a ggplot graphic layers geometric objects (circles, lines, etc), themes, and scales on top of data.
+
+You first start out with the base layer. It represents the empty *ggplot* layer defined by the `ggplot()` function.
+```{r}
+cacounty %>%
+  ggplot()
+```
+
+We get an empty plot. We haven’t told `ggplot()` what type of geometric object(s) we want to plot, nor how the variables should be mapped to the geometric objects, so we just have a blank plot. We have `geoms` to paint the blank canvas.
+
+From here, we add a “`geom`” layer to the ggplot object. Layers are added to ggplot objects using `+`, instead of `%>%`, since you are not explicitly piping an object into each subsequent layer, but adding layers on top of one another. Each `geom` is associated with a specific type of graph.
+
+Let’s go through some of the more common and popular graphs for visualizing your data.
+
+\
+
+### Histogram
+
+A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for <GEOM_FUNCTION()>. Let’s create a histogram of median household income. Note that we don’t need to specify the `y=` here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) 
+```
+
+We can continue to add layers to the plot. For example, we use the argument `xlab("Median household income")` to label the x-axis as “Median household income”.
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) +
+  xlab("Median household income")
+```
+
+Note the message produced with the plot. It tells us that we can use the `bins =` argument to change the number of bins used to produce the histogram. You can increase the number of bins to make the bins narrower and thus get a finer grain of detail. Or you can decrease the number of bins to get a broader visual summary of the shape of the variable’s distribution. Compare bins = 10 to bins = 50.
+
+\
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc), bins=10) +
+  xlab("Median household income")
+```
+
+\
+
+### Boxplot
+
+We can use a *boxplot* to visually summarize the distribution of a single numeric variable or the relationship between a categorical and numeric variable. Use `geom_boxplot()` for <GEOM_FUNCTION()> to create a boxplot. Let’s examine median household income. Note that a boxplot uses y= rather than x= to specify where mhhinc goes. We also provide a descriptive y-axis label using the `ylab()` function.
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(y = mhhinc)) +
+    ylab("Median household income")
+```
+
+\
+
+Let’s examine the distribution of median income by *mhisp.* Because we are examining the association between two variables, we need to specify x and y variables in `aes()` (we also specify both x- and y-axis labels).
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income")
+```
+
+The top and bottom of a boxplot represent the 75th and 25th percentiles, respectively. The line in the middle of the box is the 50th percentile. Points outside the whiskers represent outliers. Outliers are defined as having values that are either larger than the 75th percentile plus 1.5 times the IQR or smaller than the 25th percentile minus 1.5 times the IQR.
+
+\
+
+The boxplot is for all counties combined. Use the `facet_wrap()` function to separate by region. Notice the tilde ~ before the variable region inside `facet_wrap()`.
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income") +
+    facet_wrap(~region) 
+```
+
+\
+
+### Bar chart
+
+The primary purpose of a bar chart is to illustrate and compare the values for a categorical variable. Bar charts show either the number or frequency of each category. To create a bar chart, use `geom_bar()` for <GEOM_FUNCTION>(). Let’s show a bar chart of median household income by region. We’ll borrow from code above that generated a tibble of mean household income by region, and pipe that into `ggplot()`.
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=region, y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income")
+```
+
+\
+
+Right now the bars are ordered based on the region names. We can order the bars in descending order based on household income by using the `reorder()` function. Notice the negative sign in front of Mean to order by descending order.
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income")
+```
+
+\
+
+We can flip the axes using the function `coord_flip()`.
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income") +
+  coord_flip()
+```
+
+\
+
+Well aren't we fancy? `ggplot()` is a powerful function, and you can make a lot of visually captivating graphs. We have just scratched the surface of its functions and features. You can also make your graphs really “pretty” and professional looking by altering graphing features, including colors, labels, titles and axes. For a list of `ggplot()` functions that alter various features of a graph, check out Chapter 28 in [RDS](https://r4ds.hadley.nz/).
+
+Here’s your **ggplot2** badge. Wear it with pride! OK, we've done a lot today. Get outside and get some fresh air!
+
+\
+
+![ggplot2 Badge](ggplot2.png){width=20%, height=20%}
+
+
+\
+
+# Other US Government datasets
+
+Check out the [Data Sources](Other.html) link for more links to US Government Data
+
+\
+
+# Acknowledgements
+
+Major acknowledgements to Noli Brazil (as always) and [Crime by the Numbers](https://crimebythenumbers.com/geocoding.html). 
+
+
+Lab 4.
+\
+
+# More with vector data and introducing rasters
+
+In this lab, we are going to work more with vector data. We will learn how to visualize Census data, we will talk about how to wrangle spatial data, and we will get into some really cool ways to create choropleth maps (maps color coded by attributes). Finally, we will introduce the concept of rasters.
+
+The objectives of this guide are to teach you:
+
+1. Visualize Vector Data
+2. Process Vector Data
+3. Create Publication-Ready Maps
+4. Introduce Rasters
+
+Let's get cracking!
+
+First, let's install our packages.
+
+\
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)
+```
+
+\
+
+In [Lab 2](Lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it with the following code:
+
+```{r, eval = FALSE}
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overwrite=TRUE)
+```
+\
+
+Use the `set_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 2](Lab2.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
+```{r, message=FALSE}
+ca.tracts <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+
+\
+
+The only difference between the code above and what we used in [Lab 2](lab2.html) is we have one additional argument added to the `get_acs()` command: `geometry = TRUE`. This tells R to bring in the spatial features associated with the geography you specified in the command, in the above case California tracts. You can set `cache_table = TRUE` so that you don’t have to re-download after you’ve downloaded successfully the first time. This is important because you might be downloading a really large file, or may encounter Census FTP issues when trying to collect data. 
+
+\
+
+Note: We can also download the data another way. We can go to the [Census Shapefiles website](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) and navigate to 2023, Census Tracts, then California. We can then download a .zip file that contains an ESRI shapefile of the Census tracts for California. When we unzip the file, we see a series of files. Thankfully, the **sf** package has an `st_read()` function that can tackle this! For more detailed data downloads, you can use [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). The code below is example of how we might bring in a shapefile, just for future reference!
+
+```{r eval=FALSE}
+ca.tracts <- st_read("/Users/pjames1/Downloads/tl_2024_06_tract/tl_2024_06_tract.shp")
+```
+
+
+OK, let's go back to the data we got from **tidycensus**. Lets take a look at our data.
+
+\
+
+```{r}
+ca.tracts
+```
+
+\
+
+The object looks much like a basic tibble, but with a few differences.
+
+  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in California) with 13 fields (attributes or columns of data).
+  - The `Geometry Type` indicates that the spatial data are in `MULTIPOLYGON` form (as opposed to points or lines, the other basic vector data forms).
+  - `Bounding box` indicates the spatial extent of the features (from left to right, for example, California tracts go from a longitude of -124.482 to -114.1312).
+  - `Geodetic CRS` tells us the coordinate reference system.
+  - The final difference is that the data frame contains the column geometry. This column (a list-column) contains the geometry for each observation. This looks familiar!
+  
+At its most basic, an **sf** object is a collection of simple features that includes attributes and geometries in the form of a data frame. In other words, it is a data frame (or tibble) with rows of features, columns of attributes, and a special column always named geometry that contains the spatial aspects of the features.
+
+If you want to peek behind the curtain and learn more about the nitty gritty details about simple features, check out the official **sf** [vignette.](https://r-spatial.github.io/sf/articles/sf1.html)
+
+\
+
+# Data Wrangling
+
+There is a lot of stuff [behind the curtain](https://www.jessesadler.com/post/simple-feature-objects/) of how R handles spatial data as simple features, but the main takeaway is that **sf** objects are data frames. This means you can use many of the **tidyverse** functions we’ve learned in the past couple labs to manipulate **sf** objects, including the pipe `%>%` operator. For example, let’s break up the column *NAME* into separate tract, county and state variables using the `separate()` function
+
+We do all of this in one line of continuous code using the pipe operator `%>%`
+
+```{r}
+ca.tracts <- ca.tracts %>%
+              separate(NAME, c("Tract", "County", "State"), sep = "; ")
+glimpse(ca.tracts)
+```
+
+\
+
+Another important data wrangling operation is to join attribute data to an sf object. For example, let’s say you wanted to add tract level median household income, which is located in the file ca_med_inc_2018.csv. Read the file in.
+
+```{r}
+ca.inc <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+\
+
+Unlike before, we brought these data in without the `geometry = TRUE` option. So this is just a table. But remember, an **sf** object is a data frame, so we can use `left_join()`, which we covered in [Lab 1](lab1.html), to join the files *ca.inc* and *ca.tracts*.
+
+```{r}
+ca.tracts <- ca.tracts %>%
+  left_join(ca.inc, by = "GEOID")
+
+#take a look to make sure the join worked
+glimpse(ca.tracts)
+```
+
+\
+
+Note that we can’t use `left_join()` to join the attribute tables of two **sf** files. You will need to either make one of them not spatial by using the `st_drop_geometry()` function or use the `st_join()` function to spatially join them.
+
+We use the function `tm_shape()` from the **tmap** package to map the data. 
+
+```{r}
+tmap_mode("plot")
+tract_map <- tm_shape(ca.tracts) +   tm_polygons()
+tract_map
+```
+
+\
+
+# Spatial Data Wrangling
+
+There is Data Wrangling and then there is Spatial Data Wrangling. Cue dangerous sounding music. Well, it’s not that dangerous or scary. Spatial Data Wrangling involves cleaning or altering your data set based on the geographic location of features. The **sf** package offers a suite of functions unique to wrangling spatial data. Most of these functions start out with the prefix `st_`. To see all of the functions, type in
+
+```{r, eval=FALSE}
+methods(class = "sf")
+```
+
+\
+
+We won’t go through all of these functions as the list is quite extensive. But, we’ll go through a few relevant spatial operations for this class below. The function we will be primarily using is `st_join()`.
+
+\
+
+## Intersect
+
+A common spatial data wrangling issue is to subset a set of spatial objects based on their location relative to another spatial object. In our case, we want to keep California tracts that are in the Sacramento metro area. We can do this using the `st_join()` function. We’ll need to specify a type of join. Let’s first try `join = st_intersects`. First, let's bring in a polygon of the Sacramento metro area from Github.
+
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds"
+download.file(url, destfile = "sac.metro.rds", mode = "wb")
+sac.metro <- readRDS("sac.metro.rds")
+```
+
+\
+
+Let's take a look at *sac.metro* and understand what file it is.
+
+```{r}
+glimpse(sac.metro)
+```
+
+\
+
+OK, that geometry looks good. And it's a polygon, so that's good. Let's now try to intersect our *sac.metro* dataset with our *ca.tracts* dataset. 
+
+```{r}
+sac.metro.tracts.int <- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)
+```
+
+\
+
+The above code tells R to identify the polygons in *ca.tracts* that intersect with the polygon *sac.metro*. We indicate we want a polygon intersection by specifying `join = st_intersects`. The option `left=FALSE` tells R to remove the polygons from *ca.tracts* that do not intersect (make it TRUE and see what happens) with *sac.metro*. Plotting our tracts, we get:
+```{r}
+tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +  
+  tm_borders(col = "red")
+```
+
+\
+
+## Within
+
+We have one small issue. Using `join = st_intersects` returns all tracts that intersect *sac.metro*, which include those that touch the metro’s boundary. No bueno. We can instead use the argument `join = st_within` to return tracts that are *completely within* the metro area.
+
+```{r}
+sac.metro.tracts.w <- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +
+  tm_borders(col = "red")
+```
+
+\
+
+Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table, you’ll see it includes all the variables from both *ca.tracts* and *sac.metro*. We don’t need these variables, so use `select()` to eliminate them. You’ll also notice that if variables from two data sets share the same name, R will keep both and attach a *.x* and *.y* to the end. For example, I was found in both *ca.tracts* and *sac.metro*, so R named one *GEOID.x* and the other that was merged in was named *GEOID.y*.
+
+\
+
+# Mapping in R
+
+## ggplot
+
+OK, so now we've talked a little about how to bring in and manipulate vector polygon data, let's do some mapping and create some choropleth maps. We can do this with the **ggplot** package, the **tmap** package, and the **leaflet** package (which we won't cover now, but it's very cool for interactive maps). Let's start with **ggplot**.
+
+\
+
+### ggplot
+
+Because **sf** is tidy friendly, it is no surprise we can use the **tidyverse** plotting function `ggplot()` to make maps. We already received an introduction to `ggplot()` in [Lab 2](lab2.html). Recall its basic structure:
+
+```{r, eval=FALSE}
+ggplot(data = <DATA>) +
+      <GEOM_FUNCTION>(mapping = aes(x, y)) +
+      <OPTIONS>()
+```
+
+\
+
+In mapping, `geom_sf()` is `<GEOM_FUNCTION>()`. Unlike with functions like `geom_histogram()` and `geom_boxplot()`, we don’t specify an x and y axis. Instead you use `fill` if you want to map a variable or color to just map boundaries.
+
+Let’s use `ggplot()` to make a choropleth map. We need to specify a numeric variable in the `fill =` argument within `geom_sf()`. Here we map tract-level median household income in the Sacramento metro area.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))
+```
+
+\
+
+We can also specify a title (as well as subtitles and captions) using the `labs()` function.
+
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = "Median Income Sacramento MSA Tracts") 
+```
+
+\
+
+We can make further layout adjustments to the map. Don’t like a blue scale on the legend? You can change it using the `scale_file_gradient()` function. Let’s change it to a white to red gradient. We can also eliminate the gray tract border colors to make the fill color distinction clearer. We do this by specifying `color = NA` inside `geom_sf()`. We can also get rid of the gray background by specifying a basic black and white theme using `theme_bw()`. We also added a caption indicating the source of the data using the `captions =` parameter within `labs()`. We then changed the color to red using labels for `low=` and `high=`, and we added a name to our legend with `name='.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+    labs(title = "Median Income Sacramento MSA Tracts",
+         caption = "Source: American Community Survey") +  
+  theme_bw()
+```
+
+\
+
+Dare I say, we are ready for the New York Times with this map!
+
+\
+
+### Points on top of polygons
+
+OK, now that we have mapped points and mapped polygons, let's put them both together! First, we are going to bring in our old friend *CAdata* from last week's lab.
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+```
+
+\
+
+This time, we will map those points with **ggplot**.
+
+```{r}
+ggplot(data = ca_pts_crs) +
+  geom_sf(fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+
+```
+
+\
+
+We can overlay the points over Sacramento tracts to give the locations some perspective. Here, you add two `geom_sf()` arguments for the tracts and the cancer cases.
+
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+\
+
+Hmmm. That doesn't look great. We have lots of cases outside of Sacramento. Let's filter out to just pick cases within the Sacramento area. 
+
+```{r, eval=FALSE}
+ca_pts_crs.w <- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+Ooof. That doesn't work. It says our  `st_crs(x) == st_crs(y) is not TRUE`. That means our Coordinate Reference Systems are not matching! Let's transform our cancer dataset *ca_pts_crs.w* to match the CRS for *sac.metro.tracts.w* with one easy step using `st_transform`:
+```{r}
+#check crs of each dataset
+st_crs(ca_pts_crs)
+st_crs(sac.metro.tracts.w)
+
+#create new dataset with transformed CRS
+ca_pts_crs.transformed <- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+st_crs(ca_pts_crs.transformed )
+```
+
+\
+
+OK, let's try this again!
+
+```{r}
+ca_pts_crs.w <- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+It worked! OK, now let's try our map again.
+
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+\
+
+Alright, who's ready for a challenge? Let's put it all together in one nice map.
+
+```{r}
+ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants Overlaid with Median Income of Sacramento Tracts",
+       caption = "Source: American Community Survey and Ovarian Cancer Cases") +
+  theme_bw()
+  
+```
+
+\
+
+Can I just say, you're very impressive. Well done!
+
+\
+
+## tmap
+
+Whether you prefer **tmap** or **ggplot** is up to you, but I find that **tmap** has some benefits, so let’s focus on its mapping functions next.
+
+**tmap** uses the same layered logic as **ggplot**. As we saw last week, the initial command is `tm_shape()`, which specifies the geography to which the mapping is applied. You then build on `tm_shape()` by adding one or more elements such as `tm_polygons()` for polygons, `tm_borders()` for lines, and `tm_dots()` for points. All additional functions take on the form of `tm_`. Check the full list of `tm_` elements [here](https://www.rdocumentation.org/packages/tmap/versions/2.0/topics/tmap-element).
+
+### Choropleth maps in tmap
+
+Let’s make a static choropleth map of median household income in Sacramento MSA just like we did above, but this time in **tmap**.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile")
+```
+
+\
+
+We first put the dataset *sac.metro.tracts.w* inside `tm_shape()`. Because you are plotting polygons, you use `tm_polygons()` next. The argument `col = "medincE"` tells R to shade (or color) the tracts by the variable *medincE.* The argument `style = "quantile"` tells R to break up the shading into quantiles, or equal groups of 5 as a default. I find that this is where **tmap** offers a distinct advantage over **ggplot** in that users have greater control over the legend and bin breaks. **tmap** allows users to specify algorithms to automatically create breaks with the style argument. You can also change the number of breaks by setting `n=`. The default is `n=5`. Rather than quintiles, you can show quartiles using `n=4`. I'm feeling crazy. Let's do it.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",  n=4)
+```
+
+\
+
+Check out [this link](https://geocompr.robinlovelace.net/adv-map.html#color-settings) for more on  available classification styles in **tmap**.
+
+\
+
+The `tm_polygons()` command is a wrapper around two other functions, `tm_fill()` and `tm_borders()`. `tm_fill()` controls the contents of the polygons (color, classification, etc.), while `tm_borders()` does the same for the polygon outlines.
+
+For example, using the same shape (but no variable), we obtain the outlines of the neighborhoods from the `tm_borders()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_borders()
+```
+
+\
+
+Similarly, we obtain a choropleth map without the polygon outlines when we just use the `tm_fill()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) + 
+  tm_fill("medincE")
+```
+
+When we combine the two commands, we obtain the same map as with tm_polygons() (this illustrates how in R one can often obtain the same result in a number of different ways). Try this on your own.
+
+\
+
+### Color scheme
+
+The argument `palette =` defines the color ranges associated with the bins and determined by the `style` arguments. Several built-in palettes are contained in **tmap**. For example, using `palette = "Reds"` would yield the following map for our example.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds") 
+```
+
+Under the hood, `“Reds”` refers to one of the color schemes supported by the **RColorBrewer** package (see below).
+
+\
+
+In addition to the built-in palettes, customized color ranges can be created by specifying a vector with the desired colors as anchors. This will create a spectrum of colors in the map that range between the colors specified in the vector. For instance, if we used `c(“red”, “blue”)`, the color spectrum would move from red to purple, then to blue, with in between shades. In our example:
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","blue")) 
+```
+
+\
+
+Not exactly a pretty picture. In order to capture a diverging scale, we insert `“white”` in between red and blue.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","white", "blue")) 
+```
+
+\
+
+A preferred approach to select a color palette is to chose one of the schemes contained in the **RColorBrewer** package. These are based on the research of cartographer Cynthia Brewer (see the colorbrewer2 [website](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3) for details). ColorBrewer makes a distinction between sequential scales (for a scale that goes from low to high), diverging scales (to highlight how values differ from a central tendency), and qualitative scales (for categorical variables). For each scale, a series of single hue and multi-hue scales are suggested. In the **RColorBrewer** package, these are referred to by a name (e.g., the “Reds” palette we used above is an example). The full list is contained in the **RColorBrewer** documentation.
+
+There are two very useful commands in this package. One sets a color palette by specifying its name and the number of desired categories. The result is a character vector with the hex codes of the corresponding colors.
+
+For example, we select a sequential color scheme going from blue to green, as *BuGn*, by means of the command `brewer.pal`, with the number of categories (6) and the scheme as arguments. The resulting vector contains the HEX codes for the colors.
+
+```{r}
+brewer.pal(6,"BuGn")
+```
+
+\
+
+Using this palette in our map yields the following result.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette="BuGn") 
+```
+
+\
+
+The command `display.brewer.pal()` allows us to explore different color schemes before applying them to a map. For example:
+```{r}
+display.brewer.pal(6,"BuGn")
+```
+
+\
+
+### Legend
+
+There are many options to change the formatting of the legend. The automatic title for the legend is not that attractive, since it is simply the variable name. This can be customized by setting the `title` argument.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") 
+```
+
+\
+
+Another important aspect of the legend is its positioning. This is handled through the `tm_layout()` function. This function has a vast number of options, as detailed in the [documentation](https://www.rdocumentation.org/packages/tmap/versions/2.1-1/topics/tm_layout). There are also specialized subsets of layout functions, focused on specific aspects of the map, such as `tm_legend()`, `tm_style()` and `tm_format()`. We illustrate the positioning of the legend.
+
+Often, the default location of the legend is appropriate, but sometimes further control is needed. The `legend.position` argument to the `tm_layout` function moves the legend around the map, and it takes a vector of two string variables that determine both the horizontal position (“left”, “right”, or “center”) and the vertical position (“top”, “bottom”, or “center”).
+
+For example, if we would want to move the legend to the bottom-right position, we would use the following set of commands.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.position = c("right", "bottom"))
+```
+
+\
+
+There is also the option to position the legend outside the frame of the map. This is accomplished by setting `legend.outside` to TRUE, and optionally also specify its position by means of `legend.outside.position()`. The latter can take the values “top”, “bottom”, “right”, and “left”.
+
+For example, to position the legend outside and on the right, would be accomplished by the following commands.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+We can also customize the size of the legend, its alignment, font, etc. Check out the documentation for more!
+
+\
+
+### Title
+
+Another functionality of the `tm_layout()` function is to set a title for the map, and specify its position, size, etc. For example, we can set the title, the `title.size` and the `title.position` as in the example below. We made the font size a bit smaller (0.8) in order not to overwhelm the map, and positioned it in the top left-hand corner.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(title = "Median Income of Sacramento Tracts", title.size = 0.8, 
+            title.position = c("left","top"),
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+To have a title appear on top (or on the bottom) of the map, we need to set the `main.title` argument of the `tm_layout()` function, with the associated `main.title.position`, as illustrated below (with title.size set to 1.25 to have a larger font).
+
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+
+```
+
+\
+
+### Scale bar and arrow
+
+OK this really wouldn't be a GIS class without talking about one of the core elements of a map--the good ole scale bar and arrow. Let's add these to our map. First, we add the scale bar with `tm_scale_bar()`.
+
+The argument `breaks` tells R the distances to break up and end the bar. The argument `position` places the scale bar on the bottom left part of the map. Note that the `scale` is in miles (we're in Amurica!). The default is in kilometers (the rest of the world!), but you can specify the units within `tm_shape()` using the argument `unit`. `text.size` scales the size of the bar smaller (below 1) or larger (above 1).
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+Next let's spice things up by adding a north arrow, which we can do using the function `tm_compass()`. You can control for the type, size and location of the arrow within this function. I place a 4-star arrow on the bottom right of the map.
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+We can also eliminate the frame around the map using the argument `frame = FALSE`.
+
+```{r}
+sac.map <- tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento tracts", 
+            main.title.size = 1.25, frame = FALSE,
+            main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+sac.map
+```
+
+\
+
+Note that I saved the map into an object called *sac.map*. R is an object-oriented program, so everything you make in R are objects that can be saved for future manipulation. This includes maps. And future manipulations of a saved map includes adding more `tm_*` functions to the saved object, such as `sac.map + tm_layout(your changes here)`. Check the help documentation for `tm_layout()` to see the complete list of settings. 
+
+\
+
+## Saving maps
+
+You can save your maps a few ways. 
+1. On the plotting screen where the map is shown, click on Export and save it as either an image or pdf file.
+2. Use the function `tmap_save()`
+
+For option 2, we can save the map object *sac.map* as such:
+```{r}
+tmap_save(sac.map, "sac_city_inc.jpg")
+```
+Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
+
+\
+
+## Making a map with CDC Places data 
+
+OK, do we have energy for one more example? Let's bring in data from the [CDC Places dataset](https://www.cdc.gov/places/tools/data-portal.html). This is an incredible resource to access data on the CDC's [Behavioral Risk Factor and Surveillance System (BRFSS)](https://www.cdc.gov/brfss/index.html), as well as social determinants of health data from American Community Survey. I've already downloaded California Census tract data on the "% of adults reporting no leisure-time physical activity". Let's bring this in and take a look at it!
+
+```{r}
+places_ca_lpa<-read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/places_ca_lpa.csv")
+glimpse(places_ca_lpa)
+```
+
+\
+
+Interesting stuff. Looks like the values we care about are stores in a column called *Data_Value* and the FIPS code seems to be in *LocationName*. Let's go ahead and rename *LocationName* and then see if we can join this data with our Census tract data *ca.tracts*.
+
+```{r}
+places_ca_lpa<-rename(places_ca_lpa, GEOID = LocationName)
+glimpse(places_ca_lpa)
+
+ca.tracts.lpa <- ca.tracts %>%
+  left_join(places_ca_lpa, by = "GEOID")
+glimpse(ca.tracts.lpa)
+```
+
+\
+
+It worked! OK, now let's make a map of % of adults reporting no leisure-time physical activity. We will build on what we've learned above! I've also included the option in `tm_polygons()` of `lwd = 0` which makes the borders a width of 0...basically we are making it so there are no borders and we can easily see polygon values in denser concentrations of Census tracts (e.g., around Sacramento, San Francisco, LA, etc.)
+
+```{r}
+tm_shape(ca.tracts.lpa, unit = "mi") +
+  tm_polygons(col = "Data_Value", style = "quantile",palette = "Reds",
+              title = "% Adults No Physical Activity", lwd = 0) +
+  tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
+            main.title.size = 1.25, main.title.position="center")
+```
+\
+
+Oooooooo that is one goooood looking map!
+
+\
+
+You’ve completed your introduction to **sf**. Whew! Badge? Yes, please, you earned it! Time to [celebrate](https://www.youtube.com/watch?v=3GwjfUFyY6M)!
+
+\
+
+![sf Badge](sf.gif)
+
+\
+
+
+
+

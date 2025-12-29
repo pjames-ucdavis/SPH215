@@ -1,0 +1,213 @@
+---
+title: "Lab 4: Spatial Data Processing with Vector Data"
+---
+
+In this lab, we are going to work more with vector data, spatially joining two vector datasets. 
+
+The objectives of this guide are to teach you:
+
+   1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
+   2. Import a dataset with walkability data at the Census tract level
+   3. Compare projections of datasets and re-project if needed
+   4. Make maps
+   5. Spatially join the two datasets
+   6. Run a quick statistical analysis on the two datasets combined
+
+Let's do this!!!
+
+\
+
+First, let's install our packages.
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+#library(gtools)
+#library(gmodels)
+
+```
+
+\
+
+
+# Spatial Data Processing with Vector Data in R
+
+In this exercise, we will learn about geospatial analysis with vector data. 
+
+We will be using data included in the **MapGAM()** [package](https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf). As a reminder: While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. While this is a cohort with time to mortality, for the purposes of our class, we will conduct simple tabular analyses looking at associations between different spatial exposures with mortality at end of follow-up. 
+
+As another reminder, the *CAdata* dataset contains the following variables:
+
+* time (follow-up time)
+* event (1=dead, 0=censored)
+* X (Latitude)
+* Y (Longitude)
+* AGE (age in years)
+* INS (insurance status, categorical)
+
+We will also read in a dataset with walkability index data from California. This dataset includes administrative boundaries for United States Census tract polygons, along with values for a walkability index for each tract derived from z-scores for population density, business density, and street connectivity.
+
+\
+
+# Read in Vector Datasets and Check Projections
+
+## Read in Cancer Dataset
+
+Next, we want to read in all of our spatial data. First, we read in the *CAdata* dataset from the **MapGAM** package, and then convert it to a spatial dataset. 
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+\
+
+## Read in Walkability Index Dataset at the Census Tract level
+
+We then read in the administrative boundaries dataset with the walkability index values for the San Francisco Bay Area. Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
+
+
+```{r}
+## Reading in the walkability index dataset
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/BayArea_Walkability_Data.rds"
+download.file(url, destfile = "BayArea_Walkability_Data.rds", mode = "wb")
+walkability_tracts = readRDS("BayArea_Walkability_Data.rds")
+
+## Is walkability_tracts spatial?
+head(walkability_tracts)
+```
+
+\
+
+# Check Projections for all Spatial Data
+
+Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our polygon data. When we are done, do the projections of the two datasets match?
+
+
+```{r}
+## Look at the coordinate reference system for the cancer data, and for walkability data
+st_crs(ca_pts)
+st_crs(walkability_tracts)
+
+## Transform the coordinate reference system of the walkability tract data to match that 
+## of the cancer data
+ca_transformed <-st_transform(ca_pts, st_crs(walkability_tracts))  
+
+## Check projection of walkability_transformed
+st_crs(walkability_tracts)==st_crs(ca_transformed)
+```
+
+\
+
+# Map The Data
+
+Now, we will visualize our spatial data using **tmap**. We will overlay the walkability maps with the ovarian cancer data, and then make a choropleth map of walkability indices. Do any patterns jump out, or are there any outliers?
+
+```{r}
+## Make a choropleth map of polygons colored by levels of walkability
+tmap_mode("plot")
+walkability_map <- tm_shape(walkability_tracts) +
+  tm_polygons(
+    col = "Avg_walkin",
+    style = "cont",
+    title = "Walkability Index",
+    lwd = 0,
+    alpha=.95
+  )
+
+## Make another map adding points for the cancer data to map of polygons
+walkability_cancer_map = walkability_map + 
+  tm_shape(ca_transformed) + 
+  tm_dots(size=0.25, alpha=0.8, col="blue")
+
+## Plot both maps side by side
+tmap_arrange(walkability_map, walkability_cancer_map)
+```
+
+\
+
+We find that the most highly walkable areas are in the city of San Francisco, which makes sense. Our cancer cohort data overlaps with the SF Bay Area walkability map, which is reassuring. 
+
+\
+
+# Spatial Join 
+
+Now that we have visualized our data, let's see if there is an association between the walkability index and mortality among ovarian cancer cases. We will first spatially join the two datasets (merge the two datasets based on location of cases and the walkability index of the census tract that contains them) using `st_join()`. Then we will check the distribution of walkability index. We will use a two-sided chi-squared test to test our hypothesis of the association between residential walkability index value and mortality among ovarian cancer cases. What do we find?
+
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
+## Spatially join the cancer point data to the walkability polygon data
+walkability_cancer = st_join(ca_transformed, walkability_tracts[c("Avg_walkin", "GEOID")]) 
+
+## Take a look at a summary of the values
+summary(walkability_cancer$Avg_walkin)
+```
+
+\
+
+Looks like we have lots of NA values. That is because some of our participants live outside of the area of our walkability data. Let's drop those missing values.
+```{r}
+walkability_cancer_nomiss <- walkability_cancer %>%
+    subset(!is.na(Avg_walkin))
+summary(walkability_cancer_nomiss$Avg_walkin)
+glimpse(walkability_cancer_nomiss)
+```
+
+\
+
+# Analyze our Joined Dataset
+OK, we have a dataset with no missingness. Can we look at the distribution of our walkability index among participants?
+```{r}
+## Check distribution of walkability index
+hist(walkability_cancer_nomiss$Avg_walkin) 
+```
+
+\
+
+For the purposes of our analysis, let's divide up our walkability data into quartiles. We will do this using the `mutate()` function combined with the `ntile()` function. Then we will take a glimpse at our new dataset.
+
+```{r}
+walkability_cancer_nomiss <- walkability_cancer_nomiss %>%
+  mutate(walk_quartile = ntile(Avg_walkin, 4))
+
+glimpse(walkability_cancer_nomiss)
+```
+
+\
+
+OK that looks good. We have created a new variable *walk_quartile* that tells us what quartile of walkability a participant lives in. Let's do a two by two table of walkability quartiles by *event*, which is whether a participant died over followup.
+```{r}
+## Create a contingency table of event by walk_quartile
+tab <- table(walkability_cancer_nomiss$walk_quartile, walkability_cancer_nomiss$event)
+tab
+```
+
+\
+
+Hmmm, that's interesting, but let's look at this by percentages instead.
+```{r}
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+\
+
+Do you think the percentages are different by quartile of the walkability index? We can run a chi-squared test to be sure. This is a statistical test to see whether there is a difference in the probability of *event*, or whether a participant died over follow-up, by the quartiles of the walkability index. We do this with the `chisq.test()` function.
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```
+
+\
+
+OK, how do we interpret this? Our null hypothesis is that there is no association between mortality at end of follow-up and increasing quartile of walkability index. Our alternative hypothesis is that there is an association between mortality at end of follow-up and increasing quartile of walkability index. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of walkability as or more extreme as those produced in these data is 0.66. Since p>0.05, we fail to reject the null hypothesis and conclude that walkability is not associated with mortality at end of follow-up (under the assumptions stated above). In other words, we don't see a relationship between walkability exposure and our outcome (dying over followup).
+

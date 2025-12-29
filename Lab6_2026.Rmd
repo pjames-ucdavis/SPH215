@@ -1,0 +1,3 @@
+---
+title: 'Lab 6: Working with Raster data, Join geocoded addresses to polygon data to create exposure metrics'
+---

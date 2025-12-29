@@ -1,0 +1,142 @@
+---
+title: "Lab 9: Future Directions in GIS and Public Health"
+---
+
+> "Remember: every GPS point is a step toward understanding the world a little better."
+
+In this lab, we're diving into the wonderful world of **GPS data**, our old friend **NDVI rasters**, and **interactive mapping** – with a light touch and an emphasis on public health applications. This will be our last interactive session, so we will lean on old tools we've been using, and we will also apply some new packages for the first time! 
+
+The objectives of this guide are to teach you to:
+
+1. Understand how to load and preprocess GPS tracking data in R
+2. Visualize GPS data interactively using **leaflet**
+3. Integrate raster data (NDVI) to represent environmental exposures
+4. Practice cropping, projecting, and overlaying spatial data using **terra**
+5. Create visually engaging, layered maps using **tmap**
+
+Let's do this, one last time!
+---
+
+# Load our packages
+
+```{r}
+library(dplyr)        # data wrangling, piping, and general awesomeness
+library(readr)        # reading in data like a pro
+library(terra)        # handling raster data
+library(sf)           # spatial vector data with all the bells and whistles
+library(tmap)         # beautiful thematic maps, both static and interactive
+
+#New Packages this week!
+library(lubridate)    # working with dates and times like it's no big deal
+library(leaflet)      # making interactive maps that aim to impress
+```
+
+\
+
+# Import and Prepare Our GPS Data
+
+Here we read in our GPS dataset, parse the timestamp, and create friendly time labels. This is where **readr**, **dplyr**, and **lubridate** come together to easily tackle this task.
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/gps_apr25_30.csv", destfile = "gps_apr25_30.csv", mode = "wb")
+gps_data_raw <- read_csv("gps_apr25_30.csv")
+
+# Clean it up and extract useful time info
+gps_data <- gps_data_raw %>%
+  mutate(
+    time = ymd_hms(`UTC time`),
+    time_label = format(time, "%Y-%m-%d %H:%M:%S"),
+    rounded_minute = floor_date(time, unit = "minute")
+  ) %>%
+  arrange(time)
+```
+
+\
+
+
+# Mapping with Leaflet
+
+Now let’s use the **leaflet** package to make an interactive map of our GPS data. This lets us explore movement patterns dynamically, and it’s a great way to get students familiar with spatial data in a hands-on way.
+
+In this example, we:
+
+- Add a basemap using `addProviderTiles()`
+- Connect the dots with `addPolylines()` to show movement
+- Plot each GPS location with `addCircleMarkers()`
+- Attach a label to each point that shows the timestamp
+
+```{r}
+leaflet(gps_data) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolylines(lng = ~longitude, lat = ~latitude, color = "blue", weight = 2) %>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 2,
+    color = "red",
+    popup = ~paste("Time:", time_label),
+    label = ~time_label
+  )
+```
+
+Looks pretty cool! You just mapped a few thousand points of movement! You can pan, zoom, and click around to explore GPS data in a way that's engaging and intuitive.
+
+\
+
+# 🌿 Add Nature: Load NDVI Raster
+
+Let's make this a little richer by adding an environmental exposure that we could link to our data. Our old friend NDVI (Normalized Difference Vegetation Index) helps us understand greenness and vegetation density. 
+
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/NDVI_rast_boston.tif", destfile = "NDVI_rast_boston.tif", mode = "wb")
+ndvi_raster <- rast("NDVI_rast_boston.tif")
+
+```
+
+\
+
+# ✨ Make It Beautiful with tmap
+
+Time to show off with **tmap**, our old reliable thematic mapping package. We reproject the GPS points to match the raster and then we layer it all together.
+```{r}
+tmap_mode("view")  # switch to interactive map mode
+
+# Reproject GPS to match raster
+gps_sf <- st_as_sf(gps_data, coords = c("longitude", "latitude"), crs = 4326)
+gps_proj <- st_transform(gps_sf, crs = crs(ndvi_raster))
+
+
+# Map it!
+tm_shape(ndvi_raster) +
+  tm_raster(style = "cont", palette = "YlGn", alpha = 0.4, title = "NDVI") +
+  tm_shape(gps_proj) +
+  tm_dots(col = "blue", size = 0.5, border.col = NA) +
+  tm_layout(title = "Where We've Been (with a little green)", legend.outside = TRUE)
+```
+
+\
+
+# Extract NDVI values to GPS data
+
+Finally, let's extract NDVI values to GPS data to give us an idea of where exactly we are exposed to greenspace. We will use the `extract()` function from the **terra** package to do this.
+```{r}
+ndvi_values <- terra::extract(ndvi_raster, vect(gps_proj))
+
+```
+
+\
+
+# Look at the data
+
+OK, and now we can take a glimpse at the data. This is one participant's minute-to-minute exposure to greenspace as they move throughout their lives. This is the full distribution of a personal exposure to NDVI for five days! If we had, for instance, physical activity data, we could see if momentary exposure to greenspace is associated with higher physical activity.
+```{r}
+summary(ndvi_values$NDVI_mean)
+hist(ndvi_values$NDVI_mean)
+```
+
+\
+
+## 🎉 You Did It!
+
+You loaded real-world GPS data, mapped it, added a vegetation raster, made it interactive, and zoomed in with style. We've taken our GIS data from the macro to the micro-scale. We've covered so much in so little time! It has been a mapping whirlwind this quarter, and I'm so proud of all of you!
+
+Now go forth, and happy mapping! 🗺️💪

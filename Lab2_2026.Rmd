@@ -1,0 +1,361 @@
+---
+title: "Lab 2: Data Wrangling in R"
+---
+
+
+# Data Wrangling
+
+So this might be the most important thing you learn about R, and about working with data. It is rare that the data work on are in exactly the right form for analysis. For example, you might want to discard certain variables from the dataset to reduce clutter. Or you need to create new variables from existing ones. Or you encounter missing data. The process of gathering data in its raw form and molding it into a form that is suitable for its end use is known as data wrangling. What’s great about the **tidyverse** package is its suite of functions make data wrangling relatively easy, straight forward, and transparent.
+
+In this lab, we won’t have time to go through all of the methods and functions in R that are associated with the data wrangling process. We will cover more in later labs and many methods you will have to learn on your own given the specific tasks you will need to accomplish. In the rest of this guide, we’ll go through some of the basic data wrangling techniques using the functions found in the package **dplyr**, which was automatically installed and loaded when you brought in the **tidyverse** package. These functions can be used for either tibbles or regular data frames.
+
+\
+
+## Install packages
+Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
+
+
+```{r, message=FALSE}
+library(tidyverse)
+library(tmap)
+```
+
+## Reading in data
+
+The dataset *nycflights13* was included in Lab 1 in an R package called **nycflights13**. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
+
+To read in a csv file, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension. The two files are up on the GitHub for this course, so you can read them in directly from there. We’ll name these objects *ca1* and *ca2*.
+
+```{r}
+ca1 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset1.csv")
+ca2 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset2.csv")
+```
+
+\
+
+You should see two tibbles *ca1* and *ca2* pop up in your Environment window (top right). Every time you bring a dataset into R for the first time, look at it to make sure you understand its structure. You can do this a number of ways. One is to use the function `glimpse()`, which gives you a succinct summary of your data.
+
+```{r}
+glimpse(ca1)
+```
+
+\
+
+```{r}
+glimpse(ca2)
+```
+
+\
+
+If you like viewing your data through an Excel style worksheet, type in `View(ca1)`, and *ca1*
+should pop up in the top left window of your R Studio interface. Scroll up and down, left and right. 
+
+We’ll learn how to summarize your data using descriptive statistics and graphs in the next lab.
+
+By learning how to read in data the tidy way, I think you’ve earned another badge! Woot woot!
+![Your Readr Badge](readr.png)
+\
+
+## Renaming variables
+
+More often than you think, you will encounter a column / variable with a name that is not descriptive. The more descriptive the variable names, the more efficient your analysis will be and the less likely you are going to make a mistake. To see the names of variables in your dataset, use the `names()` command.
+
+```{r}
+names(ca1)
+```
+
+\
+
+The name *Estimated median income of a household, between 2014-2018.* is a doozy! Just a little long. Use the command `rename()` to - you guessed it - rename a variable! Let’s rename *Estimated median income of a household, between 2014-2018.* to *medinc*.
+
+```{r}
+rename(ca1, medinc = "Estimated median income of a household, between 2014-2018.")
+```
+
+\
+
+Note that you can rename multiple variables within the same `rename()` command. For example, we can also rename *Formatted FIPS* to *GEOID*. Make this permanent by assigning it back to *ca1* using the arrow operator `<-`
+
+```{r}
+ca1 <- rename(ca1, 
+        medinc = "Estimated median income of a household, between 2014-2018.",
+        GEOID = "Formatted FIPS")
+names(ca1)
+
+```
+
+And we can see our variable names have changed! We are doing things.
+
+\
+
+# Selecting variables
+
+In practice, most of the data files you will download will contain variables you don’t need. It is easier to work with a smaller dataset as it reduces clutter and clears up memory space, which is important if you are executing complex tasks on a large number of observations. Use the command `select()` to keep variables by name. Visually, we are doing the following (taken from the RStudio [cheatsheet](http://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)).
+![Subsetting columns](subsetcols.png)
+
+\
+
+Let’s take a look at the variables we have in the ca2 dataset.
+
+```{r}
+names(ca2)
+```
+
+We’ll go into more detail what these variables mean in another lab when we cover the U.S. Census, but we only want to keep the variables *GEOID*, which is the county FIPS code (a unique numeric identifier), and *tpoprE*, *nhwhiteE*, *nhblkE*, *nhasnE*, and *hispE*, which are the total, white, black, Asian and Hispanic population counts.
+
+```{r}
+ca2 <- select(ca2, GEOID, tpoprE, nhwhiteE, nhblkE, nhasnE, hispE)
+```
+
+\
+
+Here, we provide the data object first, followed by the variables we want to keep separated by commas.
+
+Let’s keep *County*, *GEOID*, and *medinc* from the *ca1* dataset. Rather than listing all the variables we want to keep like we did above, a shortcut way of doing this is to use the `:` operator.
+
+```{r}
+select(ca1, County:medinc)
+```
+
+\
+
+The `:` operator tells R to select all the variables from *County* to *medinc*. This operator is useful when you’ve got a lot of variables to keep and they all happen to be ordered sequentially.
+
+You can use also use `select()` command to keep variables except for the ones you designate. For example, to keep all variables in *ca1* except *FIPS Code* and save this back into *ca1*, type in:
+
+```{r}
+ca1 <- select(ca1, -"FIPS Code")
+```
+
+\
+
+The negative sign tells R to exclude the variable. Notice we need to use quotes around *FIPS Code* because it contains a space. You can delete multiple variables. For example, if you wanted to keep all variables except *FIPS Code* and *County*, you would type in `select(ca1, -"FIPS Code", -County)`.
+
+Take a glimpse and see if it looks how we think it should.
+```{r}
+glimpse(ca1)
+```
+Try *ca2* and let us know how it looks.
+
+\
+
+## Creating new variables
+
+The `mutate()` function (strange name, huh?) allows you to create new variables within your dataset. This is important when you need to transform variables in some way - for example, calculating a ratio or adding two variables together. Visually, you are doing this:
+![mutate](mutate.png)
+
+\
+
+You can use the `mutate()` command to generate as many new variables as you would like. For example, let’s construct four new variables in *ca2* - the percent of residents who are non-Hispanic white, non-Hispanic Asian, non-Hispanic black, and Hispanic. Name these variables *pwhite*, *pasian*, *pblack*, and *phisp*, respectively.
+
+```{r}
+mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE)
+```
+
+\
+
+Note that you can create new variables based on the variables you just created in the same line of code. For example, you can create a categorical variable called *mhisp* yielding “Majority” if the tract is majority Hispanic and “Not Majority” otherwise after creating the percent Hispanic variable *phisp* within the same `mutate()` command. Let’s save these changes back into *ca2*.
+
+```{r}
+ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+              mhisp = case_when(phisp > 0.5 ~ "Majority",
+                                TRUE ~ "Not Majority"))
+```
+
+We used the function `case_when()` to create *mhisp* - the function tells R that if the condition *phisp* > 0.5 is met, the tract’s value for the variable *mhisp* will be “Majority”, otherwise (designated by `TRUE`) it will be “Not Majority”.
+
+Take a look at our data. Pay attention to *phisp* and *mhisp*. Did our calculation work?
+
+```{r}
+glimpse(ca2)
+```
+
+\
+
+## Joining Tables
+
+Rather than working on two separate datasets, we should join the two datasets *ca1* and *ca2*, because we may want to examine the relationship between median household income, which is in *ca1*, and racial/ethnic composition, which is in *ca2*. To do this, we need a unique ID that connects the tracts across the two files. The unique Census ID for a county combines the county and state IDs. The Census ID is named *GEOID* in both files. The IDs should be the same data class. Let's check if they are!
+
+```{r}
+class(ca1$GEOID)
+```
+
+```{r}
+class(ca2$GEOID)
+```
+
+\
+
+Lookin good! Note: If they are not the same class, we can coerce them using the `as.numeric()` or `as.character()` function described earlier.
+
+To merge the datasets together, use the function `left_join()`, which matches pairs of observations whenever their keys or IDs are equal. We match on the variable GEOID and save the merged data set into a new object called *cacounty*.
+
+```{r}
+cacounty <- left_join(ca1, ca2, by = "GEOID")
+```
+
+\
+
+We want to merge *ca2* into *ca1*, so that’s why the sequence is `ca1, ca2`. The argument *by* tells R which variable(s) to match rows on, in this case *GEOID.* You can match on multiple variables and you can also match on a single variable with different variable names (see the `left_join()` help documentation for how to do this). The number of columns in *cacounty* equals the number of columns in *ca1* plus the number of columns in *ca2* minus the ID variable you merged on.
+
+Note that if you have two variables with the same name in both files, R will attach a *.x* to the variable name in *ca1* and a *.y* to the variable name in *ca1*. For example, if you have a variable named *Robert* in both files, *cacounty* will contain both variables and name it *Robert.x* (the variable in *ca1*) and *Robert.y* (the variable in *ca1*). Try to avoid having variables with the same names in the two files you want to merge.
+
+Let’s use `select()` to keep the necessary variables.
+
+```{r}
+cacounty <- select(cacounty, GEOID, County, pwhite, pasian, pblack, phisp, mhisp, medinc)
+```
+
+\
+
+## Filtering
+
+Filtering means selecting rows/observations based on their values. To filter in R, use the command `filter()`. Visually, filtering rows looks like.
+
+![Filtering](subsetrows.png)
+The first argument in the parentheses of this command is the name of the data frame. The second and any subsequent arguments (separated by commas) are the expressions that filter the data frame. For example, we can select Sacramento county using its [FIPS code](https://www.nrcs.usda.gov/wps/portal/nrcs/detail/ca/home/?cid=nrcs143_013697). A FIPS code is a unique ID for every geographic unit in the US. This will come up often!
+
+```{r}
+filter(cacounty, GEOID == "06067")
+```
+
+\
+
+The double equal operator `==` means equal to. We can also explicitly exclude cases and keep everything else by using the not equal operator `!=`. Conversely, the following code *excludes* Sacramento county.
+
+\
+
+```{r}
+filter(cacounty, GEOID != "06067")
+```
+
+\
+
+What about filtering if a county has a value greater than a specified value? For example, counties with a percent white greater than 0.5 (50%).
+
+```{r}
+filter(cacounty, pwhite > 0.5)
+```
+
+\
+
+What about less than 0.5 (50%)?
+
+```{r}
+filter(cacounty, pwhite < 0.5)
+```
+
+\
+
+Both lines of code do not include counties that have a percent white equal to 0.5. We include it by using the less than or equal operator `<=` or greater than or equal operator `>=`.
+```{r}
+filter(cacounty, pwhite <= 0.5)
+```
+
+\
+
+In addition to comparison operators, filtering may also utilize logical operators that make multiple selections. There are three basic logical operators: `&` (and), `|` is (or), and `!` is (not). We can keep counties with *phisp* greater than 0.5 **and** *medinc* greater than 50000 percent using `&`.
+```{r}
+filter(cacounty, phisp > 0.5 & medinc > 50000)
+```
+
+\
+
+Use `|` to keep counties with a *GEOID* of 06067 (Sacramento) **or** 06113 (Yolo) **or** 06075 (San Francisco).
+```{r}
+filter(cacounty, GEOID == "06067" | GEOID == "06113" | GEOID == "06075")
+```
+
+\
+
+Phew. That's a lot! You’ve gone through some of the basic data wrangling functions offered by tidyverse. Can we get another Tidy badge? Oh yeah. Congratulations!
+![Your dplyr Badge](dplyr.png)
+
+\
+
+# R Markdown
+
+In running the lines of code above, we’ve asked you to work directly in the R Console and issue commands in an interactive way. That is, you type a command after `>`, you hit enter/return, R responds, you type the next command, hit enter/return, R responds, and so on. Instead of writing the command directly into the console, you should write it in a script. The process is now: Type your command in the script. Run the code from the script. R responds. You get results. You can write two commands in a script. Run both simultaneously. R responds. You get results. This is the basic flow.
+
+One way to do this is to use the default R Script, which is covered in the [assignment guidelines](Assignments.html). In your homework assignments, we will be asking you to submit code in another type of script: the R Markdown file. R Markdown allows you to create documents that serve as a neat record of your analysis. Think of it as a word document file, but instead of sentences in an essay, you are writing code for a data analysis.
+
+When going through lab guides, I would recommend not copying and pasting code directly into the R Console, but saving and running it in an R Markdown file. This will give you good practice in the R Markdown environment. Now is a good time to read through the class [assignment guidelines](Assignments.html) as they go through the basics of R Markdown files.
+
+To open an R Markdown file, click on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 1”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+
+\
+
+![R Markdown](rmarkdown.png) 
+
+\
+
+Don’t change anything inside the YAML (the stuff at the top in between the `---`). Also keep the grey chunk after the YAML.
+
+Delete everything else. Save this file (*File* -> *Save*) in an appropriate folder. It’s best to set up a clean and efficient file management structure (e.g., SPH215>Labs>Lab1) but you do what works for you.
+
+Follow the directions in the [assignment guidelines](Assignments.html) to add this lab’s code in your Lab 1 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
+
+Although the lab guides and course textbooks should get you through a lot of the functions that are needed to successfully accomplish tasks for this class, there are a number of useful online resources on R and RStudio that you can look into if you get stuck or want to learn more. We outline these resources in the [R Help](r_help.html) section of the website. If you ever get stuck, check this resource out first to troubleshoot before immediately asking a friend or the instructor.
+
+\
+
+# Practice makes perfect
+
+Here are a few practice questions. You don’t need to submit these, but it’s good practice to answer these questions in R Markdown, producing a knitted file (html, pdf or docx).
+
+1. Look up the help documentation for the function `rep()`. Use this function to create the following 3 vectors.
+  a. [1] 0 0 0 0 0
+  a. [1] 1 2 3 1 2 3 1 2 3 1 2 3
+  a. [1] 4 5 5 6 6 6
+  
+2. Explain what is the problem in each line of code below. Fix the code so it will run properly.
+  a. my variable <- 3
+  b. seq(1, 10 by = 2)
+  c. Library(cars)
+
+3. Look up the help documentation for the function `cut()`.
+  a. Describe the purpose of this function. What kind of data type(s) does this function accept? Which arguments/options are required? Which arguments are not required and what are their default value(s)?
+  b. Create an example vector and use the `cut()` function on it. Explain your results.
+
+4. Load the *mtcars* dataset by using the code `data(mtcars)`. Find the minimum, mean, median and maximum of the variable *mpg* in the *mtcars* dataset using just one line of code. We have not covered a function that does this yet, so the main point 1. of this question is to get you used to using the resources you have available to find an answer. Describe the process you used (searched online? used the class textbook?) to find the answer.
+
+5. Look up the functions `arrange()` and `relocate()`. Input the variable *phisp* from *cacounty* in each function. What are the functions doing?
+
+6. Use the function `bind_rows()` to create a new dataset called *cacounty_brows* that combines *ca1* and *ca2*. Describe the structure of this new dataset. Do the same for the function `bind_cols()` (name the new dataset *cacounty_bcols*). How is `bind_cols()` different from `left_join()`?
+
+\
+
+# But wait, we didn't make a map!
+
+This lab is a foundation for all of the work we will do moving forward in R. But what kind of GIS course would this be if we didn't make a map? Remember that dataset we brought in earlier on cancer cases across CA called *cancer*? Let's plot that real quick. We will talk more about it next week!
+
+```{r}
+#Download Cancer Dataset
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+
+#Read in Cancer Dataset
+cancer <- readRDS("ca_cancer.rds")
+
+## Let's view the data
+head(cancer)
+table(cancer$event)
+
+## Load these packages
+library(sf)
+library(tmap)
+
+## Setting coordinate reference system (CRS) to North American Datum 1983 (NAD83)--we will discuss more next week!
+cancer_projected = st_as_sf(cancer, crs=4269)
+
+## Plot the data--will also discuss more!
+tmap_mode("view")
+cancer_map = tm_shape(cancer_projected) + tm_dots(size=0.5,alpha=0.8, col="event",style="cat")
+cancer_map
+```
+
+OK we made a pretty map! Blue dots mean they didn't have the "event" and green means they did. We are going to dive much deeper on this next week. I think this is enough for today! Get outside and enjoy the rest of your day!
+
+
+
