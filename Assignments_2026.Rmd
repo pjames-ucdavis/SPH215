@@ -39,6 +39,7 @@ To be clear, R is a programming language. RStudio is an application. R Markdown 
 In RStudio, install the packages **knitr** and **rmarkdown** using the `install.packages()` command. Type the following in your RConsole window after `>`
 
 ```{r installpackages}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 install.packages("knitr")
 install.packages("rmarkdown")
 ```
