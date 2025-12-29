@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Lab 1: Intro to R</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Winter 2026</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus_2026.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Lab1_2026.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2_2026.html">Lab 2: Understanding Packages and Wrangling Data in R</a>
+    </li>
+    <li>
+      <a href="Lab3_2026.html">Lab 3: Geocoding, Vector Data, and Census Data</a>
+    </li>
+    <li>
+      <a href="Lab4_2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing</a>
+    </li>
+    <li>
+      <a href="Lab6_2026.html">Lab 6: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab7_2026.html">Lab 7: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab8_2026.html">Lab 8: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab9_2026.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments_2026.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other_2026.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help_2026.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 1: Intro to R</h1>
+
+</div>
+
+
+<p><br />
+</p>
+<div id="using-r-for-gis" class="section level1">
+<h1>Using R for GIS</h1>
+<p>In this course, we will be using R for all our GIS needs. If you’ve
+never used R before, no worries! We will move at a slow and steady pace
+and will provide support along the way. If you’re an R pro, feel free to
+flex your R skills and (hopefully) build on them!</p>
+<p>The objectives of the guide are as follows</p>
+<ul>
+<li>Install and set up R and RStudio.</li>
+<li>Understand R data types</li>
+<li>Understand R data structures</li>
+<li>Understand R functions</li>
+<li>Introduction to tidyverse and its suite of data wrangling
+functions</li>
+<li>Understand R Markdown</li>
+<li>This lab guide follows closely and supplements the material
+presented in Chapters 2, 4, 5, 7 and 21 in the textbook <a
+href="https://r4ds.hadley.nz/">R for Data Science (RDS)</a>.</li>
+</ul>
+<p><br />
+</p>
+</div>
+<div id="what-is-r" class="section level1">
+<h1>What is R?</h1>
+<p>R is a free, open source statistical programming language. It is
+useful for data cleaning, analysis, and visualization. R is an
+interpreted language, not a compiled one. This means that you type
+something into R and it does what you tell it. It is both a command line
+software and a programming environment. It is an extensible, open-source
+language and computing environment for Windows, Macintosh, UNIX, and
+Linux platforms, which allows for the user to freely distribute, study,
+change, and improve the software. It is basically a free, super big, and
+complex calculator. You will be using R to accomplish all data analysis
+tasks in this class. You might be wondering “Why in the world do we need
+to know how to use a statistical software program?” Here are the main
+reasons:</p>
+<ol style="list-style-type: decimal">
+<li><p>You will be learning about new concepts in lecture and the
+readings. Applying these concepts using real data is an important form
+of learning. A statistical software program is the most efficient (and
+in many cases the only) means of running data analyses, not just in the
+cloistered setting of a university classroom, but especially in the real
+world. Applied data analysis will be the way we bridge statistical
+theory to the “real world.” And R is the vehicle for accomplishing
+this.</p></li>
+<li><p>In order to do applied data analysis outside of the classroom,
+you need to know how to use a statistical program. There is no way
+around it. If you want to collect data on health, you need a program to
+store and analyze that data.</p></li>
+</ol>
+<p><br />
+</p>
+<p>The next question you may have is “I love Excel or SAS or SPSS or
+Stata [or insert your favorite program]. Why can’t I use that and forget
+your stupid R?” Here are some reasons:</p>
+<ol style="list-style-type: decimal">
+<li>R is free. Most programs are not.</li>
+<li>R is open source. Which means the software is community supported.
+This allows you to get help not from some big corporation
+(e.g. Microsoft with Excel), but people all around the world who are
+using R. And R has <strong>a lot</strong> of users, which means that if
+you have a problem, and you pose it to the user community, someone will
+help you.</li>
+<li>R is powerful and extensible (meaning that procedures for analyzing
+data that don’t currently exist can be readily developed);</li>
+<li>R has the capability for mapping data, an asset not generally
+available in other statistical software.</li>
+<li>If it isn’t already there, R is becoming the de-facto data analysis
+tool in many fields, including for many CA DPH positions.</li>
+</ol>
+<p><br />
+</p>
+<p>R is different from Excel in that it is generally not a
+point-and-click program. You will be primarily writing code to clean and
+analyze data. What does <em>writing</em> or <em>sourcing</em> code mean?
+A basic example will help clarify. Let’s say you are given a dataset
+with cancer cases across CA. You have a variable in the dataset
+representing age Let’s say this variable is named <strong>AGE</strong>.
+To get the mean age of the people in your dataset, you would write code
+that would look something like this</p>
+<pre class="r"><code>#Download Cancer Dataset
+download.file(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds&quot;, &quot;ca_cancer.rds&quot;, mode = &quot;wb&quot;)
+
+#Read in Cancer Dataset
+cancer &lt;- readRDS(&quot;ca_cancer.rds&quot;)
+
+#Get names of columns or variables
+head(cancer)</code></pre>
+<pre><code>##         time event AGE INS             geometry
+## 1   1.275976     1  67 Mcr   -122.3492, 38.3025
+## 14  3.509907     1  69 Mcr -121.98325, 37.82052
+## 17 10.297702     0  75 Mng   -122.3092, 38.3314
+## 36  7.012532     0  46 Mcr -122.20308, 38.09592
+## 55  3.389200     0  70 Mcr -122.63560, 38.26257
+## 92  6.110251     1  59 Unk -122.01982, 37.35523</code></pre>
+<pre class="r"><code>#Get mean of AGE variable
+mean(cancer$AGE)</code></pre>
+<pre><code>## [1] 60.4692</code></pre>
+<p><br />
+</p>
+<p>The command tells the program to get the mean of the variable
+<strong>AGE</strong>. If you wanted the sum, you write the command
+<code>sum(cancer$AGE)</code>.</p>
+<p>Now, where do you write this command? You write it in a script. A
+script is basically a text file. Think of writing code as something
+similar to writing an essay in a word document. Instead of sentences to
+produce an essay, in a programming script you are writing lines of code
+to run a data analysis. We’ll go through scripting in more detail later
+in this lab, but the basic process of sourcing code to run a data
+analysis task is as follows.</p>
+<ol style="list-style-type: decimal">
+<li>Write code. First, you open your script file, and write code or
+various commands (like <code>mean(cancer$AGE)</code>) that will execute
+data analysis tasks in this file.</li>
+<li>Send code to the software program to run (R in our case).</li>
+<li>Program produces results based on code. The program reads in your
+commands from the script and executes them, spitting out results in its
+console screen.</li>
+</ol>
+<p><br />
+</p>
+<p>I am skipping over many details, but the above steps outline the
+general work flow. You might now be thinking that you’re perfectly happy
+pointing and clicking your mouse in Excel (or wherever) to do your data
+analysis tasks. So, why should you adopt the statistical programming
+approach to conducting a data analysis?</p>
+<ol style="list-style-type: decimal">
+<li>Your script documents the decisions you made during the data
+analysis process. This is beneficial for many reasons.</li>
+</ol>
+<ul>
+<li>It allows you to recreate your steps if you need to rerun or alter
+your analysis many weeks, months, or even years in the future.</li>
+<li>It allows you to share your steps with other people. If someone asks
+you what were the decisions made in the data analysis process, - just
+hand them the script.</li>
+<li>Related to the above points, a script promotes
+<strong>transparency</strong> (here is what I did) and
+<strong>reproducibility</strong> (you can do it too). When you write
+code, you are forced to explicitly state the steps you took to do your
+research. When you do research by clicking through drop-down menus, your
+steps are lost, or at least documenting them requires considerable extra
+effort.</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>If you make a mistake in a data analysis step, you can go back,
+change a few lines of code, and <strong>poof</strong>, you’ve fixed your
+problem.</li>
+<li>It is more efficient. In particular, cleaning data can encompass a
+lot of tedious work that can be streamlined using statistical
+programming.</li>
+</ol>
+<p>Hopefully, I’ve convinced you that statistical programming and R are
+worthwhile to learn. Now let’s talk about getting R on your
+computer!</p>
+<p><br />
+</p>
+</div>
+<div id="getting-r" class="section level1">
+<h1>Getting R</h1>
+<p>R can be downloaded from one of the “CRAN” (Comprehensive R Archive
+Network) sites. In the US, the main site is at <a
+href="http://cran.us.r-project.org/"
+class="uri">http://cran.us.r-project.org/</a>. Look in the “Download and
+Install R” area at the top. Click on the appropriate link based on your
+operating system.</p>
+<p><strong>If you already have R on your computer, make sure you have
+the most updated version of R on your personal computer (4.4.2 “Trophy
+Case”).</strong></p>
+<p><br />
+</p>
+<div id="mac-os-x" class="section level2">
+<h2>Mac OS X</h2>
+<ol style="list-style-type: decimal">
+<li><p>On the “R for Mac OS” page, there are multiple packages that
+could be downloaded. Depending on the model of your Mac, pick the
+appropriate .pkg file. <em>Note the details for some operating systems.
+If you are using an older operating system, please follow
+instructions.</em></p></li>
+<li><p>After the package finishes downloading, locate the installer on
+your hard drive, double-click on the installer package, and after a few
+screens, select a destination for the installation of the R framework
+(the program) and the R.app GUI. Note that you will have to supply the
+Administrator’s password. Close the window when the installation is
+done.</p></li>
+<li><p>An application will appear in the Applications folder:
+R.app.</p></li>
+<li><p>Browse to the <a href="https://www.xquartz.org/">XQuartz</a>
+download page. Click on the most recent version of XQuartz to download
+the application.</p></li>
+<li><p>Run the XQuartz installer. XQuartz is needed to create windows to
+display many types of R graphics: this used to be included in MacOS
+until version 10.8 but now must be downloaded separately.</p></li>
+</ol>
+<p><br />
+</p>
+</div>
+<div id="windows" class="section level2">
+<h2>Windows</h2>
+<ol style="list-style-type: decimal">
+<li><p>On the “R for Windows” page, click on the “base” link, which
+should take you to the “R-4.5.2 for Windows” page</p></li>
+<li><p>On this page, click “Download R-4.5.2 for Windows”, and save the
+.exe file to your hard disk when prompted. Saving to the desktop is
+fine.</p></li>
+<li><p>To begin the installation, double-click on the downloaded file.
+Don’t be alarmed if you get unknown publisher type warnings. Window’s
+User Account Control will also worry about an unidentified program
+wanting access to your computer. Click on “Run”.</p></li>
+<li><p>Select the proposed options in each part of the install dialog.
+When the “Select Components” screen appears, just accept the standard
+choices</p></li>
+</ol>
+<p><br />
+</p>
+</div>
+</div>
+<div id="what-is-r-studio" class="section level1">
+<h1>What is R Studio?</h1>
+<p>If you click on the R program you just downloaded, you will find a
+very basic user interface. For example, below is what I get on a
+Mac:</p>
+<div class="float">
+<img src="R_basic.png" alt="The Basic R Console" />
+<div class="figcaption">The Basic R Console</div>
+</div>
+<p><br />
+</p>
+<p>We will not use R’s direct interface to run analyses in this class.
+Instead, we will use the program <strong>RStudio</strong>, which is much
+easier to interact with! RStudio gives you a true integrated development
+environment (IDE), where you can write code in a window, see results in
+other windows, see locations of files, see objects you’ve created, and
+so on. To clarify which is which: R is the name of the programming
+language itself and RStudio is an interface that makes writing code,
+running analyses, and visualizing data in R so much easier.</p>
+<p><br />
+</p>
+</div>
+<div id="getting-r-studio" class="section level1">
+<h1>Getting R Studio</h1>
+<p>To download and install RStudio, follow the directions below</p>
+<ol style="list-style-type: decimal">
+<li>Navigate to <a
+href="https://posit.co/download/rstudio-desktop/">RStudio’s download
+site</a></li>
+<li>We’ve already downloaded R, so click on the appropriate link to
+Install RStudio based on your OS (Windows, Mac, Linux and many others).
+Do not download anything from the “All Installers and Tarballs”
+section.</li>
+<li>Click on the installer that you downloaded. Follow the installation
+directions, making sure to keep all defaults intact. After installation,
+RStudio should pop up in your Applications or Programs folder/menu.</li>
+</ol>
+<p><br />
+</p>
+<div id="the-rstudio-interface" class="section level2">
+<h2>The RStudio Interface</h2>
+<p>Open up RStudio. You should see the interface shown in the figure
+below which has three windows.</p>
+<div class="float">
+<img src="RStudio_Image.png" alt="The RStudio Console" />
+<div class="figcaption">The RStudio Console</div>
+</div>
+<p><br />
+</p>
+<ul>
+<li><strong>Console</strong> (bottom left) - The way R works is you
+write a line of code to execute some kind of task on a data object. -
+The R Console allows you to run code interactively. The screen prompt
+<code>&gt;</code> is an invitation from R to enter its - world. This is
+where you type code in, press enter to execute the code, and see the
+results.</li>
+<li><strong>Environment, History, and Connections tabs</strong>
+(upper-right)
+<ul>
+<li><strong>Environment</strong> - shows all the R objects that are
+currently open in your workspace. This is the place, for example, where
+you will see any data you’ve loaded into R. When you exit RStudio, R
+will clear all objects in this window. You can also click on <img
+src="broom.png" alt="broom" /> to clear out all the objects loaded and
+created in your current session.</li>
+<li><strong>History</strong> - shows a list of executed commands in the
+current session.</li>
+<li><strong>Connections</strong> - you can connect to a variety of data
+sources, and explore the objects and data inside the - connection. I
+typically don’t use this window, but you [can](<a
+href="https://support.rstudio.com/hc/en-us/articles/115010915687-Using-RStudio-Connections"
+class="uri">https://support.rstudio.com/hc/en-us/articles/115010915687-Using-RStudio-Connections</a>.</li>
+</ul></li>
+<li><strong>Files, Plots, Packages, Help and Viewer tabs</strong>
+(lower-right)
+<ul>
+<li>**Files - shows all the files and folders in your current working
+directory (more on what this means later).</li>
+<li><strong>Plots</strong> - shows any charts, graphs, maps and plots
+you’ve successfully executed.</li>
+<li><strong>Packages</strong> - tells you all the R packages that you
+have access to (more on this later).</li>
+<li><strong>Help</strong> - shows help documentation for R commands that
+you’ve called up.</li>
+<li><strong>Viewer</strong> - allows you to view local web content
+(won’t be using this much).</li>
+</ul></li>
+</ul>
+<p>There is also a fourth window. But, we’ll get to this window a little
+later. The <a href="Assignments.html">assignment guidelines</a> also
+have more on this window!</p>
+<p><br />
+</p>
+</div>
+<div id="setting-rstudio-defaults" class="section level2">
+<h2>Setting RStudio Defaults</h2>
+<p>While not required, I strongly suggest that you change preferences in
+RStudio to never save the workspace so you always open with a clean
+environment. See <a
+href="https://r4ds.had.co.nz/workflow-projects.html#what-is-real">Ch.
+8.1</a> of R4DS for some more background</p>
+<ol style="list-style-type: decimal">
+<li>From the Tools menu on RStudio, open the Tools menu and then select
+Global Options.</li>
+<li>If not already highlighted, click on the General button from the
+left panel.</li>
+<li>Uncheck the following Restore boxes</li>
+</ol>
+<ul>
+<li>Restore most recently opened project at startup</li>
+<li>Restore previously open source documents at startup</li>
+<li>Restore .RData into workspace at startup</li>
+</ul>
+<ol start="4" style="list-style-type: decimal">
+<li>Set Save Workspace to .RData on exit to Never</li>
+<li>Click OK at the bottom to save the changes and close the preferences
+window. You may need to restart RStudio.</li>
+</ol>
+<p>The reason for making these changes is that it is preferable for
+reproducibility to start each R session with a clean environment. You
+can restore a previous environment either by rerunning code or by
+manually loading a previously saved session.</p>
+<p>The R Studio environment is modified when you execute code from files
+or from the console. If you always start fresh, you do not need to be
+concerned about things not working because of something you typed in the
+console, but did not save in a file.</p>
+<p>You only need to set these preferences once.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="r-data-types" class="section level1">
+<h1>R Data Types</h1>
+<p>Let’s now explore what R can do. R is really just a big fancy
+calculator. For example, type in the following mathematical expression
+in the R console (left window)</p>
+<pre class="r"><code>1+1</code></pre>
+<pre><code>## [1] 2</code></pre>
+<p>Note that spacing does not matter: <code>1+1</code> will generate the
+same answer as <code>1      +       1</code>. Can you say hello to the
+world?</p>
+<pre class="r"><code>&quot;hello world&quot;</code></pre>
+<pre><code>## [1] &quot;hello world&quot;</code></pre>
+<p>Looks great! <strong>Note, we need to put quotes around it.</strong>
+“hello world” is a character and R recognizes characters only if there
+are quotes around it. This brings us to the topic of basic data types in
+R. There are four basic data types in R: character, logical, numeric,
+and factors (there are two others - complex and raw - but we won’t cover
+them because they are rarely used in practice).</p>
+<p><br />
+</p>
+<div id="characters" class="section level2">
+<h2>Characters</h2>
+<p>Characters are used to represent words or letters in R. We saw this
+above with “hello world”. Character values are also known as strings.
+You might think that the value <code>"1"</code> is a number. Well, if
+you put quotes around, it isn’t! Anything with quotes will be
+interpreted as a character. No ifs, ands or buts about it.</p>
+<p><br />
+</p>
+</div>
+<div id="logicals" class="section level2">
+<h2>Logicals</h2>
+<p>A logical takes on two values: FALSE or TRUE. Logicals are usually
+constructed with comparison operators, which we’ll go through more
+carefully in Lab 2. Think of a logical as the answer to a question like
+“Is this value greater than (lower than/equal to) this other value?” The
+answer will be either TRUE or FALSE. TRUE and FALSE are logical values
+in R. For example, typing in the following</p>
+<pre class="r"><code>3 &gt; 2</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p><br />
+</p>
+<p>This gives you a <code>TRUE</code> What about the following?</p>
+<pre class="r"><code>&quot;declan&quot; == &quot;catherine&quot;</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p><br />
+</p>
+</div>
+<div id="numeric" class="section level2">
+<h2>Numeric</h2>
+<p>Numerics are separated into two types: integer and double. The
+distinction between integers and doubles is usually not important. R
+treats numerics as doubles by default because it is a less restrictive
+data type. You can do any mathematical operation on numeric values. We
+added one and one above. We can also multiply using the <code>*</code>
+operator.</p>
+<pre class="r"><code>2*3</code></pre>
+<pre><code>## [1] 6</code></pre>
+<p><br />
+</p>
+<p>And divide</p>
+<pre class="r"><code>2*3</code></pre>
+<pre><code>## [1] 6</code></pre>
+<p><br />
+</p>
+<p>And take logs</p>
+<pre class="r"><code>log(1)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p><br />
+</p>
+<pre class="r"><code>log(0)</code></pre>
+<pre><code>## [1] -Inf</code></pre>
+<p>Hold up! What is <code>-Inf</code>? Well, you can’t take the
+logarithm of 0, so R is telling you that you’re getting a non numeric
+value in return. The value <code>-Inf</code> is another value type that
+you can get in R.</p>
+<p><br />
+</p>
+</div>
+<div id="factors" class="section level2">
+<h2>Factors</h2>
+<p>Think of a factor as a categorical variable. It is sort of like a
+character, but not really. It is actually a numeric code with
+character-valued levels. Think of a character as a true string and a
+factor as a set of categories represented as characters. We won’t use
+factors too much in this course, so maybe don’t worry about it for
+now!</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="r-data-structures" class="section level1">
+<h1>R Data Structures</h1>
+<p>You just learned that R has four basic data types. Now, let’s go
+through how we can store data in R. That is, you type in the character
+“hello world” or the number 3, and you want to store these values. You
+do this by using R’s various data structures.</p>
+<div id="vectors" class="section level2">
+<h2>Vectors</h2>
+<p>A vector is the most common and basic R data structure and is pretty
+much the workhorse of the language. A vector is simply a sequence of
+values which can be of any data type but all of the same type. There are
+a number of ways to create a vector depending on the data type, but the
+most common is to insert the data you want to save in a vector into the
+command <code>c()</code>. For example, to represent the values 4, 16 and
+9 in a vector type in</p>
+<pre class="r"><code>c(4, 16, 9)</code></pre>
+<pre><code>## [1]  4 16  9</code></pre>
+<p><br />
+</p>
+<p>You can also have a vector of character values</p>
+<pre class="r"><code>c(&quot;catherine&quot;, &quot;declan&quot;, &quot;gwen&quot;)</code></pre>
+<pre><code>## [1] &quot;catherine&quot; &quot;declan&quot;    &quot;gwen&quot;</code></pre>
+<p>The above code does not actually “save” the values 4, 16, and 9 or
+catherine, declan, gwen – it just presents it on the screen in a vector.
+If you want to use these values again without having to type out
+<code>c(4, 16, 9)</code>, you can save it in a data
+<strong>object</strong>. At the heart of almost everything you will do
+(or are ever likely to do) in R is the concept that everything in R is
+an object. These objects can be almost anything, from a single number or
+character string (like a word) to highly complex structures like the
+output of a plot, a map, a summary of your statistical analysis or a set
+of R commands that perform a specific task.</p>
+<p>You assign data to an object using the arrow sign <code>&lt;-</code>.
+This will create an object in R’s memory that can be called back into
+the command window at any time. For example, you can save “hello world”
+to a vector called <em>b</em> by typing in</p>
+<pre class="r"><code>b &lt;- &quot;hello world&quot;
+b</code></pre>
+<pre><code>## [1] &quot;hello world&quot;</code></pre>
+<p>You can pronounce the above as “b becomes ‘hello world’”.</p>
+<p>The first line tells R to store b as ‘hello world.’ In the next line,
+we are telling R to print what b is.</p>
+<p>Note that R is case sensitive, if you type in <em>B</em> instead of
+<em>b</em>, you will get an error.</p>
+<p>Similarly, you can save the numbers 4, 16 and 9 into a vector called
+<em>v1</em>.</p>
+<pre class="r"><code>v1 &lt;- c(4, 16, 9)
+v1</code></pre>
+<pre><code>## [1]  4 16  9</code></pre>
+<p><br />
+</p>
+<p>You should see the objects <em>b</em> and <em>v1</em> pop up in the
+Environment tab on the top right window of your RStudio interface.</p>
+<p><br />
+</p>
+<div class="float">
+<img src="lab0fig.png" alt="Environment Window" />
+<div class="figcaption">Environment Window</div>
+</div>
+<p><br />
+</p>
+<p>Note that the name <em>v1</em> is nothing special here. You could
+have named the object <em>x</em> or <em>sph215</em> or your pet’s name
+(mine was Ali Baba). You can’t, however, name objects using special
+characters (e.g. !, @, $) or only numbers (although you can combine
+numbers and letters, but a number cannot be at the beginning
+e.g. <em>2d2</em>). For example, you’ll get an error if you save the
+vector <em>c(4,16,9)</em> to an object with the following names</p>
+<pre class="markdown"><code>123 &lt;- c(4, 16, 9)
+!!! &lt;- c(4, 16, 9)</code></pre>
+<pre class="r"><code>## Error: &lt;text&gt;:2:5: unexpected assignment
+## 1: 123 &lt;- c(4, 16, 9)
+## 2: !!! &lt;-
+##        ^</code></pre>
+<p><br />
+</p>
+<p>Also note that to distinguish a character value from a variable name,
+it needs to be quoted. “v1” is a character value whereas <code>v1</code>
+is a variable. One of the most common mistakes for beginners is to
+forget the quotes.</p>
+<pre class="markdown"><code>james</code></pre>
+<pre class="r"><code>## ## Error in eval(expr, envir, enclos): object &#39;james&#39; not found</code></pre>
+<p>The error occurs because R tries to print the value of object
+<em>james</em>, but there is no such variable. So remember that any time
+you get the error message <code>object 'something' not found</code>, the
+most likely reason is that you forgot to quote a character value. If
+not, it probably means that you have misspelled, or not yet created, the
+object that you are referring to. We’ve included the common pitfalls and
+R tips in this class <a href="R_help.html">resource</a>.</p>
+<p>Every vector has two key properties: <em>type</em> and
+<em>length</em>. The type property indicates the data type that the
+vector is holding. Use the command <code>typeof()</code> to determine
+the type.</p>
+<pre class="r"><code>typeof(b)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<p><br />
+</p>
+<pre class="r"><code>typeof(v1)</code></pre>
+<pre><code>## [1] &quot;double&quot;</code></pre>
+<p>Note that a vector cannot hold values of different types. If
+different data types exist, R will coerce the values into the highest
+type based on its internal hierarchy: logical &lt; integer &lt; double
+&lt; character. Type in <code>test &lt;- c("r", 6, TRUE)</code> in your
+R console. What is the vector type of <code>test</code>?</p>
+<p><br />
+</p>
+<p>The command <code>length()</code> determines the number of data
+values that the vector is storing.</p>
+<pre class="r"><code>length(b)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>length(v1)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<p>You can also directly determine if a vector is of a specific data
+type by using the command <code>is.X()</code> where you replace
+<code>X</code> with the data type. For example, to find out if
+<em>v1</em> is numeric, type in:</p>
+<pre class="r"><code>is.numeric(b)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>is.numeric(v1)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p><br />
+</p>
+<p>There is also <code>is.logical()</code>, <code>is.character()</code>,
+and <code>is.factor()</code>. You can also coerce a vector of one data
+type to another. For example, save the value “1” and “2” (both in
+quotes) into a vector named <em>x1</em>.</p>
+<pre class="r"><code>x1 &lt;- c(&quot;1&quot;, &quot;2&quot;)
+typeof(x1)</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<p><br />
+</p>
+<p>To convert <em>x1</em> into a numeric, use the command
+<code>as.numeric()</code></p>
+<pre class="r"><code>x2 &lt;- as.numeric(x1)
+typeof(x2)</code></pre>
+<pre><code>## [1] &quot;double&quot;</code></pre>
+<p><br />
+</p>
+<p>There is also <code>as.logical()</code>, <code>as.character()</code>,
+and <code>as.factor()</code>.</p>
+<p>An important practice you should adopt early is to keep only
+necessary objects in your current R Environment. For example, we will
+not be using <em>x2</em> any longer in this guide. To remove this object
+from R forever, use the command <code>rm()</code></p>
+<pre class="r"><code>rm(x2)</code></pre>
+<p>The data frame object <em>x2</em> should have disappeared from the
+Environment tab. Au revoir!</p>
+<p><br />
+</p>
+<p>Also note that when you close down R Studio, the objects you created
+above will disappear for good. Unless you save them onto your hard drive
+(we’ll touch on saving data in later labs), all data objects you create
+in your current R session will go bye bye when you exit the program.</p>
+<p><br />
+</p>
+</div>
+<div id="data-frames" class="section level2">
+<h2>Data Frames</h2>
+<p>We learned that data values can be stored in data structures known as
+vectors. The next step is to learn how to store vectors into an even
+higher level data structure. The data frame can do this. Data frames
+store vectors of the same length. Create a vector called v2 storing the
+values 5, 12, and 25.</p>
+<pre class="r"><code>v2 &lt;- c(5,12,25)</code></pre>
+<p><br />
+</p>
+<p>We can create a data frame using the command
+<code>data.frame()</code> storing the vectors <em>v1</em> and
+<em>v2</em> as columns.</p>
+<pre class="r"><code>data.frame(v1,v2)</code></pre>
+<pre><code>##   v1 v2
+## 1  4  5
+## 2 16 12
+## 3  9 25</code></pre>
+<p><br />
+</p>
+<p>Store this data frame in an object called df1</p>
+<pre class="r"><code>df1&lt;-data.frame(v1, v2)</code></pre>
+<p>df1 should pop up in your Environment window. You’ll notice a <img
+src="lab0fig2.png" alt="lab0fig2.png" /> next to <em>df1</em>. This
+tells you that <em>df1</em> possesses or holds more than one object.
+Click on <img src="lab0fig2.png" alt="lab0fig2.png" /> and you’ll see
+the two vectors we saved into <em>df1</em>. Another nice thing you can
+do is directly click on <em>df1</em> from the Environment window to
+bring up an Excel style worksheet on the top left of your RStudio
+interface. You can also type in:</p>
+<pre class="r"><code>View(df1)</code></pre>
+<p>to bring the worksheet up. You can’t edit this worksheet directly,
+but it allows you to see the values that a higher level R data object
+contains.</p>
+<p><br />
+</p>
+<p>We can store different types of vectors in a data frame. For example,
+we can store one character vector and one numeric vector in a single
+data frame.</p>
+<pre class="r"><code>v3 &lt;- c(&quot;jacob&quot;, &quot;anne&quot;, &quot;gwen&quot;)
+df2 &lt;- data.frame(v1, v3)
+df2</code></pre>
+<pre><code>##   v1    v3
+## 1  4 jacob
+## 2 16  anne
+## 3  9  gwen</code></pre>
+<p><br />
+</p>
+<p>For higher level data structures like a data frame, use the function
+<code>class()</code> to figure out what kind of object you’re working
+with.</p>
+<pre class="r"><code>class(df2)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<p><br />
+</p>
+<p>We can’t use <code>length()</code> on a data frame because it has
+more than one vector. Instead, it has <em>dimensions</em> - the number
+of rows and columns. You can find the number of rows and columns that a
+data frame has by using the command <code>dim()</code></p>
+<pre class="r"><code>dim(df1)</code></pre>
+<pre><code>## [1] 3 2</code></pre>
+<p>Here, the data frame <em>df1</em> has 3 rows and 2 columns. Data
+frames also have column names, which are characters.</p>
+<p><br />
+</p>
+<p>We can figure out the names of the columns using
+<code>colnames</code>.</p>
+<pre class="r"><code>colnames(df1)</code></pre>
+<pre><code>## [1] &quot;v1&quot; &quot;v2&quot;</code></pre>
+<p>In this case, the data frame used the vector names for the column
+names.</p>
+<p><br />
+</p>
+<p>We can extract columns from data frames by referring to their names
+using the <code>$</code> sign.</p>
+<pre class="r"><code>df1$v1</code></pre>
+<pre><code>## [1]  4 16  9</code></pre>
+<p><br />
+</p>
+<p>We can also extra data from data frames using brackets [ , ]</p>
+<pre class="r"><code>df1[,1]</code></pre>
+<pre><code>## [1]  4 16  9</code></pre>
+<p>The value before the comma indicates the row, which you leave empty
+if you are not selecting by row, which we did above. The value after the
+comma indicates the column, which you leave empty if you are not
+selecting by column. The above line of code selected the first
+column.</p>
+<p><br />
+</p>
+<p>Let’s now select the 2nd row.</p>
+<pre class="r"><code>df1[2,]</code></pre>
+<pre><code>##   v1 v2
+## 2 16 12</code></pre>
+<p><br />
+</p>
+<p>OK, so that wasn’t too hard. Now let’s try something a little
+trickier! What is the value in the 2nd row and 1st column?</p>
+<pre class="r"><code>df1[2,1]</code></pre>
+<pre><code>## [1] 16</code></pre>
+<p>See – we can do hard things!</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="functions" class="section level1">
+<h1>Functions</h1>
+<p>Let’s take a step back and talk about functions (also known as
+commands or macros (in SAS)). An R function is a packaged recipe that
+converts one or more inputs (called arguments) into a single output. You
+execute all of your tasks in R using functions. We have already used a
+couple of functions above including <code>typeof()</code> and
+<code>colnames()</code>. Every function in R will have the following
+basic format</p>
+<p><code>functionName(arg1 = val1, arg2 = val2, ...)</code></p>
+<p>In R, you type in the function’s name and set a number of options or
+parameters within parentheses that are separated by commas. Some options
+need to be set by the user - i.e. the function will spit out an error
+because a required option is blank - whereas others can be set but are
+not required because there is a default value established.</p>
+<p>Let’s use the function <code>seq()</code> which makes regular
+sequences of numbers. You can find out what the options are for a
+function by calling up its help documentation by typing <code>?</code>
+and the function name</p>
+<pre class="r"><code>? seq</code></pre>
+<p>The help documentation should pop up in the bottom right window of
+your RStudio interface. The documentation should also provide some
+examples of the function at the bottom of the page. Type the arguments
+from = 1, to = 10 inside the parentheses.</p>
+<pre class="r"><code>seq(from = 1, to = 10)</code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<p><br />
+</p>
+<p>You should get the same result if you type in:</p>
+<pre class="r"><code>seq(1, 10)</code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<p>The code above demonstrates something about how R resolves function
+arguments. When you use a function, you can always specify all the
+arguments in <code>arg = value</code> form. But if you do not, R
+attempts to resolve by position. So in the code above, it is assumed
+that we want a sequence <code>from = 1</code> that goes
+<code>to = 10</code> because we typed 1 before 10. Type in 10 before 1
+and see what happens. Since we didn’t specify step size, the default
+value of <code>by</code> in the function definition is used, which ends
+up being 1 in this case.</p>
+<p><br />
+</p>
+</div>
+<div id="packages" class="section level1">
+<h1>Packages</h1>
+<p>Functions do not exist in a vacuum, but exist within <a
+href="https://r-pkgs.org/intro.html">R packages</a>. Packages are the
+fundamental units of reproducible R code. They include reusable R
+functions, the documentation that describes how to use them, and sample
+data. At the top left of a function’s help documentation, you’ll find in
+curly brackets the R package that the function is housed in. For
+example, type in your console <code>? seq</code>. At the top right of
+the help documentation, you’ll find that <code>seq()</code> is in the
+package <strong>base</strong>. All the functions we have used so far are
+part of packages that have been pre-installed and pre-loaded into R.</p>
+<p>In order to use functions in a new package, you first need to install
+the package using the <code>install.packages()</code> command. For
+example, we will be using commands from the package
+<strong>tidyverse</strong> in this lab.</p>
+<pre class="r"><code>options(repos = c(CRAN = &quot;https://cloud.r-project.org&quot;))
+install.packages(&quot;tidyverse&quot;)</code></pre>
+<pre><code>## 
+## The downloaded binary packages are in
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpRdSZSn/downloaded_packages</code></pre>
+<p>You should see a bunch of gibberish roll through your console screen.
+Don’t worry, that’s just R downloading all of the other packages and
+applications that <strong>tidyverse</strong> relies on. These are known
+as <a
+href="https://r-pkgs.org/dependencies-mindset-background.html">dependencies.</a>
+Unless you get a message in red that indicates there is an error (like
+we saw when we typed in “hello world” without quotes), you should be
+fine.</p>
+<p>Next, you will need to load packages in your working environment
+(every time you start RStudio). We do this with the
+<code>library()</code> function. Notice there are no quotes around
+<strong>tidyverse</strong> this time (just to make things trickier for
+us!).</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<p>The Packages window at the lower-right of your RStudio shows you all
+the packages you currently have installed. If you don’t have a package
+listed in this window, you’ll need to use the
+<code>install.packages()</code> function to install it. If the package
+is checked, that means it is loaded into your current R session</p>
+<p>For example, here is a section of my Packages window <img
+src="window1.png" alt="window1.png" /></p>
+<p><br />
+</p>
+<p>The only packages loaded into my current session is
+<strong>methods</strong>, a package that is loaded every time you open
+an R session. Let’s say I use <code>install.packages()</code> to install
+the package <strong>matrixStats</strong>. The window now looks like:
+<img src="window2.png" alt="window2.png" /></p>
+<p><br />
+</p>
+<p>Let’s load <strong>matrixStats</strong> using <code>library()</code>,
+and then we will see a check mark appears next to
+<strong>matrixStats</strong>.</p>
+<pre class="r"><code>install.packages(&quot;matrixStats&quot;)</code></pre>
+<pre><code>## 
+## The downloaded binary packages are in
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpRdSZSn/downloaded_packages</code></pre>
+<pre class="r"><code>library(matrixStats)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;matrixStats&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     count</code></pre>
+<p><br />
+</p>
+<p>Look at us!</p>
+<p>To uninstall a package, use the function
+<code>remove.packages()</code>.</p>
+<p><strong>Note that you only need to install packages once with
+<code>install.packages()</code>, but you need to load them each time you
+relaunch RStudio with <code>library()</code>.</strong> Repeat after me:
+Install once, library every time. If you need to reinstall R or update
+to a new version of R, you will need to reinstall all packages. And as
+noted earlier, R has several packages already preloaded into your
+working environment. These are known as <strong>base</strong> packages
+and a list of their functions can be found <a
+href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/00Index.html">here</a>.</p>
+<p><br />
+</p>
+</div>
+<div id="tidyverse" class="section level1">
+<h1>Tidyverse</h1>
+<p>In most labs, we will be using commands from the
+<strong>tidyverse</strong> package. <a
+href="https://www.tidyverse.org/">Tidyverse</a> is a collection of
+high-powered, consistent, and easy-to-use packages developed by a number
+of thoughtful and talented R developers.The consistency of the
+<strong>tidyverse</strong>, together with the goal of increasing
+productivity, mean that the syntax of tidy functions is typically
+straightforward to learn. You can read more about
+<strong>tidyverse</strong> principles in Chapter 9, pages 147-151 in
+RDS.</p>
+<p>Excited about entering the tidyverse? I bet you are, so here is a
+badge to show your excitement!</p>
+<div class="float">
+<img src="tidyverse.png" alt="Your Tidyverse Badge" />
+<div class="figcaption">Your Tidyverse Badge</div>
+</div>
+<p><br />
+</p>
+<div id="tibbles" class="section level2">
+<h2>Tibbles</h2>
+<p>Although the <strong>tidyverse</strong> works with all data objects,
+its fundamental object type is the tibble. Tibbles are not only a super
+fun word to say, they are data frames that tweak some older behaviors to
+make life a little easier. There are two main differences in the usage
+of a data frame vs a tibble: printing and subsetting. Let’s be clear
+here – tibbles are just a special kind of data frame. They just make
+things “tidier.” Let’s bring in some data to illustrate the differences
+and similarities between data frames and tibbles. Install the package
+<strong>nycflights13</strong></p>
+<pre class="r"><code>install.packages(&quot;nycflights13&quot;)</code></pre>
+<pre><code>## 
+## The downloaded binary packages are in
+##  /var/folders/hs/zvzkdz_12yj_drz4g6sm8h_00000gq/T//RtmpRdSZSn/downloaded_packages</code></pre>
+<p><br />
+</p>
+<p>Make sure you also load the package.</p>
+<pre class="r"><code>library(nycflights13)</code></pre>
+<p><br />
+</p>
+<p>If you look in the upper right hand <em>Environment</em> tab and
+click on <em>Global Environment</em>, you will see there is a dataset
+called <strong>flights</strong> included in this package. It includes
+information on all 336,776 flights that departed from New York City in
+2013. Let’s save this file in the local R environment.</p>
+<pre class="r"><code>nyctibble &lt;- flights
+class(nyctibble)</code></pre>
+<pre><code>## [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</code></pre>
+<p><br />
+</p>
+<p>This dataset is a tibble. Let’s also save it as a regular data frame
+by using the <code>as.data.frame()</code> function.</p>
+<pre class="r"><code>nycdf &lt;- as.data.frame(flights)
+class(nycdf)</code></pre>
+<pre><code>## [1] &quot;data.frame&quot;</code></pre>
+<p><br />
+</p>
+<p>The first difference between data frames and tibbles is how the
+dataset looks. Tibbles have a refined print method that shows only the
+first 10 rows, and only the columns that fit on the screen. In addition,
+each column reports its name and type.</p>
+<pre class="r"><code>nyctibble</code></pre>
+<pre><code>## # A tibble: 336,776 × 19
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;          &lt;int&gt;
+##  1  2013     1     1      517            515         2      830            819
+##  2  2013     1     1      533            529         4      850            830
+##  3  2013     1     1      542            540         2      923            850
+##  4  2013     1     1      544            545        -1     1004           1022
+##  5  2013     1     1      554            600        -6      812            837
+##  6  2013     1     1      554            558        -4      740            728
+##  7  2013     1     1      555            600        -5      913            854
+##  8  2013     1     1      557            600        -3      709            723
+##  9  2013     1     1      557            600        -3      838            846
+## 10  2013     1     1      558            600        -2      753            745
+## # ℹ 336,766 more rows
+## # ℹ 11 more variables: arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;,
+## #   tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
+## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+<p><br />
+</p>
+<p>Tibbles are designed so that you don’t overwhelm your console when
+you print large data frames. Compare the print output above to what you
+get with a data frame.</p>
+<pre class="r"><code>nycdf</code></pre>
+<p><br />
+</p>
+<p>Um, that was a lot….Tibble is much cleaner. You can bring up the
+Excel like worksheet of the tibble (or data frame) using the
+<code>View()</code> function.</p>
+<pre class="r"><code>View(nyctibble)</code></pre>
+<p><br />
+</p>
+<p>You can identify the names of the columns (and hence the variables in
+the dataset) by using the function <code>names()</code>.</p>
+<pre class="r"><code>names(nyctibble)</code></pre>
+<pre><code>##  [1] &quot;year&quot;           &quot;month&quot;          &quot;day&quot;            &quot;dep_time&quot;      
+##  [5] &quot;sched_dep_time&quot; &quot;dep_delay&quot;      &quot;arr_time&quot;       &quot;sched_arr_time&quot;
+##  [9] &quot;arr_delay&quot;      &quot;carrier&quot;        &quot;flight&quot;         &quot;tailnum&quot;       
+## [13] &quot;origin&quot;         &quot;dest&quot;           &quot;air_time&quot;       &quot;distance&quot;      
+## [17] &quot;hour&quot;           &quot;minute&quot;         &quot;time_hour&quot;</code></pre>
+<p>Those may come in handy if we wanted to analyze the data!</p>
+<p><br />
+</p>
+<p>Finally, let’s convert a regular data frame to a tibble using the
+<code>as_tibble()</code> function.</p>
+<pre class="r"><code>as_tibble(nycdf)</code></pre>
+<pre><code>## # A tibble: 336,776 × 19
+##     year month   day dep_time sched_dep_time dep_delay arr_time sched_arr_time
+##    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;          &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;          &lt;int&gt;
+##  1  2013     1     1      517            515         2      830            819
+##  2  2013     1     1      533            529         4      850            830
+##  3  2013     1     1      542            540         2      923            850
+##  4  2013     1     1      544            545        -1     1004           1022
+##  5  2013     1     1      554            600        -6      812            837
+##  6  2013     1     1      554            558        -4      740            728
+##  7  2013     1     1      555            600        -5      913            854
+##  8  2013     1     1      557            600        -3      709            723
+##  9  2013     1     1      557            600        -3      838            846
+## 10  2013     1     1      558            600        -2      753            745
+## # ℹ 336,766 more rows
+## # ℹ 11 more variables: arr_delay &lt;dbl&gt;, carrier &lt;chr&gt;, flight &lt;int&gt;,
+## #   tailnum &lt;chr&gt;, origin &lt;chr&gt;, dest &lt;chr&gt;, air_time &lt;dbl&gt;, distance &lt;dbl&gt;,
+## #   hour &lt;dbl&gt;, minute &lt;dbl&gt;, time_hour &lt;dttm&gt;</code></pre>
+<p>Not all functions work with tibbles, particularly those that are
+specific to spatial data. As such, we’ll be using a combination of
+tibbles and regular data frames throughout the class, with a preference
+towards tibbles where possible. Note that when you search on Google for
+how to do something in R, you will likely get <strong>non-tidy
+ways</strong> of doing things. Most of these suggestions are fine, but
+some are not and may screw you up down the road. My advice is to try to
+stick with tidy functions to do things in R.</p>
+<p>Anyway, you earned another badge. Yes!</p>
+<div class="float">
+<img src="tibble.png" alt="Your Tibble Badge" />
+<div class="figcaption">Your Tibble Badge</div>
+</div>
+<p><br />
+</p>
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiTGFiIDE6IEludHJvIHRvIFIiCi0tLQoKXAoKIyBVc2luZyBSIGZvciBHSVMKCkluIHRoaXMgY291cnNlLCB3ZSB3aWxsIGJlIHVzaW5nIFIgZm9yIGFsbCBvdXIgR0lTIG5lZWRzLiBJZiB5b3UndmUgbmV2ZXIgdXNlZCBSIGJlZm9yZSwgbm8gd29ycmllcyEgV2Ugd2lsbCBtb3ZlIGF0IGEgc2xvdyBhbmQgc3RlYWR5IHBhY2UgYW5kIHdpbGwgcHJvdmlkZSBzdXBwb3J0IGFsb25nIHRoZSB3YXkuIElmIHlvdSdyZSBhbiBSIHBybywgZmVlbCBmcmVlIHRvIGZsZXggeW91ciBSIHNraWxscyBhbmQgKGhvcGVmdWxseSkgYnVpbGQgb24gdGhlbSEgCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGUgZ3VpZGUgYXJlIGFzIGZvbGxvd3MKCi0gSW5zdGFsbCBhbmQgc2V0IHVwIFIgYW5kIFJTdHVkaW8uCi0gVW5kZXJzdGFuZCBSIGRhdGEgdHlwZXMKLSBVbmRlcnN0YW5kIFIgZGF0YSBzdHJ1Y3R1cmVzCi0gVW5kZXJzdGFuZCBSIGZ1bmN0aW9ucwotIEludHJvZHVjdGlvbiB0byB0aWR5dmVyc2UgYW5kIGl0cyBzdWl0ZSBvZiBkYXRhIHdyYW5nbGluZyBmdW5jdGlvbnMKLSBVbmRlcnN0YW5kIFIgTWFya2Rvd24KLSBUaGlzIGxhYiBndWlkZSBmb2xsb3dzIGNsb3NlbHkgYW5kIHN1cHBsZW1lbnRzIHRoZSBtYXRlcmlhbCBwcmVzZW50ZWQgaW4gQ2hhcHRlcnMgMiwgNCwgNSwgNyBhbmQgMjEgaW4gdGhlIHRleHRib29rIFtSIGZvciBEYXRhIFNjaWVuY2UgKFJEUyldKGh0dHBzOi8vcjRkcy5oYWRsZXkubnovKS4KClwKCiMgV2hhdCBpcyBSPwoKUiBpcyBhIGZyZWUsIG9wZW4gc291cmNlIHN0YXRpc3RpY2FsIHByb2dyYW1taW5nIGxhbmd1YWdlLiBJdCBpcyB1c2VmdWwgZm9yIGRhdGEgY2xlYW5pbmcsIGFuYWx5c2lzLCBhbmQgdmlzdWFsaXphdGlvbi4gUiBpcyBhbiBpbnRlcnByZXRlZCBsYW5ndWFnZSwgbm90IGEgY29tcGlsZWQgb25lLiBUaGlzIG1lYW5zIHRoYXQgeW91IHR5cGUgc29tZXRoaW5nIGludG8gUiBhbmQgaXQgZG9lcyB3aGF0IHlvdSB0ZWxsIGl0LiBJdCBpcyBib3RoIGEgY29tbWFuZCBsaW5lIHNvZnR3YXJlIGFuZCBhIHByb2dyYW1taW5nIGVudmlyb25tZW50LiBJdCBpcyBhbiBleHRlbnNpYmxlLCBvcGVuLXNvdXJjZSBsYW5ndWFnZSBhbmQgY29tcHV0aW5nIGVudmlyb25tZW50IGZvciBXaW5kb3dzLCBNYWNpbnRvc2gsIFVOSVgsIGFuZCBMaW51eCBwbGF0Zm9ybXMsIHdoaWNoIGFsbG93cyBmb3IgdGhlIHVzZXIgdG8gZnJlZWx5IGRpc3RyaWJ1dGUsIHN0dWR5LCBjaGFuZ2UsIGFuZCBpbXByb3ZlIHRoZSBzb2Z0d2FyZS4gSXQgaXMgYmFzaWNhbGx5IGEgZnJlZSwgc3VwZXIgYmlnLCBhbmQgY29tcGxleCBjYWxjdWxhdG9yLiBZb3Ugd2lsbCBiZSB1c2luZyBSIHRvIGFjY29tcGxpc2ggYWxsIGRhdGEgYW5hbHlzaXMgdGFza3MgaW4gdGhpcyBjbGFzcy4gWW91IG1pZ2h0IGJlIHdvbmRlcmluZyDigJxXaHkgaW4gdGhlIHdvcmxkIGRvIHdlIG5lZWQgdG8ga25vdyBob3cgdG8gdXNlIGEgc3RhdGlzdGljYWwgc29mdHdhcmUgcHJvZ3JhbT/igJ0gSGVyZSBhcmUgdGhlIG1haW4gcmVhc29uczoKCjEuIFlvdSB3aWxsIGJlIGxlYXJuaW5nIGFib3V0IG5ldyBjb25jZXB0cyBpbiBsZWN0dXJlIGFuZCB0aGUgcmVhZGluZ3MuIEFwcGx5aW5nIHRoZXNlIGNvbmNlcHRzIHVzaW5nIHJlYWwgZGF0YSBpcyBhbiBpbXBvcnRhbnQgZm9ybSBvZiBsZWFybmluZy4gQSBzdGF0aXN0aWNhbCBzb2Z0d2FyZSBwcm9ncmFtIGlzIHRoZSBtb3N0IGVmZmljaWVudCAoYW5kIGluIG1hbnkgY2FzZXMgdGhlIG9ubHkpIG1lYW5zIG9mIHJ1bm5pbmcgZGF0YSBhbmFseXNlcywgbm90IGp1c3QgaW4gdGhlIGNsb2lzdGVyZWQgc2V0dGluZyBvZiBhIHVuaXZlcnNpdHkgY2xhc3Nyb29tLCBidXQgZXNwZWNpYWxseSBpbiB0aGUgcmVhbCB3b3JsZC4gQXBwbGllZCBkYXRhIGFuYWx5c2lzIHdpbGwgYmUgdGhlIHdheSB3ZSBicmlkZ2Ugc3RhdGlzdGljYWwgdGhlb3J5IHRvIHRoZSDigJxyZWFsIHdvcmxkLuKAnSBBbmQgUiBpcyB0aGUgdmVoaWNsZSBmb3IgYWNjb21wbGlzaGluZyB0aGlzLgoKMi4gSW4gb3JkZXIgdG8gZG8gYXBwbGllZCBkYXRhIGFuYWx5c2lzIG91dHNpZGUgb2YgdGhlIGNsYXNzcm9vbSwgeW91IG5lZWQgdG8ga25vdyBob3cgdG8gdXNlIGEgc3RhdGlzdGljYWwgcHJvZ3JhbS4gVGhlcmUgaXMgbm8gd2F5IGFyb3VuZCBpdC4gSWYgeW91IHdhbnQgdG8gY29sbGVjdCBkYXRhIG9uIGhlYWx0aCwgeW91IG5lZWQgYSBwcm9ncmFtIHRvIHN0b3JlIGFuZCBhbmFseXplIHRoYXQgZGF0YS4gCgpcCgpUaGUgbmV4dCBxdWVzdGlvbiB5b3UgbWF5IGhhdmUgaXMg4oCcSSBsb3ZlIEV4Y2VsIG9yIFNBUyBvciBTUFNTIG9yIFN0YXRhIFtvciBpbnNlcnQgeW91ciBmYXZvcml0ZSBwcm9ncmFtXS4gV2h5IGNhbuKAmXQgSSB1c2UgdGhhdCBhbmQgZm9yZ2V0IHlvdXIgc3R1cGlkIFI/4oCdIEhlcmUgYXJlIHNvbWUgcmVhc29uczoKCjEuIFIgaXMgZnJlZS4gTW9zdCBwcm9ncmFtcyBhcmUgbm90LgoyLiBSIGlzIG9wZW4gc291cmNlLiBXaGljaCBtZWFucyB0aGUgc29mdHdhcmUgaXMgY29tbXVuaXR5IHN1cHBvcnRlZC4gVGhpcyBhbGxvd3MgeW91IHRvIGdldCBoZWxwIG5vdCBmcm9tIHNvbWUgYmlnIGNvcnBvcmF0aW9uIChlLmcuIE1pY3Jvc29mdCB3aXRoIEV4Y2VsKSwgYnV0IHBlb3BsZSBhbGwgYXJvdW5kIHRoZSB3b3JsZCB3aG8gYXJlIHVzaW5nIFIuIEFuZCBSIGhhcyAqKmEgbG90Kiogb2YgdXNlcnMsIHdoaWNoIG1lYW5zIHRoYXQgaWYgeW91IGhhdmUgYSBwcm9ibGVtLCBhbmQgeW91IHBvc2UgaXQgdG8gdGhlIHVzZXIgY29tbXVuaXR5LCBzb21lb25lIHdpbGwgaGVscCB5b3UuCjMuIFIgaXMgcG93ZXJmdWwgYW5kIGV4dGVuc2libGUgKG1lYW5pbmcgdGhhdCBwcm9jZWR1cmVzIGZvciBhbmFseXppbmcgZGF0YSB0aGF0IGRvbuKAmXQgY3VycmVudGx5IGV4aXN0IGNhbiBiZSByZWFkaWx5IGRldmVsb3BlZCk7CjQuIFIgaGFzIHRoZSBjYXBhYmlsaXR5IGZvciBtYXBwaW5nIGRhdGEsIGFuIGFzc2V0IG5vdCBnZW5lcmFsbHkgYXZhaWxhYmxlIGluIG90aGVyIHN0YXRpc3RpY2FsIHNvZnR3YXJlLgo1LiBJZiBpdCBpc27igJl0IGFscmVhZHkgdGhlcmUsIFIgaXMgYmVjb21pbmcgdGhlIGRlLWZhY3RvIGRhdGEgYW5hbHlzaXMgdG9vbCBpbiBtYW55IGZpZWxkcywgaW5jbHVkaW5nIGZvciBtYW55IENBIERQSCBwb3NpdGlvbnMuCgpcCgpSIGlzIGRpZmZlcmVudCBmcm9tIEV4Y2VsIGluIHRoYXQgaXQgaXMgZ2VuZXJhbGx5IG5vdCBhIHBvaW50LWFuZC1jbGljayBwcm9ncmFtLiBZb3Ugd2lsbCBiZSBwcmltYXJpbHkgd3JpdGluZyBjb2RlIHRvIGNsZWFuIGFuZCBhbmFseXplIGRhdGEuIFdoYXQgZG9lcyAqd3JpdGluZyogb3IgKnNvdXJjaW5nKiBjb2RlIG1lYW4/IEEgYmFzaWMgZXhhbXBsZSB3aWxsIGhlbHAgY2xhcmlmeS4gTGV04oCZcyBzYXkgeW91IGFyZSBnaXZlbiBhIGRhdGFzZXQgd2l0aCBjYW5jZXIgY2FzZXMgYWNyb3NzIENBLiBZb3UgaGF2ZSBhIHZhcmlhYmxlIGluIHRoZSBkYXRhc2V0IHJlcHJlc2VudGluZyBhZ2UgTGV04oCZcyBzYXkgdGhpcyB2YXJpYWJsZSBpcyBuYW1lZCAqKkFHRSoqLiBUbyBnZXQgdGhlIG1lYW4gYWdlIG9mIHRoZSBwZW9wbGUgaW4geW91ciBkYXRhc2V0LCB5b3Ugd291bGQgd3JpdGUgY29kZSB0aGF0IHdvdWxkIGxvb2sgc29tZXRoaW5nIGxpa2UgdGhpcwoKCmBgYHtyfQojRG93bmxvYWQgQ2FuY2VyIERhdGFzZXQKZG93bmxvYWQuZmlsZSgiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yZWZzL2hlYWRzL21haW4vQ0FfQ2FuY2VyX0RhdGEucmRzIiwgImNhX2NhbmNlci5yZHMiLCBtb2RlID0gIndiIikKCiNSZWFkIGluIENhbmNlciBEYXRhc2V0CmNhbmNlciA8LSByZWFkUkRTKCJjYV9jYW5jZXIucmRzIikKCiNHZXQgbmFtZXMgb2YgY29sdW1ucyBvciB2YXJpYWJsZXMKaGVhZChjYW5jZXIpCgojR2V0IG1lYW4gb2YgQUdFIHZhcmlhYmxlCm1lYW4oY2FuY2VyJEFHRSkKYGBgCgpcCgpUaGUgY29tbWFuZCB0ZWxscyB0aGUgcHJvZ3JhbSB0byBnZXQgdGhlIG1lYW4gb2YgdGhlIHZhcmlhYmxlICoqQUdFKiouIElmIHlvdSB3YW50ZWQgdGhlIHN1bSwgeW91IHdyaXRlIHRoZSBjb21tYW5kIGBzdW0oY2FuY2VyJEFHRSlgLgoKTm93LCB3aGVyZSBkbyB5b3Ugd3JpdGUgdGhpcyBjb21tYW5kPyBZb3Ugd3JpdGUgaXQgaW4gYSBzY3JpcHQuIEEgc2NyaXB0IGlzIGJhc2ljYWxseSBhIHRleHQgZmlsZS4gVGhpbmsgb2Ygd3JpdGluZyBjb2RlIGFzIHNvbWV0aGluZyBzaW1pbGFyIHRvIHdyaXRpbmcgYW4gZXNzYXkgaW4gYSB3b3JkIGRvY3VtZW50LiBJbnN0ZWFkIG9mIHNlbnRlbmNlcyB0byBwcm9kdWNlIGFuIGVzc2F5LCBpbiBhIHByb2dyYW1taW5nIHNjcmlwdCB5b3UgYXJlIHdyaXRpbmcgbGluZXMgb2YgY29kZSB0byBydW4gYSBkYXRhIGFuYWx5c2lzLiBXZeKAmWxsIGdvIHRocm91Z2ggc2NyaXB0aW5nIGluIG1vcmUgZGV0YWlsIGxhdGVyIGluIHRoaXMgbGFiLCBidXQgdGhlIGJhc2ljIHByb2Nlc3Mgb2Ygc291cmNpbmcgY29kZSB0byBydW4gYSBkYXRhIGFuYWx5c2lzIHRhc2sgaXMgYXMgZm9sbG93cy4KCjEuIFdyaXRlIGNvZGUuIEZpcnN0LCB5b3Ugb3BlbiB5b3VyIHNjcmlwdCBmaWxlLCBhbmQgd3JpdGUgY29kZSBvciB2YXJpb3VzIGNvbW1hbmRzIChsaWtlIGBtZWFuKGNhbmNlciRBR0UpYCkgdGhhdCB3aWxsIGV4ZWN1dGUgZGF0YSBhbmFseXNpcyB0YXNrcyBpbiB0aGlzIGZpbGUuCjIuIFNlbmQgY29kZSB0byB0aGUgc29mdHdhcmUgcHJvZ3JhbSB0byBydW4gKFIgaW4gb3VyIGNhc2UpLgozLiBQcm9ncmFtIHByb2R1Y2VzIHJlc3VsdHMgYmFzZWQgb24gY29kZS4gVGhlIHByb2dyYW0gcmVhZHMgaW4geW91ciBjb21tYW5kcyBmcm9tIHRoZSBzY3JpcHQgYW5kIGV4ZWN1dGVzIHRoZW0sIHNwaXR0aW5nIG91dCByZXN1bHRzIGluIGl0cyBjb25zb2xlIHNjcmVlbi4KClwKCkkgYW0gc2tpcHBpbmcgb3ZlciBtYW55IGRldGFpbHMsIGJ1dCB0aGUgYWJvdmUgc3RlcHMgb3V0bGluZSB0aGUgZ2VuZXJhbCB3b3JrIGZsb3cuIFlvdSBtaWdodCBub3cgYmUgdGhpbmtpbmcgdGhhdCB5b3XigJlyZSBwZXJmZWN0bHkgaGFwcHkgcG9pbnRpbmcgYW5kIGNsaWNraW5nIHlvdXIgbW91c2UgaW4gRXhjZWwgKG9yIHdoZXJldmVyKSB0byBkbyB5b3VyIGRhdGEgYW5hbHlzaXMgdGFza3MuIFNvLCB3aHkgc2hvdWxkIHlvdSBhZG9wdCB0aGUgc3RhdGlzdGljYWwgcHJvZ3JhbW1pbmcgYXBwcm9hY2ggdG8gY29uZHVjdGluZyBhIGRhdGEgYW5hbHlzaXM/CgoxLiBZb3VyIHNjcmlwdCBkb2N1bWVudHMgdGhlIGRlY2lzaW9ucyB5b3UgbWFkZSBkdXJpbmcgdGhlIGRhdGEgYW5hbHlzaXMgcHJvY2Vzcy4gVGhpcyBpcyBiZW5lZmljaWFsIGZvciBtYW55IHJlYXNvbnMuCiAgLSBJdCBhbGxvd3MgeW91IHRvIHJlY3JlYXRlIHlvdXIgc3RlcHMgaWYgeW91IG5lZWQgdG8gcmVydW4gb3IgYWx0ZXIgeW91ciBhbmFseXNpcyBtYW55IHdlZWtzLCBtb250aHMsIG9yIGV2ZW4geWVhcnMgaW4gdGhlIGZ1dHVyZS4KICAtIEl0IGFsbG93cyB5b3UgdG8gc2hhcmUgeW91ciBzdGVwcyB3aXRoIG90aGVyIHBlb3BsZS4gSWYgc29tZW9uZSBhc2tzIHlvdSB3aGF0IHdlcmUgdGhlIGRlY2lzaW9ucyBtYWRlIGluIHRoZSBkYXRhIGFuYWx5c2lzIHByb2Nlc3MsIC0ganVzdCBoYW5kIHRoZW0gdGhlIHNjcmlwdC4KICAtIFJlbGF0ZWQgdG8gdGhlIGFib3ZlIHBvaW50cywgYSBzY3JpcHQgcHJvbW90ZXMgKip0cmFuc3BhcmVuY3kqKiAoaGVyZSBpcyB3aGF0IEkgZGlkKSBhbmQgKipyZXByb2R1Y2liaWxpdHkqKiAoeW91IGNhbiBkbyBpdCB0b28pLiBXaGVuIHlvdSB3cml0ZSBjb2RlLCB5b3UgYXJlIGZvcmNlZCB0byBleHBsaWNpdGx5IHN0YXRlIHRoZSBzdGVwcyB5b3UgdG9vayB0byBkbyB5b3VyIHJlc2VhcmNoLiBXaGVuIHlvdSBkbyByZXNlYXJjaCBieSBjbGlja2luZyB0aHJvdWdoIGRyb3AtZG93biBtZW51cywgeW91ciBzdGVwcyBhcmUgbG9zdCwgb3IgYXQgbGVhc3QgZG9jdW1lbnRpbmcgdGhlbSByZXF1aXJlcyBjb25zaWRlcmFibGUgZXh0cmEgZWZmb3J0LgoyLiBJZiB5b3UgbWFrZSBhIG1pc3Rha2UgaW4gYSBkYXRhIGFuYWx5c2lzIHN0ZXAsIHlvdSBjYW4gZ28gYmFjaywgY2hhbmdlIGEgZmV3IGxpbmVzIG9mIGNvZGUsIGFuZCAqKnBvb2YqKiwgeW914oCZdmUgZml4ZWQgeW91ciBwcm9ibGVtLgozLiBJdCBpcyBtb3JlIGVmZmljaWVudC4gSW4gcGFydGljdWxhciwgY2xlYW5pbmcgZGF0YSBjYW4gZW5jb21wYXNzIGEgbG90IG9mIHRlZGlvdXMgd29yayB0aGF0IGNhbiBiZSBzdHJlYW1saW5lZCB1c2luZyBzdGF0aXN0aWNhbCBwcm9ncmFtbWluZy4KCkhvcGVmdWxseSwgSeKAmXZlIGNvbnZpbmNlZCB5b3UgdGhhdCBzdGF0aXN0aWNhbCBwcm9ncmFtbWluZyBhbmQgUiBhcmUgd29ydGh3aGlsZSB0byBsZWFybi4gTm93IGxldCdzIHRhbGsgYWJvdXQgZ2V0dGluZyBSIG9uIHlvdXIgY29tcHV0ZXIhCgpcCgojIEdldHRpbmcgUgoKUiBjYW4gYmUgZG93bmxvYWRlZCBmcm9tIG9uZSBvZiB0aGUg4oCcQ1JBTuKAnSAoQ29tcHJlaGVuc2l2ZSBSIEFyY2hpdmUgTmV0d29yaykgc2l0ZXMuIEluIHRoZSBVUywgdGhlIG1haW4gc2l0ZSBpcyBhdCBodHRwOi8vY3Jhbi51cy5yLXByb2plY3Qub3JnLy4gTG9vayBpbiB0aGUg4oCcRG93bmxvYWQgYW5kIEluc3RhbGwgUuKAnSBhcmVhIGF0IHRoZSB0b3AuIENsaWNrIG9uIHRoZSBhcHByb3ByaWF0ZSBsaW5rIGJhc2VkIG9uIHlvdXIgb3BlcmF0aW5nIHN5c3RlbS4KCioqSWYgeW91IGFscmVhZHkgaGF2ZSBSIG9uIHlvdXIgY29tcHV0ZXIsIG1ha2Ugc3VyZSB5b3UgaGF2ZSB0aGUgbW9zdCB1cGRhdGVkIHZlcnNpb24gb2YgUiBvbiB5b3VyIHBlcnNvbmFsIGNvbXB1dGVyICg0LjQuMiDigJxUcm9waHkgQ2FzZeKAnSkuKioKClwKCiMjIE1hYyBPUyBYCjEuIE9uIHRoZSDigJxSIGZvciBNYWMgT1PigJ0gcGFnZSwgdGhlcmUgYXJlIG11bHRpcGxlIHBhY2thZ2VzIHRoYXQgY291bGQgYmUgZG93bmxvYWRlZC4gRGVwZW5kaW5nIG9uIHRoZSBtb2RlbCBvZiB5b3VyIE1hYywgcGljayB0aGUgYXBwcm9wcmlhdGUgLnBrZyBmaWxlLiAqTm90ZSB0aGUgZGV0YWlscyBmb3Igc29tZSBvcGVyYXRpbmcgc3lzdGVtcy4gSWYgeW91IGFyZSB1c2luZyBhbiBvbGRlciBvcGVyYXRpbmcgc3lzdGVtLCBwbGVhc2UgZm9sbG93IGluc3RydWN0aW9ucy4qCjIuIEFmdGVyIHRoZSBwYWNrYWdlIGZpbmlzaGVzIGRvd25sb2FkaW5nLCBsb2NhdGUgdGhlIGluc3RhbGxlciBvbiB5b3VyIGhhcmQgZHJpdmUsIGRvdWJsZS1jbGljayBvbiB0aGUgaW5zdGFsbGVyIHBhY2thZ2UsIGFuZCBhZnRlciBhIGZldyBzY3JlZW5zLCBzZWxlY3QgYSBkZXN0aW5hdGlvbiBmb3IgdGhlIGluc3RhbGxhdGlvbiBvZiB0aGUgUiBmcmFtZXdvcmsgKHRoZSBwcm9ncmFtKSBhbmQgdGhlIFIuYXBwIEdVSS4gTm90ZSB0aGF0IHlvdSB3aWxsIGhhdmUgdG8gc3VwcGx5IHRoZSBBZG1pbmlzdHJhdG9y4oCZcyBwYXNzd29yZC4gQ2xvc2UgdGhlIHdpbmRvdyB3aGVuIHRoZSBpbnN0YWxsYXRpb24gaXMgZG9uZS4KCjMuIEFuIGFwcGxpY2F0aW9uIHdpbGwgYXBwZWFyIGluIHRoZSBBcHBsaWNhdGlvbnMgZm9sZGVyOiBSLmFwcC4KCjQuIEJyb3dzZSB0byB0aGUgW1hRdWFydHpdKGh0dHBzOi8vd3d3LnhxdWFydHoub3JnLykgZG93bmxvYWQgcGFnZS4gQ2xpY2sgb24gdGhlIG1vc3QgcmVjZW50IHZlcnNpb24gb2YgWFF1YXJ0eiB0byBkb3dubG9hZCB0aGUgYXBwbGljYXRpb24uCiAKNS4gUnVuIHRoZSBYUXVhcnR6IGluc3RhbGxlci4gWFF1YXJ0eiBpcyBuZWVkZWQgdG8gY3JlYXRlIHdpbmRvd3MgdG8gZGlzcGxheSBtYW55IHR5cGVzIG9mIFIgZ3JhcGhpY3M6IHRoaXMgdXNlZCB0byBiZSBpbmNsdWRlZCBpbiBNYWNPUyB1bnRpbCB2ZXJzaW9uIDEwLjggYnV0IG5vdyBtdXN0IGJlIGRvd25sb2FkZWQgc2VwYXJhdGVseS4KClwKCiMjIFdpbmRvd3MKMS4gT24gdGhlIOKAnFIgZm9yIFdpbmRvd3PigJ0gcGFnZSwgY2xpY2sgb24gdGhlIOKAnGJhc2XigJ0gbGluaywgd2hpY2ggc2hvdWxkIHRha2UgeW91IHRvIHRoZSDigJxSLTQuNS4yIGZvciBXaW5kb3dz4oCdIHBhZ2UKCjIuIE9uIHRoaXMgcGFnZSwgY2xpY2sg4oCcRG93bmxvYWQgUi00LjUuMiBmb3IgV2luZG93c+KAnSwgYW5kIHNhdmUgdGhlIC5leGUgZmlsZSB0byB5b3VyIGhhcmQgZGlzayB3aGVuIHByb21wdGVkLiBTYXZpbmcgdG8gdGhlIGRlc2t0b3AgaXMgZmluZS4KCjMuIFRvIGJlZ2luIHRoZSBpbnN0YWxsYXRpb24sIGRvdWJsZS1jbGljayBvbiB0aGUgZG93bmxvYWRlZCBmaWxlLiBEb27igJl0IGJlIGFsYXJtZWQgaWYgeW91IGdldCB1bmtub3duIHB1Ymxpc2hlciB0eXBlIHdhcm5pbmdzLiBXaW5kb3figJlzIFVzZXIgQWNjb3VudCBDb250cm9sIHdpbGwgYWxzbyB3b3JyeSBhYm91dCBhbiB1bmlkZW50aWZpZWQgcHJvZ3JhbSB3YW50aW5nIGFjY2VzcyB0byB5b3VyIGNvbXB1dGVyLiBDbGljayBvbiDigJxSdW7igJ0uCgo0LiBTZWxlY3QgdGhlIHByb3Bvc2VkIG9wdGlvbnMgaW4gZWFjaCBwYXJ0IG9mIHRoZSBpbnN0YWxsIGRpYWxvZy4gV2hlbiB0aGUg4oCcU2VsZWN0IENvbXBvbmVudHPigJ0gc2NyZWVuIGFwcGVhcnMsIGp1c3QgYWNjZXB0IHRoZSBzdGFuZGFyZCBjaG9pY2VzCgpcCgojIFdoYXQgaXMgUiBTdHVkaW8/CklmIHlvdSBjbGljayBvbiB0aGUgUiBwcm9ncmFtIHlvdSBqdXN0IGRvd25sb2FkZWQsIHlvdSB3aWxsIGZpbmQgYSB2ZXJ5IGJhc2ljIHVzZXIgaW50ZXJmYWNlLiBGb3IgZXhhbXBsZSwgYmVsb3cgaXMgd2hhdCBJIGdldCBvbiBhIE1hYzoKCiFbVGhlIEJhc2ljIFIgQ29uc29sZV0oUl9iYXNpYy5wbmcpCgpcCgpXZSB3aWxsIG5vdCB1c2UgUuKAmXMgZGlyZWN0IGludGVyZmFjZSB0byBydW4gYW5hbHlzZXMgaW4gdGhpcyBjbGFzcy4gSW5zdGVhZCwgd2Ugd2lsbCB1c2UgdGhlIHByb2dyYW0gKipSU3R1ZGlvKiosIHdoaWNoIGlzIG11Y2ggZWFzaWVyIHRvIGludGVyYWN0IHdpdGghIFJTdHVkaW8gZ2l2ZXMgeW91IGEgdHJ1ZSBpbnRlZ3JhdGVkIGRldmVsb3BtZW50IGVudmlyb25tZW50IChJREUpLCB3aGVyZSB5b3UgY2FuIHdyaXRlIGNvZGUgaW4gYSB3aW5kb3csIHNlZSByZXN1bHRzIGluIG90aGVyIHdpbmRvd3MsIHNlZSBsb2NhdGlvbnMgb2YgZmlsZXMsIHNlZSBvYmplY3RzIHlvdeKAmXZlIGNyZWF0ZWQsIGFuZCBzbyBvbi4gVG8gY2xhcmlmeSB3aGljaCBpcyB3aGljaDogUiBpcyB0aGUgbmFtZSBvZiB0aGUgcHJvZ3JhbW1pbmcgbGFuZ3VhZ2UgaXRzZWxmIGFuZCBSU3R1ZGlvIGlzIGFuIGludGVyZmFjZSB0aGF0IG1ha2VzIHdyaXRpbmcgY29kZSwgcnVubmluZyBhbmFseXNlcywgYW5kIHZpc3VhbGl6aW5nIGRhdGEgaW4gUiBzbyBtdWNoIGVhc2llci4KClwKCiMgR2V0dGluZyBSIFN0dWRpbwoKVG8gZG93bmxvYWQgYW5kIGluc3RhbGwgUlN0dWRpbywgZm9sbG93IHRoZSBkaXJlY3Rpb25zIGJlbG93CgoxLiBOYXZpZ2F0ZSB0byBbUlN0dWRpb+KAmXMgZG93bmxvYWQgc2l0ZV0oaHR0cHM6Ly9wb3NpdC5jby9kb3dubG9hZC9yc3R1ZGlvLWRlc2t0b3AvKQoyLiBXZSd2ZSBhbHJlYWR5IGRvd25sb2FkZWQgUiwgc28gY2xpY2sgb24gdGhlIGFwcHJvcHJpYXRlIGxpbmsgdG8gSW5zdGFsbCBSU3R1ZGlvIGJhc2VkIG9uIHlvdXIgT1MgKFdpbmRvd3MsIE1hYywgTGludXggYW5kIG1hbnkgb3RoZXJzKS4gRG8gbm90IGRvd25sb2FkIGFueXRoaW5nIGZyb20gdGhlIOKAnEFsbCBJbnN0YWxsZXJzIGFuZCBUYXJiYWxsc+KAnSBzZWN0aW9uLgozLiBDbGljayBvbiB0aGUgaW5zdGFsbGVyIHRoYXQgeW91IGRvd25sb2FkZWQuIEZvbGxvdyB0aGUgaW5zdGFsbGF0aW9uIGRpcmVjdGlvbnMsIG1ha2luZyBzdXJlIHRvIGtlZXAgYWxsIGRlZmF1bHRzIGludGFjdC4gQWZ0ZXIgaW5zdGFsbGF0aW9uLCBSU3R1ZGlvIHNob3VsZCBwb3AgdXAgaW4geW91ciBBcHBsaWNhdGlvbnMgb3IgUHJvZ3JhbXMgZm9sZGVyL21lbnUuCgpcCgojIyBUaGUgUlN0dWRpbyBJbnRlcmZhY2UKCk9wZW4gdXAgUlN0dWRpby4gWW91IHNob3VsZCBzZWUgdGhlIGludGVyZmFjZSBzaG93biBpbiB0aGUgZmlndXJlIGJlbG93IHdoaWNoIGhhcyB0aHJlZSB3aW5kb3dzLgoKIVtUaGUgUlN0dWRpbyBDb25zb2xlXShSU3R1ZGlvX2ltYWdlLnBuZykKClwKCi0gKipDb25zb2xlKiogKGJvdHRvbSBsZWZ0KSAtIFRoZSB3YXkgUiB3b3JrcyBpcyB5b3Ugd3JpdGUgYSBsaW5lIG9mIGNvZGUgdG8gZXhlY3V0ZSBzb21lIGtpbmQgb2YgdGFzayBvbiBhIGRhdGEgb2JqZWN0LiAtIFRoZSBSIENvbnNvbGUgYWxsb3dzIHlvdSB0byBydW4gY29kZSBpbnRlcmFjdGl2ZWx5LiBUaGUgc2NyZWVuIHByb21wdCBgPmAgaXMgYW4gaW52aXRhdGlvbiBmcm9tIFIgdG8gZW50ZXIgaXRzIC0gd29ybGQuIFRoaXMgaXMgd2hlcmUgeW91IHR5cGUgY29kZSBpbiwgcHJlc3MgZW50ZXIgdG8gZXhlY3V0ZSB0aGUgY29kZSwgYW5kIHNlZSB0aGUgcmVzdWx0cy4KLSAqKkVudmlyb25tZW50LCBIaXN0b3J5LCBhbmQgQ29ubmVjdGlvbnMgdGFicyoqICh1cHBlci1yaWdodCkKICAtICoqRW52aXJvbm1lbnQqKiAtIHNob3dzIGFsbCB0aGUgUiBvYmplY3RzIHRoYXQgYXJlIGN1cnJlbnRseSBvcGVuIGluIHlvdXIgd29ya3NwYWNlLiBUaGlzIGlzIHRoZSBwbGFjZSwgZm9yIGV4YW1wbGUsIHdoZXJlIHlvdSB3aWxsIHNlZSBhbnkgZGF0YSB5b3XigJl2ZSBsb2FkZWQgaW50byBSLiBXaGVuIHlvdSBleGl0IFJTdHVkaW8sIFIgd2lsbCBjbGVhciBhbGwgb2JqZWN0cyBpbiB0aGlzIHdpbmRvdy4gWW91IGNhbiBhbHNvIGNsaWNrIG9uICFbYnJvb21dKGJyb29tLnBuZykgdG8gY2xlYXIgb3V0IGFsbCB0aGUgb2JqZWN0cyBsb2FkZWQgYW5kIGNyZWF0ZWQgaW4geW91ciBjdXJyZW50IHNlc3Npb24uCiAgLSAqKkhpc3RvcnkqKiAtIHNob3dzIGEgbGlzdCBvZiBleGVjdXRlZCBjb21tYW5kcyBpbiB0aGUgY3VycmVudCBzZXNzaW9uLgogIC0gKipDb25uZWN0aW9ucyoqIC0geW91IGNhbiBjb25uZWN0IHRvIGEgdmFyaWV0eSBvZiBkYXRhIHNvdXJjZXMsIGFuZCBleHBsb3JlIHRoZSBvYmplY3RzIGFuZCBkYXRhIGluc2lkZSB0aGUgLSAgIGNvbm5lY3Rpb24uIEkgdHlwaWNhbGx5IGRvbuKAmXQgdXNlIHRoaXMgd2luZG93LCBidXQgeW91IFtjYW5dKGh0dHBzOi8vc3VwcG9ydC5yc3R1ZGlvLmNvbS9oYy9lbi11cy9hcnRpY2xlcy8xMTUwMTA5MTU2ODctVXNpbmctUlN0dWRpby1Db25uZWN0aW9ucy4KLSAqKkZpbGVzLCBQbG90cywgUGFja2FnZXMsIEhlbHAgYW5kIFZpZXdlciB0YWJzKiogKGxvd2VyLXJpZ2h0KQogIC0gKipGaWxlcyAtIHNob3dzIGFsbCB0aGUgZmlsZXMgYW5kIGZvbGRlcnMgaW4geW91ciBjdXJyZW50IHdvcmtpbmcgZGlyZWN0b3J5IChtb3JlIG9uIHdoYXQgdGhpcyBtZWFucyBsYXRlcikuCiAgLSAqKlBsb3RzKiogLSBzaG93cyBhbnkgY2hhcnRzLCBncmFwaHMsIG1hcHMgYW5kIHBsb3RzIHlvdeKAmXZlIHN1Y2Nlc3NmdWxseSBleGVjdXRlZC4KICAtICoqUGFja2FnZXMqKiAtIHRlbGxzIHlvdSBhbGwgdGhlIFIgcGFja2FnZXMgdGhhdCB5b3UgaGF2ZSBhY2Nlc3MgdG8gKG1vcmUgb24gdGhpcyBsYXRlcikuCiAgLSAqKkhlbHAqKiAtIHNob3dzIGhlbHAgZG9jdW1lbnRhdGlvbiBmb3IgUiBjb21tYW5kcyB0aGF0IHlvdeKAmXZlIGNhbGxlZCB1cC4KICAtICoqVmlld2VyKiogLSBhbGxvd3MgeW91IHRvIHZpZXcgbG9jYWwgd2ViIGNvbnRlbnQgKHdvbuKAmXQgYmUgdXNpbmcgdGhpcyBtdWNoKS4KClRoZXJlIGlzIGFsc28gYSBmb3VydGggd2luZG93LiBCdXQsIHdl4oCZbGwgZ2V0IHRvIHRoaXMgd2luZG93IGEgbGl0dGxlIGxhdGVyLiBUaGUgW2Fzc2lnbm1lbnQgZ3VpZGVsaW5lc10oQXNzaWdubWVudHMuaHRtbCkgYWxzbyBoYXZlIG1vcmUgb24gdGhpcyB3aW5kb3chCgpcCgojIyBTZXR0aW5nIFJTdHVkaW8gRGVmYXVsdHMKCldoaWxlIG5vdCByZXF1aXJlZCwgSSBzdHJvbmdseSBzdWdnZXN0IHRoYXQgeW91IGNoYW5nZSBwcmVmZXJlbmNlcyBpbiBSU3R1ZGlvIHRvIG5ldmVyIHNhdmUgdGhlIHdvcmtzcGFjZSBzbyB5b3UgYWx3YXlzIG9wZW4gd2l0aCBhIGNsZWFuIGVudmlyb25tZW50LiBTZWUgW0NoLiA4LjFdKGh0dHBzOi8vcjRkcy5oYWQuY28ubnovd29ya2Zsb3ctcHJvamVjdHMuaHRtbCN3aGF0LWlzLXJlYWwpIG9mIFI0RFMgZm9yIHNvbWUgbW9yZSBiYWNrZ3JvdW5kCgoxLiBGcm9tIHRoZSBUb29scyBtZW51IG9uIFJTdHVkaW8sIG9wZW4gdGhlIFRvb2xzIG1lbnUgYW5kIHRoZW4gc2VsZWN0IEdsb2JhbCBPcHRpb25zLgoyLiBJZiBub3QgYWxyZWFkeSBoaWdobGlnaHRlZCwgY2xpY2sgb24gdGhlIEdlbmVyYWwgYnV0dG9uIGZyb20gdGhlIGxlZnQgcGFuZWwuCjMuIFVuY2hlY2sgdGhlIGZvbGxvd2luZyBSZXN0b3JlIGJveGVzCiAgLSBSZXN0b3JlIG1vc3QgcmVjZW50bHkgb3BlbmVkIHByb2plY3QgYXQgc3RhcnR1cAogIC0gUmVzdG9yZSBwcmV2aW91c2x5IG9wZW4gc291cmNlIGRvY3VtZW50cyBhdCBzdGFydHVwCiAgLSBSZXN0b3JlIC5SRGF0YSBpbnRvIHdvcmtzcGFjZSBhdCBzdGFydHVwCjQuIFNldCBTYXZlIFdvcmtzcGFjZSB0byAuUkRhdGEgb24gZXhpdCB0byBOZXZlcgo1LiBDbGljayBPSyBhdCB0aGUgYm90dG9tIHRvIHNhdmUgdGhlIGNoYW5nZXMgYW5kIGNsb3NlIHRoZSBwcmVmZXJlbmNlcyB3aW5kb3cuIFlvdSBtYXkgbmVlZCB0byByZXN0YXJ0IFJTdHVkaW8uCgpUaGUgcmVhc29uIGZvciBtYWtpbmcgdGhlc2UgY2hhbmdlcyBpcyB0aGF0IGl0IGlzIHByZWZlcmFibGUgZm9yIHJlcHJvZHVjaWJpbGl0eSB0byBzdGFydCBlYWNoIFIgc2Vzc2lvbiB3aXRoIGEgY2xlYW4gZW52aXJvbm1lbnQuIFlvdSBjYW4gcmVzdG9yZSBhIHByZXZpb3VzIGVudmlyb25tZW50IGVpdGhlciBieSByZXJ1bm5pbmcgY29kZSBvciBieSBtYW51YWxseSBsb2FkaW5nIGEgcHJldmlvdXNseSBzYXZlZCBzZXNzaW9uLgoKVGhlIFIgU3R1ZGlvIGVudmlyb25tZW50IGlzIG1vZGlmaWVkIHdoZW4geW91IGV4ZWN1dGUgY29kZSBmcm9tIGZpbGVzIG9yIGZyb20gdGhlIGNvbnNvbGUuIElmIHlvdSBhbHdheXMgc3RhcnQgZnJlc2gsIHlvdSBkbyBub3QgbmVlZCB0byBiZSBjb25jZXJuZWQgYWJvdXQgdGhpbmdzIG5vdCB3b3JraW5nIGJlY2F1c2Ugb2Ygc29tZXRoaW5nIHlvdSB0eXBlZCBpbiB0aGUgY29uc29sZSwgYnV0IGRpZCBub3Qgc2F2ZSBpbiBhIGZpbGUuCgpZb3Ugb25seSBuZWVkIHRvIHNldCB0aGVzZSBwcmVmZXJlbmNlcyBvbmNlLgoKXAoKIyBSIERhdGEgVHlwZXMKCkxldOKAmXMgbm93IGV4cGxvcmUgd2hhdCBSIGNhbiBkby4gUiBpcyByZWFsbHkganVzdCBhIGJpZyBmYW5jeSBjYWxjdWxhdG9yLiBGb3IgZXhhbXBsZSwgdHlwZSBpbiB0aGUgZm9sbG93aW5nIG1hdGhlbWF0aWNhbCBleHByZXNzaW9uIGluIHRoZSBSIGNvbnNvbGUgKGxlZnQgd2luZG93KQpgYGB7ciByMX0KMSsxCmBgYApOb3RlIHRoYXQgc3BhY2luZyBkb2VzIG5vdCBtYXR0ZXI6IGAxKzFgIHdpbGwgZ2VuZXJhdGUgdGhlIHNhbWUgYW5zd2VyIGFzIGAxICAgICAgKyAgICAgICAxYC4gQ2FuIHlvdSBzYXkgaGVsbG8gdG8gdGhlIHdvcmxkPwpgYGB7ciByMn0KImhlbGxvIHdvcmxkIgpgYGAKTG9va3MgZ3JlYXQhICoqTm90ZSwgd2UgbmVlZCB0byBwdXQgcXVvdGVzIGFyb3VuZCBpdC4qKiDigJxoZWxsbyB3b3JsZOKAnSBpcyBhIGNoYXJhY3RlciBhbmQgUiByZWNvZ25pemVzIGNoYXJhY3RlcnMgb25seSBpZiB0aGVyZSBhcmUgcXVvdGVzIGFyb3VuZCBpdC4gVGhpcyBicmluZ3MgdXMgdG8gdGhlIHRvcGljIG9mIGJhc2ljIGRhdGEgdHlwZXMgaW4gUi4gVGhlcmUgYXJlIGZvdXIgYmFzaWMgZGF0YSB0eXBlcyBpbiBSOiBjaGFyYWN0ZXIsIGxvZ2ljYWwsIG51bWVyaWMsIGFuZCBmYWN0b3JzICh0aGVyZSBhcmUgdHdvIG90aGVycyAtIGNvbXBsZXggYW5kIHJhdyAtIGJ1dCB3ZSB3b27igJl0IGNvdmVyIHRoZW0gYmVjYXVzZSB0aGV5IGFyZSByYXJlbHkgdXNlZCBpbiBwcmFjdGljZSkuCgpcCgojIyBDaGFyYWN0ZXJzCkNoYXJhY3RlcnMgYXJlIHVzZWQgdG8gcmVwcmVzZW50IHdvcmRzIG9yIGxldHRlcnMgaW4gUi4gV2Ugc2F3IHRoaXMgYWJvdmUgd2l0aCDigJxoZWxsbyB3b3JsZOKAnS4gQ2hhcmFjdGVyIHZhbHVlcyBhcmUgYWxzbyBrbm93biBhcyBzdHJpbmdzLiBZb3UgbWlnaHQgdGhpbmsgdGhhdCB0aGUgdmFsdWUgYCIxImAgaXMgYSBudW1iZXIuIFdlbGwsIGlmIHlvdSBwdXQgcXVvdGVzIGFyb3VuZCwgaXQgaXNu4oCZdCEgQW55dGhpbmcgd2l0aCBxdW90ZXMgd2lsbCBiZSBpbnRlcnByZXRlZCBhcyBhIGNoYXJhY3Rlci4gTm8gaWZzLCBhbmRzIG9yIGJ1dHMgYWJvdXQgaXQuCgpcCgojIyBMb2dpY2FscwoKQSBsb2dpY2FsIHRha2VzIG9uIHR3byB2YWx1ZXM6IEZBTFNFIG9yIFRSVUUuIExvZ2ljYWxzIGFyZSB1c3VhbGx5IGNvbnN0cnVjdGVkIHdpdGggY29tcGFyaXNvbiBvcGVyYXRvcnMsIHdoaWNoIHdl4oCZbGwgZ28gdGhyb3VnaCBtb3JlIGNhcmVmdWxseSBpbiBMYWIgMi4gVGhpbmsgb2YgYSBsb2dpY2FsIGFzIHRoZSBhbnN3ZXIgdG8gYSBxdWVzdGlvbiBsaWtlIOKAnElzIHRoaXMgdmFsdWUgZ3JlYXRlciB0aGFuIChsb3dlciB0aGFuL2VxdWFsIHRvKSB0aGlzIG90aGVyIHZhbHVlP+KAnSBUaGUgYW5zd2VyIHdpbGwgYmUgZWl0aGVyIFRSVUUgb3IgRkFMU0UuIFRSVUUgYW5kIEZBTFNFIGFyZSBsb2dpY2FsIHZhbHVlcyBpbiBSLiBGb3IgZXhhbXBsZSwgdHlwaW5nIGluIHRoZSBmb2xsb3dpbmcKCmBgYHtyIHIzfQozID4gMgpgYGAKClwKClRoaXMgZ2l2ZXMgeW91IGEgYFRSVUVgIFdoYXQgYWJvdXQgdGhlIGZvbGxvd2luZz8KYGBge3IgcjR9CiJkZWNsYW4iID09ICJjYXRoZXJpbmUiCmBgYAoKXAoKIyMgTnVtZXJpYwpOdW1lcmljcyBhcmUgc2VwYXJhdGVkIGludG8gdHdvIHR5cGVzOiBpbnRlZ2VyIGFuZCBkb3VibGUuIFRoZSBkaXN0aW5jdGlvbiBiZXR3ZWVuIGludGVnZXJzIGFuZCBkb3VibGVzIGlzIHVzdWFsbHkgbm90IGltcG9ydGFudC4gUiB0cmVhdHMgbnVtZXJpY3MgYXMgZG91YmxlcyBieSBkZWZhdWx0IGJlY2F1c2UgaXQgaXMgYSBsZXNzIHJlc3RyaWN0aXZlIGRhdGEgdHlwZS4gWW91IGNhbiBkbyBhbnkgbWF0aGVtYXRpY2FsIG9wZXJhdGlvbiBvbiBudW1lcmljIHZhbHVlcy4gV2UgYWRkZWQgb25lIGFuZCBvbmUgYWJvdmUuIFdlIGNhbiBhbHNvIG11bHRpcGx5IHVzaW5nIHRoZSBgKmAgb3BlcmF0b3IuCgpgYGB7ciByNX0KMiozCmBgYAoKXAoKQW5kIGRpdmlkZQpgYGB7ciByNn0KMiozCmBgYAoKXAoKQW5kIHRha2UgbG9ncwpgYGB7cn0KbG9nKDEpCmBgYAoKXAoKYGBge3J9CmxvZygwKQpgYGAKCkhvbGQgdXAhIFdoYXQgaXMgYC1JbmZgPyBXZWxsLCB5b3UgY2Fu4oCZdCB0YWtlIHRoZSBsb2dhcml0aG0gb2YgMCwgc28gUiBpcyB0ZWxsaW5nIHlvdSB0aGF0IHlvdeKAmXJlIGdldHRpbmcgYSBub24gbnVtZXJpYyB2YWx1ZSBpbiByZXR1cm4uIFRoZSB2YWx1ZSBgLUluZmAgaXMgYW5vdGhlciB2YWx1ZSB0eXBlIHRoYXQgeW91IGNhbiBnZXQgaW4gUi4KClwKCiMjIEZhY3RvcnMKClRoaW5rIG9mIGEgZmFjdG9yIGFzIGEgY2F0ZWdvcmljYWwgdmFyaWFibGUuIEl0IGlzIHNvcnQgb2YgbGlrZSBhIGNoYXJhY3RlciwgYnV0IG5vdCByZWFsbHkuIEl0IGlzIGFjdHVhbGx5IGEgbnVtZXJpYyBjb2RlIHdpdGggY2hhcmFjdGVyLXZhbHVlZCBsZXZlbHMuIFRoaW5rIG9mIGEgY2hhcmFjdGVyIGFzIGEgdHJ1ZSBzdHJpbmcgYW5kIGEgZmFjdG9yIGFzIGEgc2V0IG9mIGNhdGVnb3JpZXMgcmVwcmVzZW50ZWQgYXMgY2hhcmFjdGVycy4gV2Ugd29u4oCZdCB1c2UgZmFjdG9ycyB0b28gbXVjaCBpbiB0aGlzIGNvdXJzZSwgc28gbWF5YmUgZG9uJ3Qgd29ycnkgYWJvdXQgaXQgZm9yIG5vdyEKClwKCiMgUiBEYXRhIFN0cnVjdHVyZXMKWW91IGp1c3QgbGVhcm5lZCB0aGF0IFIgaGFzIGZvdXIgYmFzaWMgZGF0YSB0eXBlcy4gTm93LCBsZXTigJlzIGdvIHRocm91Z2ggaG93IHdlIGNhbiBzdG9yZSBkYXRhIGluIFIuIFRoYXQgaXMsIHlvdSB0eXBlIGluIHRoZSBjaGFyYWN0ZXIg4oCcaGVsbG8gd29ybGTigJ0gb3IgdGhlIG51bWJlciAzLCBhbmQgeW91IHdhbnQgdG8gc3RvcmUgdGhlc2UgdmFsdWVzLiBZb3UgZG8gdGhpcyBieSB1c2luZyBS4oCZcyB2YXJpb3VzIGRhdGEgc3RydWN0dXJlcy4KCiMjIFZlY3RvcnMKCkEgdmVjdG9yIGlzIHRoZSBtb3N0IGNvbW1vbiBhbmQgYmFzaWMgUiBkYXRhIHN0cnVjdHVyZSBhbmQgaXMgcHJldHR5IG11Y2ggdGhlIHdvcmtob3JzZSBvZiB0aGUgbGFuZ3VhZ2UuIEEgdmVjdG9yIGlzIHNpbXBseSBhIHNlcXVlbmNlIG9mIHZhbHVlcyB3aGljaCBjYW4gYmUgb2YgYW55IGRhdGEgdHlwZSBidXQgYWxsIG9mIHRoZSBzYW1lIHR5cGUuIFRoZXJlIGFyZSBhIG51bWJlciBvZiB3YXlzIHRvIGNyZWF0ZSBhIHZlY3RvciBkZXBlbmRpbmcgb24gdGhlIGRhdGEgdHlwZSwgYnV0IHRoZSBtb3N0IGNvbW1vbiBpcyB0byBpbnNlcnQgdGhlIGRhdGEgeW91IHdhbnQgdG8gc2F2ZSBpbiBhIHZlY3RvciBpbnRvIHRoZSBjb21tYW5kIGBjKClgLiBGb3IgZXhhbXBsZSwgdG8gcmVwcmVzZW50IHRoZSB2YWx1ZXMgNCwgMTYgYW5kIDkgaW4gYSB2ZWN0b3IgdHlwZSBpbgoKYGBge3J9CmMoNCwgMTYsIDkpCmBgYAoKXAoKWW91IGNhbiBhbHNvIGhhdmUgYSB2ZWN0b3Igb2YgY2hhcmFjdGVyIHZhbHVlcwpgYGB7cn0KYygiY2F0aGVyaW5lIiwgImRlY2xhbiIsICJnd2VuIikKYGBgCgpUaGUgYWJvdmUgY29kZSBkb2VzIG5vdCBhY3R1YWxseSDigJxzYXZl4oCdIHRoZSB2YWx1ZXMgNCwgMTYsIGFuZCA5IG9yIGNhdGhlcmluZSwgZGVjbGFuLCBnd2VuIC0tIGl0IGp1c3QgcHJlc2VudHMgaXQgb24gdGhlIHNjcmVlbiBpbiBhIHZlY3Rvci4gSWYgeW91IHdhbnQgdG8gdXNlIHRoZXNlIHZhbHVlcyBhZ2FpbiB3aXRob3V0IGhhdmluZyB0byB0eXBlIG91dCBgYyg0LCAxNiwgOSlgLCB5b3UgY2FuIHNhdmUgaXQgaW4gYSBkYXRhICoqb2JqZWN0KiouIEF0IHRoZSBoZWFydCBvZiBhbG1vc3QgZXZlcnl0aGluZyB5b3Ugd2lsbCBkbyAob3IgYXJlIGV2ZXIgbGlrZWx5IHRvIGRvKSBpbiBSIGlzIHRoZSBjb25jZXB0IHRoYXQgZXZlcnl0aGluZyBpbiBSIGlzIGFuIG9iamVjdC4gVGhlc2Ugb2JqZWN0cyBjYW4gYmUgYWxtb3N0IGFueXRoaW5nLCBmcm9tIGEgc2luZ2xlIG51bWJlciBvciBjaGFyYWN0ZXIgc3RyaW5nIChsaWtlIGEgd29yZCkgdG8gaGlnaGx5IGNvbXBsZXggc3RydWN0dXJlcyBsaWtlIHRoZSBvdXRwdXQgb2YgYSBwbG90LCBhIG1hcCwgYSBzdW1tYXJ5IG9mIHlvdXIgc3RhdGlzdGljYWwgYW5hbHlzaXMgb3IgYSBzZXQgb2YgUiBjb21tYW5kcyB0aGF0IHBlcmZvcm0gYSBzcGVjaWZpYyB0YXNrLgoKWW91IGFzc2lnbiBkYXRhIHRvIGFuIG9iamVjdCB1c2luZyB0aGUgYXJyb3cgc2lnbiBgPC1gLiBUaGlzIHdpbGwgY3JlYXRlIGFuIG9iamVjdCBpbiBS4oCZcyBtZW1vcnkgdGhhdCBjYW4gYmUgY2FsbGVkIGJhY2sgaW50byB0aGUgY29tbWFuZCB3aW5kb3cgYXQgYW55IHRpbWUuIEZvciBleGFtcGxlLCB5b3UgY2FuIHNhdmUg4oCcaGVsbG8gd29ybGTigJ0gdG8gYSB2ZWN0b3IgY2FsbGVkICpiKiBieSB0eXBpbmcgaW4KYGBge3J9CmIgPC0gImhlbGxvIHdvcmxkIgpiCmBgYAoKWW91IGNhbiBwcm9ub3VuY2UgdGhlIGFib3ZlIGFzIOKAnGIgYmVjb21lcyDigJhoZWxsbyB3b3JsZOKAmeKAnS4KClRoZSBmaXJzdCBsaW5lIHRlbGxzIFIgdG8gc3RvcmUgYiBhcyAnaGVsbG8gd29ybGQuJyBJbiB0aGUgbmV4dCBsaW5lLCB3ZSBhcmUgdGVsbGluZyBSIHRvIHByaW50IHdoYXQgYiBpcy4KCk5vdGUgdGhhdCBSIGlzIGNhc2Ugc2Vuc2l0aXZlLCBpZiB5b3UgdHlwZSBpbiAqQiogaW5zdGVhZCBvZiAqYiosIHlvdSB3aWxsIGdldCBhbiBlcnJvci4KClNpbWlsYXJseSwgeW91IGNhbiBzYXZlIHRoZSBudW1iZXJzIDQsIDE2IGFuZCA5IGludG8gYSB2ZWN0b3IgY2FsbGVkICp2MSouCgpgYGB7cn0KdjEgPC0gYyg0LCAxNiwgOSkKdjEKYGBgCgpcCgpZb3Ugc2hvdWxkIHNlZSB0aGUgb2JqZWN0cyAqYiogYW5kICp2MSogcG9wIHVwIGluIHRoZSBFbnZpcm9ubWVudCB0YWIgb24gdGhlIHRvcCByaWdodCB3aW5kb3cgb2YgeW91ciBSU3R1ZGlvIGludGVyZmFjZS4KClwKCiFbRW52aXJvbm1lbnQgV2luZG93XShsYWIwZmlnLnBuZykKClwKCk5vdGUgdGhhdCB0aGUgbmFtZSAqdjEqIGlzIG5vdGhpbmcgc3BlY2lhbCBoZXJlLiBZb3UgY291bGQgaGF2ZSBuYW1lZCB0aGUgb2JqZWN0ICp4KiBvciAqc3BoMjE1KiBvciB5b3VyIHBldOKAmXMgbmFtZSAobWluZSB3YXMgQWxpIEJhYmEpLiBZb3UgY2Fu4oCZdCwgaG93ZXZlciwgbmFtZSBvYmplY3RzIHVzaW5nIHNwZWNpYWwgY2hhcmFjdGVycyAoZS5nLiAhLCBALCAkKSBvciBvbmx5IG51bWJlcnMgKGFsdGhvdWdoIHlvdSBjYW4gY29tYmluZSBudW1iZXJzIGFuZCBsZXR0ZXJzLCBidXQgYSBudW1iZXIgY2Fubm90IGJlIGF0IHRoZSBiZWdpbm5pbmcgZS5nLiAqMmQyKikuIEZvciBleGFtcGxlLCB5b3XigJlsbCBnZXQgYW4gZXJyb3IgaWYgeW91IHNhdmUgdGhlIHZlY3RvciAqYyg0LDE2LDkpKiB0byBhbiBvYmplY3Qgd2l0aCB0aGUgZm9sbG93aW5nIG5hbWVzCgpgYGB7ciwgcmVzdWx0cz0nYXNpcycsIGVjaG89RkFMU0V9CmNhdCgiYGBgYG1hcmtkb3duXG4iLAogICAgIjEyMyA8LSBjKDQsIDE2LCA5KVxuIiwKICAgICIhISEgPC0gYyg0LCAxNiwgOSlcbiIsCiAgICAiYGBgYCIsIHNlcCA9ICIiKQpgYGAKCgpgYGB7cn0KIyMgRXJyb3I6IDx0ZXh0PjoyOjU6IHVuZXhwZWN0ZWQgYXNzaWdubWVudAojIyAxOiAxMjMgPC0gYyg0LCAxNiwgOSkKIyMgMjogISEhIDwtCiMjICAgICAgICBeCmBgYAoKXAoKQWxzbyBub3RlIHRoYXQgdG8gZGlzdGluZ3Vpc2ggYSBjaGFyYWN0ZXIgdmFsdWUgZnJvbSBhIHZhcmlhYmxlIG5hbWUsIGl0IG5lZWRzIHRvIGJlIHF1b3RlZC4g4oCcdjHigJ0gaXMgYSBjaGFyYWN0ZXIgdmFsdWUgd2hlcmVhcyBgdjFgIGlzIGEgdmFyaWFibGUuIE9uZSBvZiB0aGUgbW9zdCBjb21tb24gbWlzdGFrZXMgZm9yIGJlZ2lubmVycyBpcyB0byBmb3JnZXQgdGhlIHF1b3Rlcy4KCmBgYHtyLCByZXN1bHRzPSdhc2lzJywgZWNobz1GQUxTRX0KY2F0KCJgYGBgbWFya2Rvd25cbiIsCiAgICAiamFtZXNcbiIsCiAgICAiYGBgYCIsIHNlcCA9ICIiKQpgYGAKCmBgYHtyfQojIyAjIyBFcnJvciBpbiBldmFsKGV4cHIsIGVudmlyLCBlbmNsb3MpOiBvYmplY3QgJ2phbWVzJyBub3QgZm91bmQKYGBgCgpUaGUgZXJyb3Igb2NjdXJzIGJlY2F1c2UgUiB0cmllcyB0byBwcmludCB0aGUgdmFsdWUgb2Ygb2JqZWN0ICpqYW1lcyosIGJ1dCB0aGVyZSBpcyBubyBzdWNoIHZhcmlhYmxlLiBTbyByZW1lbWJlciB0aGF0IGFueSB0aW1lIHlvdSBnZXQgdGhlIGVycm9yIG1lc3NhZ2UgYG9iamVjdCAnc29tZXRoaW5nJyBub3QgZm91bmRgLCB0aGUgbW9zdCBsaWtlbHkgcmVhc29uIGlzIHRoYXQgeW91IGZvcmdvdCB0byBxdW90ZSBhIGNoYXJhY3RlciB2YWx1ZS4gSWYgbm90LCBpdCBwcm9iYWJseSBtZWFucyB0aGF0IHlvdSBoYXZlIG1pc3NwZWxsZWQsIG9yIG5vdCB5ZXQgY3JlYXRlZCwgdGhlIG9iamVjdCB0aGF0IHlvdSBhcmUgcmVmZXJyaW5nIHRvLiBXZeKAmXZlIGluY2x1ZGVkIHRoZSBjb21tb24gcGl0ZmFsbHMgYW5kIFIgdGlwcyBpbiB0aGlzIGNsYXNzIFtyZXNvdXJjZV0oUl9oZWxwLmh0bWwpLgoKRXZlcnkgdmVjdG9yIGhhcyB0d28ga2V5IHByb3BlcnRpZXM6ICp0eXBlKiBhbmQgKmxlbmd0aCouIFRoZSB0eXBlIHByb3BlcnR5IGluZGljYXRlcyB0aGUgZGF0YSB0eXBlIHRoYXQgdGhlIHZlY3RvciBpcyBob2xkaW5nLiBVc2UgdGhlIGNvbW1hbmQgYHR5cGVvZigpYCB0byBkZXRlcm1pbmUgdGhlIHR5cGUuCgpgYGB7cn0KdHlwZW9mKGIpCmBgYAoKXAoKYGBge3J9CnR5cGVvZih2MSkKYGBgCgpOb3RlIHRoYXQgYSB2ZWN0b3IgY2Fubm90IGhvbGQgdmFsdWVzIG9mIGRpZmZlcmVudCB0eXBlcy4gSWYgZGlmZmVyZW50IGRhdGEgdHlwZXMgZXhpc3QsIFIgd2lsbCBjb2VyY2UgdGhlIHZhbHVlcyBpbnRvIHRoZSBoaWdoZXN0IHR5cGUgYmFzZWQgb24gaXRzIGludGVybmFsIGhpZXJhcmNoeTogbG9naWNhbCA8IGludGVnZXIgPCBkb3VibGUgPCBjaGFyYWN0ZXIuIFR5cGUgaW4gYHRlc3QgPC0gYygiciIsIDYsIFRSVUUpYCBpbiB5b3VyIFIgY29uc29sZS4gV2hhdCBpcyB0aGUgdmVjdG9yIHR5cGUgb2YgYHRlc3RgPwoKXAoKVGhlIGNvbW1hbmQgYGxlbmd0aCgpYCBkZXRlcm1pbmVzIHRoZSBudW1iZXIgb2YgZGF0YSB2YWx1ZXMgdGhhdCB0aGUgdmVjdG9yIGlzIHN0b3JpbmcuCgpgYGB7cn0KbGVuZ3RoKGIpCmBgYAoKYGBge3J9Cmxlbmd0aCh2MSkKYGBgCgpZb3UgY2FuIGFsc28gZGlyZWN0bHkgZGV0ZXJtaW5lIGlmIGEgdmVjdG9yIGlzIG9mIGEgc3BlY2lmaWMgZGF0YSB0eXBlIGJ5IHVzaW5nIHRoZSBjb21tYW5kIGBpcy5YKClgIHdoZXJlIHlvdSByZXBsYWNlIGBYYCB3aXRoIHRoZSBkYXRhIHR5cGUuIEZvciBleGFtcGxlLCB0byBmaW5kIG91dCBpZiAqdjEqIGlzIG51bWVyaWMsIHR5cGUgaW46CgpgYGB7cn0KaXMubnVtZXJpYyhiKQpgYGAKCmBgYHtyfQppcy5udW1lcmljKHYxKQpgYGAKClwKClRoZXJlIGlzIGFsc28gYGlzLmxvZ2ljYWwoKWAsIGBpcy5jaGFyYWN0ZXIoKWAsIGFuZCBgaXMuZmFjdG9yKClgLiBZb3UgY2FuIGFsc28gY29lcmNlIGEgdmVjdG9yIG9mIG9uZSBkYXRhIHR5cGUgdG8gYW5vdGhlci4gRm9yIGV4YW1wbGUsIHNhdmUgdGhlIHZhbHVlIOKAnDHigJ0gYW5kIOKAnDLigJ0gKGJvdGggaW4gcXVvdGVzKSBpbnRvIGEgdmVjdG9yIG5hbWVkICp4MSouCmBgYHtyfQp4MSA8LSBjKCIxIiwgIjIiKQp0eXBlb2YoeDEpCmBgYAoKXAoKVG8gY29udmVydCAqeDEqIGludG8gYSBudW1lcmljLCB1c2UgdGhlIGNvbW1hbmQgYGFzLm51bWVyaWMoKWAKYGBge3J9CngyIDwtIGFzLm51bWVyaWMoeDEpCnR5cGVvZih4MikKYGBgCgpcCgpUaGVyZSBpcyBhbHNvIGBhcy5sb2dpY2FsKClgLCBgYXMuY2hhcmFjdGVyKClgLCBhbmQgYGFzLmZhY3RvcigpYC4KCkFuIGltcG9ydGFudCBwcmFjdGljZSB5b3Ugc2hvdWxkIGFkb3B0IGVhcmx5IGlzIHRvIGtlZXAgb25seSBuZWNlc3Nhcnkgb2JqZWN0cyBpbiB5b3VyIGN1cnJlbnQgUiBFbnZpcm9ubWVudC4gRm9yIGV4YW1wbGUsIHdlIHdpbGwgbm90IGJlIHVzaW5nICp4MiogYW55IGxvbmdlciBpbiB0aGlzIGd1aWRlLiBUbyByZW1vdmUgdGhpcyBvYmplY3QgZnJvbSBSIGZvcmV2ZXIsIHVzZSB0aGUgY29tbWFuZCBgcm0oKWAKYGBge3J9CnJtKHgyKQpgYGAKClRoZSBkYXRhIGZyYW1lIG9iamVjdCAqeDIqIHNob3VsZCBoYXZlIGRpc2FwcGVhcmVkIGZyb20gdGhlIEVudmlyb25tZW50IHRhYi4gQXUgcmV2b2lyISAKClwKCkFsc28gbm90ZSB0aGF0IHdoZW4geW91IGNsb3NlIGRvd24gUiBTdHVkaW8sIHRoZSBvYmplY3RzIHlvdSBjcmVhdGVkIGFib3ZlIHdpbGwgZGlzYXBwZWFyIGZvciBnb29kLiBVbmxlc3MgeW91IHNhdmUgdGhlbSBvbnRvIHlvdXIgaGFyZCBkcml2ZSAod2XigJlsbCB0b3VjaCBvbiBzYXZpbmcgZGF0YSBpbiBsYXRlciBsYWJzKSwgYWxsIGRhdGEgb2JqZWN0cyB5b3UgY3JlYXRlIGluIHlvdXIgY3VycmVudCBSIHNlc3Npb24gd2lsbCBnbyBieWUgYnllIHdoZW4geW91IGV4aXQgdGhlIHByb2dyYW0uCgpcCgojIyBEYXRhIEZyYW1lcwpXZSBsZWFybmVkIHRoYXQgZGF0YSB2YWx1ZXMgY2FuIGJlIHN0b3JlZCBpbiBkYXRhIHN0cnVjdHVyZXMga25vd24gYXMgdmVjdG9ycy4gVGhlIG5leHQgc3RlcCBpcyB0byBsZWFybiBob3cgdG8gc3RvcmUgdmVjdG9ycyBpbnRvIGFuIGV2ZW4gaGlnaGVyIGxldmVsIGRhdGEgc3RydWN0dXJlLiBUaGUgZGF0YSBmcmFtZSBjYW4gZG8gdGhpcy4gRGF0YSBmcmFtZXMgc3RvcmUgdmVjdG9ycyBvZiB0aGUgc2FtZSBsZW5ndGguIENyZWF0ZSBhIHZlY3RvciBjYWxsZWQgdjIgc3RvcmluZyB0aGUgdmFsdWVzIDUsIDEyLCBhbmQgMjUuCmBgYHtyfQp2MiA8LSBjKDUsMTIsMjUpCmBgYAoKXAoKV2UgY2FuIGNyZWF0ZSBhIGRhdGEgZnJhbWUgdXNpbmcgdGhlIGNvbW1hbmQgYGRhdGEuZnJhbWUoKWAgc3RvcmluZyB0aGUgdmVjdG9ycyAqdjEqIGFuZCAqdjIqIGFzIGNvbHVtbnMuCmBgYHtyfQpkYXRhLmZyYW1lKHYxLHYyKQpgYGAKClwKClN0b3JlIHRoaXMgZGF0YSBmcmFtZSBpbiBhbiBvYmplY3QgY2FsbGVkIGRmMQpgYGB7cn0KZGYxPC1kYXRhLmZyYW1lKHYxLCB2MikKYGBgCgpkZjEgc2hvdWxkIHBvcCB1cCBpbiB5b3VyIEVudmlyb25tZW50IHdpbmRvdy4gWW914oCZbGwgbm90aWNlIGEgIVtsYWIwZmlnMi5wbmddKGxhYjBmaWcyLnBuZykgbmV4dCB0byAqZGYxKi4gVGhpcyB0ZWxscyB5b3UgdGhhdCAqZGYxKiBwb3NzZXNzZXMgb3IgaG9sZHMgbW9yZSB0aGFuIG9uZSBvYmplY3QuIENsaWNrIG9uICFbbGFiMGZpZzIucG5nXShsYWIwZmlnMi5wbmcpIGFuZCB5b3XigJlsbCBzZWUgdGhlIHR3byB2ZWN0b3JzIHdlIHNhdmVkIGludG8gKmRmMSouIEFub3RoZXIgbmljZSB0aGluZyB5b3UgY2FuIGRvIGlzIGRpcmVjdGx5IGNsaWNrIG9uICpkZjEqIGZyb20gdGhlIEVudmlyb25tZW50IHdpbmRvdyB0byBicmluZyB1cCBhbiBFeGNlbCBzdHlsZSB3b3Jrc2hlZXQgb24gdGhlIHRvcCBsZWZ0IG9mIHlvdXIgUlN0dWRpbyBpbnRlcmZhY2UuIFlvdSBjYW4gYWxzbyB0eXBlIGluOgpgYGB7cn0KVmlldyhkZjEpCmBgYAp0byBicmluZyB0aGUgd29ya3NoZWV0IHVwLiBZb3UgY2Fu4oCZdCBlZGl0IHRoaXMgd29ya3NoZWV0IGRpcmVjdGx5LCBidXQgaXQgYWxsb3dzIHlvdSB0byBzZWUgdGhlIHZhbHVlcyB0aGF0IGEgaGlnaGVyIGxldmVsIFIgZGF0YSBvYmplY3QgY29udGFpbnMuCgpcCgpXZSBjYW4gc3RvcmUgZGlmZmVyZW50IHR5cGVzIG9mIHZlY3RvcnMgaW4gYSBkYXRhIGZyYW1lLiBGb3IgZXhhbXBsZSwgd2UgY2FuIHN0b3JlIG9uZSBjaGFyYWN0ZXIgdmVjdG9yIGFuZCBvbmUgbnVtZXJpYyB2ZWN0b3IgaW4gYSBzaW5nbGUgZGF0YSBmcmFtZS4KYGBge3J9CnYzIDwtIGMoImphY29iIiwgImFubmUiLCAiZ3dlbiIpCmRmMiA8LSBkYXRhLmZyYW1lKHYxLCB2MykKZGYyCmBgYAoKXAoKRm9yIGhpZ2hlciBsZXZlbCBkYXRhIHN0cnVjdHVyZXMgbGlrZSBhIGRhdGEgZnJhbWUsIHVzZSB0aGUgZnVuY3Rpb24gYGNsYXNzKClgIHRvIGZpZ3VyZSBvdXQgd2hhdCBraW5kIG9mIG9iamVjdCB5b3XigJlyZSB3b3JraW5nIHdpdGguCmBgYHtyfQpjbGFzcyhkZjIpCmBgYAoKXAoKV2UgY2Fu4oCZdCB1c2UgYGxlbmd0aCgpYCBvbiBhIGRhdGEgZnJhbWUgYmVjYXVzZSBpdCBoYXMgbW9yZSB0aGFuIG9uZSB2ZWN0b3IuIEluc3RlYWQsIGl0IGhhcyAqZGltZW5zaW9ucyogLSB0aGUgbnVtYmVyIG9mIHJvd3MgYW5kIGNvbHVtbnMuIFlvdSBjYW4gZmluZCB0aGUgbnVtYmVyIG9mIHJvd3MgYW5kIGNvbHVtbnMgdGhhdCBhIGRhdGEgZnJhbWUgaGFzIGJ5IHVzaW5nIHRoZSBjb21tYW5kIGBkaW0oKWAKYGBge3J9CmRpbShkZjEpCmBgYApIZXJlLCB0aGUgZGF0YSBmcmFtZSAqZGYxKiBoYXMgMyByb3dzIGFuZCAyIGNvbHVtbnMuIERhdGEgZnJhbWVzIGFsc28gaGF2ZSBjb2x1bW4gbmFtZXMsIHdoaWNoIGFyZSBjaGFyYWN0ZXJzLgoKXAoKV2UgY2FuIGZpZ3VyZSBvdXQgdGhlIG5hbWVzIG9mIHRoZSBjb2x1bW5zIHVzaW5nIGBjb2xuYW1lc2AuCmBgYHtyfQpjb2xuYW1lcyhkZjEpCmBgYAoKSW4gdGhpcyBjYXNlLCB0aGUgZGF0YSBmcmFtZSB1c2VkIHRoZSB2ZWN0b3IgbmFtZXMgZm9yIHRoZSBjb2x1bW4gbmFtZXMuCgpcCgpXZSBjYW4gZXh0cmFjdCBjb2x1bW5zIGZyb20gZGF0YSBmcmFtZXMgYnkgcmVmZXJyaW5nIHRvIHRoZWlyIG5hbWVzIHVzaW5nIHRoZSBgJGAgc2lnbi4KYGBge3J9CmRmMSR2MQpgYGAKClwKCldlIGNhbiBhbHNvIGV4dHJhIGRhdGEgZnJvbSBkYXRhIGZyYW1lcyB1c2luZyBicmFja2V0cyBbICwgXQpgYGB7cn0KZGYxWywxXQpgYGAKClRoZSB2YWx1ZSBiZWZvcmUgdGhlIGNvbW1hIGluZGljYXRlcyB0aGUgcm93LCB3aGljaCB5b3UgbGVhdmUgZW1wdHkgaWYgeW91IGFyZSBub3Qgc2VsZWN0aW5nIGJ5IHJvdywgd2hpY2ggd2UgZGlkIGFib3ZlLiBUaGUgdmFsdWUgYWZ0ZXIgdGhlIGNvbW1hIGluZGljYXRlcyB0aGUgY29sdW1uLCB3aGljaCB5b3UgbGVhdmUgZW1wdHkgaWYgeW91IGFyZSBub3Qgc2VsZWN0aW5nIGJ5IGNvbHVtbi4gVGhlIGFib3ZlIGxpbmUgb2YgY29kZSBzZWxlY3RlZCB0aGUgZmlyc3QgY29sdW1uLiAKClwKCkxldOKAmXMgbm93IHNlbGVjdCB0aGUgMm5kIHJvdy4KYGBge3J9CmRmMVsyLF0KYGBgCgpcCgpPSywgc28gdGhhdCB3YXNuJ3QgdG9vIGhhcmQuIE5vdyBsZXQncyB0cnkgc29tZXRoaW5nIGEgbGl0dGxlIHRyaWNraWVyISBXaGF0IGlzIHRoZSB2YWx1ZSBpbiB0aGUgMm5kIHJvdyBhbmQgMXN0IGNvbHVtbj8KYGBge3J9CmRmMVsyLDFdCmBgYAoKU2VlIC0tIHdlIGNhbiBkbyBoYXJkIHRoaW5ncyEKClwKCiMgRnVuY3Rpb25zCkxldOKAmXMgdGFrZSBhIHN0ZXAgYmFjayBhbmQgdGFsayBhYm91dCBmdW5jdGlvbnMgKGFsc28ga25vd24gYXMgY29tbWFuZHMgb3IgbWFjcm9zIChpbiBTQVMpKS4gQW4gUiBmdW5jdGlvbiBpcyBhIHBhY2thZ2VkIHJlY2lwZSB0aGF0IGNvbnZlcnRzIG9uZSBvciBtb3JlIGlucHV0cyAoY2FsbGVkIGFyZ3VtZW50cykgaW50byBhIHNpbmdsZSBvdXRwdXQuIFlvdSBleGVjdXRlIGFsbCBvZiB5b3VyIHRhc2tzIGluIFIgdXNpbmcgZnVuY3Rpb25zLiBXZSBoYXZlIGFscmVhZHkgdXNlZCBhIGNvdXBsZSBvZiBmdW5jdGlvbnMgYWJvdmUgaW5jbHVkaW5nIGB0eXBlb2YoKWAgYW5kIGBjb2xuYW1lcygpYC4gRXZlcnkgZnVuY3Rpb24gaW4gUiB3aWxsIGhhdmUgdGhlIGZvbGxvd2luZyBiYXNpYyBmb3JtYXQKCmBmdW5jdGlvbk5hbWUoYXJnMSA9IHZhbDEsIGFyZzIgPSB2YWwyLCAuLi4pYAoKSW4gUiwgeW91IHR5cGUgaW4gdGhlIGZ1bmN0aW9u4oCZcyBuYW1lIGFuZCBzZXQgYSBudW1iZXIgb2Ygb3B0aW9ucyBvciBwYXJhbWV0ZXJzIHdpdGhpbiBwYXJlbnRoZXNlcyB0aGF0IGFyZSBzZXBhcmF0ZWQgYnkgY29tbWFzLiBTb21lIG9wdGlvbnMgbmVlZCB0byBiZSBzZXQgYnkgdGhlIHVzZXIgLSBpLmUuIHRoZSBmdW5jdGlvbiB3aWxsIHNwaXQgb3V0IGFuIGVycm9yIGJlY2F1c2UgYSByZXF1aXJlZCBvcHRpb24gaXMgYmxhbmsgLSB3aGVyZWFzIG90aGVycyBjYW4gYmUgc2V0IGJ1dCBhcmUgbm90IHJlcXVpcmVkIGJlY2F1c2UgdGhlcmUgaXMgYSBkZWZhdWx0IHZhbHVlIGVzdGFibGlzaGVkLgoKTGV04oCZcyB1c2UgdGhlIGZ1bmN0aW9uIGBzZXEoKWAgd2hpY2ggbWFrZXMgcmVndWxhciBzZXF1ZW5jZXMgb2YgbnVtYmVycy4gWW91IGNhbiBmaW5kIG91dCB3aGF0IHRoZSBvcHRpb25zIGFyZSBmb3IgYSBmdW5jdGlvbiBieSBjYWxsaW5nIHVwIGl0cyBoZWxwIGRvY3VtZW50YXRpb24gYnkgdHlwaW5nIGA/YCBhbmQgdGhlIGZ1bmN0aW9uIG5hbWUKCmBgYHtyfQo/IHNlcQpgYGAKClRoZSBoZWxwIGRvY3VtZW50YXRpb24gc2hvdWxkIHBvcCB1cCBpbiB0aGUgYm90dG9tIHJpZ2h0IHdpbmRvdyBvZiB5b3VyIFJTdHVkaW8gaW50ZXJmYWNlLiBUaGUgZG9jdW1lbnRhdGlvbiBzaG91bGQgYWxzbyBwcm92aWRlIHNvbWUgZXhhbXBsZXMgb2YgdGhlIGZ1bmN0aW9uIGF0IHRoZSBib3R0b20gb2YgdGhlIHBhZ2UuIFR5cGUgdGhlIGFyZ3VtZW50cyBmcm9tID0gMSwgdG8gPSAxMCBpbnNpZGUgdGhlIHBhcmVudGhlc2VzLgoKYGBge3J9CnNlcShmcm9tID0gMSwgdG8gPSAxMCkKYGBgCgpcCgpZb3Ugc2hvdWxkIGdldCB0aGUgc2FtZSByZXN1bHQgaWYgeW91IHR5cGUgaW46CmBgYHtyfQpzZXEoMSwgMTApCmBgYAoKVGhlIGNvZGUgYWJvdmUgZGVtb25zdHJhdGVzIHNvbWV0aGluZyBhYm91dCBob3cgUiByZXNvbHZlcyBmdW5jdGlvbiBhcmd1bWVudHMuIFdoZW4geW91IHVzZSBhIGZ1bmN0aW9uLCB5b3UgY2FuIGFsd2F5cyBzcGVjaWZ5IGFsbCB0aGUgYXJndW1lbnRzIGluIGBhcmcgPSB2YWx1ZWAgZm9ybS4gQnV0IGlmIHlvdSBkbyBub3QsIFIgYXR0ZW1wdHMgdG8gcmVzb2x2ZSBieSBwb3NpdGlvbi4gU28gaW4gdGhlIGNvZGUgYWJvdmUsIGl0IGlzIGFzc3VtZWQgdGhhdCB3ZSB3YW50IGEgc2VxdWVuY2UgYGZyb20gPSAxYCB0aGF0IGdvZXMgYHRvID0gMTBgIGJlY2F1c2Ugd2UgdHlwZWQgMSBiZWZvcmUgMTAuIFR5cGUgaW4gMTAgYmVmb3JlIDEgYW5kIHNlZSB3aGF0IGhhcHBlbnMuIFNpbmNlIHdlIGRpZG7igJl0IHNwZWNpZnkgc3RlcCBzaXplLCB0aGUgZGVmYXVsdCB2YWx1ZSBvZiBgYnlgIGluIHRoZSBmdW5jdGlvbiBkZWZpbml0aW9uIGlzIHVzZWQsIHdoaWNoIGVuZHMgdXAgYmVpbmcgMSBpbiB0aGlzIGNhc2UuCgpcCgojIFBhY2thZ2VzCgpGdW5jdGlvbnMgZG8gbm90IGV4aXN0IGluIGEgdmFjdXVtLCBidXQgZXhpc3Qgd2l0aGluIFtSIHBhY2thZ2VzXShodHRwczovL3ItcGtncy5vcmcvaW50cm8uaHRtbCkuIFBhY2thZ2VzIGFyZSB0aGUgZnVuZGFtZW50YWwgdW5pdHMgb2YgcmVwcm9kdWNpYmxlIFIgY29kZS4gVGhleSBpbmNsdWRlIHJldXNhYmxlIFIgZnVuY3Rpb25zLCB0aGUgZG9jdW1lbnRhdGlvbiB0aGF0IGRlc2NyaWJlcyBob3cgdG8gdXNlIHRoZW0sIGFuZCBzYW1wbGUgZGF0YS4gQXQgdGhlIHRvcCBsZWZ0IG9mIGEgZnVuY3Rpb27igJlzIGhlbHAgZG9jdW1lbnRhdGlvbiwgeW914oCZbGwgZmluZCBpbiBjdXJseSBicmFja2V0cyB0aGUgUiBwYWNrYWdlIHRoYXQgdGhlIGZ1bmN0aW9uIGlzIGhvdXNlZCBpbi4gRm9yIGV4YW1wbGUsIHR5cGUgaW4geW91ciBjb25zb2xlIGA/IHNlcWAuIEF0IHRoZSB0b3AgcmlnaHQgb2YgdGhlIGhlbHAgZG9jdW1lbnRhdGlvbiwgeW914oCZbGwgZmluZCB0aGF0IGBzZXEoKWAgaXMgaW4gdGhlIHBhY2thZ2UgKipiYXNlKiouIEFsbCB0aGUgZnVuY3Rpb25zIHdlIGhhdmUgdXNlZCBzbyBmYXIgYXJlIHBhcnQgb2YgcGFja2FnZXMgdGhhdCBoYXZlIGJlZW4gcHJlLWluc3RhbGxlZCBhbmQgcHJlLWxvYWRlZCBpbnRvIFIuCgpJbiBvcmRlciB0byB1c2UgZnVuY3Rpb25zIGluIGEgbmV3IHBhY2thZ2UsIHlvdSBmaXJzdCBuZWVkIHRvIGluc3RhbGwgdGhlIHBhY2thZ2UgdXNpbmcgdGhlIGBpbnN0YWxsLnBhY2thZ2VzKClgIGNvbW1hbmQuIEZvciBleGFtcGxlLCB3ZSB3aWxsIGJlIHVzaW5nIGNvbW1hbmRzIGZyb20gdGhlIHBhY2thZ2UgKip0aWR5dmVyc2UqKiBpbiB0aGlzIGxhYi4KCmBgYHtyfQpvcHRpb25zKHJlcG9zID0gYyhDUkFOID0gImh0dHBzOi8vY2xvdWQuci1wcm9qZWN0Lm9yZyIpKQppbnN0YWxsLnBhY2thZ2VzKCJ0aWR5dmVyc2UiKQpgYGAKWW91IHNob3VsZCBzZWUgYSBidW5jaCBvZiBnaWJiZXJpc2ggcm9sbCB0aHJvdWdoIHlvdXIgY29uc29sZSBzY3JlZW4uIERvbuKAmXQgd29ycnksIHRoYXTigJlzIGp1c3QgUiBkb3dubG9hZGluZyBhbGwgb2YgdGhlIG90aGVyIHBhY2thZ2VzIGFuZCBhcHBsaWNhdGlvbnMgdGhhdCAqKnRpZHl2ZXJzZSoqIHJlbGllcyBvbi4gVGhlc2UgYXJlIGtub3duIGFzIFtkZXBlbmRlbmNpZXMuXShodHRwczovL3ItcGtncy5vcmcvZGVwZW5kZW5jaWVzLW1pbmRzZXQtYmFja2dyb3VuZC5odG1sKSBVbmxlc3MgeW91IGdldCBhIG1lc3NhZ2UgaW4gcmVkIHRoYXQgaW5kaWNhdGVzIHRoZXJlIGlzIGFuIGVycm9yIChsaWtlIHdlIHNhdyB3aGVuIHdlIHR5cGVkIGluIOKAnGhlbGxvIHdvcmxk4oCdIHdpdGhvdXQgcXVvdGVzKSwgeW91IHNob3VsZCBiZSBmaW5lLgoKTmV4dCwgeW91IHdpbGwgbmVlZCB0byBsb2FkIHBhY2thZ2VzIGluIHlvdXIgd29ya2luZyBlbnZpcm9ubWVudCAoZXZlcnkgdGltZSB5b3Ugc3RhcnQgUlN0dWRpbykuIFdlIGRvIHRoaXMgd2l0aCB0aGUgYGxpYnJhcnkoKWAgZnVuY3Rpb24uIE5vdGljZSB0aGVyZSBhcmUgbm8gcXVvdGVzIGFyb3VuZCAqKnRpZHl2ZXJzZSoqIHRoaXMgdGltZSAoanVzdCB0byBtYWtlIHRoaW5ncyB0cmlja2llciBmb3IgdXMhKS4KCmBgYHtyfQpsaWJyYXJ5KHRpZHl2ZXJzZSkKYGBgClRoZSBQYWNrYWdlcyB3aW5kb3cgYXQgdGhlIGxvd2VyLXJpZ2h0IG9mIHlvdXIgUlN0dWRpbyBzaG93cyB5b3UgYWxsIHRoZSBwYWNrYWdlcyB5b3UgY3VycmVudGx5IGhhdmUgaW5zdGFsbGVkLiBJZiB5b3UgZG9u4oCZdCBoYXZlIGEgcGFja2FnZSBsaXN0ZWQgaW4gdGhpcyB3aW5kb3csIHlvdeKAmWxsIG5lZWQgdG8gdXNlIHRoZSBgaW5zdGFsbC5wYWNrYWdlcygpYCBmdW5jdGlvbiB0byBpbnN0YWxsIGl0LiBJZiB0aGUgcGFja2FnZSBpcyBjaGVja2VkLCB0aGF0IG1lYW5zIGl0IGlzIGxvYWRlZCBpbnRvIHlvdXIgY3VycmVudCBSIHNlc3Npb24KCkZvciBleGFtcGxlLCBoZXJlIGlzIGEgc2VjdGlvbiBvZiBteSBQYWNrYWdlcyB3aW5kb3cKIVt3aW5kb3cxLnBuZ10od2luZG93MS5wbmcpCgpcCgpUaGUgb25seSBwYWNrYWdlcyBsb2FkZWQgaW50byBteSBjdXJyZW50IHNlc3Npb24gaXMgKiptZXRob2RzKiosIGEgcGFja2FnZSB0aGF0IGlzIGxvYWRlZCBldmVyeSB0aW1lIHlvdSBvcGVuIGFuIFIgc2Vzc2lvbi4gTGV04oCZcyBzYXkgSSB1c2UgYGluc3RhbGwucGFja2FnZXMoKWAgdG8gaW5zdGFsbCB0aGUgcGFja2FnZSAqKm1hdHJpeFN0YXRzKiouIFRoZSB3aW5kb3cgbm93IGxvb2tzIGxpa2U6CiFbd2luZG93Mi5wbmddKHdpbmRvdzIucG5nKQoKXAoKTGV0J3MgbG9hZCAqKm1hdHJpeFN0YXRzKiogdXNpbmcgYGxpYnJhcnkoKWAsIGFuZCB0aGVuIHdlIHdpbGwgc2VlIGEgY2hlY2sgbWFyayBhcHBlYXJzIG5leHQgdG8gKiptYXRyaXhTdGF0cyoqLgoKYGBge3J9Cmluc3RhbGwucGFja2FnZXMoIm1hdHJpeFN0YXRzIikKbGlicmFyeShtYXRyaXhTdGF0cykKYGBgCgoKXAoKTG9vayBhdCB1cyEKClRvIHVuaW5zdGFsbCBhIHBhY2thZ2UsIHVzZSB0aGUgZnVuY3Rpb24gYHJlbW92ZS5wYWNrYWdlcygpYC4KCioqTm90ZSB0aGF0IHlvdSBvbmx5IG5lZWQgdG8gaW5zdGFsbCBwYWNrYWdlcyBvbmNlIHdpdGggYGluc3RhbGwucGFja2FnZXMoKWAsIGJ1dCB5b3UgbmVlZCB0byBsb2FkIHRoZW0gZWFjaCB0aW1lIHlvdSByZWxhdW5jaCBSU3R1ZGlvIHdpdGggYGxpYnJhcnkoKWAuKiogUmVwZWF0IGFmdGVyIG1lOiBJbnN0YWxsIG9uY2UsIGxpYnJhcnkgZXZlcnkgdGltZS4gSWYgeW91IG5lZWQgdG8gcmVpbnN0YWxsIFIgb3IgdXBkYXRlIHRvIGEgbmV3IHZlcnNpb24gb2YgUiwgeW91IHdpbGwgbmVlZCB0byByZWluc3RhbGwgYWxsIHBhY2thZ2VzLiBBbmQgYXMgbm90ZWQgZWFybGllciwgUiBoYXMgc2V2ZXJhbCBwYWNrYWdlcyBhbHJlYWR5IHByZWxvYWRlZCBpbnRvIHlvdXIgd29ya2luZyBlbnZpcm9ubWVudC4gVGhlc2UgYXJlIGtub3duIGFzICoqYmFzZSoqIHBhY2thZ2VzIGFuZCBhIGxpc3Qgb2YgdGhlaXIgZnVuY3Rpb25zIGNhbiBiZSBmb3VuZCBbaGVyZV0oaHR0cHM6Ly9zdGF0LmV0aHouY2gvUi1tYW51YWwvUi1kZXZlbC9saWJyYXJ5L2Jhc2UvaHRtbC8wMEluZGV4Lmh0bWwpLiAKClwKCiMgVGlkeXZlcnNlCgpJbiBtb3N0IGxhYnMsIHdlIHdpbGwgYmUgdXNpbmcgY29tbWFuZHMgZnJvbSB0aGUgKip0aWR5dmVyc2UqKiBwYWNrYWdlLiBbVGlkeXZlcnNlXShodHRwczovL3d3dy50aWR5dmVyc2Uub3JnLykgaXMgYSBjb2xsZWN0aW9uIG9mIGhpZ2gtcG93ZXJlZCwgY29uc2lzdGVudCwgYW5kIGVhc3ktdG8tdXNlIHBhY2thZ2VzIGRldmVsb3BlZCBieSBhIG51bWJlciBvZiB0aG91Z2h0ZnVsIGFuZCB0YWxlbnRlZCBSIGRldmVsb3BlcnMuVGhlIGNvbnNpc3RlbmN5IG9mIHRoZSAqKnRpZHl2ZXJzZSoqLCB0b2dldGhlciB3aXRoIHRoZSBnb2FsIG9mIGluY3JlYXNpbmcgcHJvZHVjdGl2aXR5LCBtZWFuIHRoYXQgdGhlIHN5bnRheCBvZiB0aWR5IGZ1bmN0aW9ucyBpcyB0eXBpY2FsbHkgc3RyYWlnaHRmb3J3YXJkIHRvIGxlYXJuLiBZb3UgY2FuIHJlYWQgbW9yZSBhYm91dCAqKnRpZHl2ZXJzZSoqIHByaW5jaXBsZXMgaW4gQ2hhcHRlciA5LCBwYWdlcyAxNDctMTUxIGluIFJEUy4KCkV4Y2l0ZWQgYWJvdXQgZW50ZXJpbmcgdGhlIHRpZHl2ZXJzZT8gSSBiZXQgeW91IGFyZSwgc28gaGVyZSBpcyBhIGJhZGdlIHRvIHNob3cgeW91ciBleGNpdGVtZW50IQoKIVtZb3VyIFRpZHl2ZXJzZSBCYWRnZV0odGlkeXZlcnNlLnBuZykKClwKCiMjIFRpYmJsZXMKCkFsdGhvdWdoIHRoZSAqKnRpZHl2ZXJzZSoqIHdvcmtzIHdpdGggYWxsIGRhdGEgb2JqZWN0cywgaXRzIGZ1bmRhbWVudGFsIG9iamVjdCB0eXBlIGlzIHRoZSB0aWJibGUuIFRpYmJsZXMgYXJlIG5vdCBvbmx5IGEgc3VwZXIgZnVuIHdvcmQgdG8gc2F5LCB0aGV5IGFyZSBkYXRhIGZyYW1lcyB0aGF0IHR3ZWFrIHNvbWUgb2xkZXIgYmVoYXZpb3JzIHRvIG1ha2UgbGlmZSBhIGxpdHRsZSBlYXNpZXIuIFRoZXJlIGFyZSB0d28gbWFpbiBkaWZmZXJlbmNlcyBpbiB0aGUgdXNhZ2Ugb2YgYSBkYXRhIGZyYW1lIHZzIGEgdGliYmxlOiBwcmludGluZyBhbmQgc3Vic2V0dGluZy4gTGV04oCZcyBiZSBjbGVhciBoZXJlIC0tIHRpYmJsZXMgYXJlIGp1c3QgYSBzcGVjaWFsIGtpbmQgb2YgZGF0YSBmcmFtZS4gVGhleSBqdXN0IG1ha2UgdGhpbmdzIOKAnHRpZGllci7igJ0gTGV04oCZcyBicmluZyBpbiBzb21lIGRhdGEgdG8gaWxsdXN0cmF0ZSB0aGUgZGlmZmVyZW5jZXMgYW5kIHNpbWlsYXJpdGllcyBiZXR3ZWVuIGRhdGEgZnJhbWVzIGFuZCB0aWJibGVzLiBJbnN0YWxsIHRoZSBwYWNrYWdlICoqbnljZmxpZ2h0czEzKioKCmBgYHtyfQppbnN0YWxsLnBhY2thZ2VzKCJueWNmbGlnaHRzMTMiKQpgYGAKClwKCk1ha2Ugc3VyZSB5b3UgYWxzbyBsb2FkIHRoZSBwYWNrYWdlLgoKYGBge3J9CmxpYnJhcnkobnljZmxpZ2h0czEzKQpgYGAKClwKCklmIHlvdSBsb29rIGluIHRoZSB1cHBlciByaWdodCBoYW5kICpFbnZpcm9ubWVudCogdGFiIGFuZCBjbGljayBvbiAqR2xvYmFsIEVudmlyb25tZW50KiwgeW91IHdpbGwgc2VlIHRoZXJlIGlzIGEgZGF0YXNldCBjYWxsZWQgKipmbGlnaHRzKiogaW5jbHVkZWQgaW4gdGhpcyBwYWNrYWdlLiBJdCBpbmNsdWRlcyBpbmZvcm1hdGlvbiBvbiBhbGwgMzM2LDc3NiBmbGlnaHRzIHRoYXQgZGVwYXJ0ZWQgZnJvbSBOZXcgWW9yayBDaXR5IGluIDIwMTMuIExldOKAmXMgc2F2ZSB0aGlzIGZpbGUgaW4gdGhlIGxvY2FsIFIgZW52aXJvbm1lbnQuCgpgYGB7cn0KbnljdGliYmxlIDwtIGZsaWdodHMKY2xhc3MobnljdGliYmxlKQpgYGAKClwKClRoaXMgZGF0YXNldCBpcyBhIHRpYmJsZS4gTGV04oCZcyBhbHNvIHNhdmUgaXQgYXMgYSByZWd1bGFyIGRhdGEgZnJhbWUgYnkgdXNpbmcgdGhlIGBhcy5kYXRhLmZyYW1lKClgIGZ1bmN0aW9uLgoKYGBge3J9Cm55Y2RmIDwtIGFzLmRhdGEuZnJhbWUoZmxpZ2h0cykKY2xhc3MobnljZGYpCmBgYAoKXAoKVGhlIGZpcnN0IGRpZmZlcmVuY2UgYmV0d2VlbiBkYXRhIGZyYW1lcyBhbmQgdGliYmxlcyBpcyBob3cgdGhlIGRhdGFzZXQgbG9va3MuIFRpYmJsZXMgaGF2ZSBhIHJlZmluZWQgcHJpbnQgbWV0aG9kIHRoYXQgc2hvd3Mgb25seSB0aGUgZmlyc3QgMTAgcm93cywgYW5kIG9ubHkgdGhlIGNvbHVtbnMgdGhhdCBmaXQgb24gdGhlIHNjcmVlbi4gSW4gYWRkaXRpb24sIGVhY2ggY29sdW1uIHJlcG9ydHMgaXRzIG5hbWUgYW5kIHR5cGUuCgpgYGB7cn0KbnljdGliYmxlCmBgYAoKXAoKVGliYmxlcyBhcmUgZGVzaWduZWQgc28gdGhhdCB5b3UgZG9u4oCZdCBvdmVyd2hlbG0geW91ciBjb25zb2xlIHdoZW4geW91IHByaW50IGxhcmdlIGRhdGEgZnJhbWVzLiBDb21wYXJlIHRoZSBwcmludCBvdXRwdXQgYWJvdmUgdG8gd2hhdCB5b3UgZ2V0IHdpdGggYSBkYXRhIGZyYW1lLgoKYGBge3IgZXZhbD1GQUxTRX0KbnljZGYKYGBgCgpcCgpVbSwgdGhhdCB3YXMgYSBsb3QuLi4uVGliYmxlIGlzIG11Y2ggY2xlYW5lci4gWW91IGNhbiBicmluZyB1cCB0aGUgRXhjZWwgbGlrZSB3b3Jrc2hlZXQgb2YgdGhlIHRpYmJsZSAob3IgZGF0YSBmcmFtZSkgdXNpbmcgdGhlIGBWaWV3KClgIGZ1bmN0aW9uLgpgYGB7cn0KVmlldyhueWN0aWJibGUpCmBgYAoKXAoKWW91IGNhbiBpZGVudGlmeSB0aGUgbmFtZXMgb2YgdGhlIGNvbHVtbnMgKGFuZCBoZW5jZSB0aGUgdmFyaWFibGVzIGluIHRoZSBkYXRhc2V0KSBieSB1c2luZyB0aGUgZnVuY3Rpb24gYG5hbWVzKClgLgpgYGB7cn0KbmFtZXMobnljdGliYmxlKQpgYGAKVGhvc2UgbWF5IGNvbWUgaW4gaGFuZHkgaWYgd2Ugd2FudGVkIHRvIGFuYWx5emUgdGhlIGRhdGEhCgpcCgpGaW5hbGx5LCBsZXQncyBjb252ZXJ0IGEgcmVndWxhciBkYXRhIGZyYW1lIHRvIGEgdGliYmxlIHVzaW5nIHRoZSBgYXNfdGliYmxlKClgIGZ1bmN0aW9uLgoKYGBge3J9CmFzX3RpYmJsZShueWNkZikKYGBgCgpOb3QgYWxsIGZ1bmN0aW9ucyB3b3JrIHdpdGggdGliYmxlcywgcGFydGljdWxhcmx5IHRob3NlIHRoYXQgYXJlIHNwZWNpZmljIHRvIHNwYXRpYWwgZGF0YS4gQXMgc3VjaCwgd2XigJlsbCBiZSB1c2luZyBhIGNvbWJpbmF0aW9uIG9mIHRpYmJsZXMgYW5kIHJlZ3VsYXIgZGF0YSBmcmFtZXMgdGhyb3VnaG91dCB0aGUgY2xhc3MsIHdpdGggYSBwcmVmZXJlbmNlIHRvd2FyZHMgdGliYmxlcyB3aGVyZSBwb3NzaWJsZS4gTm90ZSB0aGF0IHdoZW4geW91IHNlYXJjaCBvbiBHb29nbGUgZm9yIGhvdyB0byBkbyBzb21ldGhpbmcgaW4gUiwgeW91IHdpbGwgbGlrZWx5IGdldCAqKm5vbi10aWR5IHdheXMqKiBvZiBkb2luZyB0aGluZ3MuIE1vc3Qgb2YgdGhlc2Ugc3VnZ2VzdGlvbnMgYXJlIGZpbmUsIGJ1dCBzb21lIGFyZSBub3QgYW5kIG1heSBzY3JldyB5b3UgdXAgZG93biB0aGUgcm9hZC4gTXkgYWR2aWNlIGlzIHRvIHRyeSB0byBzdGljayB3aXRoIHRpZHkgZnVuY3Rpb25zIHRvIGRvIHRoaW5ncyBpbiBSLgoKQW55d2F5LCB5b3UgZWFybmVkIGFub3RoZXIgYmFkZ2UuIFllcyEKCiFbWW91ciBUaWJibGUgQmFkZ2VdKHRpYmJsZS5wbmcpCgpcCgoK</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab1_2026.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

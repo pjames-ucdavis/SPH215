@@ -837,7 +837,7 @@ library(terra)
 
 \
 
-In [Lab 2](Lab2.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it with the following code:
+In [Lab 2](Lab2_2026.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it with the following code:
 
 ```{r, eval = FALSE}
 census_api_key("YOUR API KEY GOES HERE", install = TRUE)

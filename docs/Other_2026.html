@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data Sources</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Winter 2026</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus_2026.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Lab1_2026.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2_2026.html">Lab 2: Understanding Packages and Wrangling Data in R</a>
+    </li>
+    <li>
+      <a href="Lab3_2026.html">Lab 3: Geocoding, Vector Data, and Census Data</a>
+    </li>
+    <li>
+      <a href="Lab4_2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing</a>
+    </li>
+    <li>
+      <a href="Lab6_2026.html">Lab 6: Spatial Data Processing with Vector and Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab7_2026.html">Lab 7: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab8_2026.html">Lab 8: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab9_2026.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments_2026.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other_2026.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help_2026.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Data Sources</h1>
+
+</div>
+
+
+<p>Below you will find links to data sources that contain spatial data
+and health data, and often both! <strong>We will continue to build out
+this list, so please check back often.</strong> Especially when thinking
+about your Final Project!</p>
+<p><br />
+</p>
+<div id="health-datasets" class="section level1">
+<h1>Health Datasets</h1>
+<ul>
+<li><p><a href="https://www.cdc.gov/places/index.html">CDC Places</a>
+PLACES provides health and health-related data using small-area
+estimation for counties, incorporated and census designated places,
+census tracts, and ZIP Code Tabulation Areas (ZCTAs) across the United
+States. This project, which started in 2015, is a partnership between
+CDC, the Robert Wood Johnson Foundation (RWJF), and CDC
+Foundation.</p></li>
+<li><p><a href="https://wonder.cdc.gov/">CDC Wonder</a> CDC WONDER –
+Wide-ranging ONline Data for Epidemiologic Research – is an easy-to-use,
+menu-driven system that makes the information resources of the Centers
+for Disease Control and Prevention (CDC) available to public health
+professionals and the public at large. It provides access to a wide
+array of public health information. There’s environmental data here,
+lots of health data at varying spatial resolutions.</p></li>
+<li><p><a
+href="https://archive.cdc.gov/www_cdc_gov/dhdsp/maps/gisx/resources/geo-spatial-data.html">Archived
+CDC GIS Website</a> Although this website is archived, there are lot of
+active links to various health-related datasets that contain spatial
+data.</p></li>
+<li><p><a href="http://www.dartmouthatlas.org/">Dartmouth Atlas</a> For
+more than 25 years, The Dartmouth Atlas Project documented striking
+variations in how medical resources were distributed and used in the
+United States. The project used Medicare and Medicaid data to provide
+information and analysis about national, regional, and local markets, as
+well as hospitals and their affiliated physicians. Although the website
+will no longer update Dartmouth Atlas tools or calculate new annual
+rates, this website will continue to provide historical Dartmouth Atlas
+rates (through 2019) and associated documentation.</p></li>
+<li><p><a href="https://gis.cancer.gov/">Cancer Data</a> The NCI GIS
+Portal for Cancer Research provides tools for mapping and download of
+cancer statistics, risk factors, cancer related tobacco policy data, and
+the information related to geographic patterns of cancer. It is intended
+for researchers, cancer control planners, cancer advocacy groups, and
+general public to inform and inspire our efforts to reduce cancer burden
+in the United States.</p></li>
+<li><p><a href="https://seer.cancer.gov/seerstat/">SEER*Stat Cancer
+Data</a> The SEER*Stat statistical software provides a convenient,
+intuitive mechanism for the analysis of SEER and other cancer-related
+databases. It is a powerful tool to view individual cancer records and
+to produce statistics for studying the impact of cancer on a
+population.</p></li>
+<li><p><a href="https://sae.cancer.gov/nhis-brfss/">NCI Small Area
+Estimates</a> Model-based small area estimates from NCI are created by
+combining information from NHIS, BRFSS and auxiliary variables obtained
+from relevant sources (Census, American Community Survey, Administrative
+information) through novel statistical models. Outcomes include smoking,
+mammography, pap smear and colorectal screening. Estimates are for
+counties, health service areas, and states.</p></li>
+<li><p><a href="https://www.countyhealthrankings.org/">RWJ County Health
+Rankings</a> County Health Rankings &amp; Roadmaps (CHR&amp;R), a
+program of the University of Wisconsin Population Health Institute,
+draws attention to why there are differences in health within and across
+communities. The program highlights policies and practices that can help
+everyone be as healthy as possible. CHR&amp;R aims to grow a shared
+understanding of health, equity and the power of communities to improve
+health for all. This work is rooted in a long-term vision where all
+people and places have what they need to thrive.</p></li>
+<li><p><a
+href="https://www.healthdata.org/data-tools-practices/data-sources">Institute
+for Health Metrics and Evaluation</a> An independent population health
+research organization based at the University of Washington School of
+Medicine, the Institute for Health Metrics and Evaluation (IHME) works
+with collaborators around the world to develop timely, relevant, and
+scientifically valid evidence that illuminates the state of health
+everywhere. They develop numerous metrics, including the Global Burden
+of Disease metrics.</p></li>
+<li><p><a href="https://healthatlas.ucsf.edu/">UCSF Health Atlas</a> An
+incredible resource from our colleagues at UCSF. Health Atlas is an
+interactive mapping website to explore neighborhood-level
+characteristics and see how they relate at a population level. The
+project was initiated by UCSF Population Health and Health Equity and
+led by the Population Health Data Initiative.</p></li>
+<li><p><a href="https://dhsprogram.com/Methodology/GIS.cfm">Demographic
+and Health Surveys</a> The Demographic and Health Surveys (DHS) Program
+has collected, analyzed, and disseminated accurate and representative
+data on population, health, HIV, and nutrition through more than 400
+surveys in over 90 countries. The DHS Program routinely collects
+geographic information in all surveyed countries. Using GIS, researchers
+can link DHS data with routine health data, health facility locations,
+local infrastructure such as roads and rivers, and environmental
+conditions. Linked DHS and geographic data are now being used to improve
+planning for family planning interventions, to assess the correlation of
+malaria prevalence and anemia in children in West Africa, and to analyze
+the effects of environment on early childhood mortality.</p></li>
+<li><p><a href="https://data-cdphdata.opendata.arcgis.com/">California
+Department of Public Health GIS Open Data</a> Search or browse for GIS
+data from the CA Department of Public Health.</p></li>
+<li><p><a
+href="https://healthpolicy.ucla.edu/our-work/california-health-interview-survey-chis">California
+Health Interview Survey</a> The largest state health survey in the
+nation, the premier source of data on the health of Californians. The
+California Health Interview Survey — also known as CHIS or the
+California Health Survey — is a leading source of credible and
+comprehensive data on the health and health care needs of California’s
+large and diverse population. CHIS helps to target resources and
+interventions where they are needed most, ultimately improving health
+outcomes for all Californians. Each year, CHIS interviews more than
+20,000 households on a wide range of health matters, from use of and
+access to health care, to health conditions and behaviors, to a range of
+topics that influence health: public program participation, housing,
+income and employment, climate change, food, gun violence, adverse
+childhood experiences, and much more.</p></li>
+</ul>
+<p><br />
+</p>
+</div>
+<div id="other-types-of-health-adjacent-data" class="section level1">
+<h1>Other Types of Health-Adjacent Data</h1>
+<ul>
+<li><p><a href="https://ucdavis.policymap.com/">PolicyMap</a> PolicyMap
+is a fully web-based online data and mapping application that gives you
+access to over 15,000 indicators related to demographics, housing,
+crime, mortgages, health, jobs and more. Data is available at all common
+geographies (address, block group, census tract, zip code, county, city,
+state, MSA) as well as unique geographies like school districts and
+political boundaries. Data comes from both public and proprietary
+sources.</p></li>
+<li><p><a href="https://www.icpsr.umich.edu/web/pages/">ICPSR</a> ICPSR
+maintains a data archive of more than 350,000 files of research in the
+social and behavioral sciences. It hosts 23 specialized collections of
+data in education, aging, criminal justice, substance abuse, terrorism,
+and other fields.</p></li>
+<li><p><a href="https://catalog.data.gov/dataset/">Data.gov</a> The
+United States Government’s open data site is designed to unleash the
+power of government open data to inform decisions by the public and
+policymakers, drive innovation and economic activity, achieve agency
+missions, and strengthen the foundation of an open and transparent
+government. Search geospatial datasets and see what they have!</p></li>
+<li><p><a
+href="https://oehha.ca.gov/calenviroscreen/report/calenviroscreen-version-20">CalEnviroScreen</a>
+The Office of Environmental Health Hazard Assessment (OEHHA), on behalf
+of the California Environmental Protection Agency (CalEPA), announces
+the availability of the California Communities Environmental Health
+Screening Tool: CalEnviroScreen Version 2.0 (CalEnviroScreen 2.0).
+CalEnviroScreen is a screening methodology that can be used to help
+identify California communities that are disproportionately burdened by
+multiple sources of pollution. CalEPA has used the tool to designate
+California communities as disadvantaged pursuant to Senate Bill 535. It
+uses environmental, health, and socioeconomic information to produce
+scores for every census tract in the state.</p></li>
+<li><p><a href="https://www.ers.usda.gov/foodatlas/">Food Environment
+Atlas from the USDA</a> Assembles statistics on food environment
+indicators to stimulate research on the determinants of food choices and
+diet quality, and provides a spatial overview of a community’s ability
+to access healthy food and its success in doing so.</p></li>
+<li><p>TEST2</p></li>
+</ul>
+<p><br />
+</p>
+</div>
+<div id="census-data-and-us-government-data-packages-in-r"
+class="section level1">
+<h1>Census Data and US Government Data Packages in R</h1>
+<ul>
+<li><p><strong>censusAPI</strong> package: See <a href="Lab2.html">Lab
+2</a>!</p></li>
+<li><p><strong>lehdr</strong> package</p></li>
+</ul>
+<p>A useful package for working with Census Bureau data is the lehdr R
+package, which accesses the <a
+href="https://lehd.ces.census.gov/">Longitudinal and Employer-Household
+Dynamics (LEHD)</a> <a
+href="https://lehd.ces.census.gov/data/#lodes">Origin-Destination
+Employment Statistics (LODES)</a> data. LODES is not available from the
+Census API, meriting an alternative package and approach. LODES includes
+synthetic estimates of residential, workplace, and residential-workplace
+links at the Census block level, allowing for highly detailed geographic
+analysis of jobs and commuter patterns over time. The core function
+implemented in <strong>lehdr</strong> is <code>grab_lodes()</code>,
+which downloads a LODES file of a specified <code>lodes_type</code>
+(either <em>rac</em> for residential, <em>wac</em> for workplace, or
+<em>od</em> for origin-destination) for a given state and year. While
+the raw LODES data are available at the Census block level, the
+<em>agg_geo</em> parameter offers a convenient way to roll up estimates
+to higher levels of aggregation. For origin-destination data, the
+<code>state_part = "main"</code> argument below captures within-state
+commuters; use <code>state_part = "aux"</code> to get commuters from
+out-of-state. The optional argument <code>use_cache = TRUE</code> stores
+downloaded LODES data in a cache directory on the user’s computer; this
+is recommended to avoid having to re-download data for future
+analyses.</p>
+<p>Let’s grab a dataset that contains 2018 tract-to-tract commute flows
+broken down by a variety of characteristics in Nevada, referenced in the
+LODES documentation.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(lehdr)
+nv_lodes_od &lt;- grab_lodes(
+  state = &quot;nv&quot;,
+  year = 2018,
+  lodes_type = &quot;od&quot;,
+  agg_geo = &quot;tract&quot;,
+  state_part = &quot;main&quot;,
+  use_cache = TRUE
+)</code></pre>
+<pre><code>## Using cached version of file found in:
+## /Users/pjames1/Library/Caches/org.R-project.R/R/lehdr/nv_od_main_JT00_2018.csv.gz</code></pre>
+<pre class="r"><code>glimpse(nv_lodes_od)</code></pre>
+<pre><code>## Rows: 182,729
+## Columns: 14
+## $ year    &lt;dbl&gt; 2018, 2018, 2018, 2018, 2018, 2018, 2018, 2018, 2018, 2018, 20…
+## $ state   &lt;chr&gt; &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;NV&quot;, &quot;N…
+## $ w_tract &lt;chr&gt; &quot;32001950100&quot;, &quot;32001950100&quot;, &quot;32001950100&quot;, &quot;32001950100&quot;, &quot;3…
+## $ h_tract &lt;chr&gt; &quot;32001950100&quot;, &quot;32001950301&quot;, &quot;32001950302&quot;, &quot;32001950400&quot;, &quot;3…
+## $ S000    &lt;dbl&gt; 97, 84, 151, 1, 29, 204, 183, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1,…
+## $ SA01    &lt;dbl&gt; 7, 14, 25, 0, 4, 7, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ SA02    &lt;dbl&gt; 51, 44, 81, 0, 7, 117, 97, 1, 0, 1, 1, 0, 0, 0, 1, 1, 2, 1, 0,…
+## $ SA03    &lt;dbl&gt; 39, 26, 45, 1, 18, 80, 78, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1,…
+## $ SE01    &lt;dbl&gt; 19, 3, 6, 0, 6, 8, 17, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, …
+## $ SE02    &lt;dbl&gt; 24, 22, 35, 0, 4, 28, 27, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, …
+## $ SE03    &lt;dbl&gt; 54, 59, 110, 1, 19, 168, 139, 1, 1, 1, 0, 1, 0, 1, 2, 1, 2, 1,…
+## $ SI01    &lt;dbl&gt; 44, 35, 49, 1, 16, 80, 76, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,…
+## $ SI02    &lt;dbl&gt; 34, 38, 72, 0, 10, 112, 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ SI03    &lt;dbl&gt; 19, 11, 30, 0, 3, 12, 33, 1, 1, 1, 2, 1, 0, 1, 2, 1, 2, 1, 1, …</code></pre>
+<p><br />
+</p>
+<ul>
+<li><strong>tidyUSDA</strong> package</li>
+</ul>
+<p>Agriculture can be a difficult sector on which to collect statistics,
+as it is not available in many data sources such as LODES. Fortunately,
+dedicated statistics on US agriculture can be acquired with the tidyUSDA
+package. You’ll need to get an API key at <a
+href="https://quickstats.nass.usda.gov/api"
+class="uri">https://quickstats.nass.usda.gov/api</a> and use that to
+request data from the USDA QuickStats API.</p>
+<p>Let’s see which California counties produce have the most acres
+devoted to <a
+href="https://youtu.be/3GCrzjVdmSg?si=bUHZfVD1uq8xYII2">peaches</a>. The
+core function implemented is g<code>etQuickstat()</code>. To use it
+effectively, it is helpful to construct a query first at <a
+href="https://quickstats.nass.usda.gov/"
+class="uri">https://quickstats.nass.usda.gov/</a> and see what options
+are available, then bring those options as arguments into R.</p>
+<pre class="r"><code>CA_asp &lt;- getQuickstat(
+  key = &quot;ENTER YOUR KEY HERE&quot;,
+  program = &quot;CENSUS&quot;,
+  data_item = &quot;PEACHES - ACRES BEARING&quot;,
+  sector = &quot;CROPS&quot;,
+  commodity = &quot;PEACHES&quot;,
+  category = &quot;AREA BEARING&quot;,
+  domain = &quot;TOTAL&quot;,
+  geographic_level = &quot;COUNTY&quot;,
+  state = &quot;CALIFORNIA&quot;,
+  year = &quot;2017&quot;
+)</code></pre>
+<p><br />
+</p>
+<p>The Census and other U.S. government agencies offer a bevy of other
+data products at various levels of aggregation. This also includes
+individual level data, also known as microdata. In many cases, microdata
+reflect responses to surveys that are de-identified and anonymized, then
+prepared in datasets that include rich detail about survey responses. US
+Census microdata are available for both the decennial Census and the
+ACS; these datasets, named the <a
+href="https://www.census.gov/programs-surveys/acs/microdata.html">Public
+Use Microdata Series</a> (PUMS), allow for detailed cross-tabulations
+not available in aggregated data. For information on the ecosystem of
+Census and Government related R packages, check out Kyle Walker’s
+indispensable <a
+href="https://walker-data.com/census-r/index.html">book</a> on using R
+to access census data. If you are interested in accessing Census data
+outside of the United States, check out his <a
+href="https://walker-data.com/census-r/working-with-census-data-outside-the-united-states.html">Chapter
+12</a>.</p>
+<p><br />
+</p>
+</div>
+<div id="resources-for-multiple-types-of-data" class="section level1">
+<h1>Resources for multiple types of data</h1>
+<ul>
+<li><p><a href="https://earthengine.google.com/">Google Earth Engine</a>
+Google Earth Engine combines a multi-petabyte catalog of satellite
+imagery and geospatial datasets with planetary-scale analysis
+capabilities. Scientists, researchers, and developers use Earth Engine
+to detect changes, map trends, and quantify differences on the Earth’s
+surface. Earth Engine is free for academic and research use, but you
+will need to create a Cloud Project.</p></li>
+<li><p><a href="https://dataverse.harvard.edu/">Harvard Dataverse</a>
+The Harvard Dataverse Repository is a free data repository open to all
+researchers from any discipline, both inside and outside of the Harvard
+community, where you can share, archive, cite, access, and explore
+research data. Each individual Dataverse collection is a customizable
+collection of datasets (or a virtual repository) for organizing,
+managing, and showcasing datasets. There is TONS of spatial data there,
+especially after the <a href="https://climatehealthcafe.org/">Climate
+Cafe</a> started hosting data there.</p></li>
+<li><p>And don’t forget the UC Davis Library! So many resources here!
+Specifically, check out: <a
+href="https://guides.library.ucdavis.edu/geography"
+class="uri">https://guides.library.ucdavis.edu/geography</a> or <a
+href="https://guides.library.ucdavis.edu/social-science-data"
+class="uri">https://guides.library.ucdavis.edu/social-science-data</a></p></li>
+</ul>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBTb3VyY2VzIgotLS0KCkJlbG93IHlvdSB3aWxsIGZpbmQgbGlua3MgdG8gZGF0YSBzb3VyY2VzIHRoYXQgY29udGFpbiBzcGF0aWFsIGRhdGEgYW5kIGhlYWx0aCBkYXRhLCBhbmQgb2Z0ZW4gYm90aCEgKipXZSB3aWxsIGNvbnRpbnVlIHRvIGJ1aWxkIG91dCB0aGlzIGxpc3QsIHNvIHBsZWFzZSBjaGVjayBiYWNrIG9mdGVuLioqIEVzcGVjaWFsbHkgd2hlbiB0aGlua2luZyBhYm91dCB5b3VyIEZpbmFsIFByb2plY3QhCgpcCgojIEhlYWx0aCBEYXRhc2V0cwoKLSBbQ0RDIFBsYWNlc10oaHR0cHM6Ly93d3cuY2RjLmdvdi9wbGFjZXMvaW5kZXguaHRtbCkgUExBQ0VTIHByb3ZpZGVzIGhlYWx0aCBhbmQgaGVhbHRoLXJlbGF0ZWQgZGF0YSB1c2luZyBzbWFsbC1hcmVhIGVzdGltYXRpb24gZm9yIGNvdW50aWVzLCBpbmNvcnBvcmF0ZWQgYW5kIGNlbnN1cyBkZXNpZ25hdGVkIHBsYWNlcywgY2Vuc3VzIHRyYWN0cywgYW5kIFpJUCBDb2RlIFRhYnVsYXRpb24gQXJlYXMgKFpDVEFzKSBhY3Jvc3MgdGhlIFVuaXRlZCBTdGF0ZXMuIFRoaXMgcHJvamVjdCwgd2hpY2ggc3RhcnRlZCBpbiAyMDE1LCBpcyBhIHBhcnRuZXJzaGlwIGJldHdlZW4gQ0RDLCB0aGUgUm9iZXJ0IFdvb2QgSm9obnNvbiBGb3VuZGF0aW9uIChSV0pGKSwgYW5kIENEQyBGb3VuZGF0aW9uLgoKLSBbQ0RDIFdvbmRlcl0oaHR0cHM6Ly93b25kZXIuY2RjLmdvdi8pIENEQyBXT05ERVIgLS0gV2lkZS1yYW5naW5nIE9ObGluZSBEYXRhIGZvciBFcGlkZW1pb2xvZ2ljIFJlc2VhcmNoIC0tIGlzIGFuIGVhc3ktdG8tdXNlLCBtZW51LWRyaXZlbiBzeXN0ZW0gdGhhdCBtYWtlcyB0aGUgaW5mb3JtYXRpb24gcmVzb3VyY2VzIG9mIHRoZSBDZW50ZXJzIGZvciBEaXNlYXNlIENvbnRyb2wgYW5kIFByZXZlbnRpb24gKENEQykgYXZhaWxhYmxlIHRvIHB1YmxpYyBoZWFsdGggcHJvZmVzc2lvbmFscyBhbmQgdGhlIHB1YmxpYyBhdCBsYXJnZS4gSXQgcHJvdmlkZXMgYWNjZXNzIHRvIGEgd2lkZSBhcnJheSBvZiBwdWJsaWMgaGVhbHRoIGluZm9ybWF0aW9uLiBUaGVyZSdzIGVudmlyb25tZW50YWwgZGF0YSBoZXJlLCBsb3RzIG9mIGhlYWx0aCBkYXRhIGF0IHZhcnlpbmcgc3BhdGlhbCByZXNvbHV0aW9ucy4KCi0gW0FyY2hpdmVkIENEQyBHSVMgV2Vic2l0ZV0oaHR0cHM6Ly9hcmNoaXZlLmNkYy5nb3Yvd3d3X2NkY19nb3YvZGhkc3AvbWFwcy9naXN4L3Jlc291cmNlcy9nZW8tc3BhdGlhbC1kYXRhLmh0bWwpIEFsdGhvdWdoIHRoaXMgd2Vic2l0ZSBpcyBhcmNoaXZlZCwgdGhlcmUgYXJlIGxvdCBvZiBhY3RpdmUgbGlua3MgdG8gdmFyaW91cyBoZWFsdGgtcmVsYXRlZCBkYXRhc2V0cyB0aGF0IGNvbnRhaW4gc3BhdGlhbCBkYXRhLiAKCi0gW0RhcnRtb3V0aCBBdGxhc10oaHR0cDovL3d3dy5kYXJ0bW91dGhhdGxhcy5vcmcvKSBGb3IgbW9yZSB0aGFuIDI1IHllYXJzLCBUaGUgRGFydG1vdXRoIEF0bGFzIFByb2plY3QgZG9jdW1lbnRlZCBzdHJpa2luZyB2YXJpYXRpb25zIGluIGhvdyBtZWRpY2FsIHJlc291cmNlcyB3ZXJlIGRpc3RyaWJ1dGVkIGFuZCB1c2VkIGluIHRoZSBVbml0ZWQgU3RhdGVzLiBUaGUgcHJvamVjdCB1c2VkIE1lZGljYXJlIGFuZCBNZWRpY2FpZCBkYXRhIHRvIHByb3ZpZGUgaW5mb3JtYXRpb24gYW5kIGFuYWx5c2lzIGFib3V0IG5hdGlvbmFsLCByZWdpb25hbCwgYW5kIGxvY2FsIG1hcmtldHMsIGFzIHdlbGwgYXMgaG9zcGl0YWxzIGFuZCB0aGVpciBhZmZpbGlhdGVkIHBoeXNpY2lhbnMuIEFsdGhvdWdoIHRoZSB3ZWJzaXRlIHdpbGwgbm8gbG9uZ2VyIHVwZGF0ZSBEYXJ0bW91dGggQXRsYXMgdG9vbHMgb3IgY2FsY3VsYXRlIG5ldyBhbm51YWwgcmF0ZXMsIHRoaXMgd2Vic2l0ZSB3aWxsIGNvbnRpbnVlIHRvIHByb3ZpZGUgaGlzdG9yaWNhbCBEYXJ0bW91dGggQXRsYXMgcmF0ZXMgKHRocm91Z2ggMjAxOSkgYW5kIGFzc29jaWF0ZWQgZG9jdW1lbnRhdGlvbi4KCi0gW0NhbmNlciBEYXRhXShodHRwczovL2dpcy5jYW5jZXIuZ292LykgVGhlIE5DSSBHSVMgUG9ydGFsIGZvciBDYW5jZXIgUmVzZWFyY2ggcHJvdmlkZXMgdG9vbHMgZm9yIG1hcHBpbmcgYW5kIGRvd25sb2FkIG9mIGNhbmNlciBzdGF0aXN0aWNzLCByaXNrIGZhY3RvcnMsIGNhbmNlciByZWxhdGVkIHRvYmFjY28gcG9saWN5IGRhdGEsIGFuZCB0aGUgaW5mb3JtYXRpb24gcmVsYXRlZCB0byBnZW9ncmFwaGljIHBhdHRlcm5zIG9mIGNhbmNlci4gSXQgaXMgaW50ZW5kZWQgZm9yIHJlc2VhcmNoZXJzLCBjYW5jZXIgY29udHJvbCBwbGFubmVycywgY2FuY2VyIGFkdm9jYWN5IGdyb3VwcywgYW5kIGdlbmVyYWwgcHVibGljIHRvIGluZm9ybSBhbmQgaW5zcGlyZSBvdXIgZWZmb3J0cyB0byByZWR1Y2UgY2FuY2VyIGJ1cmRlbiBpbiB0aGUgVW5pdGVkIFN0YXRlcy4KCi0gW1NFRVIqU3RhdCBDYW5jZXIgRGF0YV0oaHR0cHM6Ly9zZWVyLmNhbmNlci5nb3Yvc2VlcnN0YXQvKSBUaGUgU0VFUipTdGF0IHN0YXRpc3RpY2FsIHNvZnR3YXJlIHByb3ZpZGVzIGEgY29udmVuaWVudCwgaW50dWl0aXZlIG1lY2hhbmlzbSBmb3IgdGhlIGFuYWx5c2lzIG9mIFNFRVIgYW5kIG90aGVyIGNhbmNlci1yZWxhdGVkIGRhdGFiYXNlcy4gSXQgaXMgYSBwb3dlcmZ1bCB0b29sIHRvIHZpZXcgaW5kaXZpZHVhbCBjYW5jZXIgcmVjb3JkcyBhbmQgdG8gcHJvZHVjZSBzdGF0aXN0aWNzIGZvciBzdHVkeWluZyB0aGUgaW1wYWN0IG9mIGNhbmNlciBvbiBhIHBvcHVsYXRpb24uIAoKLQlbTkNJIFNtYWxsIEFyZWEgRXN0aW1hdGVzXShodHRwczovL3NhZS5jYW5jZXIuZ292L25oaXMtYnJmc3MvKSBNb2RlbC1iYXNlZCBzbWFsbCBhcmVhIGVzdGltYXRlcyBmcm9tIE5DSSBhcmUgY3JlYXRlZCBieSBjb21iaW5pbmcgaW5mb3JtYXRpb24gZnJvbSBOSElTLCBCUkZTUyBhbmQgYXV4aWxpYXJ5IHZhcmlhYmxlcyBvYnRhaW5lZCBmcm9tIHJlbGV2YW50IHNvdXJjZXMgKENlbnN1cywgQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleSwgQWRtaW5pc3RyYXRpdmUgaW5mb3JtYXRpb24pIHRocm91Z2ggbm92ZWwgc3RhdGlzdGljYWwgbW9kZWxzLiBPdXRjb21lcyBpbmNsdWRlIHNtb2tpbmcsIG1hbW1vZ3JhcGh5LCBwYXAgc21lYXIgYW5kIGNvbG9yZWN0YWwgc2NyZWVuaW5nLiBFc3RpbWF0ZXMgYXJlIGZvciBjb3VudGllcywgaGVhbHRoIHNlcnZpY2UgYXJlYXMsIGFuZCBzdGF0ZXMuCgotIFtSV0ogQ291bnR5IEhlYWx0aCBSYW5raW5nc10oaHR0cHM6Ly93d3cuY291bnR5aGVhbHRocmFua2luZ3Mub3JnLykgQ291bnR5IEhlYWx0aCBSYW5raW5ncyAmIFJvYWRtYXBzIChDSFImUiksIGEgcHJvZ3JhbSBvZiB0aGUgVW5pdmVyc2l0eSBvZiBXaXNjb25zaW4gUG9wdWxhdGlvbiBIZWFsdGggSW5zdGl0dXRlLCBkcmF3cyBhdHRlbnRpb24gdG8gd2h5IHRoZXJlIGFyZSBkaWZmZXJlbmNlcyBpbiBoZWFsdGggd2l0aGluIGFuZCBhY3Jvc3MgY29tbXVuaXRpZXMuIFRoZSBwcm9ncmFtIGhpZ2hsaWdodHMgcG9saWNpZXMgYW5kIHByYWN0aWNlcyB0aGF0IGNhbiBoZWxwIGV2ZXJ5b25lIGJlIGFzIGhlYWx0aHkgYXMgcG9zc2libGUuIENIUiZSIGFpbXMgdG8gZ3JvdyBhIHNoYXJlZCB1bmRlcnN0YW5kaW5nIG9mIGhlYWx0aCwgZXF1aXR5IGFuZCB0aGUgcG93ZXIgb2YgY29tbXVuaXRpZXMgdG8gaW1wcm92ZSBoZWFsdGggZm9yIGFsbC4gVGhpcyB3b3JrIGlzIHJvb3RlZCBpbiBhIGxvbmctdGVybSB2aXNpb24gd2hlcmUgYWxsIHBlb3BsZSBhbmQgcGxhY2VzIGhhdmUgd2hhdCB0aGV5IG5lZWQgdG8gdGhyaXZlLgoKLSBbSW5zdGl0dXRlIGZvciBIZWFsdGggTWV0cmljcyBhbmQgRXZhbHVhdGlvbl0oaHR0cHM6Ly93d3cuaGVhbHRoZGF0YS5vcmcvZGF0YS10b29scy1wcmFjdGljZXMvZGF0YS1zb3VyY2VzKSBBbiBpbmRlcGVuZGVudCBwb3B1bGF0aW9uIGhlYWx0aCByZXNlYXJjaCBvcmdhbml6YXRpb24gYmFzZWQgYXQgdGhlIFVuaXZlcnNpdHkgb2YgV2FzaGluZ3RvbiBTY2hvb2wgb2YgTWVkaWNpbmUsIHRoZSBJbnN0aXR1dGUgZm9yIEhlYWx0aCBNZXRyaWNzIGFuZCBFdmFsdWF0aW9uIChJSE1FKSB3b3JrcyB3aXRoIGNvbGxhYm9yYXRvcnMgYXJvdW5kIHRoZSB3b3JsZCB0byBkZXZlbG9wIHRpbWVseSwgcmVsZXZhbnQsIGFuZCBzY2llbnRpZmljYWxseSB2YWxpZCBldmlkZW5jZSB0aGF0IGlsbHVtaW5hdGVzIHRoZSBzdGF0ZSBvZiBoZWFsdGggZXZlcnl3aGVyZS4gVGhleSBkZXZlbG9wIG51bWVyb3VzIG1ldHJpY3MsIGluY2x1ZGluZyB0aGUgR2xvYmFsIEJ1cmRlbiBvZiBEaXNlYXNlIG1ldHJpY3MuCgotIFtVQ1NGIEhlYWx0aCBBdGxhc10oaHR0cHM6Ly9oZWFsdGhhdGxhcy51Y3NmLmVkdS8pIEFuIGluY3JlZGlibGUgcmVzb3VyY2UgZnJvbSBvdXIgY29sbGVhZ3VlcyBhdCBVQ1NGLiBIZWFsdGggQXRsYXMgaXMgYW4gaW50ZXJhY3RpdmUgbWFwcGluZyB3ZWJzaXRlIHRvIGV4cGxvcmUgbmVpZ2hib3Job29kLWxldmVsIGNoYXJhY3RlcmlzdGljcyBhbmQgc2VlIGhvdyB0aGV5IHJlbGF0ZSBhdCBhIHBvcHVsYXRpb24gbGV2ZWwuIFRoZSBwcm9qZWN0IHdhcyBpbml0aWF0ZWQgYnkgVUNTRiBQb3B1bGF0aW9uIEhlYWx0aCBhbmQgSGVhbHRoIEVxdWl0eSBhbmQgbGVkIGJ5IHRoZSBQb3B1bGF0aW9uIEhlYWx0aCBEYXRhIEluaXRpYXRpdmUuIAoKLSBbRGVtb2dyYXBoaWMgYW5kIEhlYWx0aCBTdXJ2ZXlzXShodHRwczovL2Roc3Byb2dyYW0uY29tL01ldGhvZG9sb2d5L0dJUy5jZm0pIFRoZSBEZW1vZ3JhcGhpYyBhbmQgSGVhbHRoIFN1cnZleXMgKERIUykgUHJvZ3JhbSBoYXMgY29sbGVjdGVkLCBhbmFseXplZCwgYW5kIGRpc3NlbWluYXRlZCBhY2N1cmF0ZSBhbmQgcmVwcmVzZW50YXRpdmUgZGF0YSBvbiBwb3B1bGF0aW9uLCBoZWFsdGgsIEhJViwgYW5kIG51dHJpdGlvbiB0aHJvdWdoIG1vcmUgdGhhbiA0MDAgc3VydmV5cyBpbiBvdmVyIDkwIGNvdW50cmllcy4gVGhlIERIUyBQcm9ncmFtIHJvdXRpbmVseSBjb2xsZWN0cyBnZW9ncmFwaGljIGluZm9ybWF0aW9uIGluIGFsbCBzdXJ2ZXllZCBjb3VudHJpZXMuIFVzaW5nIEdJUywgcmVzZWFyY2hlcnMgY2FuIGxpbmsgREhTIGRhdGEgd2l0aCByb3V0aW5lIGhlYWx0aCBkYXRhLCBoZWFsdGggZmFjaWxpdHkgbG9jYXRpb25zLCBsb2NhbCBpbmZyYXN0cnVjdHVyZSBzdWNoIGFzIHJvYWRzIGFuZCByaXZlcnMsIGFuZCBlbnZpcm9ubWVudGFsIGNvbmRpdGlvbnMuIExpbmtlZCBESFMgYW5kIGdlb2dyYXBoaWMgZGF0YSBhcmUgbm93IGJlaW5nIHVzZWQgdG8gaW1wcm92ZSBwbGFubmluZyBmb3IgZmFtaWx5IHBsYW5uaW5nIGludGVydmVudGlvbnMsIHRvIGFzc2VzcyB0aGUgY29ycmVsYXRpb24gb2YgbWFsYXJpYSBwcmV2YWxlbmNlIGFuZCBhbmVtaWEgaW4gY2hpbGRyZW4gaW4gV2VzdCBBZnJpY2EsIGFuZCB0byBhbmFseXplIHRoZSBlZmZlY3RzIG9mIGVudmlyb25tZW50IG9uIGVhcmx5IGNoaWxkaG9vZCBtb3J0YWxpdHkuCgotIFtDYWxpZm9ybmlhIERlcGFydG1lbnQgb2YgUHVibGljIEhlYWx0aCBHSVMgT3BlbiBEYXRhXShodHRwczovL2RhdGEtY2RwaGRhdGEub3BlbmRhdGEuYXJjZ2lzLmNvbS8pIFNlYXJjaCBvciBicm93c2UgZm9yIEdJUyBkYXRhIGZyb20gdGhlIENBIERlcGFydG1lbnQgb2YgUHVibGljIEhlYWx0aC4KCi0gW0NhbGlmb3JuaWEgSGVhbHRoIEludGVydmlldyBTdXJ2ZXldKGh0dHBzOi8vaGVhbHRocG9saWN5LnVjbGEuZWR1L291ci13b3JrL2NhbGlmb3JuaWEtaGVhbHRoLWludGVydmlldy1zdXJ2ZXktY2hpcykgVGhlIGxhcmdlc3Qgc3RhdGUgaGVhbHRoIHN1cnZleSBpbiB0aGUgbmF0aW9uLCB0aGUgcHJlbWllciBzb3VyY2Ugb2YgZGF0YSBvbiB0aGUgaGVhbHRoIG9mIENhbGlmb3JuaWFucy4gVGhlIENhbGlmb3JuaWEgSGVhbHRoIEludGVydmlldyBTdXJ2ZXkg4oCUIGFsc28ga25vd24gYXMgQ0hJUyBvciB0aGUgQ2FsaWZvcm5pYSBIZWFsdGggU3VydmV5IOKAlCBpcyBhIGxlYWRpbmcgc291cmNlIG9mIGNyZWRpYmxlIGFuZCBjb21wcmVoZW5zaXZlIGRhdGEgb24gdGhlIGhlYWx0aCBhbmQgaGVhbHRoIGNhcmUgbmVlZHMgb2YgQ2FsaWZvcm5pYeKAmXMgbGFyZ2UgYW5kIGRpdmVyc2UgcG9wdWxhdGlvbi4gQ0hJUyBoZWxwcyB0byB0YXJnZXQgcmVzb3VyY2VzIGFuZCBpbnRlcnZlbnRpb25zIHdoZXJlIHRoZXkgYXJlIG5lZWRlZCBtb3N0LCB1bHRpbWF0ZWx5IGltcHJvdmluZyBoZWFsdGggb3V0Y29tZXMgZm9yIGFsbCBDYWxpZm9ybmlhbnMuIEVhY2ggeWVhciwgQ0hJUyBpbnRlcnZpZXdzIG1vcmUgdGhhbiAyMCwwMDAgaG91c2Vob2xkcyBvbiBhIHdpZGUgcmFuZ2Ugb2YgaGVhbHRoIG1hdHRlcnMsIGZyb20gdXNlIG9mIGFuZCBhY2Nlc3MgdG8gaGVhbHRoIGNhcmUsIHRvIGhlYWx0aCBjb25kaXRpb25zIGFuZCBiZWhhdmlvcnMsIHRvIGEgcmFuZ2Ugb2YgdG9waWNzIHRoYXQgaW5mbHVlbmNlIGhlYWx0aDogcHVibGljIHByb2dyYW0gcGFydGljaXBhdGlvbiwgaG91c2luZywgaW5jb21lIGFuZCBlbXBsb3ltZW50LCBjbGltYXRlIGNoYW5nZSwgZm9vZCwgZ3VuIHZpb2xlbmNlLCBhZHZlcnNlIGNoaWxkaG9vZCBleHBlcmllbmNlcywgYW5kIG11Y2ggbW9yZS4gCgpcCgojIE90aGVyIFR5cGVzIG9mIEhlYWx0aC1BZGphY2VudCBEYXRhCgotIFtQb2xpY3lNYXBdKGh0dHBzOi8vdWNkYXZpcy5wb2xpY3ltYXAuY29tLykgUG9saWN5TWFwIGlzIGEgZnVsbHkgd2ViLWJhc2VkIG9ubGluZSBkYXRhIGFuZCBtYXBwaW5nIGFwcGxpY2F0aW9uIHRoYXQgZ2l2ZXMgeW91IGFjY2VzcyB0byBvdmVyIDE1LDAwMCBpbmRpY2F0b3JzIHJlbGF0ZWQgdG8gZGVtb2dyYXBoaWNzLCBob3VzaW5nLCBjcmltZSwgbW9ydGdhZ2VzLCBoZWFsdGgsIGpvYnMgYW5kIG1vcmUuIERhdGEgaXMgYXZhaWxhYmxlIGF0IGFsbCBjb21tb24gZ2VvZ3JhcGhpZXMgKGFkZHJlc3MsIGJsb2NrIGdyb3VwLCBjZW5zdXMgdHJhY3QsIHppcCBjb2RlLCBjb3VudHksIGNpdHksIHN0YXRlLCBNU0EpIGFzIHdlbGwgYXMgdW5pcXVlIGdlb2dyYXBoaWVzIGxpa2Ugc2Nob29sIGRpc3RyaWN0cyBhbmQgcG9saXRpY2FsIGJvdW5kYXJpZXMuIERhdGEgY29tZXMgZnJvbSBib3RoIHB1YmxpYyBhbmQgcHJvcHJpZXRhcnkgc291cmNlcy4KCi0gW0lDUFNSXShodHRwczovL3d3dy5pY3Bzci51bWljaC5lZHUvd2ViL3BhZ2VzLykgSUNQU1IgbWFpbnRhaW5zIGEgZGF0YSBhcmNoaXZlIG9mIG1vcmUgdGhhbiAzNTAsMDAwIGZpbGVzIG9mIHJlc2VhcmNoIGluIHRoZSBzb2NpYWwgYW5kIGJlaGF2aW9yYWwgc2NpZW5jZXMuIEl0IGhvc3RzIDIzIHNwZWNpYWxpemVkIGNvbGxlY3Rpb25zIG9mIGRhdGEgaW4gZWR1Y2F0aW9uLCBhZ2luZywgY3JpbWluYWwganVzdGljZSwgc3Vic3RhbmNlIGFidXNlLCB0ZXJyb3Jpc20sIGFuZCBvdGhlciBmaWVsZHMuCgotIFtEYXRhLmdvdl0oaHR0cHM6Ly9jYXRhbG9nLmRhdGEuZ292L2RhdGFzZXQvKSBUaGUgVW5pdGVkIFN0YXRlcyBHb3Zlcm5tZW504oCZcyBvcGVuIGRhdGEgc2l0ZSBpcyBkZXNpZ25lZCB0byB1bmxlYXNoIHRoZSBwb3dlciBvZiBnb3Zlcm5tZW50IG9wZW4gZGF0YSB0byBpbmZvcm0gZGVjaXNpb25zIGJ5IHRoZSBwdWJsaWMgYW5kIHBvbGljeW1ha2VycywgZHJpdmUgaW5ub3ZhdGlvbiBhbmQgZWNvbm9taWMgYWN0aXZpdHksIGFjaGlldmUgYWdlbmN5IG1pc3Npb25zLCBhbmQgc3RyZW5ndGhlbiB0aGUgZm91bmRhdGlvbiBvZiBhbiBvcGVuIGFuZCB0cmFuc3BhcmVudCBnb3Zlcm5tZW50LiBTZWFyY2ggZ2Vvc3BhdGlhbCBkYXRhc2V0cyBhbmQgc2VlIHdoYXQgdGhleSBoYXZlIQoKLSBbQ2FsRW52aXJvU2NyZWVuXShodHRwczovL29laGhhLmNhLmdvdi9jYWxlbnZpcm9zY3JlZW4vcmVwb3J0L2NhbGVudmlyb3NjcmVlbi12ZXJzaW9uLTIwKSBUaGUgT2ZmaWNlIG9mIEVudmlyb25tZW50YWwgSGVhbHRoIEhhemFyZCBBc3Nlc3NtZW50IChPRUhIQSksIG9uIGJlaGFsZiBvZiB0aGUgQ2FsaWZvcm5pYSBFbnZpcm9ubWVudGFsIFByb3RlY3Rpb24gQWdlbmN5IChDYWxFUEEpLCBhbm5vdW5jZXMgdGhlIGF2YWlsYWJpbGl0eSBvZiB0aGUgQ2FsaWZvcm5pYSBDb21tdW5pdGllcyBFbnZpcm9ubWVudGFsIEhlYWx0aCBTY3JlZW5pbmcgVG9vbDogQ2FsRW52aXJvU2NyZWVuIFZlcnNpb24gMi4wIChDYWxFbnZpcm9TY3JlZW4gMi4wKS4gQ2FsRW52aXJvU2NyZWVuIGlzIGEgc2NyZWVuaW5nIG1ldGhvZG9sb2d5IHRoYXQgY2FuIGJlIHVzZWQgdG8gaGVscCBpZGVudGlmeSBDYWxpZm9ybmlhIGNvbW11bml0aWVzIHRoYXQgYXJlIGRpc3Byb3BvcnRpb25hdGVseSBidXJkZW5lZCBieSBtdWx0aXBsZSBzb3VyY2VzIG9mIHBvbGx1dGlvbi4gQ2FsRVBBIGhhcyB1c2VkIHRoZSB0b29sIHRvIGRlc2lnbmF0ZSBDYWxpZm9ybmlhIGNvbW11bml0aWVzIGFzIGRpc2FkdmFudGFnZWQgcHVyc3VhbnQgdG8gU2VuYXRlIEJpbGwgNTM1LiBJdCB1c2VzIGVudmlyb25tZW50YWwsIGhlYWx0aCwgYW5kIHNvY2lvZWNvbm9taWMgaW5mb3JtYXRpb24gdG8gcHJvZHVjZSBzY29yZXMgZm9yIGV2ZXJ5IGNlbnN1cyB0cmFjdCBpbiB0aGUgc3RhdGUuCgotIFtGb29kIEVudmlyb25tZW50IEF0bGFzIGZyb20gdGhlIFVTREFdKGh0dHBzOi8vd3d3LmVycy51c2RhLmdvdi9mb29kYXRsYXMvKSBBc3NlbWJsZXMgc3RhdGlzdGljcyBvbiBmb29kIGVudmlyb25tZW50IGluZGljYXRvcnMgdG8gc3RpbXVsYXRlIHJlc2VhcmNoIG9uIHRoZSBkZXRlcm1pbmFudHMgb2YgZm9vZCBjaG9pY2VzIGFuZCBkaWV0IHF1YWxpdHksIGFuZCBwcm92aWRlcyBhIHNwYXRpYWwgb3ZlcnZpZXcgb2YgYSBjb21tdW5pdHkncyBhYmlsaXR5IHRvIGFjY2VzcyBoZWFsdGh5IGZvb2QgYW5kIGl0cyBzdWNjZXNzIGluIGRvaW5nIHNvLiAKCi0gVEVTVDIKClwKCiMgQ2Vuc3VzIERhdGEgYW5kIFVTIEdvdmVybm1lbnQgRGF0YSBQYWNrYWdlcyBpbiBSCgotICoqY2Vuc3VzQVBJKiogcGFja2FnZTogU2VlIFtMYWIgMl0oTGFiMi5odG1sKSEKCi0gKipsZWhkcioqIHBhY2thZ2UKCkEgdXNlZnVsIHBhY2thZ2UgZm9yIHdvcmtpbmcgd2l0aCBDZW5zdXMgQnVyZWF1IGRhdGEgaXMgdGhlIGxlaGRyIFIgcGFja2FnZSwgd2hpY2ggYWNjZXNzZXMgdGhlIFtMb25naXR1ZGluYWwgYW5kIEVtcGxveWVyLUhvdXNlaG9sZCBEeW5hbWljcyAoTEVIRCldKGh0dHBzOi8vbGVoZC5jZXMuY2Vuc3VzLmdvdi8pIFtPcmlnaW4tRGVzdGluYXRpb24gRW1wbG95bWVudCBTdGF0aXN0aWNzIChMT0RFUyldKGh0dHBzOi8vbGVoZC5jZXMuY2Vuc3VzLmdvdi9kYXRhLyNsb2RlcykgZGF0YS4gTE9ERVMgaXMgbm90IGF2YWlsYWJsZSBmcm9tIHRoZSBDZW5zdXMgQVBJLCBtZXJpdGluZyBhbiBhbHRlcm5hdGl2ZSBwYWNrYWdlIGFuZCBhcHByb2FjaC4gTE9ERVMgaW5jbHVkZXMgc3ludGhldGljIGVzdGltYXRlcyBvZiByZXNpZGVudGlhbCwgd29ya3BsYWNlLCBhbmQgcmVzaWRlbnRpYWwtd29ya3BsYWNlIGxpbmtzIGF0IHRoZSBDZW5zdXMgYmxvY2sgbGV2ZWwsIGFsbG93aW5nIGZvciBoaWdobHkgZGV0YWlsZWQgZ2VvZ3JhcGhpYyBhbmFseXNpcyBvZiBqb2JzIGFuZCBjb21tdXRlciBwYXR0ZXJucyBvdmVyIHRpbWUuIFRoZSBjb3JlIGZ1bmN0aW9uIGltcGxlbWVudGVkIGluICoqbGVoZHIqKiBpcyBgZ3JhYl9sb2RlcygpYCwgd2hpY2ggZG93bmxvYWRzIGEgTE9ERVMgZmlsZSBvZiBhIHNwZWNpZmllZCBgbG9kZXNfdHlwZWAgKGVpdGhlciAqcmFjKiBmb3IgcmVzaWRlbnRpYWwsICp3YWMqIGZvciB3b3JrcGxhY2UsIG9yICpvZCogZm9yIG9yaWdpbi1kZXN0aW5hdGlvbikgZm9yIGEgZ2l2ZW4gc3RhdGUgYW5kIHllYXIuIFdoaWxlIHRoZSByYXcgTE9ERVMgZGF0YSBhcmUgYXZhaWxhYmxlIGF0IHRoZSBDZW5zdXMgYmxvY2sgbGV2ZWwsIHRoZSAqYWdnX2dlbyogcGFyYW1ldGVyIG9mZmVycyBhIGNvbnZlbmllbnQgd2F5IHRvIHJvbGwgdXAgZXN0aW1hdGVzIHRvIGhpZ2hlciBsZXZlbHMgb2YgYWdncmVnYXRpb24uIEZvciBvcmlnaW4tZGVzdGluYXRpb24gZGF0YSwgdGhlIGBzdGF0ZV9wYXJ0ID0gIm1haW4iYCBhcmd1bWVudCBiZWxvdyBjYXB0dXJlcyB3aXRoaW4tc3RhdGUgY29tbXV0ZXJzOyB1c2UgYHN0YXRlX3BhcnQgPSAiYXV4ImAgdG8gZ2V0IGNvbW11dGVycyBmcm9tIG91dC1vZi1zdGF0ZS4gVGhlIG9wdGlvbmFsIGFyZ3VtZW50IGB1c2VfY2FjaGUgPSBUUlVFYCBzdG9yZXMgZG93bmxvYWRlZCBMT0RFUyBkYXRhIGluIGEgY2FjaGUgZGlyZWN0b3J5IG9uIHRoZSB1c2Vy4oCZcyBjb21wdXRlcjsgdGhpcyBpcyByZWNvbW1lbmRlZCB0byBhdm9pZCBoYXZpbmcgdG8gcmUtZG93bmxvYWQgZGF0YSBmb3IgZnV0dXJlIGFuYWx5c2VzLgoKTGV04oCZcyBncmFiIGEgZGF0YXNldCB0aGF0IGNvbnRhaW5zIDIwMTggdHJhY3QtdG8tdHJhY3QgY29tbXV0ZSBmbG93cyBicm9rZW4gZG93biBieSBhIHZhcmlldHkgb2YgY2hhcmFjdGVyaXN0aWNzIGluIE5ldmFkYSwgcmVmZXJlbmNlZCBpbiB0aGUgTE9ERVMgZG9jdW1lbnRhdGlvbi4KCmBgYHtyfQpsaWJyYXJ5KGRwbHlyKQpsaWJyYXJ5KGxlaGRyKQpudl9sb2Rlc19vZCA8LSBncmFiX2xvZGVzKAogIHN0YXRlID0gIm52IiwKICB5ZWFyID0gMjAxOCwKICBsb2Rlc190eXBlID0gIm9kIiwKICBhZ2dfZ2VvID0gInRyYWN0IiwKICBzdGF0ZV9wYXJ0ID0gIm1haW4iLAogIHVzZV9jYWNoZSA9IFRSVUUKKQpnbGltcHNlKG52X2xvZGVzX29kKQoKYGBgClwKCgoKCi0gKip0aWR5VVNEQSoqIHBhY2thZ2UKCkFncmljdWx0dXJlIGNhbiBiZSBhIGRpZmZpY3VsdCBzZWN0b3Igb24gd2hpY2ggdG8gY29sbGVjdCBzdGF0aXN0aWNzLCBhcyBpdCBpcyBub3QgYXZhaWxhYmxlIGluIG1hbnkgZGF0YSBzb3VyY2VzIHN1Y2ggYXMgTE9ERVMuIEZvcnR1bmF0ZWx5LCBkZWRpY2F0ZWQgc3RhdGlzdGljcyBvbiBVUyBhZ3JpY3VsdHVyZSBjYW4gYmUgYWNxdWlyZWQgd2l0aCB0aGUgdGlkeVVTREEgcGFja2FnZS4gWW914oCZbGwgbmVlZCB0byBnZXQgYW4gQVBJIGtleSBhdCBodHRwczovL3F1aWNrc3RhdHMubmFzcy51c2RhLmdvdi9hcGkgYW5kIHVzZSB0aGF0IHRvIHJlcXVlc3QgZGF0YSBmcm9tIHRoZSBVU0RBIFF1aWNrU3RhdHMgQVBJLgoKTGV04oCZcyBzZWUgd2hpY2ggQ2FsaWZvcm5pYSBjb3VudGllcyBwcm9kdWNlIGhhdmUgdGhlIG1vc3QgYWNyZXMgZGV2b3RlZCB0byBbcGVhY2hlc10oaHR0cHM6Ly95b3V0dS5iZS8zR0NyempWZG1TZz9zaT1iVUhaZlZEMXVxOHhZSUkyKS4gVGhlIGNvcmUgZnVuY3Rpb24gaW1wbGVtZW50ZWQgaXMgZ2BldFF1aWNrc3RhdCgpYC4gVG8gdXNlIGl0IGVmZmVjdGl2ZWx5LCBpdCBpcyBoZWxwZnVsIHRvIGNvbnN0cnVjdCBhIHF1ZXJ5IGZpcnN0IGF0IGh0dHBzOi8vcXVpY2tzdGF0cy5uYXNzLnVzZGEuZ292LyBhbmQgc2VlIHdoYXQgb3B0aW9ucyBhcmUgYXZhaWxhYmxlLCB0aGVuIGJyaW5nIHRob3NlIG9wdGlvbnMgYXMgYXJndW1lbnRzIGludG8gUi4KCmBgYHtyLCBldmFsID0gRkFMU0V9CkNBX2FzcCA8LSBnZXRRdWlja3N0YXQoCiAga2V5ID0gIkVOVEVSIFlPVVIgS0VZIEhFUkUiLAogIHByb2dyYW0gPSAiQ0VOU1VTIiwKICBkYXRhX2l0ZW0gPSAiUEVBQ0hFUyAtIEFDUkVTIEJFQVJJTkciLAogIHNlY3RvciA9ICJDUk9QUyIsCiAgY29tbW9kaXR5ID0gIlBFQUNIRVMiLAogIGNhdGVnb3J5ID0gIkFSRUEgQkVBUklORyIsCiAgZG9tYWluID0gIlRPVEFMIiwKICBnZW9ncmFwaGljX2xldmVsID0gIkNPVU5UWSIsCiAgc3RhdGUgPSAiQ0FMSUZPUk5JQSIsCiAgeWVhciA9ICIyMDE3IgopCmBgYAoKXAoKVGhlIENlbnN1cyBhbmQgb3RoZXIgVS5TLiBnb3Zlcm5tZW50IGFnZW5jaWVzIG9mZmVyIGEgYmV2eSBvZiBvdGhlciBkYXRhIHByb2R1Y3RzIGF0IHZhcmlvdXMgbGV2ZWxzIG9mIGFnZ3JlZ2F0aW9uLiBUaGlzIGFsc28gaW5jbHVkZXMgaW5kaXZpZHVhbCBsZXZlbCBkYXRhLCBhbHNvIGtub3duIGFzIG1pY3JvZGF0YS4gSW4gbWFueSBjYXNlcywgbWljcm9kYXRhIHJlZmxlY3QgcmVzcG9uc2VzIHRvIHN1cnZleXMgdGhhdCBhcmUgZGUtaWRlbnRpZmllZCBhbmQgYW5vbnltaXplZCwgdGhlbiBwcmVwYXJlZCBpbiBkYXRhc2V0cyB0aGF0IGluY2x1ZGUgcmljaCBkZXRhaWwgYWJvdXQgc3VydmV5IHJlc3BvbnNlcy4gVVMgQ2Vuc3VzIG1pY3JvZGF0YSBhcmUgYXZhaWxhYmxlIGZvciBib3RoIHRoZSBkZWNlbm5pYWwgQ2Vuc3VzIGFuZCB0aGUgQUNTOyB0aGVzZSBkYXRhc2V0cywgbmFtZWQgdGhlIFtQdWJsaWMgVXNlIE1pY3JvZGF0YSBTZXJpZXNdKGh0dHBzOi8vd3d3LmNlbnN1cy5nb3YvcHJvZ3JhbXMtc3VydmV5cy9hY3MvbWljcm9kYXRhLmh0bWwpIChQVU1TKSwgYWxsb3cgZm9yIGRldGFpbGVkIGNyb3NzLXRhYnVsYXRpb25zIG5vdCBhdmFpbGFibGUgaW4gYWdncmVnYXRlZCBkYXRhLiBGb3IgaW5mb3JtYXRpb24gb24gdGhlIGVjb3N5c3RlbSBvZiBDZW5zdXMgYW5kIEdvdmVybm1lbnQgcmVsYXRlZCBSIHBhY2thZ2VzLCBjaGVjayBvdXQgS3lsZSBXYWxrZXLigJlzIGluZGlzcGVuc2FibGUgW2Jvb2tdKGh0dHBzOi8vd2Fsa2VyLWRhdGEuY29tL2NlbnN1cy1yL2luZGV4Lmh0bWwpIG9uIHVzaW5nIFIgdG8gYWNjZXNzIGNlbnN1cyBkYXRhLiBJZiB5b3UgYXJlIGludGVyZXN0ZWQgaW4gYWNjZXNzaW5nIENlbnN1cyBkYXRhIG91dHNpZGUgb2YgdGhlIFVuaXRlZCBTdGF0ZXMsIGNoZWNrIG91dCBoaXMgW0NoYXB0ZXIgMTJdKGh0dHBzOi8vd2Fsa2VyLWRhdGEuY29tL2NlbnN1cy1yL3dvcmtpbmctd2l0aC1jZW5zdXMtZGF0YS1vdXRzaWRlLXRoZS11bml0ZWQtc3RhdGVzLmh0bWwpLgoKXAoKIyBSZXNvdXJjZXMgZm9yIG11bHRpcGxlIHR5cGVzIG9mIGRhdGEKCi0gW0dvb2dsZSBFYXJ0aCBFbmdpbmVdKGh0dHBzOi8vZWFydGhlbmdpbmUuZ29vZ2xlLmNvbS8pIEdvb2dsZSBFYXJ0aCBFbmdpbmUgY29tYmluZXMgYSBtdWx0aS1wZXRhYnl0ZSBjYXRhbG9nIG9mIHNhdGVsbGl0ZSBpbWFnZXJ5IGFuZCBnZW9zcGF0aWFsIGRhdGFzZXRzIHdpdGggcGxhbmV0YXJ5LXNjYWxlIGFuYWx5c2lzIGNhcGFiaWxpdGllcy4gU2NpZW50aXN0cywgcmVzZWFyY2hlcnMsIGFuZCBkZXZlbG9wZXJzIHVzZSBFYXJ0aCBFbmdpbmUgdG8gZGV0ZWN0IGNoYW5nZXMsIG1hcCB0cmVuZHMsIGFuZCBxdWFudGlmeSBkaWZmZXJlbmNlcyBvbiB0aGUgRWFydGgncyBzdXJmYWNlLiBFYXJ0aCBFbmdpbmUgaXMgZnJlZSBmb3IgYWNhZGVtaWMgYW5kIHJlc2VhcmNoIHVzZSwgYnV0IHlvdSB3aWxsIG5lZWQgdG8gY3JlYXRlIGEgQ2xvdWQgUHJvamVjdC4KCi0gW0hhcnZhcmQgRGF0YXZlcnNlXShodHRwczovL2RhdGF2ZXJzZS5oYXJ2YXJkLmVkdS8pIFRoZSBIYXJ2YXJkIERhdGF2ZXJzZSBSZXBvc2l0b3J5IGlzIGEgZnJlZSBkYXRhIHJlcG9zaXRvcnkgb3BlbiB0byBhbGwgcmVzZWFyY2hlcnMgZnJvbSBhbnkgZGlzY2lwbGluZSwgYm90aCBpbnNpZGUgYW5kIG91dHNpZGUgb2YgdGhlIEhhcnZhcmQgY29tbXVuaXR5LCB3aGVyZSB5b3UgY2FuIHNoYXJlLCBhcmNoaXZlLCBjaXRlLCBhY2Nlc3MsIGFuZCBleHBsb3JlIHJlc2VhcmNoIGRhdGEuIEVhY2ggaW5kaXZpZHVhbCBEYXRhdmVyc2UgY29sbGVjdGlvbiBpcyBhIGN1c3RvbWl6YWJsZSBjb2xsZWN0aW9uIG9mIGRhdGFzZXRzIChvciBhIHZpcnR1YWwgcmVwb3NpdG9yeSkgZm9yIG9yZ2FuaXppbmcsIG1hbmFnaW5nLCBhbmQgc2hvd2Nhc2luZyBkYXRhc2V0cy4gVGhlcmUgaXMgVE9OUyBvZiBzcGF0aWFsIGRhdGEgdGhlcmUsIGVzcGVjaWFsbHkgYWZ0ZXIgdGhlIFtDbGltYXRlIENhZmVdKGh0dHBzOi8vY2xpbWF0ZWhlYWx0aGNhZmUub3JnLykgc3RhcnRlZCBob3N0aW5nIGRhdGEgdGhlcmUuCgotIEFuZCBkb24ndCBmb3JnZXQgdGhlIFVDIERhdmlzIExpYnJhcnkhIFNvIG1hbnkgcmVzb3VyY2VzIGhlcmUhIFNwZWNpZmljYWxseSwgY2hlY2sgb3V0OiBodHRwczovL2d1aWRlcy5saWJyYXJ5LnVjZGF2aXMuZWR1L2dlb2dyYXBoeSBvciBodHRwczovL2d1aWRlcy5saWJyYXJ5LnVjZGF2aXMuZWR1L3NvY2lhbC1zY2llbmNlLWRhdGEgIAoKCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Other_2026.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
