@@ -1,5 +1,5 @@
 ---
-title: "SPH 215: Geographic Information Systems and Public Health"
+title: "SPH 215: Geographic Information Systems for Public Health 2026"
 ---
 
 \
