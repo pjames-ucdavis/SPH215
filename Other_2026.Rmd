@@ -52,7 +52,7 @@ Below you will find links to data sources that contain spatial data and health d
 
 # Census Data and US Government Data Packages in R
 
-- **censusAPI** package: See [Lab 2](Lab2.html)!
+- **censusAPI** package: See [Lab 2](Lab2_2026.html)!
 
 - **lehdr** package
 
