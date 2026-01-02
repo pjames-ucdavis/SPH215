@@ -63,13 +63,15 @@ In this course, students will gain
 
 # Course Format
 Lecture sessions will adhere to the following format: 
-1. 45 minute or so lecture / discussion about that week's topic -- Feel free to interrupt me to ask questions! 
-2. Short break
-3. 40 minute or so student-led discussion of the week's reading.
+
+- 45 minute or so lecture / discussion about that week's topic -- Feel free to interrupt me to ask questions! 
+- Short break
+- 40 minute or so student-led discussion of the week's reading.
 
 \
 
 Lab Sessions will adhere to the following format:
+
 - A hands on lab where we apply the methods learned in lecture/discussion using real data in R. 
 
 \
@@ -79,16 +81,12 @@ All students are expected to actively participate in all components of the cours
 \
 
 # Required Readings
-Required reading material is composed of a combination of the following:
-
-- Journal articles and research reports.
+There are also a set of weekly readings listed in the syllabus that provide applications of the methods. Required reading material is composed of journal articles from peer-reviewed journals.
 
 \
 
 # Handouts
-For most topics, in lieu of an article or book chapter, I will provide lecture handouts on Canvas in advance of the assigned class.
-
-There are also a set of weekly readings listed in the syllabus that provide applications of the methods.
+I will provide lecture handouts on Canvas in advance of the assigned class.
 
 \
 
@@ -108,7 +106,7 @@ The textbook is free online at: https://geocompr.robinlovelace.net/
 \
 
 # Course Software
-R is the only statistical language used in this course, as it has become an increasingly popular program for data analysis in the social sciences. We will use RStudio as a user friendly interface for R. R is freeware and you can download it on your personal laptop and desktop computers (along with RStudio, which is a user friendly interface for R). Note that although the course does not require students to have experience with R, this class does not devote too much time introducing students to the program. In other words, this is a not an introduction to R programming. The lab guides will provide as much detail as possible to execute tasks and functions, but you will likely run into tasks that will require you to go beyond the guides. My suggestion is to (1) look up RDS or GWR as they are excellent resources and (2) if (1) fails search online. As such, you are expected to do as much independent learning of the software as I teach in the labs.
+R is the only statistical language used in this course, as it has become an increasingly popular program for data analysis in the social sciences. We will use RStudio as a user friendly interface for R. R is freeware and you can download it on your personal laptop and desktop computers (along with RStudio, which is a user friendly interface for R). Note that although the course does not require students to have experience with R, this class does not devote too much time introducing students to the program. In other words, this is a not an introduction to R programming. The lab guides will provide as much detail as possible to execute tasks and functions, but you will likely run into tasks that will require you to go beyond the guides. My suggestion is to (1) look up RDS or GWR as they are excellent resources and (2) if (1) fails, search online. As such, you are expected to do as much independent learning of the software as I teach in the labs.
 
 \
 
@@ -122,7 +120,7 @@ Students will be expected to submit their completed GIS lab assignments. These a
 \
 
 ## Mid-Term Exam (20%): 
-Students will be given a case study based on the use of GIS within a specific public health situation.  The students will write a response to the way they would utilize GIS to aid in the resolution of the case presented.  This will include the policy, procedures, technical aspects and other knowledge gained throughout the course. The mid-term case study will be 20% of the final grade.
+Students will be given a mid-term based on the use of GIS for public health. This mid-term will be multiple choice and short answer, and all questions will be related to coursework, lectures, and readings. The mid-term will be open book and will posted on Wednesday and due on Friday. The mid-term will be 20% of the final grade.
 
 \
 
@@ -132,7 +130,7 @@ The course will end with a final project where the students will be able to appl
 \
 
 ## Class Participation (10%):
-All students are expected to be active participants in class, speaking and contributing to class discussion on most days. On Mondays, during the second half of class there will be student-led discussions of readings. Each student will participate in leading a group discussion on the reading assignments. Students will sign up to lead the classes in groups of 1-3 and will be expected to facilitate class discussion. These discussions can involve presentations, or other interactive approaches to involve students in discussion of the paper (I’d even accept interpretive dance). Class discussions are an important teaching component of the course. Overall class participation will make up 10% of the final grade.
+All students are expected to be active participants in class, speaking and contributing to class discussion on most days. On Mondays, during the second half of class there will be student-led discussions of readings. Each student will participate in leading a group discussion on the reading assignments. Students will sign up to lead the classes in groups of 1-4 and will be expected to facilitate class discussion. These discussions can involve presentations, or other interactive approaches to involve students in discussion of the paper (I’d even accept interpretive dance). Class discussions are an important teaching component of the course. Overall class participation will make up 10% of the final grade.
 
 \
 

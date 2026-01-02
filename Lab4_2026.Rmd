@@ -1,64 +1,803 @@
 ---
-title: "Lab 4: Spatial Data Processing with Vector Data"
+title: "Lab 4: More with Vector Data and Visualizing Raster data"
 ---
 
-In this lab, we are going to work more with vector data, spatially joining two vector datasets. 
+In this lab, we are going to work with vector and raster data, spatially joining point data to vector data. We will learn how to visualize Census data, we will talk about how to wrangle spatial data, and we will get into some really cool ways to create choropleth maps (maps color coded by attributes). Finally, we will take a deep dive into raster data.
 
 The objectives of this guide are to teach you:
 
-   1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
-   2. Import a dataset with walkability data at the Census tract level
-   3. Compare projections of datasets and re-project if needed
-   4. Make maps
-   5. Spatially join the two datasets
-   6. Run a quick statistical analysis on the two datasets combined
+   1. Wrangle vector data
+   1. Create Publication-Ready Maps with vector data
+   1. Introduce raster data 
+   2. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
+   3. Import a dataset with greenspace across the Bay Area
+   4. Compare projections of datasets and re-project if needed
+   5. Make maps
+   6. Spatially join the two datasets
+   7. Run a quick statistical analysis on the two datasets combined
 
-Let's do this!!!
-
-\
+Let's get cracking!
 
 First, let's install our packages.
+\
+# Load packages
 ```{r}
 library(sf)
 library(MapGAM)
 library(tidyverse)
+library(tidycensus)
 library(flextable)
 library(RColorBrewer)
 library(tmap)
-#library(gtools)
-#library(gmodels)
+library(terra)
+```
+
+\
+
+In [Lab 3](Lab3_2026.html), we worked with the tidycensus package and the Census API to bring in Census data into R. We can use the same commands to bring in Census geography. If you haven’t already, make sure to [sign up for and install your Census API key](https://api.census.gov/data/key_signup.html). If you could not install your API key, you’ll need to use `census_api_key()` to activate it with the following code:
+
+```{r, eval = FALSE}
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overwrite=TRUE)
+```
+\
+
+Use the `set_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 3](Lab3_2026.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
+```{r, message=FALSE}
+ca.tracts <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+
+\
+
+The only difference between the code above and what we used in [Lab 3](Lab3_2026.html) is we have one additional argument added to the `get_acs()` command: `geometry = TRUE`. This tells R to bring in the spatial features associated with the geography you specified in the command, in the above case California tracts. You can set `cache_table = TRUE` so that you don’t have to re-download after you’ve downloaded successfully the first time. This is important because you might be downloading a really large file, or may encounter Census FTP issues when trying to collect data. 
+
+\
+
+Note: We can also download the data another way. We can go to the [Census Shapefiles website](https://www.census.gov/cgi-bin/geo/shapefiles/index.php) and navigate to 2023, Census Tracts, then California. We can then download a .zip file that contains an ESRI shapefile of the Census tracts for California. When we unzip the file, we see a series of files. Thankfully, the **sf** package has an `st_read()` function that can tackle this! For more detailed data downloads, you can use [National Historical Geographic Information System (NHGIS)](https://www.nhgis.org/). The code below is example of how we might bring in a shapefile, just for future reference!
+
+```{r eval=FALSE}
+ca.tracts <- st_read("/Users/pjames1/Downloads/tl_2024_06_tract/tl_2024_06_tract.shp")
+```
+
+
+OK, let's go back to the data we got from **tidycensus**. Lets take a look at our data.
+
+\
+
+```{r}
+ca.tracts
+```
+
+\
+
+The object looks much like a basic tibble, but with a few differences.
+
+  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in California) with 13 fields (attributes or columns of data).
+  - The `Geometry Type` indicates that the spatial data are in `MULTIPOLYGON` form (as opposed to points or lines, the other basic vector data forms).
+  - `Bounding box` indicates the spatial extent of the features (from left to right, for example, California tracts go from a longitude of -124.482 to -114.1312).
+  - `Geodetic CRS` tells us the coordinate reference system.
+  - The final difference is that the data frame contains the column geometry. This column (a list-column) contains the geometry for each observation. This looks familiar!
+  
+At its most basic, an **sf** object is a collection of simple features that includes attributes and geometries in the form of a data frame. In other words, it is a data frame (or tibble) with rows of features, columns of attributes, and a special column always named geometry that contains the spatial aspects of the features.
+
+If you want to peek behind the curtain and learn more about the nitty gritty details about simple features, check out the official **sf** [vignette.](https://r-spatial.github.io/sf/articles/sf1.html)
+
+\
+
+# Data Wrangling
+
+There is a lot of stuff [behind the curtain](https://www.jessesadler.com/post/simple-feature-objects/) of how R handles spatial data as simple features, but the main takeaway is that **sf** objects are data frames. This means you can use many of the **tidyverse** functions we’ve learned in the past couple labs to manipulate **sf** objects, including the pipe `%>%` operator. For example, let’s break up the column *NAME* into separate tract, county and state variables using the `separate()` function
+
+We do all of this in one line of continuous code using the pipe operator `%>%`
+
+```{r}
+ca.tracts <- ca.tracts %>%
+              separate(NAME, c("Tract", "County", "State"), sep = "; ")
+glimpse(ca.tracts)
+```
+
+\
+
+Another important data wrangling operation is to join attribute data to an sf object. For example, let’s say you wanted to add tract level median household income, which we can get using `get_acs()`. We could have searched online for the variable name, but it's *B19013_001*. Read the file in and save it as an object call *ca.inc*.
+
+```{r}
+ca.inc <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(medinc = "B19013_001"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+\
+
+Unlike before, we brought these data in without the `geometry = TRUE` option. So this is just a table. But remember, an **sf** object is a data frame, so we can use `left_join()`, which we covered in [Lab 2](Lab2_2026.html), to join the files *ca.inc* and *ca.tracts*.
+
+```{r}
+ca.tracts <- ca.tracts %>%
+  left_join(ca.inc, by = "GEOID")
+
+#take a look to make sure the join worked
+glimpse(ca.tracts)
+```
+
+\
+
+Note that we can’t use `left_join()` to join the attribute tables of two **sf** files. You will need to either make one of them not spatial by using the `st_drop_geometry()` function or use the `st_join()` function to spatially join them.
+
+We use the function `tm_shape()` from the **tmap** package to map the data. 
+
+```{r}
+tmap_mode("plot")
+tract_map <- tm_shape(ca.tracts) +   tm_polygons()
+tract_map
+```
+
+\
+
+# Spatial Data Wrangling
+
+There is Data Wrangling and then there is Spatial Data Wrangling. Cue dangerous sounding music. Well, it’s not that dangerous or scary. Spatial Data Wrangling involves cleaning or altering your data set based on the geographic location of features. The **sf** package offers a suite of functions unique to wrangling spatial data. Most of these functions start out with the prefix `st_`. To see all of the functions, type in
+
+```{r, eval=FALSE}
+methods(class = "sf")
+```
+
+\
+
+We won’t go through all of these functions as the list is quite extensive. But, we’ll go through a few relevant spatial operations for this class below. The function we will be primarily using is `st_join()`.
+
+\
+
+## Intersect
+
+A common spatial data wrangling issue is to subset a set of spatial objects based on their location relative to another spatial object. In our case, we want to keep California tracts that are in the Sacramento metro area. We can do this using the `st_join()` function. We’ll need to specify a type of join. Let’s first try `join = st_intersects`. First, let's bring in a polygon of the Sacramento metro area from Github.
+
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds"
+download.file(url, destfile = "sac.metro.rds", mode = "wb")
+sac.metro <- readRDS("sac.metro.rds")
+```
+
+\
+
+Let's take a look at *sac.metro* and understand what file it is.
+
+```{r}
+glimpse(sac.metro)
+```
+
+\
+
+OK, that geometry looks good. And it's a polygon, so that's good. Let's now try to intersect our *sac.metro* dataset with our *ca.tracts* dataset. 
+
+```{r}
+sac.metro.tracts.int <- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)
+```
+
+\
+
+The above code tells R to identify the polygons in *ca.tracts* that intersect with the polygon *sac.metro*. We indicate we want a polygon intersection by specifying `join = st_intersects`. The option `left=FALSE` tells R to remove the polygons from *ca.tracts* that do not intersect (make it TRUE and see what happens) with *sac.metro*. Plotting our tracts, we get:
+```{r}
+tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +  
+  tm_borders(col = "red")
+```
+
+\
+
+## Within
+
+We have one small issue. Using `join = st_intersects` returns all tracts that intersect *sac.metro*, which include those that touch the metro’s boundary. No bueno. We can instead use the argument `join = st_within` to return tracts that are *completely within* the metro area.
+
+```{r}
+sac.metro.tracts.w <- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "blue") +
+tm_shape(sac.metro) +
+  tm_borders(col = "red")
+```
+
+\
+
+Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table, you’ll see it includes all the variables from both *ca.tracts* and *sac.metro*. We don’t need these variables, so use `select()` to eliminate them. You’ll also notice that if variables from two data sets share the same name, R will keep both and attach a *.x* and *.y* to the end. For example, I was found in both *ca.tracts* and *sac.metro*, so R named one *GEOID.x* and the other that was merged in was named *GEOID.y*.
+
+\
+
+# Mapping in R
+
+## ggplot
+
+OK, so now we've talked a little about how to bring in and manipulate vector polygon data, let's do some mapping and create some choropleth maps. We can do this with the **ggplot** package, the **tmap** package, and the **leaflet** package (which we won't cover now, but it's very cool for interactive maps). Let's start with **ggplot**.
+
+\
+
+### ggplot
+
+Because **sf** is tidy friendly, it is no surprise we can use the **tidyverse** plotting function `ggplot()` to make maps. We already received an introduction to `ggplot()` in [Lab 3](Lab3_2026.html). Recall its basic structure:
+
+```{r, eval=FALSE}
+ggplot(data = <DATA>) +
+      <GEOM_FUNCTION>(mapping = aes(x, y)) +
+      <OPTIONS>()
+```
+
+\
+
+In mapping, `geom_sf()` is `<GEOM_FUNCTION>()`. Unlike with functions like `geom_histogram()` and `geom_boxplot()`, we don’t specify an x and y axis. Instead you use `fill` if you want to map a variable or color to just map boundaries.
+
+Let’s use `ggplot()` to make a choropleth map. We need to specify a numeric variable in the `fill =` argument within `geom_sf()`. Here we map tract-level median household income in the Sacramento metro area.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))
+```
+
+\
+
+We can also specify a title (as well as subtitles and captions) using the `labs()` function.
+
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = "Median Income Sacramento MSA Tracts") 
+```
+
+\
+
+We can make further layout adjustments to the map. Don’t like a blue scale on the legend? You can change it using the `scale_file_gradient()` function. Let’s change it to a white to red gradient. We can also eliminate the gray tract border colors to make the fill color distinction clearer. We do this by specifying `color = NA` inside `geom_sf()`. We can also get rid of the gray background by specifying a basic black and white theme using `theme_bw()`. We also added a caption indicating the source of the data using the `captions =` parameter within `labs()`. We then changed the color to red using labels for `low=` and `high=`, and we added a name to our legend with `name='.
+
+```{r}
+ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+    labs(title = "Median Income Sacramento MSA Tracts",
+         caption = "Source: American Community Survey") +  
+  theme_bw()
+```
+
+\
+
+Dare I say, we are ready for the New York Times with this map!
+
+\
+
+### Points on top of polygons
+
+OK, now that we have mapped points and mapped polygons, let's put them both together! First, we are going to bring in our old friend *CAdata* from last week's lab.
+
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+```
+
+\
+
+This time, we will map those points with **ggplot**.
+
+```{r}
+ggplot(data = ca_pts_crs) +
+  geom_sf(fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
 
 ```
 
 \
 
+We can overlay the points over Sacramento tracts to give the locations some perspective. Here, you add two `geom_sf()` arguments for the tracts and the cancer cases.
 
-# Spatial Data Processing with Vector Data in R
-
-In this exercise, we will learn about geospatial analysis with vector data. 
-
-We will be using data included in the **MapGAM()** [package](https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf). As a reminder: While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. While this is a cohort with time to mortality, for the purposes of our class, we will conduct simple tabular analyses looking at associations between different spatial exposures with mortality at end of follow-up. 
-
-As another reminder, the *CAdata* dataset contains the following variables:
-
-* time (follow-up time)
-* event (1=dead, 0=censored)
-* X (Latitude)
-* Y (Longitude)
-* AGE (age in years)
-* INS (insurance status, categorical)
-
-We will also read in a dataset with walkability index data from California. This dataset includes administrative boundaries for United States Census tract polygons, along with values for a walkability index for each tract derived from z-scores for population density, business density, and street connectivity.
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
 
 \
 
-# Read in Vector Datasets and Check Projections
+Hmmm. That doesn't look great. We have lots of cases outside of Sacramento. Let's filter out to just pick cases within the Sacramento area. 
 
-## Read in Cancer Dataset
+```{r, eval=FALSE}
+ca_pts_crs.w <- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
 
-Next, we want to read in all of our spatial data. First, we read in the *CAdata* dataset from the **MapGAM** package, and then convert it to a spatial dataset. 
+\
+
+Ooof. That doesn't work. It says our  `st_crs(x) == st_crs(y) is not TRUE`. That means our Coordinate Reference Systems are not matching! Let's transform our cancer dataset *ca_pts_crs.w* to match the CRS for *sac.metro.tracts.w* with one easy step using `st_transform`:
+```{r}
+#check crs of each dataset
+st_crs(ca_pts_crs)
+st_crs(sac.metro.tracts.w)
+
+#create new dataset with transformed CRS
+ca_pts_crs.transformed <- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+st_crs(ca_pts_crs.transformed )
+```
+
+\
+
+OK, let's try this again!
 
 ```{r}
+ca_pts_crs.w <- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)
+```
+
+It worked! OK, now let's try our map again.
+
+```{r}
+ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants",
+       caption = "Source: Ovarian Cancer Cases") +  
+  theme_bw()
+```
+
+\
+
+Alright, who's ready for a challenge? Let's put it all together in one nice map.
+
+```{r}
+ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= "white", high = "red", na.value ="gray", name = "Median Income") +  
+  geom_sf(data = ca_pts_crs.w, fill = "black") +
+  labs(title = "Study Participants Overlaid with Median Income of Sacramento Tracts",
+       caption = "Source: American Community Survey and Ovarian Cancer Cases") +
+  theme_bw()
+  
+```
+
+\
+
+Can I just say, you're very impressive. Well done!
+
+\
+
+## tmap
+
+Whether you prefer **tmap** or **ggplot** is up to you, but I find that **tmap** has some benefits, so let’s focus on its mapping functions next.
+
+**tmap** uses the same layered logic as **ggplot**. As we saw last week, the initial command is `tm_shape()`, which specifies the geography to which the mapping is applied. You then build on `tm_shape()` by adding one or more elements such as `tm_polygons()` for polygons, `tm_borders()` for lines, and `tm_dots()` for points. All additional functions take on the form of `tm_`. Check the full list of `tm_` elements [here](https://www.rdocumentation.org/packages/tmap/versions/2.0/topics/tmap-element).
+
+### Choropleth maps in tmap
+
+Let’s make a static choropleth map of median household income in Sacramento MSA just like we did above, but this time in **tmap**.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile")
+```
+
+\
+
+We first put the dataset *sac.metro.tracts.w* inside `tm_shape()`. Because you are plotting polygons, you use `tm_polygons()` next. The argument `col = "medincE"` tells R to shade (or color) the tracts by the variable *medincE.* The argument `style = "quantile"` tells R to break up the shading into quantiles, or equal groups of 5 as a default. I find that this is where **tmap** offers a distinct advantage over **ggplot** in that users have greater control over the legend and bin breaks. **tmap** allows users to specify algorithms to automatically create breaks with the style argument. You can also change the number of breaks by setting `n=`. The default is `n=5`. Rather than quintiles, you can show quartiles using `n=4`. I'm feeling crazy. Let's do it.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",  n=4)
+```
+
+\
+
+Check out [this link](https://geocompr.robinlovelace.net/adv-map.html#color-settings) for more on  available classification styles in **tmap**.
+
+\
+
+The `tm_polygons()` command is a wrapper around two other functions, `tm_fill()` and `tm_borders()`. `tm_fill()` controls the contents of the polygons (color, classification, etc.), while `tm_borders()` does the same for the polygon outlines.
+
+For example, using the same shape (but no variable), we obtain the outlines of the neighborhoods from the `tm_borders()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_borders()
+```
+
+\
+
+Similarly, we obtain a choropleth map without the polygon outlines when we just use the `tm_fill()` command.
+```{r}
+tm_shape(sac.metro.tracts.w) + 
+  tm_fill("medincE")
+```
+
+When we combine the two commands, we obtain the same map as with tm_polygons() (this illustrates how in R one can often obtain the same result in a number of different ways). Try this on your own.
+
+\
+
+### Color scheme
+
+The argument `palette =` defines the color ranges associated with the bins and determined by the `style` arguments. Several built-in palettes are contained in **tmap**. For example, using `palette = "Reds"` would yield the following map for our example.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds") 
+```
+
+Under the hood, `“Reds”` refers to one of the color schemes supported by the **RColorBrewer** package (see below).
+
+\
+
+In addition to the built-in palettes, customized color ranges can be created by specifying a vector with the desired colors as anchors. This will create a spectrum of colors in the map that range between the colors specified in the vector. For instance, if we used `c(“red”, “blue”)`, the color spectrum would move from red to purple, then to blue, with in between shades. In our example:
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","blue")) 
+```
+
+\
+
+Not exactly a pretty picture. In order to capture a diverging scale, we insert `“white”` in between red and blue.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = c("red","white", "blue")) 
+```
+
+\
+
+A preferred approach to select a color palette is to chose one of the schemes contained in the **RColorBrewer** package. These are based on the research of cartographer Cynthia Brewer (see the colorbrewer2 [website](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3) for details). ColorBrewer makes a distinction between sequential scales (for a scale that goes from low to high), diverging scales (to highlight how values differ from a central tendency), and qualitative scales (for categorical variables). For each scale, a series of single hue and multi-hue scales are suggested. In the **RColorBrewer** package, these are referred to by a name (e.g., the “Reds” palette we used above is an example). The full list is contained in the **RColorBrewer** documentation.
+
+There are two very useful commands in this package. One sets a color palette by specifying its name and the number of desired categories. The result is a character vector with the hex codes of the corresponding colors.
+
+For example, we select a sequential color scheme going from blue to green, as *BuGn*, by means of the command `brewer.pal`, with the number of categories (6) and the scheme as arguments. The resulting vector contains the HEX codes for the colors.
+
+```{r}
+brewer.pal(6,"BuGn")
+```
+
+\
+
+Using this palette in our map yields the following result.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette="BuGn") 
+```
+
+\
+
+The command `display.brewer.pal()` allows us to explore different color schemes before applying them to a map. For example:
+```{r}
+display.brewer.pal(6,"BuGn")
+```
+
+\
+
+### Legend
+
+There are many options to change the formatting of the legend. The automatic title for the legend is not that attractive, since it is simply the variable name. This can be customized by setting the `title` argument.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") 
+```
+
+\
+
+Another important aspect of the legend is its positioning. This is handled through the `tm_layout()` function. This function has a vast number of options, as detailed in the [documentation](https://www.rdocumentation.org/packages/tmap/versions/2.1-1/topics/tm_layout). There are also specialized subsets of layout functions, focused on specific aspects of the map, such as `tm_legend()`, `tm_style()` and `tm_format()`. We illustrate the positioning of the legend.
+
+Often, the default location of the legend is appropriate, but sometimes further control is needed. The `legend.position` argument to the `tm_layout` function moves the legend around the map, and it takes a vector of two string variables that determine both the horizontal position (“left”, “right”, or “center”) and the vertical position (“top”, “bottom”, or “center”).
+
+For example, if we would want to move the legend to the bottom-right position, we would use the following set of commands.
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.position = c("right", "bottom"))
+```
+
+\
+
+There is also the option to position the legend outside the frame of the map. This is accomplished by setting `legend.outside` to TRUE, and optionally also specify its position by means of `legend.outside.position()`. The latter can take the values “top”, “bottom”, “right”, and “left”.
+
+For example, to position the legend outside and on the right, would be accomplished by the following commands.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+We can also customize the size of the legend, its alignment, font, etc. Check out the documentation for more!
+
+\
+
+### Title
+
+Another functionality of the `tm_layout()` function is to set a title for the map, and specify its position, size, etc. For example, we can set the title, the `title.size` and the `title.position` as in the example below. We made the font size a bit smaller (0.8) in order not to overwhelm the map, and positioned it in the top left-hand corner.
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(title = "Median Income of Sacramento Tracts", title.size = 0.8, 
+            title.position = c("left","top"),
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+To have a title appear on top (or on the bottom) of the map, we need to set the `main.title` argument of the `tm_layout()` function, with the associated `main.title.position`, as illustrated below (with title.size set to 1.25 to have a larger font).
+
+
+```{r}
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+
+```
+
+\
+
+### Scale bar and arrow
+
+OK this really wouldn't be a GIS class without talking about one of the core elements of a map--the good ole scale bar and arrow. Let's add these to our map. First, we add the scale bar with `tm_scale_bar()`.
+
+The argument `breaks` tells R the distances to break up and end the bar. The argument `position` places the scale bar on the bottom left part of the map. Note that the `scale` is in miles (we're in Amurica!). The default is in kilometers (the rest of the world!), but you can specify the units within `tm_shape()` using the argument `unit`. `text.size` scales the size of the bar smaller (below 1) or larger (above 1).
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+Next let's spice things up by adding a north arrow, which we can do using the function `tm_compass()`. You can control for the type, size and location of the arrow within this function. I place a 4-star arrow on the bottom right of the map.
+
+```{r}
+tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento Tracts", 
+            main.title.size = 1.25, main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+```
+
+\
+
+We can also eliminate the frame around the map using the argument `frame = FALSE`.
+
+```{r}
+sac.map <- tm_shape(sac.metro.tracts.w, unit = "mi") +
+  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
+              title = "Median Income") +
+  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) +
+  tm_layout(main.title = "Median Income of Sacramento tracts", 
+            main.title.size = 1.25, frame = FALSE,
+            main.title.position="center",
+            legend.outside = TRUE, legend.outside.position = "right")
+sac.map
+```
+
+\
+
+Note that I saved the map into an object called *sac.map*. R is an object-oriented program, so everything you make in R are objects that can be saved for future manipulation. This includes maps. And future manipulations of a saved map includes adding more `tm_*` functions to the saved object, such as `sac.map + tm_layout(your changes here)`. Check the help documentation for `tm_layout()` to see the complete list of settings. 
+
+\
+
+## Saving maps
+
+You can save your maps a few ways. 
+1. On the plotting screen where the map is shown, click on Export and save it as either an image or pdf file.
+2. Use the function `tmap_save()`
+
+For option 2, we can save the map object *sac.map* as such:
+```{r}
+tmap_save(sac.map, "sac_city_inc.jpg")
+```
+Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
+
+\
+
+## Making a map with CDC Places data 
+
+OK, do we have energy for one more example? Let's bring in data from the [CDC Places dataset](https://www.cdc.gov/places/tools/data-portal.html). This is an incredible resource to access data on the CDC's [Behavioral Risk Factor and Surveillance System (BRFSS)](https://www.cdc.gov/brfss/index.html), as well as social determinants of health data from American Community Survey. I've already downloaded California Census tract data on the "% of adults reporting no leisure-time physical activity". Let's bring this in and take a look at it!
+
+```{r}
+places_ca_lpa<-read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/places_ca_lpa.csv")
+glimpse(places_ca_lpa)
+```
+
+\
+
+Interesting stuff. Looks like the values we care about are stores in a column called *Data_Value* and the FIPS code seems to be in *LocationName*. Let's go ahead and rename *LocationName* and then see if we can join this data with our Census tract data *ca.tracts*.
+
+```{r}
+places_ca_lpa<-rename(places_ca_lpa, GEOID = LocationName)
+glimpse(places_ca_lpa)
+
+ca.tracts.lpa <- ca.tracts %>%
+  left_join(places_ca_lpa, by = "GEOID")
+glimpse(ca.tracts.lpa)
+```
+
+\
+
+It worked! OK, now let's make a map of % of adults reporting no leisure-time physical activity. We will build on what we've learned above! I've also included the option in `tm_polygons()` of `lwd = 0` which makes the borders a width of 0...basically we are making it so there are no borders and we can easily see polygon values in denser concentrations of Census tracts (e.g., around Sacramento, San Francisco, LA, etc.)
+
+```{r}
+tm_shape(ca.tracts.lpa, unit = "mi") +
+  tm_polygons(col = "Data_Value", style = "quantile",palette = "Reds",
+              title = "% Adults No Physical Activity", lwd = 0) +
+  tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
+            main.title.size = 1.25, main.title.position="center")
+```
+\
+
+Oooooooo that is one goooood looking map!
+
+\
+
+You’ve completed your introduction to **sf**. Whew! Badge? Yes, please, you earned it! Time to [celebrate](https://www.youtube.com/watch?v=3GwjfUFyY6M)!
+
+\
+
+![sf Badge](sf.gif)
+
+\
+
+# Rasters
+
+Raster datasets are simply an array of pixels/cells organized into rows and columns (or a grid) where each cell contains a value representing information, such as temperature, vegetation, land use, air pollution, etc. Raster maps usually represent continuous phenomena such as elevation, temperature, or population density. Discrete features such as soil type or land-cover classes can also be represented in the raster data model. Rasters are aerial photographs, imagery from satellites, Google Street View images, etc. A few things to note.
+
+ - Raster datasets are always rectangular (rows x col) similar to matrices. Irregular boundaries are created by using `NAs`.
+ - Rasters have to contain values of the same type (int, float, boolean) throughout the raster, just like matrices and unlike data frames.
+ - The size of the raster depends on the **resolution** and the **extent** of the raster. As such many rasters are large and often cannot be held in memory completely.
+ 
+ 
+The workhorse package for working with rasters in R is the **terra** package by Robert Hijmans. **terra** has functions for creating, reading, manipulating, and writing raster data. The package also implements raster algebra and many other functions for raster data manipulation. The package works with `SpatRaster` objects. The `rast()` function is used to create these objects. 
+
+Typically you will bring in a raster dataset directly from a file. These files come in many different forms, typically .tif, .img, and .grd.
+
+\
+
+We’ll bring in the file NDVI_rast.tif. The file contains normalized difference vegetation index (NDVI) data for the Bay Area. These data are taken from Landsat satellite data that I downloaded from Google Earth Engine. We use the function `rast()` to bring in data in raster form, then take a look at the dataset.
+
+```{r}
+
+
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif"
+download.file(url, destfile = "NDVI_rast2.tif", mode = "wb")
+NDVI_raster = rast("NDVI_rast2.tif")
+
+## Get summary of raster data
+NDVI_raster
+```
+
+\
+
+Does it have a CRS?
+```{r}
+
+## Check CRS
+st_crs(NDVI_raster)
+
+```
+
+\
+
+OK we have what looks like a raster. We see our resolution and our extent, and we have a CRS. Nice! Shall we plot this?
+
+```{r}
+## Plot the raster on a map
+tmap_mode("plot")
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(style = "cont") +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+\
+
+Looks pretty cool! Seems to be the Bay Area, and we have some nice variability. But we let's see if we can make this fancier.
+
+```{r}
+# palette for plotting
+breaks_ndvi <- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
+palette_ndvi <- c("#BFBFBF","#DBDBDB","#FFFFE0","#FFFACC","#EDE8B5","#DED99C","#CCC782","#BDB86B","#B0C261","#A3CC59","#91BF52","#80B347","#70A340","#619636","#4F8A2E","#407D24","#306E1C","#216112","#0F540A","#004500")
+
+NDVI_map = tm_shape(NDVI_raster) +
+  tm_raster(title = "NDVI",
+             style="cont",
+             palette = palette_ndvi
+            ) +
+  tm_legend(outside = TRUE)
+NDVI_map
+```
+
+\
+
+## Crop
+
+OK, let's see if we can crop this to focus on San Francisco. I've googled the lat and long for the area around San Francisco, and I'll put these right into my `crop()` function. I can use the `tmap_mode("view")` now because the raster is small enough for R to make interactive.
+
+```{r}
+sf_rast<-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
+
+tmap_mode("plot")
+NDVI_sf_map = tm_shape(sf_rast) +
+  tm_raster(title = "NDVI",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+
+NDVI_sf_map
+```
+
+\
+
+## Classify
+
+So negative values of NDVI represent water. Let's set all negative values to -1, and that will help us to distinguish water from land easier.
+
+```{r}
+sf_rast_neg <- app(sf_rast, fun=function(x){ x[x <= 0] <- -1; return(x)} )
+
+NDVI_sf_map_neg = tm_shape(sf_rast_neg) +
+  tm_raster(title = "NDVI",
+             style="cont",
+            ) +
+  tm_legend(outside = TRUE)
+
+NDVI_sf_map_neg
+```
+
+\
+
+Nice. What do we notice? The coast of San Francisco might have some cloud cover errors! Satellite data isn't perfect! But the good news is, we've learned how to bring in raster data! I think we need a badge!!!!
+
+\
+
+![terra Badge](terra.png)
+
+\
+
+One last step. Let's put all our knowledge together and map our old friend CAdata on top of the NDVI data in San Francisco. First, let's bring in the CAdata dataset on ovarian cancer cases again. 
+
+```{r}
+
 data(CAdata)
 ca_pts <- CAdata
 ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
@@ -71,143 +810,39 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 \
 
-## Read in Walkability Index Dataset at the Census Tract level
-
-We then read in the administrative boundaries dataset with the walkability index values for the San Francisco Bay Area. Finally, we check the file to make sure it was read correctly. Does it have a coordinate reference system?
-
+Let's check the CRS and compare it to our NDVI dataset.
 
 ```{r}
-## Reading in the walkability index dataset
-url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/BayArea_Walkability_Data.rds"
-download.file(url, destfile = "BayArea_Walkability_Data.rds", mode = "wb")
-walkability_tracts = readRDS("BayArea_Walkability_Data.rds")
-
-## Is walkability_tracts spatial?
-head(walkability_tracts)
-```
-
-\
-
-# Check Projections for all Spatial Data
-
-Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our polygon data. When we are done, do the projections of the two datasets match?
-
-
-```{r}
-## Look at the coordinate reference system for the cancer data, and for walkability data
 st_crs(ca_pts)
-st_crs(walkability_tracts)
-
-## Transform the coordinate reference system of the walkability tract data to match that 
-## of the cancer data
-ca_transformed <-st_transform(ca_pts, st_crs(walkability_tracts))  
-
-## Check projection of walkability_transformed
-st_crs(walkability_tracts)==st_crs(ca_transformed)
+st_crs(sf_rast_neg)
 ```
 
 \
 
-# Map The Data
-
-Now, we will visualize our spatial data using **tmap**. We will overlay the walkability maps with the ovarian cancer data, and then make a choropleth map of walkability indices. Do any patterns jump out, or are there any outliers?
+Hmmm, let's make sure they are the same projection.
 
 ```{r}
-## Make a choropleth map of polygons colored by levels of walkability
+ca_pts_proj<-st_transform(ca_pts,st_crs(sf_rast_neg))
+st_crs(ca_pts_proj)
+```
+
+\
+
+They should be good to go now. Let's map these addresses on top of the raster data!
+
+```{r}
 tmap_mode("plot")
-walkability_map <- tm_shape(walkability_tracts) +
-  tm_polygons(
-    col = "Avg_walkin",
-    style = "cont",
-    title = "Walkability Index",
-    lwd = 0,
-    alpha=.95
-  )
-
-## Make another map adding points for the cancer data to map of polygons
-walkability_cancer_map = walkability_map + 
-  tm_shape(ca_transformed) + 
-  tm_dots(size=0.25, alpha=0.8, col="blue")
-
-## Plot both maps side by side
-tmap_arrange(walkability_map, walkability_cancer_map)
+NDVI_cancer_map = tm_shape(sf_rast_neg) +
+  tm_raster(style = "cont", title = "NDVI") +
+  tm_legend(outside = TRUE) +
+  tm_shape(ca_pts_proj) + 
+  tm_dots(size=0.3, alpha=0.5, col = "blue")
+NDVI_cancer_map
 ```
 
 \
 
-We find that the most highly walkable areas are in the city of San Francisco, which makes sense. Our cancer cohort data overlaps with the SF Bay Area walkability map, which is reassuring. 
+That is one fine looking map. You deserve a break--get outside and enjoy some greenspace. 
 
-\
 
-# Spatial Join 
-
-Now that we have visualized our data, let's see if there is an association between the walkability index and mortality among ovarian cancer cases. We will first spatially join the two datasets (merge the two datasets based on location of cases and the walkability index of the census tract that contains them) using `st_join()`. Then we will check the distribution of walkability index. We will use a two-sided chi-squared test to test our hypothesis of the association between residential walkability index value and mortality among ovarian cancer cases. What do we find?
-
-```{r, eval=TRUE, warning=FALSE, message=FALSE}
-## Spatially join the cancer point data to the walkability polygon data
-walkability_cancer = st_join(ca_transformed, walkability_tracts[c("Avg_walkin", "GEOID")]) 
-
-## Take a look at a summary of the values
-summary(walkability_cancer$Avg_walkin)
-```
-
-\
-
-Looks like we have lots of NA values. That is because some of our participants live outside of the area of our walkability data. Let's drop those missing values.
-```{r}
-walkability_cancer_nomiss <- walkability_cancer %>%
-    subset(!is.na(Avg_walkin))
-summary(walkability_cancer_nomiss$Avg_walkin)
-glimpse(walkability_cancer_nomiss)
-```
-
-\
-
-# Analyze our Joined Dataset
-OK, we have a dataset with no missingness. Can we look at the distribution of our walkability index among participants?
-```{r}
-## Check distribution of walkability index
-hist(walkability_cancer_nomiss$Avg_walkin) 
-```
-
-\
-
-For the purposes of our analysis, let's divide up our walkability data into quartiles. We will do this using the `mutate()` function combined with the `ntile()` function. Then we will take a glimpse at our new dataset.
-
-```{r}
-walkability_cancer_nomiss <- walkability_cancer_nomiss %>%
-  mutate(walk_quartile = ntile(Avg_walkin, 4))
-
-glimpse(walkability_cancer_nomiss)
-```
-
-\
-
-OK that looks good. We have created a new variable *walk_quartile* that tells us what quartile of walkability a participant lives in. Let's do a two by two table of walkability quartiles by *event*, which is whether a participant died over followup.
-```{r}
-## Create a contingency table of event by walk_quartile
-tab <- table(walkability_cancer_nomiss$walk_quartile, walkability_cancer_nomiss$event)
-tab
-```
-
-\
-
-Hmmm, that's interesting, but let's look at this by percentages instead.
-```{r}
-## Convert to percentages by column
-tab_col_perc <- prop.table(tab, margin = 2) * 100
-round(tab_col_perc, 1)
-```
-
-\
-
-Do you think the percentages are different by quartile of the walkability index? We can run a chi-squared test to be sure. This is a statistical test to see whether there is a difference in the probability of *event*, or whether a participant died over follow-up, by the quartiles of the walkability index. We do this with the `chisq.test()` function.
-```{r}
-## Chi-squared test
-chisq.test(tab)
-```
-
-\
-
-OK, how do we interpret this? Our null hypothesis is that there is no association between mortality at end of follow-up and increasing quartile of walkability index. Our alternative hypothesis is that there is an association between mortality at end of follow-up and increasing quartile of walkability index. We use a two-sided chi-squared test with alpha=0.05. Assuming no sources of bias and that the null hypothesis is true, the probability of observing increases in mortality at end of follow-up with increasing quartiles of walkability as or more extreme as those produced in these data is 0.66. Since p>0.05, we fail to reject the null hypothesis and conclude that walkability is not associated with mortality at end of follow-up (under the assumptions stated above). In other words, we don't see a relationship between walkability exposure and our outcome (dying over followup).
 

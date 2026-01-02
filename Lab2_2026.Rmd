@@ -5,7 +5,7 @@ title: "Lab 2: Data Wrangling in R"
 
 # Data Wrangling
 
-So this might be the most important thing you learn about R, and about working with data. It is rare that the data work on are in exactly the right form for analysis. For example, you might want to discard certain variables from the dataset to reduce clutter. Or you need to create new variables from existing ones. Or you encounter missing data. The process of gathering data in its raw form and molding it into a form that is suitable for its end use is known as data wrangling. What’s great about the **tidyverse** package is its suite of functions make data wrangling relatively easy, straight forward, and transparent.
+This might be the most important thing you learn about R, and about working with data. It is rare, and I daresay impossible, that the data you work on are in exactly the right form for analysis. For example, you might want to discard certain variables from the dataset to reduce clutter. Or you need to create new variables from existing ones. Or you encounter missing data. The process of gathering data in its raw form and molding it into a form that is suitable for its end use is known as data wrangling. What’s great about the **tidyverse** package is its suite of functions make data wrangling relatively easy, straight forward, and transparent.
 
 In this lab, we won’t have time to go through all of the methods and functions in R that are associated with the data wrangling process. We will cover more in later labs and many methods you will have to learn on your own given the specific tasks you will need to accomplish. In the rest of this guide, we’ll go through some of the basic data wrangling techniques using the functions found in the package **dplyr**, which was automatically installed and loaded when you brought in the **tidyverse** package. These functions can be used for either tibbles or regular data frames.
 
@@ -18,11 +18,12 @@ Let's load some packages that we will need this week. We need to load any packag
 ```{r, message=FALSE}
 library(tidyverse)
 library(tmap)
+library(nycflights13)
 ```
 
 ## Reading in data
 
-The dataset *nycflights13* was included in Lab 1 in an R package called **nycflights13**. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
+The dataset *nycflights13* was included in ([Lab 1](Lab1_2026.html) in an R package called **nycflights13**. In most cases, you’ll have to read it in. Most data files you will encounter are comma-delimited (or comma-separated) files, which have .csv extensions. Comma-delimited means that columns are separated by commas. We’re going to bring in two csv files *lab1dataset1.csv* and *lab1dataset2.csv*. The first file is a county-level dataset containing median household income. The second file is also a county-level dataset containing Non-Hispanic white, Non-Hispanic black, non-Hispanic Asian, and Hispanic population counts. Both data sets come from the 2014-2018 American Community Survey (ACS). We’ll cover the Census, and how to download Census data, in another lab.
 
 To read in a csv file, use the function `read_csv()`, which is a part of the **tidyverse** package, and plug in the name of the file in quotes inside the parentheses. Make sure you include the *.csv* extension. The two files are up on the GitHub for this course, so you can read them in directly from there. We’ll name these objects *ca1* and *ca2*.
 
@@ -66,7 +67,7 @@ names(ca1)
 
 \
 
-The name *Estimated median income of a household, between 2014-2018.* is a doozy! Just a little long. Use the command `rename()` to - you guessed it - rename a variable! Let’s rename *Estimated median income of a household, between 2014-2018.* to *medinc*.
+The name *Estimated median income of a household, between 2014-2018.* is a doozy! Just a little long. Use the command `rename()` to -- you guessed it -- rename a variable! Let’s rename *Estimated median income of a household, between 2014-2018.* to *medinc*.
 
 ```{r}
 rename(ca1, medinc = "Estimated median income of a household, between 2014-2018.")
@@ -279,9 +280,9 @@ Phew. That's a lot! You’ve gone through some of the basic data wrangling funct
 
 In running the lines of code above, we’ve asked you to work directly in the R Console and issue commands in an interactive way. That is, you type a command after `>`, you hit enter/return, R responds, you type the next command, hit enter/return, R responds, and so on. Instead of writing the command directly into the console, you should write it in a script. The process is now: Type your command in the script. Run the code from the script. R responds. You get results. You can write two commands in a script. Run both simultaneously. R responds. You get results. This is the basic flow.
 
-One way to do this is to use the default R Script, which is covered in the [assignment guidelines](Assignments.html). In your homework assignments, we will be asking you to submit code in another type of script: the R Markdown file. R Markdown allows you to create documents that serve as a neat record of your analysis. Think of it as a word document file, but instead of sentences in an essay, you are writing code for a data analysis.
+One way to do this is to use the default R Script, which is covered in the [assignment guidelines](Assignments_2026.html). In your homework assignments, we will be asking you to submit code in another type of script: the R Markdown file. R Markdown allows you to create documents that serve as a neat record of your analysis. Think of it as a word document file, but instead of sentences in an essay, you are writing code for a data analysis.
 
-When going through lab guides, I would recommend not copying and pasting code directly into the R Console, but saving and running it in an R Markdown file. This will give you good practice in the R Markdown environment. Now is a good time to read through the class [assignment guidelines](Assignments.html) as they go through the basics of R Markdown files.
+When going through lab guides, I would recommend not copying and pasting code directly into the R Console, but saving and running it in an R Markdown file. This will give you good practice in the R Markdown environment. Now is a good time to read through the class [assignment guidelines](Assignments_2026.html) as they go through the basics of R Markdown files.
 
 To open an R Markdown file, click on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 1”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
 
@@ -295,9 +296,9 @@ Don’t change anything inside the YAML (the stuff at the top in between the `--
 
 Delete everything else. Save this file (*File* -> *Save*) in an appropriate folder. It’s best to set up a clean and efficient file management structure (e.g., SPH215>Labs>Lab1) but you do what works for you.
 
-Follow the directions in the [assignment guidelines](Assignments.html) to add this lab’s code in your Lab 1 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
+Follow the directions in the [assignment guidelines](Assignments_2026.html) to add this lab’s code in your Lab 1 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
 
-Although the lab guides and course textbooks should get you through a lot of the functions that are needed to successfully accomplish tasks for this class, there are a number of useful online resources on R and RStudio that you can look into if you get stuck or want to learn more. We outline these resources in the [R Help](r_help.html) section of the website. If you ever get stuck, check this resource out first to troubleshoot before immediately asking a friend or the instructor.
+Although the lab guides and course textbooks should get you through a lot of the functions that are needed to successfully accomplish tasks for this class, there are a number of useful online resources on R and RStudio that you can look into if you get stuck or want to learn more. We outline these resources in the [R Help](R_help_2026.html) section of the website. If you ever get stuck, check this resource out first to troubleshoot before immediately asking a friend or the instructor.
 
 \
 
@@ -306,18 +307,18 @@ Although the lab guides and course textbooks should get you through a lot of the
 Here are a few practice questions. You don’t need to submit these, but it’s good practice to answer these questions in R Markdown, producing a knitted file (html, pdf or docx).
 
 1. Look up the help documentation for the function `rep()`. Use this function to create the following 3 vectors.
-  a. [1] 0 0 0 0 0
-  a. [1] 1 2 3 1 2 3 1 2 3 1 2 3
-  a. [1] 4 5 5 6 6 6
+  - [1] 0 0 0 0 0
+  - [1] 1 2 3 1 2 3 1 2 3 1 2 3
+  - [1] 4 5 5 6 6 6
   
 2. Explain what is the problem in each line of code below. Fix the code so it will run properly.
-  a. my variable <- 3
-  b. seq(1, 10 by = 2)
-  c. Library(cars)
+  - my variable <- 3
+  - seq(1, 10 by = 2)
+  - Library(cars)
 
 3. Look up the help documentation for the function `cut()`.
-  a. Describe the purpose of this function. What kind of data type(s) does this function accept? Which arguments/options are required? Which arguments are not required and what are their default value(s)?
-  b. Create an example vector and use the `cut()` function on it. Explain your results.
+  - Describe the purpose of this function. What kind of data type(s) does this function accept? Which arguments/options are required? Which arguments are not required and what are their default value(s)?
+  - Create an example vector and use the `cut()` function on it. Explain your results.
 
 4. Load the *mtcars* dataset by using the code `data(mtcars)`. Find the minimum, mean, median and maximum of the variable *mpg* in the *mtcars* dataset using just one line of code. We have not covered a function that does this yet, so the main point 1. of this question is to get you used to using the resources you have available to find an answer. Describe the process you used (searched online? used the class textbook?) to find the answer.
 
@@ -342,14 +343,14 @@ cancer <- readRDS("ca_cancer.rds")
 head(cancer)
 table(cancer$event)
 
-## Load these packages
+## Load these packages--let's not worry too much about what they do!
 library(sf)
 library(tmap)
 
 ## Setting coordinate reference system (CRS) to North American Datum 1983 (NAD83)--we will discuss more next week!
 cancer_projected = st_as_sf(cancer, crs=4269)
 
-## Plot the data--will also discuss more!
+## Plot the data--will also discuss more in a few weeks!
 tmap_mode("view")
 cancer_map = tm_shape(cancer_projected) + tm_dots(size=0.5,alpha=0.8, col="event",style="cat")
 cancer_map

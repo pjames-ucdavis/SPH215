@@ -1,0 +1,218 @@
+---
+title: 'Lab 7: Network Analysis'
+---
+
+In this lab, we will be using spatial data to run a network analysis. We will be playing around with data from Davis, including geocoding fast food restaurants in our fair city, then mapping the most efficient route to bike between all fast food establishments. Next, we will estimate the travel time between all fast food establishments in Davis. Finally, we are going to create a cool visualization of the travel times from the building that we are sitting in! This is all intended to explain how you can use spatial data to understand how different spatial features relate using the road networks that we travel on.
+
+The objectives of this guide are to teach you to:
+
+1. Use the **osrm** package to map the optimal trip between multiple points
+2. Get a matrix of travel times between multiple points
+3. Create an isochrone to map travel times from one location
+
+Let's get rollin...
+
+\
+
+# Load Packages
+First, we always gotta remember to load our packages.
+```{r}
+library(tidygeocoder)
+library(sf)
+library(tmap)
+library(osrm)
+library(tidyverse)
+```
+
+\
+
+# osrm package for network analysis in R
+R offers a few packages for network analysis. We will be using the **osrm** package because it is fast and open source. It is an interface between R and the Open Street Map-Based Routing Service. It has a number of options, including:
+
+- `osrmTrip`: Build and send an OSRM API query to get the shortest travel geometry between multiple unordered points. This function interfaces the trip OSRM service. Use this function to resolve the travelling salesman problem.
+- `osrmTable`: Build and send OSRM API queries to get travel time matrices between points. This function interfaces the table OSRM service.
+- `osrmIsochrone`: This function computes areas that are reachable within a given time span from a point and returns the reachable regions as polygons. These areas of equal travel time are called isochrones.
+- `osrmRoute`: Build and send an OSRM API query to get the travel geometry between two points. This function interfaces with the route OSRM service.
+- `osrmNearest`: Build and send an OSRM API query to get the nearest point on the street network. This function interfaces the nearest OSRM service.
+- `osrmIsodistance`: This function computes areas that are reachable within a given road distance from a point and returns the reachable regions as polygons. These areas of equal travel distance are called isodistances.
+
+\
+
+Note that there are other options for network analyses in R, including **gmapsdistance**, which uses the Google Maps API, **stplanr**, and others. But many of these require an API key and may even cost money if you use them too much! So for now, we will stick to **osrm**.
+
+\
+
+# Bring in fast food establishments in Davis, CA
+Similar to what we did in one of our first labs, let's bring in the addresses of all fast food establishments in Davis and geocode them! We will first read in the .csv from the website using `read_csv` from the **tidyverse** package.
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv", destfile = "fast_food_davis_ca.csv", mode = "wb")
+ff <- read_csv("fast_food_davis_ca.csv")
+
+glimpse(ff)
+```
+
+\
+
+OK, so looks like *Address* is the variable we want to focus on. Let's geocode the Davis fast food data using the the `geocode()` function in **tidygeocoder**. And let's specify that we want to use the "arcgis" geocoder.
+```{r}
+ff_geo      <- geocode(ff, address = "Address",
+                          method = "arcgis")
+```
+
+\
+
+Alrighty that ran! Now let's check our data and make sure there's no missingness in our *lat* and *long* fields.
+```{r}
+summary(ff_geo$lat)
+summary(ff_geo$long)
+```
+
+\
+
+Looks like there's no missingness! No NAs! OK, now we use `st_as_sf` from the **sf** package to make the dataset spatial and we use the CRS of 4326 because we have longitude and latitude.
+```{r}
+ff_pts <- st_as_sf(ff_geo, coords=c("long","lat"), crs=4326)
+```
+
+\
+
+# osrmTrip to map the optimal trip between all fast food establishments
+
+Now let's use the **osrm** package to calculate an optimal trip between all fast food establishments in Davis, then let's take a look at the output. This means we are estimating the shortest travel geometry between all fast food establishments in Davis. And we are in Davis, so of course we will estimate this on bike! Maybe useful for an SPH 215 pub crawl in the future?
+```{r}
+trip <- osrmTrip(ff_pts, osrm.profile = "bike")
+glimpse(trip)
+```
+
+\
+
+OK, it ran! Some good info in there. Looks like we have a *List* with an sf dataset, a data.frame, and a list of duration and distance. Now, let's visualize what this path might look like using the **tmap** package. We will pull out the route as an **sf** object and store it as *trip_sf*. Then we will map that and specify that we want the lines to be the route in blue, and then we want to see the location of our fast food establishments *ff_pts* in red bubbles. We also can label the restaurants using `tm_text` and set an offset with `xmod` and `ymod` options.
+```{r}
+# Extract the linestring route (as an sf object)
+trip_sf <- trip[[1]]$trip
+
+# Set tmap to interactive mode
+tmap_mode("view")
+
+# Plot with tmap
+tm <- tm_shape(trip_sf) +
+  tm_lines(lwd = 3, col = "blue") +
+  tm_shape(ff_pts) +
+  tm_bubbles(size = 0.5, col = "red") + 
+  tm_text("Restaurant Name", size=1, xmod = 0.25, ymod=0.25) 
+
+tm
+
+```
+
+\
+
+Spectacular! Let's now get some summary stats for each leg of our fast food extravaganza. We can use the `mutate()` function from **tidyverse** to get this info.
+```{r}
+leg_summary <- trip_sf %>%
+  mutate(duration = round(duration, 1),
+         distance = round(distance, 1))
+
+leg_summary
+```
+
+\
+
+OK, we we have the duration and distance for each trip. Let's get the summary of the whole trip in minutes and kilometers.
+```{r}
+trip_summary <- trip[[1]]$summary
+trip_summary
+```
+\
+
+# osrmTable to get a matrix of travel times between all fast food establishments in Davis
+
+So it was nice to get an optimal route, but what if I wanted the travel times between all of the fast food establishments in Davis? You could imagine doing this with addresses of geocoded participants and fast food establishments to create a dataset with distance to the closest fast food establishment.
+
+```{r}
+ff_table <- osrmTable(ff_pts,
+                      osrm.profile = "bike")
+glimpse(ff_table)
+
+```
+
+\
+
+Great. Now let's look at the *duration* matrix.
+```{r}
+ff_table$duration
+```
+
+\
+
+That's a little confusing. Let's keep the restaurant names and take a look at this again. We will print it as a massive table.
+```{r}
+# Extract restaurant names
+rest_names <- ff_pts[["Restaurant Name"]]  # or ff_pts$`Restaurant Name`
+
+# Assign names to rows and columns of distance and duration matrices
+rownames(ff_table$duration) <- rest_names
+colnames(ff_table$duration) <- rest_names
+
+# Travel times in minutes
+ff_table$duration
+```
+
+# osrmIsochrone to create isochrones
+
+So let's try something different with network analyses. What if I wanted to create a map that would show me all the locations I could reach within a given number of minutes of biking? This is called an **isochrone** and you betcha the **osrm** package can do this!
+
+First, let's set this up to be centered around the building we all know and love, the one that we are in right now. That's right--the epically named Medical Sciences 1-B. I've clearly memorized the longitude and latitude for this building, which we paste in below, and then store as an **sf** object.
+```{r}
+loc <- c("lon" = -121.7617, "lat" = 38.5382)
+loc_sf <- st_sf(name = "Medical Sciences 1-B",
+                geometry = st_sfc(st_point(loc), crs = 4326))
+```
+
+\
+
+Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, the *res* or resolution will be 30, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
+```{r}
+iso <- osrmIsochrone(loc = loc_sf,
+                     breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
+                     res = 30, # Lower res for faster requests
+                     osrm.profile = "bike")  # mode bicycle
+
+glimpse(iso)
+```
+
+\
+
+OK, so now we can see we have *isomin* and *isomax* as our columns for our time bins. And our dataset is a *MULTIPOLYGON*, so it's spatial. Let's map this! First, we will create a categorical variable called *run_times*. Then we will use **tmap** to plot our isochrones. We will use a palette of heat colors for our ischrones, and we will also plot Medical Sciences 1-B in there just so we never forget our beautiful home base.
+```{r}
+# Create factor column for time intervals
+iso$run_times <- factor(
+  paste(iso$isomin, "to", iso$isomax, "min"),
+  levels = c("0 to 5 min", "5 to 10 min", "10 to 15 min", 
+             "15 to 20 min", "20 to 25 min", "25 to 30 min")
+)
+
+
+# Plot using tmap
+tm <- tm_shape(iso) +
+  tm_polygons(col = "run_times",
+              palette = rev(heat.colors(6)),  # reverse for same effect
+              border.col = "black",
+              lwd = 0.5,
+              alpha = 0.3,
+              title = "Biking Duration") +
+  tm_shape(loc_sf) +
+  tm_bubbles(size = 0.3, col = "blue") +
+  tm_text("name", size = 1, ymod = -0.5) 
+
+tm
+
+```
+
+\
+
+Would you look at that! It's like a work of art. Georgia O'Keefe, eat your heart out. Click around and explore where you could bike to in 10 minutes once class gets out! And you've earned that **osrm** badge! Get biking somewhere--you know the route now!
+
+\
+
+![Your osrm Badge!!](osrm.png)---
