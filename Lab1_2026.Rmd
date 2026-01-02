@@ -10,13 +10,13 @@ In this course, we will be using R for all our GIS needs. If you've never used R
 
 The objectives of the guide are as follows
 
-- Install and set up R and RStudio.
+- Install and set up R and RStudio
 - Understand R data types
 - Understand R data structures
 - Understand R functions
 - Introduction to tidyverse and its suite of data wrangling functions
 - Understand R Markdown
-- This lab guide follows closely and supplements the material presented in Chapters 2, 4, 5, 7 and 21 in the textbook [R for Data Science (RDS)](https://r4ds.hadley.nz/).
+- This lab guide follows closely and supplements the material presented in Chapters 2, 4, 5, 7, and 21 in the textbook [R for Data Science (RDS)](https://r4ds.hadley.nz/).
 
 \
 
@@ -36,7 +36,7 @@ The next question you may have is “I love Excel or SAS or SPSS or Stata [or in
 2. R is open source. Which means the software is community supported. This allows you to get help not from some big corporation (e.g. Microsoft with Excel), but people all around the world who are using R. And R has **a lot** of users, which means that if you have a problem, and you pose it to the user community, someone will help you.
 3. R is powerful and extensible (meaning that procedures for analyzing data that don’t currently exist can be readily developed);
 4. R has the capability for mapping data, an asset not generally available in other statistical software.
-5. If it isn’t already there, R is becoming the de-facto data analysis tool in many fields, including for many CA DPH positions.
+5. If it isn’t already, R is becoming the de-facto data analysis tool in many fields, including for many CA DPH positions.
 
 \
 
@@ -44,16 +44,16 @@ R is different from Excel in that it is generally not a point-and-click program.
 
 
 ```{r}
-#Download Cancer Dataset
+# Download Cancer Dataset
 download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
 
-#Read in Cancer Dataset
+# Read in Cancer Dataset
 cancer <- readRDS("ca_cancer.rds")
 
-#Get names of columns or variables
+# Get names of columns or variables
 head(cancer)
 
-#Get mean of AGE variable
+# Get mean of AGE variable
 mean(cancer$AGE)
 ```
 
@@ -75,7 +75,9 @@ I am skipping over many details, but the above steps outline the general work fl
   - It allows you to recreate your steps if you need to rerun or alter your analysis many weeks, months, or even years in the future.
   - It allows you to share your steps with other people. If someone asks you what were the decisions made in the data analysis process, - just hand them the script.
   - Related to the above points, a script promotes **transparency** (here is what I did) and **reproducibility** (you can do it too). When you write code, you are forced to explicitly state the steps you took to do your research. When you do research by clicking through drop-down menus, your steps are lost, or at least documenting them requires considerable extra effort.
+  
 2. If you make a mistake in a data analysis step, you can go back, change a few lines of code, and **poof**, you’ve fixed your problem.
+
 3. It is more efficient. In particular, cleaning data can encompass a lot of tedious work that can be streamlined using statistical programming.
 
 Hopefully, I’ve convinced you that statistical programming and R are worthwhile to learn. Now let's talk about getting R on your computer!
@@ -92,6 +94,7 @@ R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network)
 
 ## Mac OS X
 1. On the “R for Mac OS” page, there are multiple packages that could be downloaded. Depending on the model of your Mac, pick the appropriate .pkg file. *Note the details for some operating systems. If you are using an older operating system, please follow instructions.*
+
 2. After the package finishes downloading, locate the installer on your hard drive, double-click on the installer package, and after a few screens, select a destination for the installation of the R framework (the program) and the R.app GUI. Note that you will have to supply the Administrator’s password. Close the window when the installation is done.
 
 3. An application will appear in the Applications folder: R.app.
@@ -129,7 +132,9 @@ We will not use R’s direct interface to run analyses in this class. Instead, w
 To download and install RStudio, follow the directions below
 
 1. Navigate to [RStudio’s download site](https://posit.co/download/rstudio-desktop/)
+
 2. We've already downloaded R, so click on the appropriate link to Install RStudio based on your OS (Windows, Mac, Linux and many others). Do not download anything from the “All Installers and Tarballs” section.
+
 3. Click on the installer that you downloaded. Follow the installation directions, making sure to keep all defaults intact. After installation, RStudio should pop up in your Applications or Programs folder/menu.
 
 \
@@ -146,15 +151,16 @@ Open up RStudio. You should see the interface shown in the figure below which ha
 - **Environment, History, and Connections tabs** (upper-right)
   - **Environment** - shows all the R objects that are currently open in your workspace. This is the place, for example, where you will see any data you’ve loaded into R. When you exit RStudio, R will clear all objects in this window. You can also click on ![broom](broom.png) to clear out all the objects loaded and created in your current session.
   - **History** - shows a list of executed commands in the current session.
-  - **Connections** - you can connect to a variety of data sources, and explore the objects and data inside the -   connection. I typically don’t use this window, but you [can](https://support.rstudio.com/hc/en-us/articles/115010915687-Using-RStudio-Connections.
+  - **Connections** - you can connect to a variety of data sources, and explore the objects and data inside the connection. I typically don’t use this window, but you [can](https://support.rstudio.com/hc/en-us/articles/115010915687-Using-RStudio-Connections).
 - **Files, Plots, Packages, Help and Viewer tabs** (lower-right)
-  - **Files - shows all the files and folders in your current working directory (more on what this means later).
-  - **Plots** - shows any charts, graphs, maps and plots you’ve successfully executed.
-  - **Packages** - tells you all the R packages that you have access to (more on this later).
-  - **Help** - shows help documentation for R commands that you’ve called up.
-  - **Viewer** - allows you to view local web content (won’t be using this much).
+  - **Files** – shows all the files and folders in your current working directory
+  - **Plots** – shows any charts, graphs, maps and plots you’ve executed
+  - **Packages** – shows available R packages
+  - **Help** – displays help documentation
+  - **Viewer** – displays local web content
 
-There is also a fourth window. But, we’ll get to this window a little later. The [assignment guidelines](Assignments.html) also have more on this window!
+
+There is also a fourth window. But, we’ll get to this window a little later. The [assignment guidelines](Assignments_2026.html) also have more on this window!
 
 \
 
@@ -163,12 +169,16 @@ There is also a fourth window. But, we’ll get to this window a little later. T
 While not required, I strongly suggest that you change preferences in RStudio to never save the workspace so you always open with a clean environment. See [Ch. 8.1](https://r4ds.had.co.nz/workflow-projects.html#what-is-real) of R4DS for some more background
 
 1. From the Tools menu on RStudio, open the Tools menu and then select Global Options.
+
 2. If not already highlighted, click on the General button from the left panel.
+
 3. Uncheck the following Restore boxes
   - Restore most recently opened project at startup
   - Restore previously open source documents at startup
   - Restore .RData into workspace at startup
-4. Set Save Workspace to .RData on exit to Never
+
+4. Set Save Workspace to .RData on exit to "Never".
+
 5. Click OK at the bottom to save the changes and close the preferences window. You may need to restart RStudio.
 
 The reason for making these changes is that it is preferable for reproducibility to start each R session with a clean environment. You can restore a previous environment either by rerunning code or by manually loading a previously saved session.
@@ -181,7 +191,7 @@ You only need to set these preferences once.
 
 # R Data Types
 
-Let’s now explore what R can do. R is really just a big fancy calculator. For example, type in the following mathematical expression in the R console (left window)
+Let’s now explore what R can do. R is really just a big fancy calculator. For example, type in the following mathematical expression in the R console (left window):
 ```{r r1}
 1+1
 ```
@@ -200,7 +210,7 @@ Characters are used to represent words or letters in R. We saw this above with �
 
 ## Logicals
 
-A logical takes on two values: FALSE or TRUE. Logicals are usually constructed with comparison operators, which we’ll go through more carefully in Lab 2. Think of a logical as the answer to a question like “Is this value greater than (lower than/equal to) this other value?” The answer will be either TRUE or FALSE. TRUE and FALSE are logical values in R. For example, typing in the following
+A logical takes on two values: `FALSE` or `TRUE`. Logicals are usually constructed with comparison operators, which we’ll go through more carefully in Lab 2. Think of a logical as the answer to a question like “Is this value greater than (lower than/equal to) this other value?” The answer will be either `TRUE` or `FALSE`. `TRUE` and `FALSE` are logical values in R. For example, typing in the following
 
 ```{r r3}
 3 > 2
@@ -257,7 +267,7 @@ You just learned that R has four basic data types. Now, let’s go through how w
 
 ## Vectors
 
-A vector is the most common and basic R data structure and is pretty much the workhorse of the language. A vector is simply a sequence of values which can be of any data type but all of the same type. There are a number of ways to create a vector depending on the data type, but the most common is to insert the data you want to save in a vector into the command `c()`. For example, to represent the values 4, 16 and 9 in a vector type in
+A vector is the most common and basic R data structure and is pretty much the workhorse of the language. A vector is simply a sequence of values which can be of any data type but all of the same type. There are a number of ways to create a vector depending on the data type, but the most common is to insert the data you want to save in a vector into the command `c()`. For example, to represent the values 4, 16, and 9 in a vector type in
 
 ```{r}
 c(4, 16, 9)
@@ -282,7 +292,7 @@ You can pronounce the above as “b becomes ‘hello world’”.
 
 The first line tells R to store b as 'hello world.' In the next line, we are telling R to print what b is.
 
-Note that R is case sensitive, if you type in *B* instead of *b*, you will get an error.
+Note that R is **case sensitive**, if you type in *B* instead of *b*, you will get an error.
 
 Similarly, you can save the numbers 4, 16 and 9 into a vector called *v1*.
 
@@ -332,7 +342,7 @@ cat("````markdown\n",
 ## ## Error in eval(expr, envir, enclos): object 'james' not found
 ```
 
-The error occurs because R tries to print the value of object *james*, but there is no such variable. So remember that any time you get the error message `object 'something' not found`, the most likely reason is that you forgot to quote a character value. If not, it probably means that you have misspelled, or not yet created, the object that you are referring to. We’ve included the common pitfalls and R tips in this class [resource](R_help.html).
+The error occurs because R tries to print the value of object *james*, but there is no such variable. So remember that any time you get the error message `object 'something' not found`, the most likely reason is that you forgot to quote a character value. If not, it probably means that you have misspelled, or not yet created, the object that you are referring to. We’ve included the common pitfalls and R tips in this class [resource](R_help_2026.html).
 
 Every vector has two key properties: *type* and *length*. The type property indicates the data type that the vector is holding. Use the command `typeof()` to determine the type.
 
@@ -433,7 +443,7 @@ to bring the worksheet up. You can’t edit this worksheet directly, but it allo
 
 We can store different types of vectors in a data frame. For example, we can store one character vector and one numeric vector in a single data frame.
 ```{r}
-v3 <- c("jacob", "anne", "gwen")
+v3 <- c("catherine", "declan", "gwen")
 df2 <- data.frame(v1, v3)
 df2
 ```
