@@ -11,9 +11,9 @@
 
 
 
-<title>Lab 6: Working with Raster data, Join geocoded addresses to polygon data to create exposure metrics</title>
+<title>Lab 6: Working with Raster and Vector Data Together</title>
 
-<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
@@ -348,13 +348,13 @@ div.tocify {
       <a href="Lab3_2026.html">Lab 3: Geocoding, Vector Data, and Census Data</a>
     </li>
     <li>
-      <a href="Lab4_2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
+      <a href="Lab4_2026.html">Lab 4: More with Vector Data and Visualizing Raster Data</a>
     </li>
     <li>
-      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing</a>
+      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing with Vector Data</a>
     </li>
     <li>
-      <a href="Lab6_2026.html">Lab 6: Spatial Data Processing with Vector and Raster Data</a>
+      <a href="Lab6_2026.html">Lab 6: Working with Raster and Vector Data Together</a>
     </li>
     <li>
       <a href="Lab7_2026.html">Lab 7: Network Analysis</a>
@@ -395,15 +395,461 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Lab 6: Working with Raster data, Join
-geocoded addresses to polygon data to create exposure metrics</h1>
+<h1 class="title toc-ignore">Lab 6: Working with Raster and Vector Data
+Together</h1>
 
 </div>
 
 
+<p>In this lab, we are going to work with vector and raster data,
+extracting raster values to point data</p>
+<p>The objectives of this guide are to teach you: 1. Import our dataset
+with simulated geocoded addresses and mortality data from an ovarian
+cancer cohort 2. Import our dataset with greenspace across the Bay Area
+3. Compare projections of datasets and re-project if needed 4. Make maps
+5. Spatially join the two datasets by extracting raster values to points
+6. Run a quick statistical analysis on the two datasets combined</p>
+<p><br />
+</p>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<pre class="r"><code>library(terra)</code></pre>
+<pre><code>## terra 1.8.29</code></pre>
+<pre class="r"><code>library(sf)</code></pre>
+<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(tmap)
+library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## Loading required package: gam</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.22-5</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ purrr::accumulate() masks foreach::accumulate()
+## ✖ tidyr::extract()    masks terra::extract()
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ dplyr::lag()        masks stats::lag()
+## ✖ purrr::when()       masks foreach::when()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose
+## 
+## The following objects are masked from &#39;package:terra&#39;:
+## 
+##     align, colorize, rotate, width</code></pre>
+<pre class="r"><code>library(RColorBrewer)</code></pre>
+<p><br />
+</p>
+</div>
+<div id="import-greenspace-raster" class="section level1">
+<h1>Import greenspace raster</h1>
+<p>We’ll bring in the file NDVI_rast.tif. The file contains normalized
+difference vegetation index (NDVI) data for the Bay Area. These data are
+taken from Landsat satellite data that I downloaded from Google Earth
+Engine. We use the function <code>rast()</code> from the
+<strong>terra</strong> package to bring in data in raster form, then
+take a look at the dataset.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif&quot;
+download.file(url, destfile = &quot;NDVI_rast2.tif&quot;, mode = &quot;wb&quot;)
+ndvi_rast = rast(&quot;NDVI_rast2.tif&quot;)
 
+## Get summary of raster data
+ndvi_rast</code></pre>
+<pre><code>## class       : SpatRaster 
+## dimensions  : 1856, 1485, 1  (nrow, ncol, nlyr)
+## resolution  : 0.0002694946, 0.0002694946  (x, y)
+## extent      : -122.6001, -122.1999, 37.59988, 38.10007  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 (EPSG:4326) 
+## source      : NDVI_rast2.tif 
+## name        : NDVI_BayArea 
+## min value   :   -1.0000000 
+## max value   :    0.8533574</code></pre>
+<p><br />
+</p>
+<p>As always, we check the file to make sure it was read correctly. Does
+it have a coordinate reference system?</p>
+<pre class="r"><code>## Check CRS
+st_crs(ndvi_rast)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>OK, let’s plot it like we did when we first looked at this dataset
+back in <a href="Lab4_2026.html">Lab 4</a>.</p>
+<pre class="r"><code>## Plot the raster on a map
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
+## ℹ toggle with `tmap::ttm()`</code></pre>
+<pre class="r"><code>NDVI_map = tm_shape(ndvi_rast) +
+  tm_raster(style = &quot;cont&quot;) +
+  tm_legend(outside = TRUE)</code></pre>
+<pre><code>## 
+## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.</code></pre>
+<pre class="r"><code>NDVI_map</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_legend()`: use &#39;tm_legend()&#39; inside a layer function, e.g.
+## &#39;tm_polygons(..., fill.legend = tm_legend())&#39;
+## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.
+## 
+## This message is displayed once every 8 hours.</code></pre>
+<p><img src="Lab6_2026_files/figure-html/unnamed-chunk-4-1.png" alt="" width="672" /></p>
+<p>Looks very nice!</p>
+<p><br />
+</p>
+</div>
+<div id="bring-in-cancer-dataset" class="section level1">
+<h1>Bring in Cancer dataset</h1>
+<p>For our health dataset, we will be using data included in the
+<strong>MapGAM</strong> <a
+href="https://cran.r-project.org/web/packages/MapGAM/MapGAM.pdf">package</a>.
+As a reminder: While they are based on real patterns expected in
+observational epidemiologic studies, these data have been simulated and
+are for teaching purposes only. The data contain 5000 simulated ovarian
+cancer cases. While this is a cohort with time to mortality, for the
+purposes of our class, we will conduct simple tabular analyses looking
+at associations between different spatial exposures with mortality at
+end of follow-up.</p>
+<p>As another reminder, the <em>CAdata</em> dataset contains the
+following variables:</p>
+<ul>
+<li>time (follow-up time)</li>
+<li>event (1=dead, 0=censored)</li>
+<li>X (Latitude)</li>
+<li>Y (Longitude)</li>
+<li>AGE (age in years)</li>
+<li>INS (insurance status, categorical)</li>
+</ul>
+<p><br />
+</p>
+<div id="read-in-cancer-dataset" class="section level2">
+<h2>Read in Cancer Dataset</h2>
+<p>Next, we want to read in all of our spatial data. First, we read in
+the <em>CAdata</em> dataset from the <strong>MapGAM</strong> package,
+and then convert it to a spatial dataset.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDY6IFdvcmtpbmcgd2l0aCBSYXN0ZXIgZGF0YSwgSm9pbiBnZW9jb2RlZCBhZGRyZXNzZXMgdG8gcG9seWdvbiBkYXRhIHRvIGNyZWF0ZSBleHBvc3VyZSBtZXRyaWNzJwotLS0=</div>
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p><br />
+</p>
+</div>
+</div>
+<div id="check-projections-for-all-spatial-data" class="section level1">
+<h1>Check Projections for all Spatial Data</h1>
+<p>Finally, we check the projections. <strong>This is the most important
+step and is guaranteed to make life easier with your geospatial
+analysis!</strong> When you have files in different projections, this
+can be a major problem because when we try to overlay the two files they
+may not overlap. First we check the coordinate reference systems for
+each dataset using <code>st_crs()</code>. We then use the
+<code>st_transform()</code> function to convert the projection for our
+point data to match that of our polygon data. When we are done, do the
+projections of the two datasets match?</p>
+<pre class="r"><code>## Look at the coordinate reference system for the cancer data, and for greenspace data
+st_crs(ca_pts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(ndvi_rast)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<pre class="r"><code>## Transform the coordinate reference system of the cancer data to match that 
+## of the greenspace data
+ca_transformed &lt;-st_transform(ca_pts, st_crs(ndvi_rast))  
+
+## Check projections
+st_crs(ndvi_rast)==st_crs(ca_transformed)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p><br />
+</p>
+</div>
+<div id="map-the-data" class="section level1">
+<h1>Map The Data</h1>
+<p>Now, we will visualize our spatial data using <strong>tmap</strong>.
+We will overlay the greenspace maps with the ovarian cancer data. Do any
+patterns jump out, or are there any participants living in the middle of
+the Bay?</p>
+<pre class="r"><code>ca.ndvi.map &lt;- tm_shape(ndvi_rast) +
+  tm_raster(style = &quot;cont&quot;) +
+      tm_shape(ca_transformed) +
+        tm_dots(size=0.25, alpha=0.8, col=&quot;blue&quot;)</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
+## `tm_scale_continuous()`.
+## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
+## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).
+## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+<pre class="r"><code>ca.ndvi.map</code></pre>
+<pre><code>## Variable(s) &quot;col&quot; contains positive and negative values, so midpoint is set to 0. Set midpoint = NA to show the full range of visual values.</code></pre>
+<p><img src="Lab6_2026_files/figure-html/unnamed-chunk-7-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We find that the most least green areas are in the downtown areas of
+San Francisco and Oakland, which makes sense. Our cancer cohort data
+overlaps with the greenspace map, which is reassuring.</p>
+<p><br />
+</p>
+</div>
+<div id="extract-raster-values-to-points" class="section level1">
+<h1>Extract Raster Values to Points</h1>
+<p>Now that we have visualized our data, let’s see if there is an
+association between greenspace exposure and mortality among ovarian
+cancer cases. We will first extract the values for greenspace to the
+cancer dataset (merge the two datasets based on location of cases and
+the greenspace pixel that they are in) using
+<code>terra::extract</code>. Then we will check the distribution of
+greenspace exposure in our cancer cases. We will use a two-sided
+chi-squared test to test our hypothesis of the association between
+greenspace exposure and mortality among ovarian cancer cases. What do we
+find?</p>
+<pre class="r"><code>## Spatially join the cancer point data to the walkability polygon data
+ndvi_cancer = data.frame(ca_transformed,terra::extract(ndvi_rast, ca_transformed))
+glimpse(ndvi_cancer) </code></pre>
+<pre><code>## Rows: 5,000
+## Columns: 7
+## $ time         &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977017, 4…
+## $ event        &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, …
+## $ AGE          &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46, 77, 6…
+## $ INS          &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, Mcr, Mn…
+## $ geometry     &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 34.1437…
+## $ ID           &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17…
+## $ NDVI_BayArea &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 0.2483448…</code></pre>
+<pre class="r"><code>## Take a look at a summary of the values
+summary(ndvi_cancer$NDVI_BayArea)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##  -0.311   0.123   0.239   0.267   0.376   0.757    4688</code></pre>
+<p><br />
+</p>
+<p>Looks like we have lots of NA values. That is because some of our
+participants live outside of the area of our greenspace data. Let’s drop
+those missing values using <code>drop_na()</code>, which is slightly
+different from how we’ve done this before.</p>
+<pre class="r"><code>ndvi_cancer_nomiss &lt;- ndvi_cancer %&gt;% drop_na(NDVI_BayArea) 
+
+## Take a look at a summary of the values
+summary(ndvi_cancer_nomiss$NDVI_BayArea)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -0.3107  0.1228  0.2385  0.2666  0.3759  0.7572</code></pre>
+<pre class="r"><code>glimpse(ndvi_cancer_nomiss)</code></pre>
+<pre><code>## Rows: 312
+## Columns: 7
+## $ time         &lt;dbl&gt; 7.0125318, 0.9644371, 15.0007229, 2.9063815, 16.7471545, …
+## $ event        &lt;dbl&gt; 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, …
+## $ AGE          &lt;int&gt; 46, 69, 45, 78, 72, 73, 77, 72, 46, 61, 79, 54, 78, 60, 7…
+## $ INS          &lt;fct&gt; Mcr, Unk, Mcd, Mcr, Mng, Mcr, Mng, Mcr, Oth, Uni, Mcr, Un…
+## $ geometry     &lt;POINT [°]&gt; POINT (-122.2031 38.09592), POINT (-122.416 37.7678…
+## $ ID           &lt;dbl&gt; 13, 42, 48, 49, 64, 74, 100, 124, 141, 173, 178, 219, 223…
+## $ NDVI_BayArea &lt;dbl&gt; 0.24834478, 0.03120242, 0.21596712, 0.09975440, 0.5120553…</code></pre>
+<p><br />
+</p>
+</div>
+<div id="analyze-our-joined-dataset" class="section level1">
+<h1>Analyze our Joined Dataset</h1>
+<p>OK, we have a dataset with no missingness. Can we look at the
+distribution of greenspace exposure among participants?</p>
+<pre class="r"><code>ndvi_cancer_nomiss %&gt;%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=NDVI_BayArea)) </code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Lab6_2026_files/figure-html/unnamed-chunk-10-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>For the purposes of our analysis, let’s divide up our greenspace data
+into quartiles. We will do this using the <code>mutate()</code> function
+combined with the <code>ntile()</code> function. Then we will take a
+glimpse at our new dataset.</p>
+<pre class="r"><code>ndvi_cancer_nomiss &lt;- ndvi_cancer_nomiss %&gt;%
+  mutate(ndvi_quartile = ntile(NDVI_BayArea, 4))
+
+glimpse(ndvi_cancer_nomiss)</code></pre>
+<pre><code>## Rows: 312
+## Columns: 8
+## $ time          &lt;dbl&gt; 7.0125318, 0.9644371, 15.0007229, 2.9063815, 16.7471545,…
+## $ event         &lt;dbl&gt; 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1,…
+## $ AGE           &lt;int&gt; 46, 69, 45, 78, 72, 73, 77, 72, 46, 61, 79, 54, 78, 60, …
+## $ INS           &lt;fct&gt; Mcr, Unk, Mcd, Mcr, Mng, Mcr, Mng, Mcr, Oth, Uni, Mcr, U…
+## $ geometry      &lt;POINT [°]&gt; POINT (-122.2031 38.09592), POINT (-122.416 37.767…
+## $ ID            &lt;dbl&gt; 13, 42, 48, 49, 64, 74, 100, 124, 141, 173, 178, 219, 22…
+## $ NDVI_BayArea  &lt;dbl&gt; 0.24834478, 0.03120242, 0.21596712, 0.09975440, 0.512055…
+## $ ndvi_quartile &lt;int&gt; 3, 1, 2, 1, 4, 1, 3, 1, 4, 1, 1, 3, 3, 1, 3, 3, 1, 3, 4,…</code></pre>
+<p><br />
+</p>
+<p>OK that looks good. We have created a new variable
+<em>ndvi_quartile</em> that tells us what quartile of greenspace a
+participant lives in. Let’s do a two by two table of greenspace
+quartiles by <em>event</em>, which is whether a participant died over
+followup.</p>
+<pre class="r"><code>## Create a contingency table of event by walk_quartile
+tab &lt;- table(ndvi_cancer_nomiss$ndvi_quartile, ndvi_cancer_nomiss$event)
+tab</code></pre>
+<pre><code>##    
+##      0  1
+##   1 36 42
+##   2 37 41
+##   3 32 46
+##   4 31 47</code></pre>
+<p><br />
+</p>
+<p>Hmmm, that’s interesting, but let’s look at this by percentages
+instead.</p>
+<pre class="r"><code>## Convert to percentages by column
+tab_col_perc &lt;- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)</code></pre>
+<pre><code>##    
+##        0    1
+##   1 26.5 23.9
+##   2 27.2 23.3
+##   3 23.5 26.1
+##   4 22.8 26.7</code></pre>
+<p><br />
+</p>
+<p>Do you think the percentages are different by quartile of greenspace?
+We can run a chi-squared test to be sure. This is a statistical test to
+see whether there is a difference in the probability of <em>event</em>,
+or whether a participant died over follow-up, by the quartiles of
+greenspace We do this with the <code>chisq.test()</code> function.</p>
+<pre class="r"><code>## Chi-squared test
+chisq.test(tab)</code></pre>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test
+## 
+## data:  tab
+## X-squared = 1.3556, df = 3, p-value = 0.716</code></pre>
+<p><br />
+</p>
+<p>OK, how do we interpret this? Our null hypothesis is that there is no
+association between mortality at end of follow-up and increasing
+quartile of greenspace. Our alternative hypothesis is that there is an
+association between mortality at end of follow-up and increasing
+quartile of greenspace. We use a two-sided chi-squared test with
+alpha=0.05. Assuming no sources of bias and that the null hypothesis is
+true, the probability of observing increases in mortality at end of
+follow-up with increasing quartiles of greenspace as or more extreme as
+those produced in these data is 0.716. Since p&gt;0.05, we fail to
+reject the null hypothesis and conclude that greenspace is not
+associated with mortality at end of follow-up (under the assumptions
+stated above). In other words, we don’t see a relationship between
+greenspace exposure and our outcome (dying over followup).</p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDY6IFdvcmtpbmcgd2l0aCBSYXN0ZXIgYW5kIFZlY3RvciBEYXRhIFRvZ2V0aGVyJwotLS0KSW4gdGhpcyBsYWIsIHdlIGFyZSBnb2luZyB0byB3b3JrIHdpdGggdmVjdG9yIGFuZCByYXN0ZXIgZGF0YSwgZXh0cmFjdGluZyByYXN0ZXIgdmFsdWVzIHRvIHBvaW50IGRhdGEgCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3U6CiAgMS4gSW1wb3J0IG91ciBkYXRhc2V0IHdpdGggc2ltdWxhdGVkIGdlb2NvZGVkIGFkZHJlc3NlcyBhbmQgbW9ydGFsaXR5IGRhdGEgZnJvbSBhbiBvdmFyaWFuIGNhbmNlciBjb2hvcnQKICAyLiBJbXBvcnQgb3VyIGRhdGFzZXQgd2l0aCBncmVlbnNwYWNlIGFjcm9zcyB0aGUgQmF5IEFyZWEKICAzLiBDb21wYXJlIHByb2plY3Rpb25zIG9mIGRhdGFzZXRzIGFuZCByZS1wcm9qZWN0IGlmIG5lZWRlZAogIDQuIE1ha2UgbWFwcwogIDUuIFNwYXRpYWxseSBqb2luIHRoZSB0d28gZGF0YXNldHMgYnkgZXh0cmFjdGluZyByYXN0ZXIgdmFsdWVzIHRvIHBvaW50cwogIDYuIFJ1biBhIHF1aWNrIHN0YXRpc3RpY2FsIGFuYWx5c2lzIG9uIHRoZSB0d28gZGF0YXNldHMgY29tYmluZWQKICAKXAoKIyBMb2FkIHBhY2thZ2VzCmBgYHtyfQpsaWJyYXJ5KHRlcnJhKQpsaWJyYXJ5KHNmKQpsaWJyYXJ5KHRtYXApCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeShmbGV4dGFibGUpCmxpYnJhcnkoUkNvbG9yQnJld2VyKQpgYGAKClwKCiMgSW1wb3J0IGdyZWVuc3BhY2UgcmFzdGVyCgoKV2XigJlsbCBicmluZyBpbiB0aGUgZmlsZSBORFZJX3Jhc3QudGlmLiBUaGUgZmlsZSBjb250YWlucyBub3JtYWxpemVkIGRpZmZlcmVuY2UgdmVnZXRhdGlvbiBpbmRleCAoTkRWSSkgZGF0YSBmb3IgdGhlIEJheSBBcmVhLiBUaGVzZSBkYXRhIGFyZSB0YWtlbiBmcm9tIExhbmRzYXQgc2F0ZWxsaXRlIGRhdGEgdGhhdCBJIGRvd25sb2FkZWQgZnJvbSBHb29nbGUgRWFydGggRW5naW5lLiBXZSB1c2UgdGhlIGZ1bmN0aW9uIGByYXN0KClgIGZyb20gdGhlICoqdGVycmEqKiBwYWNrYWdlIHRvIGJyaW5nIGluIGRhdGEgaW4gcmFzdGVyIGZvcm0sIHRoZW4gdGFrZSBhIGxvb2sgYXQgdGhlIGRhdGFzZXQuCgpgYGB7cn0KdXJsIDwtICJodHRwczovL2dpdGh1Yi5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3Jhdy9tYWluL05EVklfcmFzdDIudGlmIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiTkRWSV9yYXN0Mi50aWYiLCBtb2RlID0gIndiIikKbmR2aV9yYXN0ID0gcmFzdCgiTkRWSV9yYXN0Mi50aWYiKQoKIyMgR2V0IHN1bW1hcnkgb2YgcmFzdGVyIGRhdGEKbmR2aV9yYXN0CmBgYAoKXAoKQXMgYWx3YXlzLCB3ZSBjaGVjayB0aGUgZmlsZSB0byBtYWtlIHN1cmUgaXQgd2FzIHJlYWQgY29ycmVjdGx5LiBEb2VzIGl0IGhhdmUgYSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0/CgpgYGB7cn0KIyMgQ2hlY2sgQ1JTCnN0X2NycyhuZHZpX3Jhc3QpCmBgYAoKXAoKT0ssIGxldCdzIHBsb3QgaXQgbGlrZSB3ZSBkaWQgd2hlbiB3ZSBmaXJzdCBsb29rZWQgYXQgdGhpcyBkYXRhc2V0IGJhY2sgaW4gW0xhYiA0XShMYWI0XzIwMjYuaHRtbCkuCgpgYGB7cn0KIyMgUGxvdCB0aGUgcmFzdGVyIG9uIGEgbWFwCnRtYXBfbW9kZSgicGxvdCIpCk5EVklfbWFwID0gdG1fc2hhcGUobmR2aV9yYXN0KSArCiAgdG1fcmFzdGVyKHN0eWxlID0gImNvbnQiKSArCiAgdG1fbGVnZW5kKG91dHNpZGUgPSBUUlVFKQpORFZJX21hcApgYGAKCkxvb2tzIHZlcnkgbmljZSEgCgpcCgojIEJyaW5nIGluIENhbmNlciBkYXRhc2V0CgpGb3Igb3VyIGhlYWx0aCBkYXRhc2V0LCB3ZSB3aWxsIGJlIHVzaW5nIGRhdGEgaW5jbHVkZWQgaW4gdGhlICoqTWFwR0FNKiogW3BhY2thZ2VdKGh0dHBzOi8vY3Jhbi5yLXByb2plY3Qub3JnL3dlYi9wYWNrYWdlcy9NYXBHQU0vTWFwR0FNLnBkZikuIEFzIGEgcmVtaW5kZXI6IFdoaWxlIHRoZXkgYXJlIGJhc2VkIG9uIHJlYWwgcGF0dGVybnMgZXhwZWN0ZWQgaW4gb2JzZXJ2YXRpb25hbCBlcGlkZW1pb2xvZ2ljIHN0dWRpZXMsIHRoZXNlIGRhdGEgaGF2ZSBiZWVuIHNpbXVsYXRlZCBhbmQgYXJlIGZvciB0ZWFjaGluZyBwdXJwb3NlcyBvbmx5LiBUaGUgZGF0YSBjb250YWluIDUwMDAgc2ltdWxhdGVkIG92YXJpYW4gY2FuY2VyIGNhc2VzLiBXaGlsZSB0aGlzIGlzIGEgY29ob3J0IHdpdGggdGltZSB0byBtb3J0YWxpdHksIGZvciB0aGUgcHVycG9zZXMgb2Ygb3VyIGNsYXNzLCB3ZSB3aWxsIGNvbmR1Y3Qgc2ltcGxlIHRhYnVsYXIgYW5hbHlzZXMgbG9va2luZyBhdCBhc3NvY2lhdGlvbnMgYmV0d2VlbiBkaWZmZXJlbnQgc3BhdGlhbCBleHBvc3VyZXMgd2l0aCBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cC4gCgpBcyBhbm90aGVyIHJlbWluZGVyLCB0aGUgKkNBZGF0YSogZGF0YXNldCBjb250YWlucyB0aGUgZm9sbG93aW5nIHZhcmlhYmxlczoKCiogdGltZSAoZm9sbG93LXVwIHRpbWUpCiogZXZlbnQgKDE9ZGVhZCwgMD1jZW5zb3JlZCkKKiBYIChMYXRpdHVkZSkKKiBZIChMb25naXR1ZGUpCiogQUdFIChhZ2UgaW4geWVhcnMpCiogSU5TIChpbnN1cmFuY2Ugc3RhdHVzLCBjYXRlZ29yaWNhbCkKClwKCiMjIFJlYWQgaW4gQ2FuY2VyIERhdGFzZXQKCk5leHQsIHdlIHdhbnQgdG8gcmVhZCBpbiBhbGwgb2Ygb3VyIHNwYXRpYWwgZGF0YS4gRmlyc3QsIHdlIHJlYWQgaW4gdGhlICpDQWRhdGEqIGRhdGFzZXQgZnJvbSB0aGUgKipNYXBHQU0qKiBwYWNrYWdlLCBhbmQgdGhlbiBjb252ZXJ0IGl0IHRvIGEgc3BhdGlhbCBkYXRhc2V0LiAKCmBgYHtyfQpkYXRhKENBZGF0YSkKY2FfcHRzIDwtIENBZGF0YQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpLCBjcnM9Y2FfcHJvaikKYGBgCgpcCgoKIyBDaGVjayBQcm9qZWN0aW9ucyBmb3IgYWxsIFNwYXRpYWwgRGF0YQoKRmluYWxseSwgd2UgY2hlY2sgdGhlIHByb2plY3Rpb25zLiAqKlRoaXMgaXMgdGhlIG1vc3QgaW1wb3J0YW50IHN0ZXAgYW5kIGlzIGd1YXJhbnRlZWQgdG8gbWFrZSBsaWZlIGVhc2llciB3aXRoIHlvdXIgZ2Vvc3BhdGlhbCBhbmFseXNpcyEqKiBXaGVuIHlvdSBoYXZlIGZpbGVzIGluIGRpZmZlcmVudCBwcm9qZWN0aW9ucywgdGhpcyBjYW4gYmUgYSBtYWpvciBwcm9ibGVtIGJlY2F1c2Ugd2hlbiB3ZSB0cnkgdG8gb3ZlcmxheSB0aGUgdHdvIGZpbGVzIHRoZXkgbWF5IG5vdCBvdmVybGFwLiBGaXJzdCB3ZSBjaGVjayB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtcyBmb3IgZWFjaCBkYXRhc2V0IHVzaW5nIGBzdF9jcnMoKWAuIFdlIHRoZW4gdXNlIHRoZSBgc3RfdHJhbnNmb3JtKClgIGZ1bmN0aW9uIHRvIGNvbnZlcnQgdGhlIHByb2plY3Rpb24gZm9yIG91ciBwb2ludCBkYXRhIHRvIG1hdGNoIHRoYXQgb2Ygb3VyIHBvbHlnb24gZGF0YS4gV2hlbiB3ZSBhcmUgZG9uZSwgZG8gdGhlIHByb2plY3Rpb25zIG9mIHRoZSB0d28gZGF0YXNldHMgbWF0Y2g/CgoKYGBge3J9CiMjIExvb2sgYXQgdGhlIGNvb3JkaW5hdGUgcmVmZXJlbmNlIHN5c3RlbSBmb3IgdGhlIGNhbmNlciBkYXRhLCBhbmQgZm9yIGdyZWVuc3BhY2UgZGF0YQpzdF9jcnMoY2FfcHRzKQpzdF9jcnMobmR2aV9yYXN0KQoKIyMgVHJhbnNmb3JtIHRoZSBjb29yZGluYXRlIHJlZmVyZW5jZSBzeXN0ZW0gb2YgdGhlIGNhbmNlciBkYXRhIHRvIG1hdGNoIHRoYXQgCiMjIG9mIHRoZSBncmVlbnNwYWNlIGRhdGEKY2FfdHJhbnNmb3JtZWQgPC1zdF90cmFuc2Zvcm0oY2FfcHRzLCBzdF9jcnMobmR2aV9yYXN0KSkgIAoKIyMgQ2hlY2sgcHJvamVjdGlvbnMKc3RfY3JzKG5kdmlfcmFzdCk9PXN0X2NycyhjYV90cmFuc2Zvcm1lZCkKYGBgCgpcCgojIE1hcCBUaGUgRGF0YQoKTm93LCB3ZSB3aWxsIHZpc3VhbGl6ZSBvdXIgc3BhdGlhbCBkYXRhIHVzaW5nICoqdG1hcCoqLiBXZSB3aWxsIG92ZXJsYXkgdGhlIGdyZWVuc3BhY2UgbWFwcyB3aXRoIHRoZSBvdmFyaWFuIGNhbmNlciBkYXRhLiBEbyBhbnkgcGF0dGVybnMganVtcCBvdXQsIG9yIGFyZSB0aGVyZSBhbnkgcGFydGljaXBhbnRzIGxpdmluZyBpbiB0aGUgbWlkZGxlIG9mIHRoZSBCYXk/CgpgYGB7cn0KY2EubmR2aS5tYXAgPC0gdG1fc2hhcGUobmR2aV9yYXN0KSArCiAgdG1fcmFzdGVyKHN0eWxlID0gImNvbnQiKSArCiAgICAgIHRtX3NoYXBlKGNhX3RyYW5zZm9ybWVkKSArCiAgICAgICAgdG1fZG90cyhzaXplPTAuMjUsIGFscGhhPTAuOCwgY29sPSJibHVlIikKY2EubmR2aS5tYXAKYGBgCgpcCgpXZSBmaW5kIHRoYXQgdGhlIG1vc3QgbGVhc3QgZ3JlZW4gYXJlYXMgYXJlIGluIHRoZSBkb3dudG93biBhcmVhcyBvZiBTYW4gRnJhbmNpc2NvIGFuZCBPYWtsYW5kLCB3aGljaCBtYWtlcyBzZW5zZS4gT3VyIGNhbmNlciBjb2hvcnQgZGF0YSBvdmVybGFwcyB3aXRoIHRoZSBncmVlbnNwYWNlIG1hcCwgd2hpY2ggaXMgcmVhc3N1cmluZy4gCgpcCgojIEV4dHJhY3QgUmFzdGVyIFZhbHVlcyB0byBQb2ludHMKCk5vdyB0aGF0IHdlIGhhdmUgdmlzdWFsaXplZCBvdXIgZGF0YSwgbGV0J3Mgc2VlIGlmIHRoZXJlIGlzIGFuIGFzc29jaWF0aW9uIGJldHdlZW4gZ3JlZW5zcGFjZSBleHBvc3VyZSBhbmQgbW9ydGFsaXR5IGFtb25nIG92YXJpYW4gY2FuY2VyIGNhc2VzLiBXZSB3aWxsIGZpcnN0IGV4dHJhY3QgdGhlIHZhbHVlcyBmb3IgZ3JlZW5zcGFjZSB0byB0aGUgY2FuY2VyIGRhdGFzZXQgKG1lcmdlIHRoZSB0d28gZGF0YXNldHMgYmFzZWQgb24gbG9jYXRpb24gb2YgY2FzZXMgYW5kIHRoZSBncmVlbnNwYWNlIHBpeGVsIHRoYXQgdGhleSBhcmUgaW4pIHVzaW5nIGB0ZXJyYTo6ZXh0cmFjdGAuIFRoZW4gd2Ugd2lsbCBjaGVjayB0aGUgZGlzdHJpYnV0aW9uIG9mIGdyZWVuc3BhY2UgZXhwb3N1cmUgaW4gb3VyIGNhbmNlciBjYXNlcy4gV2Ugd2lsbCB1c2UgYSB0d28tc2lkZWQgY2hpLXNxdWFyZWQgdGVzdCB0byB0ZXN0IG91ciBoeXBvdGhlc2lzIG9mIHRoZSBhc3NvY2lhdGlvbiBiZXR3ZWVuIGdyZWVuc3BhY2UgZXhwb3N1cmUgYW5kIG1vcnRhbGl0eSBhbW9uZyBvdmFyaWFuIGNhbmNlciBjYXNlcy4gV2hhdCBkbyB3ZSBmaW5kPwoKYGBge3J9CiMjIFNwYXRpYWxseSBqb2luIHRoZSBjYW5jZXIgcG9pbnQgZGF0YSB0byB0aGUgd2Fsa2FiaWxpdHkgcG9seWdvbiBkYXRhCm5kdmlfY2FuY2VyID0gZGF0YS5mcmFtZShjYV90cmFuc2Zvcm1lZCx0ZXJyYTo6ZXh0cmFjdChuZHZpX3Jhc3QsIGNhX3RyYW5zZm9ybWVkKSkKZ2xpbXBzZShuZHZpX2NhbmNlcikgCiMjIFRha2UgYSBsb29rIGF0IGEgc3VtbWFyeSBvZiB0aGUgdmFsdWVzCnN1bW1hcnkobmR2aV9jYW5jZXIkTkRWSV9CYXlBcmVhKQpgYGAKClwKCkxvb2tzIGxpa2Ugd2UgaGF2ZSBsb3RzIG9mIE5BIHZhbHVlcy4gVGhhdCBpcyBiZWNhdXNlIHNvbWUgb2Ygb3VyIHBhcnRpY2lwYW50cyBsaXZlIG91dHNpZGUgb2YgdGhlIGFyZWEgb2Ygb3VyIGdyZWVuc3BhY2UgZGF0YS4gTGV0J3MgZHJvcCB0aG9zZSBtaXNzaW5nIHZhbHVlcyB1c2luZyBgZHJvcF9uYSgpYCwgd2hpY2ggaXMgc2xpZ2h0bHkgZGlmZmVyZW50IGZyb20gaG93IHdlJ3ZlIGRvbmUgdGhpcyBiZWZvcmUuCgpgYGB7cn0KbmR2aV9jYW5jZXJfbm9taXNzIDwtIG5kdmlfY2FuY2VyICU+JSBkcm9wX25hKE5EVklfQmF5QXJlYSkgCgojIyBUYWtlIGEgbG9vayBhdCBhIHN1bW1hcnkgb2YgdGhlIHZhbHVlcwpzdW1tYXJ5KG5kdmlfY2FuY2VyX25vbWlzcyRORFZJX0JheUFyZWEpCmdsaW1wc2UobmR2aV9jYW5jZXJfbm9taXNzKQpgYGAKClwKCiMgQW5hbHl6ZSBvdXIgSm9pbmVkIERhdGFzZXQKT0ssIHdlIGhhdmUgYSBkYXRhc2V0IHdpdGggbm8gbWlzc2luZ25lc3MuIENhbiB3ZSBsb29rIGF0IHRoZSBkaXN0cmlidXRpb24gb2YgZ3JlZW5zcGFjZSBleHBvc3VyZSBhbW9uZyBwYXJ0aWNpcGFudHM/CmBgYHtyfQpuZHZpX2NhbmNlcl9ub21pc3MgJT4lCiAgZ2dwbG90KCkgKyAKICBnZW9tX2hpc3RvZ3JhbShtYXBwaW5nID0gYWVzKHg9TkRWSV9CYXlBcmVhKSkgCgpgYGAKClwKCkZvciB0aGUgcHVycG9zZXMgb2Ygb3VyIGFuYWx5c2lzLCBsZXQncyBkaXZpZGUgdXAgb3VyIGdyZWVuc3BhY2UgZGF0YSBpbnRvIHF1YXJ0aWxlcy4gV2Ugd2lsbCBkbyB0aGlzIHVzaW5nIHRoZSBgbXV0YXRlKClgIGZ1bmN0aW9uIGNvbWJpbmVkIHdpdGggdGhlIGBudGlsZSgpYCBmdW5jdGlvbi4gVGhlbiB3ZSB3aWxsIHRha2UgYSBnbGltcHNlIGF0IG91ciBuZXcgZGF0YXNldC4KCmBgYHtyfQpuZHZpX2NhbmNlcl9ub21pc3MgPC0gbmR2aV9jYW5jZXJfbm9taXNzICU+JQogIG11dGF0ZShuZHZpX3F1YXJ0aWxlID0gbnRpbGUoTkRWSV9CYXlBcmVhLCA0KSkKCmdsaW1wc2UobmR2aV9jYW5jZXJfbm9taXNzKQpgYGAKClwKCk9LIHRoYXQgbG9va3MgZ29vZC4gV2UgaGF2ZSBjcmVhdGVkIGEgbmV3IHZhcmlhYmxlICpuZHZpX3F1YXJ0aWxlKiB0aGF0IHRlbGxzIHVzIHdoYXQgcXVhcnRpbGUgb2YgZ3JlZW5zcGFjZSBhIHBhcnRpY2lwYW50IGxpdmVzIGluLiBMZXQncyBkbyBhIHR3byBieSB0d28gdGFibGUgb2YgZ3JlZW5zcGFjZSBxdWFydGlsZXMgYnkgKmV2ZW50Kiwgd2hpY2ggaXMgd2hldGhlciBhIHBhcnRpY2lwYW50IGRpZWQgb3ZlciBmb2xsb3d1cC4KYGBge3J9CiMjIENyZWF0ZSBhIGNvbnRpbmdlbmN5IHRhYmxlIG9mIGV2ZW50IGJ5IHdhbGtfcXVhcnRpbGUKdGFiIDwtIHRhYmxlKG5kdmlfY2FuY2VyX25vbWlzcyRuZHZpX3F1YXJ0aWxlLCBuZHZpX2NhbmNlcl9ub21pc3MkZXZlbnQpCnRhYgpgYGAKClwKCkhtbW0sIHRoYXQncyBpbnRlcmVzdGluZywgYnV0IGxldCdzIGxvb2sgYXQgdGhpcyBieSBwZXJjZW50YWdlcyBpbnN0ZWFkLgpgYGB7cn0KIyMgQ29udmVydCB0byBwZXJjZW50YWdlcyBieSBjb2x1bW4KdGFiX2NvbF9wZXJjIDwtIHByb3AudGFibGUodGFiLCBtYXJnaW4gPSAyKSAqIDEwMApyb3VuZCh0YWJfY29sX3BlcmMsIDEpCmBgYAoKXAoKRG8geW91IHRoaW5rIHRoZSBwZXJjZW50YWdlcyBhcmUgZGlmZmVyZW50IGJ5IHF1YXJ0aWxlIG9mIGdyZWVuc3BhY2U/IFdlIGNhbiBydW4gYSBjaGktc3F1YXJlZCB0ZXN0IHRvIGJlIHN1cmUuIFRoaXMgaXMgYSBzdGF0aXN0aWNhbCB0ZXN0IHRvIHNlZSB3aGV0aGVyIHRoZXJlIGlzIGEgZGlmZmVyZW5jZSBpbiB0aGUgcHJvYmFiaWxpdHkgb2YgKmV2ZW50Kiwgb3Igd2hldGhlciBhIHBhcnRpY2lwYW50IGRpZWQgb3ZlciBmb2xsb3ctdXAsIGJ5IHRoZSBxdWFydGlsZXMgb2YgZ3JlZW5zcGFjZSBXZSBkbyB0aGlzIHdpdGggdGhlIGBjaGlzcS50ZXN0KClgIGZ1bmN0aW9uLgpgYGB7cn0KIyMgQ2hpLXNxdWFyZWQgdGVzdApjaGlzcS50ZXN0KHRhYikKYGBgCgpcCgpPSywgaG93IGRvIHdlIGludGVycHJldCB0aGlzPyBPdXIgbnVsbCBoeXBvdGhlc2lzIGlzIHRoYXQgdGhlcmUgaXMgbm8gYXNzb2NpYXRpb24gYmV0d2VlbiBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cCBhbmQgaW5jcmVhc2luZyBxdWFydGlsZSBvZiBncmVlbnNwYWNlLiBPdXIgYWx0ZXJuYXRpdmUgaHlwb3RoZXNpcyBpcyB0aGF0IHRoZXJlIGlzIGFuIGFzc29jaWF0aW9uIGJldHdlZW4gbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgYW5kIGluY3JlYXNpbmcgcXVhcnRpbGUgb2YgZ3JlZW5zcGFjZS4gV2UgdXNlIGEgdHdvLXNpZGVkIGNoaS1zcXVhcmVkIHRlc3Qgd2l0aCBhbHBoYT0wLjA1LiBBc3N1bWluZyBubyBzb3VyY2VzIG9mIGJpYXMgYW5kIHRoYXQgdGhlIG51bGwgaHlwb3RoZXNpcyBpcyB0cnVlLCB0aGUgcHJvYmFiaWxpdHkgb2Ygb2JzZXJ2aW5nIGluY3JlYXNlcyBpbiBtb3J0YWxpdHkgYXQgZW5kIG9mIGZvbGxvdy11cCB3aXRoIGluY3JlYXNpbmcgcXVhcnRpbGVzIG9mIGdyZWVuc3BhY2UgYXMgb3IgbW9yZSBleHRyZW1lIGFzIHRob3NlIHByb2R1Y2VkIGluIHRoZXNlIGRhdGEgaXMgMC43MTYuIFNpbmNlIHA+MC4wNSwgd2UgZmFpbCB0byByZWplY3QgdGhlIG51bGwgaHlwb3RoZXNpcyBhbmQgY29uY2x1ZGUgdGhhdCBncmVlbnNwYWNlIGlzIG5vdCBhc3NvY2lhdGVkIHdpdGggbW9ydGFsaXR5IGF0IGVuZCBvZiBmb2xsb3ctdXAgKHVuZGVyIHRoZSBhc3N1bXB0aW9ucyBzdGF0ZWQgYWJvdmUpLiBJbiBvdGhlciB3b3Jkcywgd2UgZG9uJ3Qgc2VlIGEgcmVsYXRpb25zaGlwIGJldHdlZW4gZ3JlZW5zcGFjZSBleHBvc3VyZSBhbmQgb3VyIG91dGNvbWUgKGR5aW5nIG92ZXIgZm9sbG93dXApLg==</div>
 
 
 </div>

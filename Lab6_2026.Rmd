@@ -1,5 +1,5 @@
 ---
-title: 'Lab 6: Working with Raster and Vector data together'
+title: 'Lab 6: Working with Raster and Vector Data Together'
 ---
 In this lab, we are going to work with vector and raster data, extracting raster values to point data 
 

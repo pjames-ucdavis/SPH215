@@ -1,5 +1,5 @@
 ---
-title: "Lab 4: More with Vector Data and Visualizing Raster data"
+title: "Lab 4: More with Vector Data and Visualizing Raster Data"
 ---
 
 In this lab, we are going to work with vector and raster data, spatially joining point data to vector data. We will learn how to visualize Census data, we will talk about how to wrangle spatial data, and we will get into some really cool ways to create choropleth maps (maps color coded by attributes). Finally, we will take a deep dive into raster data.
