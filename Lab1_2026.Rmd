@@ -88,7 +88,7 @@ Hopefully, I’ve convinced you that statistical programming and R are worthwhil
 
 R can be downloaded from one of the “CRAN” (Comprehensive R Archive Network) sites. In the US, the main site is at http://cran.us.r-project.org/. Look in the “Download and Install R” area at the top. Click on the appropriate link based on your operating system.
 
-**If you already have R on your computer, make sure you have the most updated version of R on your personal computer (4.4.2 “Trophy Case”).**
+**If you already have R on your computer, make sure you have the most updated version of R on your personal computer (R version 4.5.2 ([Not] Part in a Rumble)).**
 
 \
 
