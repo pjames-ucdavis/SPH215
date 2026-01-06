@@ -54,10 +54,10 @@ In this course, students will gain
 - A theoretical understanding of the role of space and place in community-level phenomenon
 - An understanding of what kinds of spatial data are available and where to find them
 - Proficiency in spatial analytic tools (R) to
-- Manage and process spatial data
-- Descriptively examine spatial data
-- Run spatial models for statistical inference
-- An understanding of how these methods are employed in community research- 
+  - Manage and process spatial data
+  - Descriptively examine spatial data
+  - Run spatial models for statistical inference
+- An understanding of how these methods are employed in community research
 
 \
 

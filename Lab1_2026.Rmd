@@ -585,7 +585,7 @@ To uninstall a package, use the function `remove.packages()`.
 
 # Tidyverse
 
-In most labs, we will be using commands from the **tidyverse** package. [Tidyverse](https://www.tidyverse.org/) is a collection of high-powered, consistent, and easy-to-use packages developed by a number of thoughtful and talented R developers.The consistency of the **tidyverse**, together with the goal of increasing productivity, mean that the syntax of tidy functions is typically straightforward to learn. You can read more about **tidyverse** principles in Chapter 9, pages 147-151 in RDS.
+In most labs, we will be using commands from the **tidyverse** package. [Tidyverse](https://www.tidyverse.org/) is a collection of high-powered, consistent, and easy-to-use packages developed by a number of thoughtful and talented R developers. The consistency of the **tidyverse**, together with the goal of increasing productivity, mean that the syntax of tidy functions is typically straightforward to learn. You can read more about **tidyverse** principles in Chapter 9, pages 147-151 in RDS.
 
 Excited about entering the tidyverse? I bet you are, so here is a badge to show your excitement!
 
