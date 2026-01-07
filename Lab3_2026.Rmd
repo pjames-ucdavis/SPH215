@@ -1,5 +1,5 @@
 ---
-title: "Lab 3: Geocoding, Vector Data, and Census Data"
+title: 'Lab 3: Geocoding, Vector Data, and Census Data'
 ---
 
 In this lab, we are going to work with vector data, which we've talked about last week. First, we are going to geocode addresses.  We are going to work with a dataset of cancer patients across California, as well as Census data on socioeconomic factors. We will also talk about how to visualize data. 
@@ -220,17 +220,19 @@ cancer_map
 
 \
 
-Let's play around with some of the options. We can change the color with the `col=` option. We can make the dots smaller by specifying the `size=` option. And we can change the transparency of the points with the `alpha=` option.
+Let's play around with some of the options. We can change the color with the `fill=` option. We can make the dots smaller by specifying the `size=` option. And we can change the transparency of the points with the `fill_alpha=` option.
 ```{r}
-cancer_map_small = tm_shape(ca_pts_crs) + tm_dots(col = "blue", size = 0.3, alpha = 0.5)
+cancer_map_small = tm_shape(ca_pts_crs) + 
+  tm_dots(fill = "blue", size = 0.3, fill_alpha = 0.5)
 cancer_map_small
 ```
 
 \
 
-Let's map the points color coded by the variable *event*, or whether or not the participant died over followup. We do that by specifying that the color (`col=`) is based on the column *event*. We have to specify that *event* is a categorical variable with `style="cat"`. 
+Let's map the points color coded by the variable *event*, or whether or not the participant died over followup. We do that by specifying that the color (`fill=`) is based on the column *event*. We have to specify that *event* is a categorical variable with `fill.scale=tm_scale_categorical()`. 
 ```{r}
-cancer_map_events = tm_shape(ca_pts_crs) + tm_dots(size=0.3, col="event", style="cat")
+cancer_map_events = tm_shape(ca_pts_crs) + 
+  tm_dots(size=0.3, fill="event", fill.scale=tm_scale_categorical())
 cancer_map_events
 ```
 
@@ -238,7 +240,8 @@ cancer_map_events
 
 Let's see if we can change up the color scheme.
 ```{r}
-cancer_map_events_rg = tm_shape(ca_pts_crs) + tm_dots(col = "event", palette = c("0" = "gray", "1" = "red"), style="cat")
+cancer_map_events_rg = tm_shape(ca_pts_crs) + 
+  tm_dots(fill = "event", fill.scale=tm_scale_categorical(values=c("0"="gray","1"="red")))
 cancer_map_events_rg
 ```
 
@@ -312,11 +315,11 @@ ca <- get_acs(geography = "county",
 In the above code, we specified the following arguments
 
 - `geography`: The level of geography we want the data in; in our case, the county. Other geographic options can be found [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus).
-- `year`: The end year of the data (because we want 2016-2020, we use 2020).
+- `year`: The end year of the data (because we want 2019-2023, we use 2023).
 - `variables`: The variables we want to bring in as specified in a vector you create using the function `c()`. Note that we created variable names of our own (e.g. “nhwhite”) and we put the ACS IDs in quotes (“B03002_003”). Had we not done this, the variable names will come in as they are named in the ACS, which are not very descriptive.
 - `state`: We can filter the counties to those in a specific state. Here it is “CA” for California. If we don’t specify this, we get all counties in the United States.
 - `survey`: The specific Census survey were extracting data from. We want data from the 5-year American Community Survey, so we specify “acs5”. The ACS comes in 1- and 5-year - varieties.
-- `output`: The argument tells R to return a wide dataset as opposed to a long dataset (see this vignette for more info).
+- `output`: The argument tells R to return a wide dataset as opposed to a long dataset (see this [vignette](https://tidyr.tidyverse.org/articles/tidy-data.html) for more info).
 
 Another useful option to set is `cache_table = TRUE`, so you don’t have to re-download after you’ve downloaded successfully the first time. Type in `? get_acs()` to see the full list of options.
 
@@ -355,7 +358,7 @@ To save us time, I’ve uploaded a PolicyMap ([link to .csv](https://github.com/
 
 From a Mac laptop, I type in the following command to set the directory to the folder containing my data.
 
-```{r}
+```{r, eval = FALSE}
 setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
 ```
 
@@ -400,7 +403,7 @@ If you like viewing your data through an Excel style worksheet, type in `View(ca
 
 # More data wrangling
 
-We learned about the various data wrangling related functions from the **tidyverse** package in [Lab 1](Lab1_2026.html). Let’s employ some of those functions to create a single county level dataset that joins the datasets we downloaded from the Census API and PolicyMap.
+We learned about the various data wrangling related functions from the **tidyverse** package in [Lab 2](Lab2_2026.html). Let’s employ some of those functions to create a single county level dataset that joins the datasets we downloaded from the Census API and PolicyMap.
 
 We are going to combine these datasets using the county FIPS codes. In the Census API and PolicyMap, these are contained in the variables GEOID and GeoID, respectively. Let’s make sure they are in the same class.
 
@@ -442,7 +445,7 @@ Piping makes code clearer, and simultaneously gets rid of the need to define any
 If you want to save your data frame or tibble as a csv file on your hard drive, use the command `write_csv()`. Before you save a file, make sure R is pointed to the appropriate folder on your hard drive by using the function `getwd()`. If it’s not pointed to the right folder, use the function `setwd()` to set the appropriate working directory.
 
 ```{r}
-write_csv(cacounty, "lab2_file.csv")
+write_csv(cacounty, "lab3_file.csv")
 ```
 
 The first argument is the name of the R object you want to save. The second argument is the name of the csv file in quotes. Make sure to add the .csv extension. The file is saved in your current working directory.
@@ -466,7 +469,7 @@ cacounty %>%
   summarize(Mean = mean(mhhinc))
 ```
 
-The average county median household income is $87,001. If the variable *mhhinc* contained missing values, we would have gotten *NA* as a result. To omit missing values from the calculation, you need to add `rm = TRUE` to `mean()`.
+The average county median household income is $87,001. If the variable *mhhinc* contained missing values, we would have gotten *NA* as a result. To omit missing values from the calculation, you need to add `na.rm = TRUE` to `mean()`.
 
 We can calculate more than one summary statistic within `summarize()`. What is the spread of the distribution? We can add to `summarize()` the function `sd()` to calculate the standard deviation.
 \
