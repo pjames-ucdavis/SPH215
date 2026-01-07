@@ -1,5 +1,5 @@
 ---
-title: "Lab 2: Data Wrangling in R"
+title: 'Lab 2: Data Wrangling in R'
 ---
 
 
@@ -284,7 +284,7 @@ One way to do this is to use the default R Script, which is covered in the [assi
 
 When going through lab guides, I would recommend not copying and pasting code directly into the R Console, but saving and running it in an R Markdown file. This will give you good practice in the R Markdown environment. Now is a good time to read through the class [assignment guidelines](Assignments_2026.html) as they go through the basics of R Markdown files.
 
-To open an R Markdown file, click on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 1”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
+To open an R Markdown file, click on *File* at the top menu in RStudio, select *New File*, and then *R Markdown...*. A window should pop up. In that window, for *title*, put in “Lab 2”. For *author*, put your name. Leave the HTML radio button clicked, and select OK. A new R Markdown file should pop up in the top left window.
 
 \
 
@@ -296,7 +296,7 @@ Don’t change anything inside the YAML (the stuff at the top in between the `--
 
 Delete everything else. Save this file (*File* -> *Save*) in an appropriate folder. It’s best to set up a clean and efficient file management structure (e.g., SPH215>Labs>Lab1) but you do what works for you.
 
-Follow the directions in the [assignment guidelines](Assignments_2026.html) to add this lab’s code in your Lab 1 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
+Follow the directions in the [assignment guidelines](Assignments_2026.html) to add this lab’s code in your Lab 2 R Markdown file. Then knit it as an html, word or pdf file. You don’t have to turn in the Rmd and its knitted file, but it’s good practice to create an Rmd file for each lab (and you will see that the lab assignments are eerily similar to what we do in the lab, so you will save yourself time).
 
 Although the lab guides and course textbooks should get you through a lot of the functions that are needed to successfully accomplish tasks for this class, there are a number of useful online resources on R and RStudio that you can look into if you get stuck or want to learn more. We outline these resources in the [R Help](R_help_2026.html) section of the website. If you ever get stuck, check this resource out first to troubleshoot before immediately asking a friend or the instructor.
 
