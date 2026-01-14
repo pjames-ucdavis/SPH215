@@ -1,5 +1,5 @@
 ---
-title: "Lab 1: Intro to R"
+title: 'Lab 1: Intro to R'
 ---
 
 \
@@ -236,7 +236,7 @@ Numerics are separated into two types: integer and double. The distinction betwe
 
 And divide
 ```{r r6}
-2*3
+2/3
 ```
 
 \
