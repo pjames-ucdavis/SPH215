@@ -162,10 +162,10 @@ Note that you can create new variables based on the variables you just created i
 ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
               pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
               mhisp = case_when(phisp > 0.5 ~ "Majority",
-                                TRUE ~ "Not Majority"))
+                                .default = "Not Majority"))
 ```
 
-We used the function `case_when()` to create *mhisp* - the function tells R that if the condition *phisp* > 0.5 is met, the tract’s value for the variable *mhisp* will be “Majority”, otherwise (designated by `TRUE`) it will be “Not Majority”.
+We used the function `case_when()` to create *mhisp* - the function tells R that if the condition *phisp* > 0.5 is met, the tract’s value for the variable *mhisp* will be “Majority”, otherwise (designated by `.default=`) it will be “Not Majority”.
 
 Take a look at our data. Pay attention to *phisp* and *mhisp*. Did our calculation work?
 
@@ -352,7 +352,8 @@ cancer_projected = st_as_sf(cancer, crs=4269)
 
 ## Plot the data--will also discuss more in a few weeks!
 tmap_mode("view")
-cancer_map = tm_shape(cancer_projected) + tm_dots(size=0.5,alpha=0.8, col="event",style="cat")
+cancer_map = tm_shape(cancer_projected) + 
+  tm_dots(size=0.5,fill_alpha=0.8, fill="event",fill.scale = tm_scale_categorical())
 cancer_map
 ```
 
