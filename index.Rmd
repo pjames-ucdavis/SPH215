@@ -11,7 +11,7 @@ title: "SPH 215: Geographic Information Systems for Public Health 2026"
 
 \
 
-Welcome to the SPH 215 website. This website complements the class [Canvas](https://canvas.ucdavis.edu/courses/996070) site.
+Welcome to the SPH 215 website. This website complements the class [Canvas](https://canvas.ucdavis.edu/courses/1064227) site.
 
 On this website you will find:
 
