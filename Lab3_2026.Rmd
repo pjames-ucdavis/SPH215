@@ -25,6 +25,24 @@ We hopefully remember some of this from last week in [Lab 2](Lab2_2026.html), bu
 
 Let's load some packages that we will need this week. We need to load any packages we previously installed  using the function `library()`. Remember, install once, load every time. And if it gives you an error for `no package called...`, then we need to install those packages using `install.packages()`. So when using a package, `library()` should always be at the top of your R Markdown.
 
+\
+
+...but here's a shortcut way to check and install packages you don't have, then load them up!
+```{r}
+packages <- c("tidygeocoder", "sf", "terra", "MapGAM", "tidyverse", "tidycensus", "flextable", "tmap")
+
+installed <- packages %in% rownames(installed.packages())
+
+if (any(!installed)) {
+  install.packages(packages[!installed])
+}
+
+lapply(packages, library, character.only = TRUE)
+```
+
+\
+
+And here's the traditional way we would have loaded them (don't need this now though...)
 
 ```{r, message=FALSE}
 library(tidygeocoder)
@@ -90,7 +108,7 @@ summary(sf_mj_geo$long)
 
 \
 
-Looks like we have 10 addresses missing *lat* and 10 missing *long*. Let's try this again using a different geocoding database called *arcgis*.
+Looks like we have 11 addresses missing *lat* and 11 missing *long*. Let's try this again using a different geocoding database called *arcgis*.
 
 ```{r}
 sf_mj_geo_arc      <- geocode(sf_mj, "Premise Address",
@@ -154,10 +172,9 @@ The *CAdata* dataset contains the following variables
 
 \
 
-So let's bring in the *CAdata* dataset and have a look at it. 
+So let's bring in the *CAdata* dataset and have a look at it. We don't have to do much because it's part of the **MapGAM** package and quickly loads in with the `data()` command.
 
 ```{r}
-#Load CAdata dataset from MapGAM package
 data(CAdata)
 ca_pts <- CAdata
 summary(ca_pts)
