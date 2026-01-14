@@ -465,12 +465,12 @@ The proper workflow for each assignment will be as follows
 1. Create an R Markdown assignment file. Save it in the appropriate assignment folder on your hard drive.
 1. Download any data needed for the assignment into the same folder. For most assignments, I will upload the assignment data on GitHub, which you can directly link to in R, so you won’t have to download data. Some files will be located on Canvas.
 1. In the R Markdown document, answer the first assignment question.
-- Most of the questions will ask you to run code. Show that code in R Markdown chunks. Bottom line: Any code you used to get a result should be in your assignment. Otherwise, you will get points off, and for 1. some questions, get all points off.
+  - Most of the questions will ask you to run code. Show that code in R Markdown chunks. Bottom line: Any code you used to get a result should be in your assignment. Otherwise, you will get points off, and for 1. some questions, get all points off.
   - Break up your code into different chunks where it makes sense. For some questions, you might include all code for a question in one single chunk. For other questions, you might break up the code into 1. several chunks.
   - Make sure your code works. Run code one chunk at a time to make sure it is working. Note that there are multiple ways to get to an answer in R. We will not grade on how efficient your code is unless stated 1. so in the question.
-- Most of the questions will ask you to explain your results. Write your explanations outside of the R code chunks. Please - *please* - take these interpretation questions seriously. This is a not a programming or Data Science course - you may have taken 40 hours to produce super elegant code to answer a question, but your results won’t be worth much to anyone if you can’t properly interpret them.
+  - Most of the questions will ask you to explain your results. Write your explanations outside of the R code chunks. Please - *please* - take these interpretation questions seriously. This is a not a programming or Data Science course - you may have taken 40 hours to produce super elegant code to answer a question, but your results won’t be worth much to anyone if you can’t properly interpret them.
 1. After you’ve completed the first question, knit to an `.html`, `.pdf` or `.docx` file. Make sure it knits properly. If it does not, examine the error, and fix the problem.
-1. If you’re satisfied with your code and its results for the first question, and the document properly knitted, move on to the next question. Repeat steps 5 and 6.
+1. If you’re satisfied with your code and its results for the first question, and the document properly knitted, move on to the next question. Repeat steps above to knit.
 1. Once you’ve completed all questions and successfully knitted, submit the `.Rmd` and the knitted files on Canvas before the designated due time.
 1. Smile, pat yourself on the back, and go for a walk, run, or bike ride. Or just sit outside and enjoy nature.
 
