@@ -330,13 +330,13 @@ Here are a few practice questions. You don’t need to submit these, but it’s 
 
 # But wait, we didn't make a map!
 
-This lab is a foundation for all of the work we will do moving forward in R. But what kind of GIS course would this be if we didn't make a map? Remember that dataset we brought in earlier on cancer cases across CA called *cancer*? Let's plot that real quick. We will talk more about it next week!
+This lab is a foundation for all of the work we will do moving forward in R. But what kind of GIS course would this be if we didn't make a map? Remember that dataset we brought in earlier on cancer cases across CA called *ca_cancer*? Let's plot that real quick. We will talk more about it next week (or later today if we have time)!
 
 ```{r}
-#Download Cancer Dataset
+# Download Cancer Dataset
 download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
 
-#Read in Cancer Dataset
+# Read in Cancer Dataset
 cancer <- readRDS("ca_cancer.rds")
 
 ## Let's view the data
