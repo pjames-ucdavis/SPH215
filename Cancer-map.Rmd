@@ -1,0 +1,48 @@
+---
+title: "Lab2_end"
+author: "Peter James"
+date: "2026-01-15"
+output: html_document
+---
+
+
+# Let's make a map
+
+Here we make a map.
+
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+
+# Read in cancer dataset
+cancer <- readRDS("ca_cancer.rds")
+
+# Look at the data
+head(cancer)
+```
+
+```{r}
+table(cancer$event)
+```
+
+#load packages
+```{r}
+library(sf)
+library(tmap)
+```
+
+# Let's do this map
+Here is my first beautiful map of class.
+```{r}
+## Setting coordinate reference system (CRS) to North American Datum 1983 (NAD83)--we will discuss more next week!
+cancer_projected = st_as_sf(cancer, crs=4269)
+
+## Plot the data--will also discuss more in a few weeks!
+tmap_mode("view")
+
+cancer_map = tm_shape(cancer_projected) + 
+  tm_dots(size=0.5,fill_alpha=0.8, fill="event",fill.scale = tm_scale_categorical())
+
+cancer_map
+```
+
+

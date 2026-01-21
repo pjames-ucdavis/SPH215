@@ -290,7 +290,7 @@ The first way to obtain Census data is to download them directly from the web on
 
 The other way to bring Census data into R is to use the [Census Application Program Interface (API)](https://www.census.gov/data/developers/guidance/api-user-guide.What_is_the_API.html). An API allows for direct requests for data in machine-readable form. That is, rather than you having to navigate to some website, scroll around to find a dataset, download that dataset once you find it, save that data onto your hard drive, and then bring the data into R, you just tell R to retrieve data directly from the source using one or two lines of code.
 
-In order to directly download data from the Census API, you need a key. You can sign up for a free key [here](http://api.census.gov/data/key_signup.html), which you should have already done before the lab. Type your key in quotes using the census_api_key() command.
+In order to directly download data from the Census API, you need a key. You can sign up for a free key [here](http://api.census.gov/data/key_signup.html), which you should have already done before the lab. Type your key in quotes using the `census_api_key()` command.
 ```{r, eval = FALSE}
 census_api_key("YOUR API KEY GOES HERE", install = TRUE)
 ```

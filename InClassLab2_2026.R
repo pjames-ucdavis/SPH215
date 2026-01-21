@@ -1,0 +1,63 @@
+install.packages("tmap")
+
+# Install Packages
+library(tidyverse)
+library(tmap)
+library(nycflights13)
+
+ca1 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset1.csv")
+ca2 <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/lab1dataset2.csv")
+
+glimpse(ca1)
+glimpse(ca2)
+
+names(ca1)
+
+rename(ca1, medinc = "Estimated median income of a household, between 2014-2018.")
+
+
+ca1 <- rename(ca1, 
+              medinc = "Estimated median income of a household, between 2014-2018.",
+              GEOID = "Formatted FIPS")
+names(ca1)
+ca1$FIPSnumeric<-as.numeric(ca1$GEOID)
+glimpse(ca1)
+
+names(ca2)
+ca2 <- select(ca2, GEOID, tpoprE, nhwhiteE, nhblkE, nhasnE, hispE)
+names(ca2)
+
+select(ca1, County:medinc)
+
+ca1 <- select(ca1, -"FIPS Code")
+glimpse(ca1)
+
+ca1.1 <- select(ca1, -"FIPSnumeric")
+
+mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+       pblack = nhblkE/tpoprE, phisp = hispE/tpoprE)
+
+ca2 <- mutate(ca2, pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+              mhisp = case_when(phisp > 0.5 ~ "Majority",
+                                .default = "Not Majority"))
+glimpse(ca2)
+
+class(ca1$GEOID)
+class(ca2$GEOID)
+
+cacounty <- left_join(ca1, ca2, by = "GEOID")
+glimpse(cacounty)
+
+cacounty <- select(cacounty, GEOID, County, pwhite, pasian, pblack, phisp, mhisp, medinc)
+names(cacounty)
+
+filter(cacounty, GEOID != "06067")
+filter(cacounty, pwhite > 0.5)
+filter(cacounty, pwhite < 0.5)
+filter(cacounty, pwhite <= 0.5)
+
+cacounty_v2<-filter(cacounty, phisp > 0.5 & medinc > 50000)
+View(cacounty_v2)
+
+filter(cacounty, GEOID == "06067" | GEOID == "06113" | GEOID == "06075")
