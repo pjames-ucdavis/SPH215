@@ -1,10 +1,10 @@
 ---
-title: "Lab 4: More with Vector Data and Visualizing Raster Data"
+title: 'Lab 4: More with Vector Data and Visualizing Raster Data'
 ---
 
 In this lab, we are going to work with vector and raster data, spatially joining point data to vector data. We will learn how to visualize Census data, we will talk about how to wrangle spatial data, and we will get into some really cool ways to create choropleth maps (maps color coded by attributes). Finally, we will take a deep dive into raster data.
 
-The objectives of this guide are to teach you:
+The objectives of this guide are to teach you how to:
 
    1. Wrangle vector data
    1. Create Publication-Ready Maps with vector data
@@ -19,9 +19,11 @@ The objectives of this guide are to teach you:
 Let's get cracking!
 
 First, let's install our packages.
+
 \
+
 # Load packages
-```{r}
+```{r, message = FALSE}
 library(sf)
 library(MapGAM)
 library(tidyverse)
@@ -46,7 +48,7 @@ census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overw
 \
 
 Use the `set_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 3](Lab3_2026.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
-```{r, message=FALSE}
+```{r, results=FALSE}
 ca.tracts <- get_acs(geography = "tract", 
               year = 2023,
               variables = c(tpopr = "B03002_001", 
@@ -84,7 +86,7 @@ ca.tracts
 
 The object looks much like a basic tibble, but with a few differences.
 
-  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in California) with 13 fields (attributes or columns of data).
+  - You’ll find that the description of the object now indicates that it is a simple feature collection with 9,129 features (tracts in California) with 12 fields (attributes or columns of data).
   - The `Geometry Type` indicates that the spatial data are in `MULTIPOLYGON` form (as opposed to points or lines, the other basic vector data forms).
   - `Bounding box` indicates the spatial extent of the features (from left to right, for example, California tracts go from a longitude of -124.482 to -114.1312).
   - `Geodetic CRS` tells us the coordinate reference system.
@@ -215,7 +217,7 @@ tm_shape(sac.metro) +
 
 \
 
-Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table, you’ll see it includes all the variables from both *ca.tracts* and *sac.metro*. We don’t need these variables, so use `select()` to eliminate them. You’ll also notice that if variables from two data sets share the same name, R will keep both and attach a *.x* and *.y* to the end. For example, I was found in both *ca.tracts* and *sac.metro*, so R named one *GEOID.x* and the other that was merged in was named *GEOID.y*.
+Looking much better! Now, if we look at *sac.metro.tracts.w*’s attribute table, you’ll see it includes all the variables from both *ca.tracts* and *sac.metro*. We don’t need these variables, so use `select()` to eliminate them. You’ll also notice that if variables from two data sets share the same name, R will keep both and attach a *.x* and *.y* to the end. For example, *GEOID* was found in both *ca.tracts* and *sac.metro*, so R named one *GEOID.x* and the other that was merged in was named *GEOID.y*.
 
 \
 
@@ -396,16 +398,18 @@ Let’s make a static choropleth map of median household income in Sacramento MS
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile")
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile"))
 ```
 
 \
 
-We first put the dataset *sac.metro.tracts.w* inside `tm_shape()`. Because you are plotting polygons, you use `tm_polygons()` next. The argument `col = "medincE"` tells R to shade (or color) the tracts by the variable *medincE.* The argument `style = "quantile"` tells R to break up the shading into quantiles, or equal groups of 5 as a default. I find that this is where **tmap** offers a distinct advantage over **ggplot** in that users have greater control over the legend and bin breaks. **tmap** allows users to specify algorithms to automatically create breaks with the style argument. You can also change the number of breaks by setting `n=`. The default is `n=5`. Rather than quintiles, you can show quartiles using `n=4`. I'm feeling crazy. Let's do it.
+We first put the dataset *sac.metro.tracts.w* inside `tm_shape()`. Because you are plotting polygons, you use `tm_polygons()` next. The argument `fill = "medincE"` tells R to shade (or color) the tracts by the variable *medincE.* The argument `fill.scale = tm_scale_intervals(style = "quantile")"` tells R to break up the shading into quantiles, or equal groups of 5 as a default. I find that this is where **tmap** offers a distinct advantage over **ggplot** in that users have greater control over the legend and bin breaks. **tmap** allows users to specify algorithms to automatically create breaks with the style argument. You can also change the number of breaks by setting `n=`. The default is `n=5`. Rather than quintiles, you can show quartiles using `n=4`. I'm feeling crazy. Let's do it.
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",  n=4)
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile", n=4))
 ```
 
 \
@@ -436,10 +440,12 @@ When we combine the two commands, we obtain the same map as with tm_polygons() (
 
 ### Color scheme
 
-The argument `palette =` defines the color ranges associated with the bins and determined by the `style` arguments. Several built-in palettes are contained in **tmap**. For example, using `palette = "Reds"` would yield the following map for our example.
-```{r}
+The argument `values =` defines the color ranges associated with the bins and determined by the `style` arguments. Several built-in palettes are contained in **tmap**. For example, using `values = "Reds"` would yield the following map for our example.
+```{r, message = FALSE}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds") 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile", 
+                                              values = "Reds")) 
 ```
 
 Under the hood, `“Reds”` refers to one of the color schemes supported by the **RColorBrewer** package (see below).
@@ -449,7 +455,9 @@ Under the hood, `“Reds”` refers to one of the color schemes supported by the
 In addition to the built-in palettes, customized color ranges can be created by specifying a vector with the desired colors as anchors. This will create a spectrum of colors in the map that range between the colors specified in the vector. For instance, if we used `c(“red”, “blue”)`, the color spectrum would move from red to purple, then to blue, with in between shades. In our example:
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = c("red","blue")) 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile", 
+                                              values = c("red","blue"))) 
 ```
 
 \
@@ -457,7 +465,9 @@ tm_shape(sac.metro.tracts.w) +
 Not exactly a pretty picture. In order to capture a diverging scale, we insert `“white”` in between red and blue.
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = c("red","white", "blue")) 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile", 
+                                              values = c("red","white", "blue"))) 
 ```
 
 \
@@ -477,7 +487,9 @@ brewer.pal(6,"BuGn")
 Using this palette in our map yields the following result.
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette="BuGn") 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values="brewer.bu_gn")) 
 ```
 
 \
@@ -491,12 +503,14 @@ display.brewer.pal(6,"BuGn")
 
 ### Legend
 
-There are many options to change the formatting of the legend. The automatic title for the legend is not that attractive, since it is simply the variable name. This can be customized by setting the `title` argument.
+There are many options to change the formatting of the legend. The automatic title for the legend is not that attractive, since it is simply the variable name. This can be customized by setting the `title` argument in `tm_legend()`.
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"), 
+              fill.legend = tm_legend(title = "Median Income")) 
 ```
 
 \
@@ -508,8 +522,10 @@ Often, the default location of the legend is appropriate, but sometimes further 
 For example, if we would want to move the legend to the bottom-right position, we would use the following set of commands.
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
   tm_layout(legend.position = c("right", "bottom"))
 ```
 
@@ -521,61 +537,71 @@ For example, to position the legend outside and on the right, would be accomplis
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
+ tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
   tm_layout(legend.outside = TRUE, legend.outside.position = "right")
 ```
 
 \
 
-We can also customize the size of the legend, its alignment, font, etc. Check out the documentation for more!
+We can also customize the size of the legend, its alignment, font, etc. Check out the [documentation](https://r-tmap.github.io/tmap/articles/basics_legends) for more!
 
 \
 
 ### Title
 
-Another functionality of the `tm_layout()` function is to set a title for the map, and specify its position, size, etc. For example, we can set the title, the `title.size` and the `title.position` as in the example below. We made the font size a bit smaller (0.8) in order not to overwhelm the map, and positioned it in the top left-hand corner.
+The `tm_title()` function can be used to set a title for the map, and specify its position, size, etc. For example, we can set the `text`, the `size` and the `position` as in the example below. We made the font size a bit smaller (0.8) in order not to overwhelm the map, and positioned it in the top left-hand corner.
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
-  tm_layout(title = "Median Income of Sacramento Tracts", title.size = 0.8, 
-            title.position = c("left","top"),
-            legend.outside = TRUE, legend.outside.position = "right")
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) + 
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_title(text = "Median Income of Sacramento Tracts",
+           size = 0.8, 
+           position = c("left","top"))
 ```
 
 \
 
-To have a title appear on top (or on the bottom) of the map, we need to set the `main.title` argument of the `tm_layout()` function, with the associated `main.title.position`, as illustrated below (with title.size set to 1.25 to have a larger font).
-
+To have a title appear on top (or on the bottom) of the map, we need to set the `position` argument of the `tm_title()` function with the associated `tm_pos_out()`, as illustrated below (with title.size set to 1.25 to have a larger font).
 
 ```{r}
 tm_shape(sac.metro.tracts.w) +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
-  tm_layout(main.title = "Median Income of Sacramento Tracts", 
-            main.title.size = 1.25, main.title.position="center",
-            legend.outside = TRUE, legend.outside.position = "right")
-
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_title(text = "Median Income of Sacramento Tracts",
+           size = 1.25,
+           position = tm_pos_out("center", "top"))
 ```
+
+A shortcut to achieve this title position is to use `tm_title_out()` instead of `tm_title()`.
 
 \
 
 ### Scale bar and arrow
 
-OK this really wouldn't be a GIS class without talking about one of the core elements of a map--the good ole scale bar and arrow. Let's add these to our map. First, we add the scale bar with `tm_scale_bar()`.
+OK this really wouldn't be a GIS class without talking about one of the core elements of a map--the good ole scale bar and arrow. Let's add these to our map. First, we add the scale bar with `tm_scalebar()`.
 
 The argument `breaks` tells R the distances to break up and end the bar. The argument `position` places the scale bar on the bottom left part of the map. Note that the `scale` is in miles (we're in Amurica!). The default is in kilometers (the rest of the world!), but you can specify the units within `tm_shape()` using the argument `unit`. `text.size` scales the size of the bar smaller (below 1) or larger (above 1).
 
 ```{r}
 tm_shape(sac.metro.tracts.w, unit = "mi") +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
-  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
-  tm_layout(main.title = "Median Income of Sacramento Tracts", 
-            main.title.size = 1.25, main.title.position="center",
-            legend.outside = TRUE, legend.outside.position = "right")
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_title_out(text = "Median Income of Sacramento Tracts",
+               size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) 
 ```
 
 \
@@ -584,30 +610,35 @@ Next let's spice things up by adding a north arrow, which we can do using the fu
 
 ```{r}
 tm_shape(sac.metro.tracts.w, unit = "mi") +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
-  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right") +
+  tm_title_out(text = "Median Income of Sacramento Tracts",
+               size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
                position = c("left", "bottom")) +
-  tm_compass(type = "4star", position = c("right", "bottom")) +
-  tm_layout(main.title = "Median Income of Sacramento Tracts", 
-            main.title.size = 1.25, main.title.position="center",
-            legend.outside = TRUE, legend.outside.position = "right")
+  tm_compass(type = "4star", position = c("right", "bottom"))
 ```
 
 \
 
-We can also eliminate the frame around the map using the argument `frame = FALSE`.
+We can also eliminate the frame around the map using the argument `frame = FALSE` in `tm_layout()`.
 
 ```{r}
 sac.map <- tm_shape(sac.metro.tracts.w, unit = "mi") +
-  tm_polygons(col = "medincE", style = "quantile",palette = "Reds",
-              title = "Median Income") +
-  tm_scale_bar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
-  tm_compass(type = "4star", position = c("right", "bottom")) +
-  tm_layout(main.title = "Median Income of Sacramento tracts", 
-            main.title.size = 1.25, frame = FALSE,
-            main.title.position="center",
-            legend.outside = TRUE, legend.outside.position = "right")
+  tm_polygons(fill = "medincE", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "Median Income")) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE, legend.outside.position = "right") +
+  tm_title(text = "Median Income of Sacramento Tracts",
+           size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c("left", "bottom")) +
+  tm_compass(type = "4star", position = c("right", "bottom")) 
+  
 sac.map
 ```
 
@@ -624,7 +655,7 @@ You can save your maps a few ways.
 2. Use the function `tmap_save()`
 
 For option 2, we can save the map object *sac.map* as such:
-```{r}
+```{r, message = FALSE}
 tmap_save(sac.map, "sac_city_inc.jpg")
 ```
 Specify the **tmap** object and a filename with an extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and .tiff. The default is .png. Also make sure you’ve set your working directory to the folder that you want your map to be saved in.
@@ -636,7 +667,7 @@ Specify the **tmap** object and a filename with an extension. It supports .pdf, 
 OK, do we have energy for one more example? Let's bring in data from the [CDC Places dataset](https://www.cdc.gov/places/tools/data-portal.html). This is an incredible resource to access data on the CDC's [Behavioral Risk Factor and Surveillance System (BRFSS)](https://www.cdc.gov/brfss/index.html), as well as social determinants of health data from American Community Survey. I've already downloaded California Census tract data on the "% of adults reporting no leisure-time physical activity". Let's bring this in and take a look at it!
 
 ```{r}
-places_ca_lpa<-read_csv("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/places_ca_lpa.csv")
+places_ca_lpa <- read_csv("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/places_ca_lpa.csv")
 glimpse(places_ca_lpa)
 ```
 
@@ -655,14 +686,15 @@ glimpse(ca.tracts.lpa)
 
 \
 
-It worked! OK, now let's make a map of % of adults reporting no leisure-time physical activity. We will build on what we've learned above! I've also included the option in `tm_polygons()` of `lwd = 0` which makes the borders a width of 0...basically we are making it so there are no borders and we can easily see polygon values in denser concentrations of Census tracts (e.g., around Sacramento, San Francisco, LA, etc.)
+It worked! OK, now let's make a map of % of adults reporting no leisure-time physical activity. We will build on what we've learned above! I've also used `tm_fill()` instead of `tm_polygons()` to make it so there are no borders and we can easily see polygon values in denser concentrations of Census tracts (e.g., around Sacramento, San Francisco, LA, etc.)
 
 ```{r}
 tm_shape(ca.tracts.lpa, unit = "mi") +
-  tm_polygons(col = "Data_Value", style = "quantile",palette = "Reds",
-              title = "% Adults No Physical Activity", lwd = 0) +
-  tm_layout(main.title = "% of Adults Reporting No Leisure Time Physical Activity", 
-            main.title.size = 1.25, main.title.position="center")
+  tm_fill(fill = "Data_Value", 
+          fill.scale = tm_scale_intervals(style = "quantile",
+                                          values = "brewer.reds"),
+          fill.legend = tm_legend(title = "% Adults No Physical Activity")) +
+  tm_title_out(text = "% of Adults Reporting No Leisure Time Physical Activity")
 ```
 \
 
@@ -723,9 +755,9 @@ OK we have what looks like a raster. We see our resolution and our extent, and w
 ```{r}
 ## Plot the raster on a map
 tmap_mode("plot")
-NDVI_map = tm_shape(NDVI_raster) +
-  tm_raster(style = "cont") +
-  tm_legend(outside = TRUE)
+NDVI_map <-  tm_shape(NDVI_raster) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(outside = TRUE))
 NDVI_map
 ```
 
@@ -738,12 +770,9 @@ Looks pretty cool! Seems to be the Bay Area, and we have some nice variability. 
 breaks_ndvi <- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
 palette_ndvi <- c("#BFBFBF","#DBDBDB","#FFFFE0","#FFFACC","#EDE8B5","#DED99C","#CCC782","#BDB86B","#B0C261","#A3CC59","#91BF52","#80B347","#70A340","#619636","#4F8A2E","#407D24","#306E1C","#216112","#0F540A","#004500")
 
-NDVI_map = tm_shape(NDVI_raster) +
-  tm_raster(title = "NDVI",
-             style="cont",
-             palette = palette_ndvi
-            ) +
-  tm_legend(outside = TRUE)
+NDVI_map <-  tm_shape(NDVI_raster) +
+  tm_raster(col.scale = tm_scale_continuous(values = palette_ndvi),
+            col.legend = tm_legend(title = "NDVI", outside = TRUE))
 NDVI_map
 ```
 
@@ -757,11 +786,9 @@ OK, let's see if we can crop this to focus on San Francisco. I've googled the la
 sf_rast<-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
 
 tmap_mode("plot")
-NDVI_sf_map = tm_shape(sf_rast) +
-  tm_raster(title = "NDVI",
-             style="cont",
-            ) +
-  tm_legend(outside = TRUE)
+NDVI_sf_map <- tm_shape(sf_rast) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = "NDVI", outside = TRUE))
 
 NDVI_sf_map
 ```
@@ -775,11 +802,9 @@ So negative values of NDVI represent water. Let's set all negative values to -1,
 ```{r}
 sf_rast_neg <- app(sf_rast, fun=function(x){ x[x <= 0] <- -1; return(x)} )
 
-NDVI_sf_map_neg = tm_shape(sf_rast_neg) +
-  tm_raster(title = "NDVI",
-             style="cont",
-            ) +
-  tm_legend(outside = TRUE)
+NDVI_sf_map_neg <- tm_shape(sf_rast_neg) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = "NDVI", outside = TRUE))
 
 NDVI_sf_map_neg
 ```
@@ -822,7 +847,7 @@ st_crs(sf_rast_neg)
 Hmmm, let's make sure they are the same projection.
 
 ```{r}
-ca_pts_proj<-st_transform(ca_pts,st_crs(sf_rast_neg))
+ca_pts_proj <- st_transform(ca_pts,st_crs(sf_rast_neg))
 st_crs(ca_pts_proj)
 ```
 
@@ -832,11 +857,12 @@ They should be good to go now. Let's map these addresses on top of the raster da
 
 ```{r}
 tmap_mode("plot")
-NDVI_cancer_map = tm_shape(sf_rast_neg) +
-  tm_raster(style = "cont", title = "NDVI") +
-  tm_legend(outside = TRUE) +
-  tm_shape(ca_pts_proj) + 
-  tm_dots(size=0.3, alpha=0.5, col = "blue")
+NDVI_cancer_map <-  tm_shape(sf_rast_neg) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = "NDVI", outside = TRUE)) +
+  tm_shape(ca_pts_proj) +
+  tm_dots(fill = "blue", fill_alpha = 0.5, size = 0.3)
+
 NDVI_cancer_map
 ```
 
