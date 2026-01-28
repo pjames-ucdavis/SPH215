@@ -1,0 +1,330 @@
+---
+title: "Lab 3"
+author: "Peter James"
+date: "2026-01-21"
+output: html_document
+---
+
+```{r}
+packages <- c("tidygeocoder", "sf", "terra", "MapGAM", "tidyverse", "tidycensus", "flextable", "tmap")
+
+installed <- packages %in% rownames(installed.packages())
+
+if (any(!installed)) {
+  install.packages(packages[!installed])
+}
+
+lapply(packages, library, character.only = TRUE)
+```
+
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/san_francisco_active_marijuana_retailers.csv", "san_francisco_active_marijuana_retailers.csv", mode = "wb")
+
+sf_mj <- read_csv("san_francisco_active_marijuana_retailers.csv")
+```
+
+```{r}
+head(sf_mj)                  
+```
+
+```{r}
+sf_mj$`Premise Address` <- gsub(" County: SAN FRANCISCO",
+                                  "", sf_mj$`Premise Address`)
+head(sf_mj$`Premise Address`)
+
+```
+```{r}
+sf_mj_geo      <- geocode(sf_mj, "Premise Address",
+                          method = "osm")
+```
+
+```{r}
+head(sf_mj_geo)
+```
+
+```{r}
+summary(sf_mj_geo$lat)
+summary(sf_mj_geo$long)
+```
+
+```{r}
+sf_mj_geo_arc      <- geocode(sf_mj, "Premise Address",
+                          method = "arcgis")
+```
+
+```{r}
+head(sf_mj_geo_arc)
+summary(sf_mj_geo_arc$lat)
+summary(sf_mj_geo_arc$long)
+```
+```{r}
+plot(sf_mj_geo_arc$long, sf_mj_geo_arc$lat)
+```
+
+Bring in CAdata dataset
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+summary(ca_pts)
+```
+```{r}
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+```
+
+```{r}
+st_crs(ca_pts)
+```
+
+```{r}
+#Load the projection into an object called ca_proj
+
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+
+#Look at dataset
+summary(ca_pts_crs) 
+```
+```{r}
+#Check the CRS
+st_crs(ca_pts_crs)
+```
+
+Let's map!
+```{r}
+tmap_mode("view")
+cancer_map = tm_shape(ca_pts_crs) + tm_dots(size=0.1)
+cancer_map
+```
+
+Census Data!
+```{r}
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+
+
+
+
+```{r}
+cancer_map_small = tm_shape(ca_pts_crs) + 
+  tm_dots(fill = "blue", size = 0.3, fill_alpha = 0.5)
+cancer_map_small
+```
+
+```{r}
+cancer_map_events = tm_shape(ca_pts_crs) + 
+  tm_dots(size=0.3, fill="event", fill.scale=tm_scale_categorical())
+cancer_map_events
+```
+
+```{r}
+cancer_map_events_rg = tm_shape(ca_pts_crs) + 
+  tm_dots(fill = "event", fill.scale=tm_scale_categorical(values=c("0"="gray","1"="red")))
+cancer_map_events_rg
+```
+
+Bring in census variables
+```{r}
+acs2023 <- load_variables(2023, "acs5", cache = TRUE)
+View(acs2023)
+```
+
+Get CA data
+```{r}
+ca <- get_acs(geography = "county", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+```{r}
+glimpse(ca)
+```
+
+```{r}
+setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
+ca.pm <- read_csv("PolicyMap Data 2025-03-27 192555 UTC.csv", skip = 1)
+```
+
+```{r}
+cacounty <- ca %>% 
+      left_join(ca.pm, by = c("GEOID" = "GeoID")) %>%
+      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+             mhisp = case_when(phisp > 0.5 ~ "Majority",
+                               TRUE ~ "Not Majority")) %>%
+      rename(County = GeoID_Name) %>%
+      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
+glimpse(cacounty)
+```
+
+```{r}
+cacounty %>%
+  summarize(Mean = mean(mhhinc))
+cacounty %>%
+  summarize(Mean = mean(mhhinc), SD = sd(mhhinc))
+```
+
+```{r}
+cacounty <- cacounty %>%
+    mutate(region = case_when(County == "Sonoma" | County == "Napa" | 
+                              County == "Solano" | County == "Marin" | 
+                              County == "Contra Costa" | County == "San Francisco" |
+                              County == "San Mateo" | County == "Alameda" | 
+                              County == "Santa Clara" ~ "Bay Area",
+                              County == "Imperial" | County == "Los Angeles" | 
+                              County == "Orange" | County == "Riverside" |
+                              County == "San Diego" | County == "San Bernardino" |
+                              County == "Ventura" ~ "Southern California",
+                              County == "Fresno" | County == "Madera" | 
+                              County == "Mariposa" | County == "Merced" | 
+                              County == "Tulare" | 
+                              County == "Kings" ~ "Central Valley",
+                              County == "Alpine" | County == "Colusa" |
+                              County == "El Dorado" | County == "Glenn" |
+                              County == "Placer" | County == "Sacramento" |
+                              County == "Sutter" | County == "Yolo" |
+                              County == "Yuba" ~ "Capital Region",
+                              TRUE ~ "Rest"))
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc))
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+```
+
+```{r}
+cacounty %>%
+  group_by(mhisp) %>%
+  summarize(n = n()) %>%
+  mutate(freq = n / sum(n))
+```
+
+```{r}
+region.summary <- cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc),
+            Median = median(mhhinc),
+            SD = sd(mhhinc),
+            Correlation = cor(mhhinc, phisp))
+
+my_table <- flextable(region.summary)
+my_table
+```
+
+```{r}
+my_table <- my_table %>%
+          set_header_labels(
+            region = "Region",
+            Mean = "Mean",
+            Median = "Median",
+            SD = "Standard Deviation",
+            Correlation = "Correlation") %>%
+              flextable::align(align = "center", part = "all")
+my_table
+```
+
+```{r}
+cacounty %>%
+  ggplot()
+```
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) 
+```
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc)) +
+  xlab("Median household income")
+```
+
+```{r}
+cacounty %>%
+  ggplot() + 
+  geom_histogram(mapping = aes(x=mhhinc), bins=10) +
+  xlab("Median household income")
+```
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(y = mhhinc)) +
+    ylab("Median household income")
+```
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income")
+```
+
+```{r}
+cacounty %>%
+  ggplot() +
+    geom_boxplot(mapping = aes(x = mhisp, y = mhhinc)) +
+    xlab("Majority Hispanic") +
+    ylab("Median household income") +
+    facet_wrap(~region) 
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=region, y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income")
+
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income")
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc)) %>%
+  ggplot(aes(x=reorder(region, -Mean), y = Mean)) +
+  geom_bar(stat = "Identity") +
+  xlab("Region") +
+  ylab("Average household income") +
+  coord_flip()
+```
+
+```{r}
+setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
+```
+

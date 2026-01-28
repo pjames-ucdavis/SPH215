@@ -3,8 +3,9 @@ title: "Lab 1 Assignment"
 author: "Peter James"
 date: "2025-04-17"
 output:
-  pdf_document: default
   html_document: default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -77,7 +78,7 @@ innout_map
 Question 7. Map the addreses in blue below!
 ```{r}
 tmap_mode("plot")
-innout_map_blue = tm_shape(innout_pts) + tm_dots(col = "blue", size = 0.3, alpha = 0.5) + tm_basemap())
+innout_map_blue = tm_shape(innout_pts) + tm_dots(col = "blue", size = 0.3, alpha = 0.5) + tm_basemap()
 innout_map_blue
 ```
 
@@ -180,10 +181,11 @@ ca %>%
 \
 
 Question 17.	OK now give me a boxplot! And I want a nice label for this too!
-```{r, eval=FALSE}
+```{r}
 ca %>%
   ggplot() +
     geom_boxplot(mapping = aes(y = medincE)) +
     ylab("Median household income")
+
 ```
 
