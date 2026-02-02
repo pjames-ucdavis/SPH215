@@ -47,7 +47,7 @@ census_api_key("5d68935c96c26ee67ca52eb973d71e4a7b8490ad", install = TRUE, overw
 ```
 \
 
-Use the `set_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 3](Lab3_2026.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
+Use the `get_acs()` command to bring in California tract-level race/ethnicity counts, total population, and total number of households. How did I find the variable IDs? Check [Lab 3](Lab3_2026.html). Since we want tracts, we’ll use the `geography = "tract"` argument.
 ```{r, results=FALSE}
 ca.tracts <- get_acs(geography = "tract", 
               year = 2023,
