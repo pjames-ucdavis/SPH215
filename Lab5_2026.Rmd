@@ -1,10 +1,10 @@
 ---
-title: "Lab 5: Spatial Data Processing with Vector Data"
+title: 'Lab 5: Spatial Data Processing with Vector Data'
 ---
 
 In this lab, we are going to work more with vector data, spatially joining two vector datasets. 
 
-The objectives of this guide are to teach you:
+The objectives of this guide are to teach you how to:
 
    1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
    2. Import a dataset with walkability data at the Census tract level
@@ -18,7 +18,7 @@ Let's do this!!!
 \
 
 First, let's install our packages.
-```{r}
+```{r, message = FALSE}
 library(sf)
 library(MapGAM)
 library(tidyverse)
@@ -40,8 +40,8 @@ As another reminder, the *CAdata* dataset contains the following variables:
 
 * time (follow-up time)
 * event (1=dead, 0=censored)
-* X (Latitude)
-* Y (Longitude)
+* X (Longitude)
+* Y (Latitude)
 * AGE (age in years)
 * INS (insurance status, categorical)
 
@@ -95,11 +95,11 @@ Finally, we check the projections. **This is the most important step and is guar
 st_crs(ca_pts)
 st_crs(walkability_tracts)
 
-## Transform the coordinate reference system of the walkability tract data to match that 
-## of the cancer data
-ca_transformed <-st_transform(ca_pts, st_crs(walkability_tracts))  
+## Transform the coordinate reference system of the cancer data to match that 
+## of the walkability tract data
+ca_transformed <- st_transform(ca_pts, st_crs(walkability_tracts))  
 
-## Check projection of walkability_transformed
+## Check projection of ca_transformed
 st_crs(walkability_tracts)==st_crs(ca_transformed)
 ```
 
@@ -109,22 +109,21 @@ st_crs(walkability_tracts)==st_crs(ca_transformed)
 
 Now, we will visualize our spatial data using **tmap**. We will overlay the walkability maps with the ovarian cancer data, and then make a choropleth map of walkability indices. Do any patterns jump out, or are there any outliers?
 
-```{r}
+```{r, message = FALSE}
 ## Make a choropleth map of polygons colored by levels of walkability
 tmap_mode("plot")
 walkability_map <- tm_shape(walkability_tracts) +
-  tm_polygons(
-    col = "Avg_walkin",
-    style = "cont",
-    title = "Walkability Index",
-    lwd = 0,
-    alpha=.95
+  tm_fill(
+    fill = "Avg_walkin",
+    fill.scale = tm_scale_continuous(),
+    fill.legend = tm_legend(title = "Walkability Index"),
+    fill_alpha=.95
   )
 
 ## Make another map adding points for the cancer data to map of polygons
-walkability_cancer_map = walkability_map + 
+walkability_cancer_map <- walkability_map + 
   tm_shape(ca_transformed) + 
-  tm_dots(size=0.25, alpha=0.8, col="blue")
+  tm_dots(size=0.25, fill_alpha=0.8, fill="blue")
 
 ## Plot both maps side by side
 tmap_arrange(walkability_map, walkability_cancer_map)
