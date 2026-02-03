@@ -28,7 +28,7 @@ Let's load some packages that we will need this week. We need to load any packag
 \
 
 ...but here's a shortcut way to check and install packages you don't have, then load them up!
-```{r}
+```{r, message=FALSE}
 packages <- c("tidygeocoder", "sf", "terra", "MapGAM", "tidyverse", "tidycensus", "flextable", "tmap")
 
 installed <- packages %in% rownames(installed.packages())
@@ -111,8 +111,8 @@ summary(sf_mj_geo$long)
 Looks like we have 11 addresses missing *lat* and 11 missing *long*. Let's try this again using a different geocoding database called *arcgis*.
 
 ```{r}
-sf_mj_geo_arc      <- geocode(sf_mj, "Premise Address",
-                          method = "arcgis")
+sf_mj_geo_arc <- geocode(sf_mj, "Premise Address",
+                         method = "arcgis")
 head(sf_mj_geo_arc)
 summary(sf_mj_geo_arc$lat)
 summary(sf_mj_geo_arc$long)
@@ -165,8 +165,8 @@ The *CAdata* dataset contains the following variables
 
 - *time* (follow-up time to either event of being censored)
 - *event* (1=dead, 0=censored)
-- *X* (Latitude)
-- *Y* (Longitude)
+- *X* (Longitude)
+- *Y* (Latitude)
 - *AGE* (age in years)
 - *INS* (insurance status, categorical)
 
