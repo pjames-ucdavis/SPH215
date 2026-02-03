@@ -14,7 +14,7 @@ The objectives of this guide are to teach you:
 \
 
 # Load packages
-```{r}
+```{r, message = FALSE}
 library(terra)
 library(sf)
 library(tmap)
