@@ -3,7 +3,8 @@ title: 'Lab 6: Working with Raster and Vector Data Together'
 ---
 In this lab, we are going to work with vector and raster data, extracting raster values to point data 
 
-The objectives of this guide are to teach you:
+The objectives of this guide are to teach you how to:
+
   1. Import our dataset with simulated geocoded addresses and mortality data from an ovarian cancer cohort
   2. Import our dataset with greenspace across the Bay Area
   3. Compare projections of datasets and re-project if needed
@@ -57,8 +58,8 @@ OK, let's plot it like we did when we first looked at this dataset back in [Lab 
 ## Plot the raster on a map
 tmap_mode("plot")
 NDVI_map = tm_shape(ndvi_rast) +
-  tm_raster(style = "cont") +
-  tm_legend(outside = TRUE)
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(outside = TRUE))
 NDVI_map
 ```
 
@@ -74,8 +75,8 @@ As another reminder, the *CAdata* dataset contains the following variables:
 
 * time (follow-up time)
 * event (1=dead, 0=censored)
-* X (Latitude)
-* Y (Longitude)
+* X (Longitude)
+* Y (Latitude)
 * AGE (age in years)
 * INS (insurance status, categorical)
 
@@ -101,7 +102,7 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 # Check Projections for all Spatial Data
 
-Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our polygon data. When we are done, do the projections of the two datasets match?
+Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our raster data. When we are done, do the projections of the two datasets match?
 
 
 ```{r}
@@ -125,9 +126,9 @@ Now, we will visualize our spatial data using **tmap**. We will overlay the gree
 
 ```{r}
 ca.ndvi.map <- tm_shape(ndvi_rast) +
-  tm_raster(style = "cont") +
+  tm_raster(col.scale = tm_scale_continuous()) +
       tm_shape(ca_transformed) +
-        tm_dots(size=0.25, alpha=0.8, col="blue")
+        tm_dots(size=0.25, fill_alpha=0.8, fill="blue")
 ca.ndvi.map
 ```
 
@@ -142,7 +143,7 @@ We find that the most least green areas are in the downtown areas of San Francis
 Now that we have visualized our data, let's see if there is an association between greenspace exposure and mortality among ovarian cancer cases. We will first extract the values for greenspace to the cancer dataset (merge the two datasets based on location of cases and the greenspace pixel that they are in) using `terra::extract`. Then we will check the distribution of greenspace exposure in our cancer cases. We will use a two-sided chi-squared test to test our hypothesis of the association between greenspace exposure and mortality among ovarian cancer cases. What do we find?
 
 ```{r}
-## Spatially join the cancer point data to the walkability polygon data
+## Spatially join the cancer point data to the greenspace raster data
 ndvi_cancer = data.frame(ca_transformed,terra::extract(ndvi_rast, ca_transformed))
 glimpse(ndvi_cancer) 
 ## Take a look at a summary of the values

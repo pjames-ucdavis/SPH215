@@ -16,7 +16,7 @@ Let's get rollin...
 
 # Load Packages
 First, we always gotta remember to load our packages.
-```{r}
+```{r, message=FALSE}
 library(tidygeocoder)
 library(sf)
 library(tmap)
@@ -44,8 +44,10 @@ Note that there are other options for network analyses in R, including **gmapsdi
 
 # Bring in fast food establishments in Davis, CA
 Similar to what we did in one of our first labs, let's bring in the addresses of all fast food establishments in Davis and geocode them! We will first read in the .csv from the website using `read_csv` from the **tidyverse** package.
-```{r}
-download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv", destfile = "fast_food_davis_ca.csv", mode = "wb")
+```{r, message=FALSE}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv", 
+              destfile = "fast_food_davis_ca.csv", 
+              mode = "wb")
 ff <- read_csv("fast_food_davis_ca.csv")
 
 glimpse(ff)
@@ -55,8 +57,8 @@ glimpse(ff)
 
 OK, so looks like *Address* is the variable we want to focus on. Let's geocode the Davis fast food data using the the `geocode()` function in **tidygeocoder**. And let's specify that we want to use the "arcgis" geocoder.
 ```{r}
-ff_geo      <- geocode(ff, address = "Address",
-                          method = "arcgis")
+ff_geo <- geocode(ff, address = "Address",
+                      method = "arcgis")
 ```
 
 \
@@ -171,11 +173,11 @@ loc_sf <- st_sf(name = "Medical Sciences 1-B",
 
 \
 
-Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, the *res* or resolution will be 30, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
+Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, the *n*, or number of points used to compute isochrones will be 100, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
 ```{r}
 iso <- osrmIsochrone(loc = loc_sf,
                      breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
-                     res = 30, # Lower res for faster requests
+                     n = 100, # Lower n for faster requests
                      osrm.profile = "bike")  # mode bicycle
 
 glimpse(iso)
@@ -195,12 +197,12 @@ iso$run_times <- factor(
 
 # Plot using tmap
 tm <- tm_shape(iso) +
-  tm_polygons(col = "run_times",
-              palette = rev(heat.colors(6)),  # reverse for same effect
-              border.col = "black",
+  tm_polygons(fill = "run_times",
+              fill.scale = tm_scale(values = rev(heat.colors(6))),  # reverse for same effect
+              col = "black",
               lwd = 0.5,
-              alpha = 0.3,
-              title = "Biking Duration") +
+              fill_alpha = 0.3,
+              fill.legend = tm_legend(title = "Biking Duration")) +
   tm_shape(loc_sf) +
   tm_bubbles(size = 0.3, col = "blue") +
   tm_text("name", size = 1, ymod = -0.5) 
