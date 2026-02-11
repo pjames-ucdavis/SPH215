@@ -102,7 +102,7 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
 
 # Check Projections for all Spatial Data
 
-Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our polygon data. When we are done, do the projections of the two datasets match?
+Finally, we check the projections. **This is the most important step and is guaranteed to make life easier with your geospatial analysis!** When you have files in different projections, this can be a major problem because when we try to overlay the two files they may not overlap. First we check the coordinate reference systems for each dataset using `st_crs()`. We then use the `st_transform()` function to convert the projection for our point data to match that of our raster data. When we are done, do the projections of the two datasets match?
 
 
 ```{r}
