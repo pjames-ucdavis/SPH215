@@ -169,7 +169,7 @@ tm_shape(ca_diab_data) +
 
 \
 
-###️ Interpreting the LISA Map
+### Interpreting the LISA Map
 
 This map shows where spatial clustering of diabetes is strongest — not just overall, but **locally**. Here's how to read it:
 
