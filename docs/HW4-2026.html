@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Peter James" />
+
+<meta name="date" content="2026-02-12" />
+
+<title>HW4 2026</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Winter 2026</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus_2026.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Lab1_2026.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2_2026.html">Lab 2: Understanding Packages and Wrangling Data in R</a>
+    </li>
+    <li>
+      <a href="Lab3_2026.html">Lab 3: Geocoding, Vector Data, and Census Data</a>
+    </li>
+    <li>
+      <a href="Lab4_2026.html">Lab 4: More with Vector Data and Visualizing Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab6_2026.html">Lab 6: Working with Raster and Vector Data Together</a>
+    </li>
+    <li>
+      <a href="Lab7_2026.html">Lab 7: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab8_2026.html">Lab 8: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab9_2026.html">Lab 9: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments_2026.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other_2026.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help_2026.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">HW4 2026</h1>
+<h4 class="author">Peter James</h4>
+<h4 class="date">2026-02-12</h4>
+
+</div>
+
+
+<p>Question 1. Bring in CA data dataset</p>
+<pre class="r"><code>library(terra)</code></pre>
+<pre><code>## terra 1.8.29</code></pre>
+<pre class="r"><code>library(sf)</code></pre>
+<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>library(tmap)
+library(MapGAM)</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## Loading required package: gam</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.22-5</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ purrr::accumulate() masks foreach::accumulate()
+## ✖ tidyr::extract()    masks terra::extract()
+## ✖ dplyr::filter()     masks stats::filter()
+## ✖ dplyr::lag()        masks stats::lag()
+## ✖ purrr::when()       masks foreach::when()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(flextable)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;flextable&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     compose
+## 
+## The following objects are masked from &#39;package:terra&#39;:
+## 
+##     align, colorize, rotate, width</code></pre>
+<pre class="r"><code>library(RColorBrewer)</code></pre>
+<p>Load up CAdata</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p>Question 2. Read in LST data</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif&quot;
+download.file(url, destfile = &quot;LST_med_ca.tif&quot;, mode = &quot;wb&quot;)
+lst_rast = rast(&quot;LST_med_ca.tif&quot;)</code></pre>
+<p>Question 3. Check projections. Do they match?</p>
+<pre class="r"><code>st_crs(lst_rast)==st_crs(ca_pts)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<p>They do not match.</p>
+<p>Question 4. Reproject the cancer dataset to match raster</p>
+<pre class="r"><code>ca_transformed&lt;-st_transform(ca_pts,st_crs(lst_rast))
+st_crs(ca_transformed)==st_crs(lst_rast)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<p>Question 5. Make a map</p>
+<pre class="r"><code>lst_cancer&lt;-tm_shape(lst_rast) + 
+  tm_raster(col.scale = tm_scale_continuous()) +
+  tm_shape(ca_transformed) +
+        tm_dots(size=0.25, fill_alpha=0.8, fill=&quot;red&quot;)
+
+lst_cancer</code></pre>
+<p><img src="HW4-2026_files/figure-html/unnamed-chunk-6-1.png" alt="" width="672" /></p>
+<p>Question 6. Extract the values for LST to cancer dataset</p>
+<pre class="r"><code>lst_cancer_extract&lt;-data.frame(ca_transformed,terra::extract(lst_rast,ca_transformed))
+glimpse(lst_cancer_extract)</code></pre>
+<pre><code>## Rows: 5,000
+## Columns: 7
+## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977…
+## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, …
+## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46,…
+## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, M…
+## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 3…
+## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
+## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40…</code></pre>
+<p>Question 7. We have 64 missing values</p>
+<pre class="r"><code>summary(lst_cancer_extract$LST_Day_1km_median)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA&#39;s 
+##   18.41   37.35   40.87   40.04   43.73   54.67      64</code></pre>
+<pre class="r"><code>lst_cancer_nomiss &lt;- lst_cancer_extract %&gt;% drop_na(LST_Day_1km_median) 
+
+## Take a look at a summary of the values
+summary(lst_cancer_nomiss$LST_Day_1km_median)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   18.41   37.35   40.87   40.04   43.73   54.67</code></pre>
+<p>Question 8. Histogram</p>
+<pre class="r"><code>hist(lst_cancer_nomiss$LST_Day_1km_median)</code></pre>
+<p><img src="HW4-2026_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672" />
+Question 9. Create quartiles</p>
+<pre class="r"><code>lst_cancer_nomiss &lt;- lst_cancer_nomiss %&gt;%
+  mutate(lst_quartile = ntile(LST_Day_1km_median, 4))
+
+glimpse(lst_cancer_nomiss)</code></pre>
+<pre><code>## Rows: 4,936
+## Columns: 8
+## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977…
+## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, …
+## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46,…
+## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, M…
+## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 3…
+## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
+## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40…
+## $ lst_quartile       &lt;int&gt; 1, 3, 3, 1, 2, 3, 2, 2, 1, 2, 1, 4, 1, 2, 2, 4, 2, …</code></pre>
+<pre class="r"><code>table(lst_cancer_nomiss$lst_quartile)</code></pre>
+<pre><code>## 
+##    1    2    3    4 
+## 1234 1234 1234 1234</code></pre>
+<p>Question 10. Create table of quartiles by event</p>
+<pre class="r"><code>## Create a contingency table of event by walk_quartile
+tab &lt;- table(lst_cancer_nomiss$lst_quartile, lst_cancer_nomiss$event)
+tab</code></pre>
+<pre><code>##    
+##       0   1
+##   1 531 703
+##   2 498 736
+##   3 450 784
+##   4 466 768</code></pre>
+<pre class="r"><code>## Convert to percentages by column
+tab_col_perc &lt;- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)</code></pre>
+<pre><code>##    
+##        0    1
+##   1 27.3 23.5
+##   2 25.6 24.6
+##   3 23.1 26.2
+##   4 24.0 25.7</code></pre>
+<p>Question 11. Run chi square</p>
+<pre class="r"><code>chisq.test(tab)</code></pre>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test
+## 
+## data:  tab
+## X-squared = 13.117, df = 3, p-value = 0.004391</code></pre>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiSFc0IDIwMjYiCmF1dGhvcjogIlBldGVyIEphbWVzIgpkYXRlOiAiMjAyNi0wMi0xMiIKb3V0cHV0OiBodG1sX2RvY3VtZW50Ci0tLQoKUXVlc3Rpb24gMS4gQnJpbmcgaW4gQ0EgZGF0YSBkYXRhc2V0CmBgYHtyfQpsaWJyYXJ5KHRlcnJhKQpsaWJyYXJ5KHNmKQpsaWJyYXJ5KHRtYXApCmxpYnJhcnkoTWFwR0FNKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKbGlicmFyeShmbGV4dGFibGUpCmxpYnJhcnkoUkNvbG9yQnJld2VyKQoKYGBgCgpMb2FkIHVwIENBZGF0YQpgYGB7cn0KZGF0YShDQWRhdGEpCmNhX3B0cyA8LSBDQWRhdGEKY2FfcHJvaiA8LSAiK3Byb2o9bGNjICtsYXRfMT00MCArbGF0XzI9NDEuNjY2NjY2NjY2NjY2NjYgCiAgICAgICAgICAgICArbGF0XzA9MzkuMzMzMzMzMzMzMzMzMzQgK2xvbl8wPS0xMjIgK3hfMD0yMDAwMDAwIAogICAgICAgICAgICAgK3lfMD01MDAwMDAuMDAwMDAwMDAwMiArZWxscHM9R1JTODAgCiAgICAgICAgICAgICArZGF0dW09TkFEODMgK3VuaXRzPW0gK25vX2RlZnMiCgpjYV9wdHMgPC0gc3RfYXNfc2YoQ0FkYXRhLCBjb29yZHM9YygiWCIsIlkiKSwgY3JzPWNhX3Byb2opCmBgYAoKClF1ZXN0aW9uIDIuIFJlYWQgaW4gTFNUIGRhdGEKYGBge3J9CnVybCA8LSAiaHR0cHM6Ly9naXRodWIuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yYXcvbWFpbi9MU1RfbWVkX2NhLnRpZiIKZG93bmxvYWQuZmlsZSh1cmwsIGRlc3RmaWxlID0gIkxTVF9tZWRfY2EudGlmIiwgbW9kZSA9ICJ3YiIpCmxzdF9yYXN0ID0gcmFzdCgiTFNUX21lZF9jYS50aWYiKQpgYGAKClF1ZXN0aW9uIDMuIENoZWNrIHByb2plY3Rpb25zLiBEbyB0aGV5IG1hdGNoPwpgYGB7cn0Kc3RfY3JzKGxzdF9yYXN0KT09c3RfY3JzKGNhX3B0cykKYGBgCgpUaGV5IGRvIG5vdCBtYXRjaC4KClF1ZXN0aW9uIDQuIFJlcHJvamVjdCB0aGUgY2FuY2VyIGRhdGFzZXQgdG8gbWF0Y2ggcmFzdGVyCgpgYGB7cn0KY2FfdHJhbnNmb3JtZWQ8LXN0X3RyYW5zZm9ybShjYV9wdHMsc3RfY3JzKGxzdF9yYXN0KSkKc3RfY3JzKGNhX3RyYW5zZm9ybWVkKT09c3RfY3JzKGxzdF9yYXN0KQpgYGAKClF1ZXN0aW9uIDUuIE1ha2UgYSBtYXAKCmBgYHtyfQpsc3RfY2FuY2VyPC10bV9zaGFwZShsc3RfcmFzdCkgKyAKICB0bV9yYXN0ZXIoY29sLnNjYWxlID0gdG1fc2NhbGVfY29udGludW91cygpKSArCiAgdG1fc2hhcGUoY2FfdHJhbnNmb3JtZWQpICsKICAgICAgICB0bV9kb3RzKHNpemU9MC4yNSwgZmlsbF9hbHBoYT0wLjgsIGZpbGw9InJlZCIpCgpsc3RfY2FuY2VyCmBgYAoKUXVlc3Rpb24gNi4gRXh0cmFjdCB0aGUgdmFsdWVzIGZvciBMU1QgdG8gY2FuY2VyIGRhdGFzZXQKYGBge3J9CmxzdF9jYW5jZXJfZXh0cmFjdDwtZGF0YS5mcmFtZShjYV90cmFuc2Zvcm1lZCx0ZXJyYTo6ZXh0cmFjdChsc3RfcmFzdCxjYV90cmFuc2Zvcm1lZCkpCmdsaW1wc2UobHN0X2NhbmNlcl9leHRyYWN0KQoKYGBgClF1ZXN0aW9uIDcuCldlIGhhdmUgNjQgbWlzc2luZyB2YWx1ZXMKYGBge3J9CnN1bW1hcnkobHN0X2NhbmNlcl9leHRyYWN0JExTVF9EYXlfMWttX21lZGlhbikKCmxzdF9jYW5jZXJfbm9taXNzIDwtIGxzdF9jYW5jZXJfZXh0cmFjdCAlPiUgZHJvcF9uYShMU1RfRGF5XzFrbV9tZWRpYW4pIAoKIyMgVGFrZSBhIGxvb2sgYXQgYSBzdW1tYXJ5IG9mIHRoZSB2YWx1ZXMKc3VtbWFyeShsc3RfY2FuY2VyX25vbWlzcyRMU1RfRGF5XzFrbV9tZWRpYW4pCgoKYGBgCgpRdWVzdGlvbiA4LiBIaXN0b2dyYW0KCmBgYHtyfQpoaXN0KGxzdF9jYW5jZXJfbm9taXNzJExTVF9EYXlfMWttX21lZGlhbikKYGBgClF1ZXN0aW9uIDkuIENyZWF0ZSBxdWFydGlsZXMKYGBge3J9CmxzdF9jYW5jZXJfbm9taXNzIDwtIGxzdF9jYW5jZXJfbm9taXNzICU+JQogIG11dGF0ZShsc3RfcXVhcnRpbGUgPSBudGlsZShMU1RfRGF5XzFrbV9tZWRpYW4sIDQpKQoKZ2xpbXBzZShsc3RfY2FuY2VyX25vbWlzcykKdGFibGUobHN0X2NhbmNlcl9ub21pc3MkbHN0X3F1YXJ0aWxlKQpgYGAKClF1ZXN0aW9uIDEwLiBDcmVhdGUgdGFibGUgb2YgcXVhcnRpbGVzIGJ5IGV2ZW50CgpgYGB7cn0KIyMgQ3JlYXRlIGEgY29udGluZ2VuY3kgdGFibGUgb2YgZXZlbnQgYnkgd2Fsa19xdWFydGlsZQp0YWIgPC0gdGFibGUobHN0X2NhbmNlcl9ub21pc3MkbHN0X3F1YXJ0aWxlLCBsc3RfY2FuY2VyX25vbWlzcyRldmVudCkKdGFiCmBgYAoKYGBge3J9CiMjIENvbnZlcnQgdG8gcGVyY2VudGFnZXMgYnkgY29sdW1uCnRhYl9jb2xfcGVyYyA8LSBwcm9wLnRhYmxlKHRhYiwgbWFyZ2luID0gMikgKiAxMDAKcm91bmQodGFiX2NvbF9wZXJjLCAxKQpgYGAKClF1ZXN0aW9uIDExLiBSdW4gY2hpIHNxdWFyZSAKYGBge3J9CmNoaXNxLnRlc3QodGFiKQpgYGAKCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("HW4 2026.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

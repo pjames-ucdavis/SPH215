@@ -1,0 +1,130 @@
+---
+title: "HW3"
+author: "Peter James"
+date: "2026-02-05"
+output: html_document
+---
+
+# Homework 3
+
+## Question 1
+
+```{r}
+library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+
+```
+
+Bringing in the CAdata dataset with the right projection
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+
+```
+
+## Question 2
+Bring in CEnsus data
+```{r}
+ca.tracts <- get_acs(geography = "tract", 
+              year = 2023,
+              variables = c(medinc= "B19013_001"), 
+              state = "CA",
+              output = "wide",
+              survey = "acs5",
+              geometry = TRUE,
+              cb = FALSE)
+```
+What is our medinc variable name?
+```{r}
+glimpse(ca.tracts)
+```
+
+## Question 3
+Check projections. We see that the projections are not the same.
+```{r}
+st_crs(ca.tracts)==st_crs(ca_pts)
+
+```
+
+## Question 4
+Transform the dataset. I transformed the CRS for the tracts to match the points and now they have the same CRS.
+```{r}
+tracts_transformed<-st_transform(ca.tracts,st_crs(ca_pts))
+st_crs(tracts_transformed)==st_crs(ca_pts)
+```
+
+## Question 5
+
+```{r}
+tmap_mode("plot")
+cancer_medinc_map <- tm_shape(tracts_transformed) + 
+  tm_fill(
+    fill = "medincE",
+    fill.scale = tm_scale_continuous(values="red"),
+    fill.legend = tm_legend(title = "Median Income"),
+    fill_alpha=.95) +
+  tm_shape(ca_pts) + 
+  tm_dots(size=0.1, fill_alpha=0.5, fill="blue")
+cancer_medinc_map
+```
+
+## Question 6
+Spatially joined our two datasets. We now have a medincE value (median income) for our participants. 
+```{r}
+cancer_medinc <- st_join(ca_pts,tracts_transformed)
+summary(cancer_medinc$medincE)
+```
+
+## Question 7
+Drop missing data. I dropped 7 observations that were missing census tract median income.
+```{r}
+cancer_medinc_nomiss <- cancer_medinc %>%
+    subset(!is.na(medincE))
+summary(cancer_medinc_nomiss$medincE)
+glimpse(cancer_medinc_nomiss)
+```
+
+## Question 8
+Histogram
+```{r}
+hist(cancer_medinc_nomiss$medincE)
+```
+
+## Question 9
+Create quartiles
+```{r}
+cancer_medinc_nomiss <- cancer_medinc_nomiss %>%
+  mutate(medinc_quartile = ntile(medincE, 4))
+
+glimpse(cancer_medinc_nomiss)
+table(cancer_medinc_nomiss$medinc_quartile)
+```
+
+## Question 10.
+Create tables of quartiles for median income by event
+```{r}
+tab <- table(cancer_medinc_nomiss$medinc_quartile, cancer_medinc_nomiss$event)
+tab
+
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+
+```
+
+## Question 11
+Chi-squared test
+```{r}
+## Chi-squared test
+chisq.test(tab)
+```

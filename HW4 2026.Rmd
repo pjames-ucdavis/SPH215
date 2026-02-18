@@ -1,0 +1,116 @@
+---
+title: "HW4 2026"
+author: "Peter James"
+date: "2026-02-12"
+output: html_document
+---
+
+Question 1. Bring in CA data dataset
+```{r}
+library(terra)
+library(sf)
+library(tmap)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
+
+```
+
+Load up CAdata
+```{r}
+data(CAdata)
+ca_pts <- CAdata
+ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+ca_pts <- st_as_sf(CAdata, coords=c("X","Y"), crs=ca_proj)
+```
+
+
+Question 2. Read in LST data
+```{r}
+url <- "https://github.com/pjames-ucdavis/SPH215/raw/main/LST_med_ca.tif"
+download.file(url, destfile = "LST_med_ca.tif", mode = "wb")
+lst_rast = rast("LST_med_ca.tif")
+```
+
+Question 3. Check projections. Do they match?
+```{r}
+st_crs(lst_rast)==st_crs(ca_pts)
+```
+
+They do not match.
+
+Question 4. Reproject the cancer dataset to match raster
+
+```{r}
+ca_transformed<-st_transform(ca_pts,st_crs(lst_rast))
+st_crs(ca_transformed)==st_crs(lst_rast)
+```
+
+Question 5. Make a map
+
+```{r}
+lst_cancer<-tm_shape(lst_rast) + 
+  tm_raster(col.scale = tm_scale_continuous()) +
+  tm_shape(ca_transformed) +
+        tm_dots(size=0.25, fill_alpha=0.8, fill="red")
+
+lst_cancer
+```
+
+Question 6. Extract the values for LST to cancer dataset
+```{r}
+lst_cancer_extract<-data.frame(ca_transformed,terra::extract(lst_rast,ca_transformed))
+glimpse(lst_cancer_extract)
+
+```
+Question 7.
+We have 64 missing values
+```{r}
+summary(lst_cancer_extract$LST_Day_1km_median)
+
+lst_cancer_nomiss <- lst_cancer_extract %>% drop_na(LST_Day_1km_median) 
+
+## Take a look at a summary of the values
+summary(lst_cancer_nomiss$LST_Day_1km_median)
+
+
+```
+
+Question 8. Histogram
+
+```{r}
+hist(lst_cancer_nomiss$LST_Day_1km_median)
+```
+Question 9. Create quartiles
+```{r}
+lst_cancer_nomiss <- lst_cancer_nomiss %>%
+  mutate(lst_quartile = ntile(LST_Day_1km_median, 4))
+
+glimpse(lst_cancer_nomiss)
+table(lst_cancer_nomiss$lst_quartile)
+```
+
+Question 10. Create table of quartiles by event
+
+```{r}
+## Create a contingency table of event by walk_quartile
+tab <- table(lst_cancer_nomiss$lst_quartile, lst_cancer_nomiss$event)
+tab
+```
+
+```{r}
+## Convert to percentages by column
+tab_col_perc <- prop.table(tab, margin = 2) * 100
+round(tab_col_perc, 1)
+```
+
+Question 11. Run chi square 
+```{r}
+chisq.test(tab)
+```
+
