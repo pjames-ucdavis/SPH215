@@ -240,9 +240,9 @@ summary(lag_model)
 
 Let’s break down the results of our spatial lag model:
 
-- The **spatial lag coefficient (rho)** is about **0.48** and statistically significant (*p < 0.001*). That means diabetes rates in a county are **strongly influenced by neighboring counties** — there's real spatial autocorrelation.
+- The **spatial lag coefficient (rho)** is about **0.48** and statistically significant (*p < 0.002*). That means diabetes rates in a county are **strongly influenced by neighboring counties** — there's real spatial autocorrelation.
 - The **income coefficient** is **negative**, suggesting that higher income is associated with lower diabetes, but it’s **not statistically significant** (*p = 0.171*). So, in this model, income alone doesn't explain much variation in diabetes once spatial effects are accounted for.
-- The **AIC (Akaike Information Criterion)** is lower for the spatial lag model than for the regular OLS model (176 vs. 184), suggesting that the spatial lag model is a better fit--this means we really should be accounting for spatial autocorrelation!
+- The **AIC (Akaike Information Criterion)** is lower for the spatial lag model than for the regular OLS model (176 vs. 184), suggesting that the spatial lag model is a better fit---this means we really should be accounting for spatial autocorrelation!
 - The **residual autocorrelation test** is not significant (*p = 0.85*), which means the model has successfully addressed spatial dependence in the residuals.
 
 👉 **Take home:** There is strong spatial dependence in diabetes rates, and including spatial effects accounts for this spatial autocorrelation. However, income may not be a key driver of diabetes once those spatial influences are considered.
