@@ -100,7 +100,7 @@ tmap_mode("view")
 tm <- tm_shape(trip_sf) +
   tm_lines(lwd = 3, col = "blue") +
   tm_shape(ff_pts) +
-  tm_bubbles(size = 0.5, col = "red") + 
+  tm_bubbles(size = 0.25, col = "red") + 
   tm_text("Restaurant Name", size=1, xmod = 0.25, ymod=0.25) 
 
 tm
@@ -164,20 +164,19 @@ ff_table$duration
 
 So let's try something different with network analyses. What if I wanted to create a map that would show me all the locations I could reach within a given number of minutes of biking? This is called an **isochrone** and you betcha the **osrm** package can do this!
 
-First, let's set this up to be centered around the building we all know and love, the one that we are in right now. That's right--the epically named Medical Sciences 1-B. I've clearly memorized the longitude and latitude for this building, which we paste in below, and then store as an **sf** object.
+First, let's set this up to be centered around the building we all know and love, the one that we are in right now. That's right--Hart Hall. I've clearly memorized the longitude and latitude for this building, which we paste in below, and then store as an **sf** object.
 ```{r}
-loc <- c("lon" = -121.7617, "lat" = 38.5382)
-loc_sf <- st_sf(name = "Medical Sciences 1-B",
+loc <- c("lon" = -121.750763, "lat" = 38.540566)
+loc_sf <- st_sf(name = "Hart Hall",
                 geometry = st_sfc(st_point(loc), crs = 4326))
 ```
 
 \
 
-Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, the *n*, or number of points used to compute isochrones will be 100, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
+Next, we use the `osrmIsochrone()` function to create the isochrones. We will specify the *loc* to be *loc_sf*, the *breaks* (in minutes) will be 0 to 30 minutes by 5 minute intervals, and the *osrm.profile*, or the mode, will be "bike". Let's run it!
 ```{r}
 iso <- osrmIsochrone(loc = loc_sf,
                      breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
-                     n = 100, # Lower n for faster requests
                      osrm.profile = "bike")  # mode bicycle
 
 glimpse(iso)
@@ -185,7 +184,7 @@ glimpse(iso)
 
 \
 
-OK, so now we can see we have *isomin* and *isomax* as our columns for our time bins. And our dataset is a *MULTIPOLYGON*, so it's spatial. Let's map this! First, we will create a categorical variable called *run_times*. Then we will use **tmap** to plot our isochrones. We will use a palette of heat colors for our ischrones, and we will also plot Medical Sciences 1-B in there just so we never forget our beautiful home base.
+OK, so now we can see we have *isomin* and *isomax* as our columns for our time bins. And our dataset is a *MULTIPOLYGON*, so it's spatial. Let's map this! First, we will create a categorical variable called *run_times*. Then we will use **tmap** to plot our isochrones. We will use a palette of heat colors for our ischrones, and we will also plot Hart Hall in there just so we never forget our beautiful home base.
 ```{r}
 # Create factor column for time intervals
 iso$run_times <- factor(
