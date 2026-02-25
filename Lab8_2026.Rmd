@@ -1,5 +1,6 @@
 ---
-title: "Lab 8: Spatial Statistics and Geographically Weighted Regression in Public Health"
+title: 'Lab 8: Spatial Statistics and Geographically Weighted Regression in Public
+  Health'
 ---
 
 \
@@ -70,7 +71,7 @@ ca_diabetes <- diab_raw |>
 \
 
 Now lets get our good ole median income data from the US Census. Because it's 2021 Diabetes data, we will pull the 2017-2021 five year estimates from the ACS.
-```{r get-acs}
+```{r get-acs, results=FALSE}
 # Download median income and geometries for California counties
 ca_geo <- get_acs(
   geography = "county",
@@ -105,8 +106,10 @@ Let's make a map and see what diabetes prevalence looks like across counties in 
 
 tmap_mode("view")
 tm_shape(ca_diab_data) +
-  tm_polygons("Diabetes", palette = "Reds", style = "quantile",
-              title = "% Diagnosed Diabetes")
+  tm_polygons(fill = "Diabetes", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "% Diagnosed Diabetes"))
 ```
 
 \
@@ -162,9 +165,12 @@ ca_diab_data$Ii <- local_moran[, "Ii"]
 ca_diab_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
 
 # Map LISA
-cat("\n### Local Spatial Clustering of Diabetes\n")
 tm_shape(ca_diab_data) +
-  tm_polygons("Ii", style = "quantile", palette = "PuOr", title = "Local Moran's I")
+  tm_polygons(fill = "Ii", 
+              fill.scale = tm_scale_intervals(style = "quantile", 
+                                              values = "brewer.pu_or"), 
+              fill.legend = tm_legend(title = "Local Moran's I")) +
+  tm_title_out(text = "Local Spatial Clustering of Diabetes")
 ```
 
 \
@@ -175,8 +181,7 @@ This map shows where spatial clustering of diabetes is strongest — not just ov
 
 - **Dark purple counties** have strong local clustering — likely high-high or low-low patterns. These are areas where diabetes rates mirror their neighbors and form significant clusters.
 - **Orange or tan counties** may be spatial **outliers** — places where diabetes rates differ from nearby counties. For example, a healthy county surrounded by high-rate neighbors.
-- **Gray or muted tones** indicate weak or non-significant clustering.
-- **White areas** may represent missing or insignificant data.
+- **White areas or muted tones** indicate weak or non-significant clustering.
 
 👉 **Take home:** Counties with strong clustering (dark purple) may benefit from regional strategies, while outliers may need more localized investigation. This helps tailor public health interventions to spatial realities.
 
@@ -198,7 +203,10 @@ gi_star <- localG(ca_diab_data$Diabetes, lw)
 ca_diab_data$Gi_star <- as.numeric(gi_star)
 
 tm_shape(ca_diab_data) +
-  tm_polygons("Gi_star", palette = "-RdBu", style = "pretty", title = "Gi* Hot Spots")
+  tm_polygons(fill = "Gi_star", 
+              fill.scale = tm_scale_intervals(style = "pretty",
+                                              values = "-brewer.rd_bu"),
+              fill.legend = tm_legend(title = "Gi* Hot Spots"))
 ```
 
 ### Interpreting the Gi* Map
@@ -287,7 +295,10 @@ Let’s map those locally varying regression coefficients and see where income m
 
 ```{r gwr-map}
 tm_shape(ca_diab_data) +
-  tm_polygons("gwr_income", palette = "RdYlGn", style = "quantile", title = "GWR: Income-Diabetes Association")
+  tm_polygons(fill = "gwr_income", 
+              tm_scale_intervals(style = "quantile",
+                                 values = "brewer.rd_yl_gn"), 
+              fill.legend = tm_legend(title = "GWR: Income-Diabetes Association"))
 ```
 
 \
