@@ -12,7 +12,7 @@ navbar:
         - text: "Lab 2: Geocoding, Vector Data, and Census Data"
           href: Lab2_FALL2026.html
         - text: "Lab 3: More with Vector Data and Visualizing Raster Data"
-          href: Lab3_2026.html
+          href: Lab3_FALL2026.html
         - text: "Lab 4: Spatial Data Processing with Vector Data"
           href: Lab4_2026.html
         - text: "Lab 5: Working with Raster and Vector Data Together"

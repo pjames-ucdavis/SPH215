@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Lab 3: More with Vector Data and Visualizing Raster Data</title>
+
+<script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Fall 2026</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus_2026.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Lab1_FALL2026.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2_FALL2026.html">Lab 2: Geocoding, Vector Data, and Census Data</a>
+    </li>
+    <li>
+      <a href="Lab3_FALL2026.html">Lab 3: More with Vector Data and Visualizing Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab4_2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5_2026.html">Lab 5: Working with Raster and Vector Data Together</a>
+    </li>
+    <li>
+      <a href="Lab6_2026.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab7_2026.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab8_2026.html">Lab 8: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments_2026.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other_2026.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help_2026.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 3: More with Vector Data and
+Visualizing Raster Data</h1>
+
+</div>
+
+
+<p>In this lab, we are going to work with vector and raster data,
+spatially joining point data to vector data. We will learn how to
+visualize Census data, we will talk about how to wrangle spatial data,
+and we will get into some really cool ways to create choropleth maps
+(maps color coded by attributes). Finally, we will take a deep dive into
+raster data.</p>
+<p>The objectives of this guide are to teach you how to:</p>
+<ol style="list-style-type: decimal">
+<li>Wrangle vector data</li>
+<li>Create Publication-Ready Maps with vector data</li>
+<li>Introduce raster data</li>
+<li>Import our dataset with simulated geocoded addresses and mortality
+data from an ovarian cancer cohort</li>
+<li>Import a dataset with greenspace across the Bay Area</li>
+<li>Compare projections of datasets and re-project if needed</li>
+<li>Make maps</li>
+<li>Spatially join the two datasets</li>
+<li>Run a quick statistical analysis on the two datasets combined</li>
+</ol>
+<p>Let’s get cracking!</p>
+<p>First, let’s install our packages.</p>
+<p><br />
+</p>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<pre class="r"><code>library(sf)
+library(MapGAM)
+library(tidyverse)
+library(tidycensus)
+library(flextable)
+library(RColorBrewer)
+library(tmap)
+library(terra)</code></pre>
+<p><br />
+</p>
+<p>In <a href="Lab2_FALL2026.html">Lab 2</a>, we worked with the
+tidycensus package and the Census API to bring in Census data into R. We
+can use the same commands to bring in Census geography. If you haven’t
+already, make sure to <a
+href="https://api.census.gov/data/key_signup.html">sign up for and
+install your Census API key</a>. If you could not install your API key,
+you’ll need to use <code>census_api_key()</code> to activate it with the
+following code:</p>
+<pre class="r"><code>census_api_key(&quot;YOUR API KEY GOES HERE&quot;, install = TRUE)</code></pre>
+<p><br />
+</p>
+<p>Use the <code>get_acs()</code> command to bring in California
+tract-level race/ethnicity counts, total population, and total number of
+households. How did I find the variable IDs? Check <a
+href="Lab2_FALL2026.html">Lab 2</a>. Since we want tracts, we’ll use the
+<code>geography = "tract"</code> argument.</p>
+<pre class="r"><code>ca.tracts &lt;- get_acs(geography = &quot;tract&quot;, 
+              year = 2023,
+              variables = c(tpopr = &quot;B03002_001&quot;, 
+                            nhwhite = &quot;B03002_003&quot;, nhblk = &quot;B03002_004&quot;, 
+                            nhasn = &quot;B03002_006&quot;, hisp = &quot;B03002_012&quot;), 
+              state = &quot;CA&quot;,
+              output = &quot;wide&quot;,
+              survey = &quot;acs5&quot;,
+              geometry = TRUE,
+              cb = FALSE)</code></pre>
+<pre><code>## Getting data from the 2019-2023 5-year ACS</code></pre>
+<pre><code>## Downloading feature geometry from the Census website.  To cache shapefiles for use in future sessions, set `options(tigris_use_cache = TRUE)`.</code></pre>
+<p><br />
+</p>
+<p>The only difference between the code above and what we used in <a
+href="Lab2_FALL2026.html">Lab 2</a> is we have one additional argument
+added to the <code>get_acs()</code> command:
+<code>geometry = TRUE</code>. This tells R to bring in the spatial
+features associated with the geography you specified in the command, in
+the above case California tracts. You can set
+<code>cache_table = TRUE</code> so that you don’t have to re-download
+after you’ve downloaded successfully the first time. This is important
+because you might be downloading a really large file, or may encounter
+Census FTP issues when trying to collect data.</p>
+<p><br />
+</p>
+<p>Note: We can also download the data another way. We can go to the <a
+href="https://www.census.gov/cgi-bin/geo/shapefiles/index.php">Census
+Shapefiles website</a> and navigate to 2023, Census Tracts, then
+California. We can then download a .zip file that contains an ESRI
+shapefile of the Census tracts for California. When we unzip the file,
+we see a series of files. Thankfully, the <strong>sf</strong> package
+has an <code>st_read()</code> function that can tackle this! For more
+detailed data downloads, you can use <a
+href="https://www.nhgis.org/">National Historical Geographic Information
+System (NHGIS)</a>. The code below is example of how we might bring in a
+shapefile, just for future reference!</p>
+<pre class="r"><code>ca.tracts &lt;- st_read(&quot;/Users/pjames1/Downloads/tl_2024_06_tract/tl_2024_06_tract.shp&quot;)</code></pre>
+<p>OK, let’s go back to the data we got from
+<strong>tidycensus</strong>. Lets take a look at our data.</p>
+<p><br />
+</p>
+<pre class="r"><code>ca.tracts</code></pre>
+<pre><code>## Simple feature collection with 9129 features and 12 fields
+## Geometry type: MULTIPOLYGON
+## Dimension:     XY
+## Bounding box:  xmin: -124.482 ymin: 32.52951 xmax: -114.1312 ymax: 42.0095
+## Geodetic CRS:  NAD83
+## First 10 features:
+##          GEOID                                                 NAME tpoprE
+## 1  06001442700        Census Tract 4427; Alameda County; California   2998
+## 2  06001442800        Census Tract 4428; Alameda County; California   3087
+## 3  06037204920 Census Tract 2049.20; Los Angeles County; California   2459
+## 4  06037205110 Census Tract 2051.10; Los Angeles County; California   3690
+## 5  06037320101 Census Tract 3201.01; Los Angeles County; California   3402
+## 6  06037205120 Census Tract 2051.20; Los Angeles County; California   3409
+## 7  06037206010 Census Tract 2060.10; Los Angeles County; California   3490
+## 8  06037206020 Census Tract 2060.20; Los Angeles County; California   8179
+## 9  06037206050 Census Tract 2060.50; Los Angeles County; California   2290
+## 10 06037111402 Census Tract 1114.02; Los Angeles County; California   5998
+##    tpoprM nhwhiteE nhwhiteM nhblkE nhblkM nhasnE nhasnM hispE hispM
+## 1     475      921      168    119    115   1577    469   308    81
+## 2     386      779      183     12     49   1671    356   561   181
+## 3     387       68       33     49     51      0     14  2331   387
+## 4     446       14       14      8     12      0     14  3642   446
+## 5     438      236      131     65     93    123    164  2978   481
+## 6     624       15       24      8     10     70    104  3303   628
+## 7     605      500      264     17     75   1030    235  1919   519
+## 8     350     1379      165   2633    344    238     76  3541   285
+## 9     509      138       49     18     22    151     82  1932   519
+## 10   1024     2685      831     18     19    920    563  2322   433
+##                          geometry
+## 1  MULTIPOLYGON (((-122.0172 3...
+## 2  MULTIPOLYGON (((-122.0023 3...
+## 3  MULTIPOLYGON (((-118.2028 3...
+## 4  MULTIPOLYGON (((-118.2196 3...
+## 5  MULTIPOLYGON (((-118.4388 3...
+## 6  MULTIPOLYGON (((-118.2202 3...
+## 7  MULTIPOLYGON (((-118.2392 3...
+## 8  MULTIPOLYGON (((-118.2379 3...
+## 9  MULTIPOLYGON (((-118.2287 3...
+## 10 MULTIPOLYGON (((-118.5023 3...</code></pre>
+<p><br />
+</p>
+<p>The object looks much like a basic tibble, but with a few
+differences.</p>
+<ul>
+<li>You’ll find that the description of the object now indicates that it
+is a simple feature collection with 9,129 features (tracts in
+California) with 12 fields (attributes or columns of data).</li>
+<li>The <code>Geometry Type</code> indicates that the spatial data are
+in <code>MULTIPOLYGON</code> form (as opposed to points or lines, the
+other basic vector data forms).</li>
+<li><code>Bounding box</code> indicates the spatial extent of the
+features (from left to right, for example, California tracts go from a
+longitude of -124.482 to -114.1312).</li>
+<li><code>Geodetic CRS</code> tells us the coordinate reference
+system.</li>
+<li>The final difference is that the data frame contains the column
+geometry. This column (a list-column) contains the geometry for each
+observation. This looks familiar!</li>
+</ul>
+<p>At its most basic, an <strong>sf</strong> object is a collection of
+simple features that includes attributes and geometries in the form of a
+data frame. In other words, it is a data frame (or tibble) with rows of
+features, columns of attributes, and a special column always named
+geometry that contains the spatial aspects of the features.</p>
+<p>If you want to peek behind the curtain and learn more about the nitty
+gritty details about simple features, check out the official
+<strong>sf</strong> <a
+href="https://r-spatial.github.io/sf/articles/sf1.html">vignette.</a></p>
+<p><br />
+</p>
+</div>
+<div id="data-wrangling" class="section level1">
+<h1>Data Wrangling</h1>
+<p>There is a lot of stuff <a
+href="https://www.jessesadler.com/post/simple-feature-objects/">behind
+the curtain</a> of how R handles spatial data as simple features, but
+the main takeaway is that <strong>sf</strong> objects are data frames.
+This means you can use many of the <strong>tidyverse</strong> functions
+we’ve learned in the past couple labs to manipulate <strong>sf</strong>
+objects, including the pipe <code>%&gt;%</code> operator. For example,
+let’s break up the column <em>NAME</em> into separate tract, county and
+state variables using the <code>separate()</code> function</p>
+<p>We do all of this in one line of continuous code using the pipe
+operator <code>%&gt;%</code></p>
+<pre class="r"><code>ca.tracts &lt;- ca.tracts %&gt;%
+              separate(NAME, c(&quot;Tract&quot;, &quot;County&quot;, &quot;State&quot;), sep = &quot;; &quot;)
+glimpse(ca.tracts)</code></pre>
+<pre><code>## Rows: 9,129
+## Columns: 15
+## $ GEOID    &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;, &quot;06037205110&quot;, &quot;…
+## $ Tract    &lt;chr&gt; &quot;Census Tract 4427&quot;, &quot;Census Tract 4428&quot;, &quot;Census Tract 2049.…
+## $ County   &lt;chr&gt; &quot;Alameda County&quot;, &quot;Alameda County&quot;, &quot;Los Angeles County&quot;, &quot;Lo…
+## $ State    &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;Cali…
+## $ tpoprE   &lt;dbl&gt; 2998, 3087, 2459, 3690, 3402, 3409, 3490, 8179, 2290, 5998, 4…
+## $ tpoprM   &lt;dbl&gt; 475, 386, 387, 446, 438, 624, 605, 350, 509, 1024, 578, 621, …
+## $ nhwhiteE &lt;dbl&gt; 921, 779, 68, 14, 236, 15, 500, 1379, 138, 2685, 2306, 11, 81…
+## $ nhwhiteM &lt;dbl&gt; 168, 183, 33, 14, 131, 24, 264, 165, 49, 831, 535, 27, 73, 18…
+## $ nhblkE   &lt;dbl&gt; 119, 12, 49, 8, 65, 8, 17, 2633, 18, 18, 93, 26, 2, 352, 1086…
+## $ nhblkM   &lt;dbl&gt; 115, 49, 51, 12, 93, 10, 75, 344, 22, 19, 97, 41, 4, 264, 679…
+## $ nhasnE   &lt;dbl&gt; 1577, 1671, 0, 0, 123, 70, 1030, 238, 151, 920, 665, 13, 29, …
+## $ nhasnM   &lt;dbl&gt; 469, 356, 14, 14, 164, 104, 235, 76, 82, 563, 176, 21, 45, 26…
+## $ hispE    &lt;dbl&gt; 308, 561, 2331, 3642, 2978, 3303, 1919, 3541, 1932, 2322, 134…
+## $ hispM    &lt;dbl&gt; 81, 181, 387, 446, 481, 628, 519, 285, 519, 433, 265, 618, 18…
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-122.0172 3..., MULTIPOLYGON (((…</code></pre>
+<p><br />
+</p>
+<p>Another important data wrangling operation is to join attribute data
+to an sf object. For example, let’s say you wanted to add tract level
+median household income, which we can get using <code>get_acs()</code>.
+We could have searched online for the variable name, but it’s
+<em>B19013_001</em>. Read the file in and save it as an object call
+<em>ca.inc</em>.</p>
+<pre class="r"><code>ca.inc &lt;- get_acs(geography = &quot;tract&quot;, 
+              year = 2023,
+              variables = c(medinc = &quot;B19013_001&quot;), 
+              state = &quot;CA&quot;,
+              survey = &quot;acs5&quot;,
+              output = &quot;wide&quot;)</code></pre>
+<pre><code>## Getting data from the 2019-2023 5-year ACS</code></pre>
+<p><br />
+</p>
+<p>Unlike before, we brought these data in without the
+<code>geometry = TRUE</code> option. So this is just a table. But
+remember, an <strong>sf</strong> object is a data frame, so we can use
+<code>left_join()</code>, which we covered in <a
+href="Lab1_FALL2026.html">Lab 1</a>, to join the files <em>ca.inc</em>
+and <em>ca.tracts</em>.</p>
+<pre class="r"><code>ca.tracts &lt;- ca.tracts %&gt;%
+  left_join(ca.inc, by = &quot;GEOID&quot;)
+
+#take a look to make sure the join worked
+glimpse(ca.tracts)</code></pre>
+<pre><code>## Rows: 9,129
+## Columns: 18
+## $ GEOID    &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;, &quot;06037205110&quot;, &quot;…
+## $ Tract    &lt;chr&gt; &quot;Census Tract 4427&quot;, &quot;Census Tract 4428&quot;, &quot;Census Tract 2049.…
+## $ County   &lt;chr&gt; &quot;Alameda County&quot;, &quot;Alameda County&quot;, &quot;Los Angeles County&quot;, &quot;Lo…
+## $ State    &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;Cali…
+## $ tpoprE   &lt;dbl&gt; 2998, 3087, 2459, 3690, 3402, 3409, 3490, 8179, 2290, 5998, 4…
+## $ tpoprM   &lt;dbl&gt; 475, 386, 387, 446, 438, 624, 605, 350, 509, 1024, 578, 621, …
+## $ nhwhiteE &lt;dbl&gt; 921, 779, 68, 14, 236, 15, 500, 1379, 138, 2685, 2306, 11, 81…
+## $ nhwhiteM &lt;dbl&gt; 168, 183, 33, 14, 131, 24, 264, 165, 49, 831, 535, 27, 73, 18…
+## $ nhblkE   &lt;dbl&gt; 119, 12, 49, 8, 65, 8, 17, 2633, 18, 18, 93, 26, 2, 352, 1086…
+## $ nhblkM   &lt;dbl&gt; 115, 49, 51, 12, 93, 10, 75, 344, 22, 19, 97, 41, 4, 264, 679…
+## $ nhasnE   &lt;dbl&gt; 1577, 1671, 0, 0, 123, 70, 1030, 238, 151, 920, 665, 13, 29, …
+## $ nhasnM   &lt;dbl&gt; 469, 356, 14, 14, 164, 104, 235, 76, 82, 563, 176, 21, 45, 26…
+## $ hispE    &lt;dbl&gt; 308, 561, 2331, 3642, 2978, 3303, 1919, 3541, 1932, 2322, 134…
+## $ hispM    &lt;dbl&gt; 81, 181, 387, 446, 481, 628, 519, 285, 519, 433, 265, 618, 18…
+## $ NAME     &lt;chr&gt; &quot;Census Tract 4427; Alameda County; California&quot;, &quot;Census Trac…
+## $ medincE  &lt;dbl&gt; 199154, 180800, 70500, 52262, 110967, 28516, 60703, 148661, 4…
+## $ medincM  &lt;dbl&gt; 30525, 28293, 15698, 5659, 22149, 3246, 28578, 39223, 19295, …
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-122.0172 3..., MULTIPOLYGON (((…</code></pre>
+<p><br />
+</p>
+<p>Note that we can’t use <code>left_join()</code> to join the attribute
+tables of two <strong>sf</strong> files. You will need to either make
+one of them not spatial by using the <code>st_drop_geometry()</code>
+function or use the <code>st_join()</code> function to spatially join
+them.</p>
+<p>We use the function <code>tm_shape()</code> from the
+<strong>tmap</strong> package to map the data.</p>
+<pre class="r"><code>tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
+## ℹ toggle with `tmap::ttm()`</code></pre>
+<pre class="r"><code>tract_map &lt;- tm_shape(ca.tracts) +   tm_polygons()
+tract_map</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-10-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="spatial-data-wrangling" class="section level1">
+<h1>Spatial Data Wrangling</h1>
+<p>There is Data Wrangling and then there is Spatial Data Wrangling. Cue
+dangerous sounding music. Well, it’s not that dangerous or scary.
+Spatial Data Wrangling involves cleaning or altering your data set based
+on the geographic location of features. The <strong>sf</strong> package
+offers a suite of functions unique to wrangling spatial data. Most of
+these functions start out with the prefix <code>st_</code>. To see all
+of the functions, type in</p>
+<pre class="r"><code>methods(class = &quot;sf&quot;)</code></pre>
+<p><br />
+</p>
+<p>We won’t go through all of these functions as the list is quite
+extensive. But, we’ll go through a few relevant spatial operations for
+this class below. The function we will be primarily using is
+<code>st_join()</code>.</p>
+<p><br />
+</p>
+<div id="intersect" class="section level2">
+<h2>Intersect</h2>
+<p>A common spatial data wrangling issue is to subset a set of spatial
+objects based on their location relative to another spatial object. In
+our case, we want to keep California tracts that are in the Sacramento
+metro area. We can do this using the <code>st_join()</code> function.
+We’ll need to specify a type of join. Let’s first try
+<code>join = st_intersects</code>. First, let’s bring in a polygon of
+the Sacramento metro area from Github.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/sac.metro.rds&quot;
+download.file(url, destfile = &quot;sac.metro.rds&quot;, mode = &quot;wb&quot;)
+sac.metro &lt;- readRDS(&quot;sac.metro.rds&quot;)</code></pre>
+<p><br />
+</p>
+<p>Let’s take a look at <em>sac.metro</em> and understand what file it
+is.</p>
+<pre class="r"><code>glimpse(sac.metro)</code></pre>
+<pre><code>## Rows: 1
+## Columns: 14
+## $ CSAFP    &lt;chr&gt; &quot;472&quot;
+## $ CBSAFP   &lt;chr&gt; &quot;40900&quot;
+## $ GEOID    &lt;chr&gt; &quot;40900&quot;
+## $ GEOIDFQ  &lt;chr&gt; &quot;310M700US40900&quot;
+## $ NAME     &lt;chr&gt; &quot;Sacramento-Roseville-Folsom, CA&quot;
+## $ NAMELSAD &lt;chr&gt; &quot;Sacramento-Roseville-Folsom, CA Metro Area&quot;
+## $ LSAD     &lt;chr&gt; &quot;M1&quot;
+## $ MEMI     &lt;chr&gt; &quot;1&quot;
+## $ MTFCC    &lt;chr&gt; &quot;G3110&quot;
+## $ ALAND    &lt;dbl&gt; 13191309279
+## $ AWATER   &lt;dbl&gt; 548018355
+## $ INTPTLAT &lt;chr&gt; &quot;+38.7902715&quot;
+## $ INTPTLON &lt;chr&gt; &quot;-121.0056427&quot;
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-120.0064 3...</code></pre>
+<p><br />
+</p>
+<p>OK, that geometry looks good. And it’s a polygon, so that’s good.
+Let’s now try to intersect our <em>sac.metro</em> dataset with our
+<em>ca.tracts</em> dataset.</p>
+<pre class="r"><code>sac.metro.tracts.int &lt;- st_join(ca.tracts, sac.metro, 
+                                join = st_intersects, left=FALSE)</code></pre>
+<p><br />
+</p>
+<p>The above code tells R to identify the polygons in <em>ca.tracts</em>
+that intersect with the polygon <em>sac.metro</em>. We indicate we want
+a polygon intersection by specifying <code>join = st_intersects</code>.
+The option <code>left=FALSE</code> tells R to remove the polygons from
+<em>ca.tracts</em> that do not intersect (make it TRUE and see what
+happens) with <em>sac.metro</em>. Plotting our tracts, we get:</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.int) +
+  tm_polygons(col = &quot;blue&quot;) +
+tm_shape(sac.metro) +  
+  tm_borders(col = &quot;red&quot;)</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-15-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="within" class="section level2">
+<h2>Within</h2>
+<p>We have one small issue. Using <code>join = st_intersects</code>
+returns all tracts that intersect <em>sac.metro</em>, which include
+those that touch the metro’s boundary. No bueno. We can instead use the
+argument <code>join = st_within</code> to return tracts that are
+<em>completely within</em> the metro area.</p>
+<pre class="r"><code>sac.metro.tracts.w &lt;- st_join(ca.tracts, sac.metro, join = st_within, left=FALSE)
+
+tm_shape(sac.metro.tracts.w) +
+  tm_polygons(col = &quot;blue&quot;) +
+tm_shape(sac.metro) +
+  tm_borders(col = &quot;red&quot;)</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-16-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Looking much better! Now, if we look at <em>sac.metro.tracts.w</em>’s
+attribute table, you’ll see it includes all the variables from both
+<em>ca.tracts</em> and <em>sac.metro</em>. We don’t need these
+variables, so use <code>select()</code> to eliminate them. You’ll also
+notice that if variables from two data sets share the same name, R will
+keep both and attach a <em>.x</em> and <em>.y</em> to the end. For
+example, <em>GEOID</em> was found in both <em>ca.tracts</em> and
+<em>sac.metro</em>, so R named one <em>GEOID.x</em> and the other that
+was merged in was named <em>GEOID.y</em>.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="mapping-in-r" class="section level1">
+<h1>Mapping in R</h1>
+<div id="ggplot" class="section level2">
+<h2>ggplot</h2>
+<p>OK, so now we’ve talked a little about how to bring in and manipulate
+vector polygon data, let’s do some mapping and create some choropleth
+maps. We can do this with the <strong>ggplot</strong> package, the
+<strong>tmap</strong> package, and the <strong>leaflet</strong> package
+(which we won’t cover now, but it’s very cool for interactive maps).
+Let’s start with <strong>ggplot</strong>.</p>
+<p><br />
+</p>
+<div id="ggplot-1" class="section level3">
+<h3>ggplot</h3>
+<p>Because <strong>sf</strong> is tidy friendly, it is no surprise we
+can use the <strong>tidyverse</strong> plotting function
+<code>ggplot()</code> to make maps. We already received an introduction
+to <code>ggplot()</code> in <a href="Lab2_FALL2026.html">Lab 2</a>.
+Recall its basic structure:</p>
+<pre class="r"><code>ggplot(data = &lt;DATA&gt;) +
+      &lt;GEOM_FUNCTION&gt;(mapping = aes(x, y)) +
+      &lt;OPTIONS&gt;()</code></pre>
+<p><br />
+</p>
+<p>In mapping, <code>geom_sf()</code> is
+<code>&lt;GEOM_FUNCTION&gt;()</code>. Unlike with functions like
+<code>geom_histogram()</code> and <code>geom_boxplot()</code>, we don’t
+specify an x and y axis. Instead you use <code>fill</code> if you want
+to map a variable or color to just map boundaries.</p>
+<p>Let’s use <code>ggplot()</code> to make a choropleth map. We need to
+specify a numeric variable in the <code>fill =</code> argument within
+<code>geom_sf()</code>. Here we map tract-level median household income
+in the Sacramento metro area.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-18-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We can also specify a title (as well as subtitles and captions) using
+the <code>labs()</code> function.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE)) +
+    labs(title = &quot;Median Income Sacramento MSA Tracts&quot;) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-19-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We can make further layout adjustments to the map. Don’t like a blue
+scale on the legend? You can change it using the
+<code>scale_file_gradient()</code> function. Let’s change it to a white
+to red gradient. We can also eliminate the gray tract border colors to
+make the fill color distinction clearer. We do this by specifying
+<code>color = NA</code> inside <code>geom_sf()</code>. We can also get
+rid of the gray background by specifying a basic black and white theme
+using <code>theme_bw()</code>. We also added a caption indicating the
+source of the data using the <code>captions =</code> parameter within
+<code>labs()</code>. We then changed the color to red using labels for
+<code>low=</code> and <code>high=</code>, and we added a name to our
+legend with `name=’.</p>
+<pre class="r"><code>ggplot(data = sac.metro.tracts.w) +
+  geom_sf(aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= &quot;white&quot;, high = &quot;red&quot;, na.value =&quot;gray&quot;, name = &quot;Median Income&quot;) +  
+    labs(title = &quot;Median Income Sacramento MSA Tracts&quot;,
+         caption = &quot;Source: American Community Survey&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-20-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Dare I say, we are ready for the New York Times with this map!</p>
+<p><br />
+</p>
+</div>
+<div id="points-on-top-of-polygons" class="section level3">
+<h3>Points on top of polygons</h3>
+<p>OK, now that we have mapped points and mapped polygons, let’s put
+them both together! First, we are going to bring in our old friend
+<em>CAdata</em> from last week’s lab.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+summary(ca_pts)</code></pre>
+<pre><code>##       time               event              X                 Y          
+##  Min.   : 0.004068   Min.   :0.0000   Min.   :1811375   Min.   :-241999  
+##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:2018363   1st Qu.: -94700  
+##  Median : 4.749980   Median :1.0000   Median :2325084   Median : -60386  
+##  Mean   : 6.496130   Mean   :0.6062   Mean   :2230219   Mean   :  87591  
+##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:2380230   3rd Qu.: 318280  
+##  Max.   :24.997764   Max.   :1.0000   Max.   :2705633   Max.   : 770658  
+##       AGE         INS      
+##  Min.   :25.00   Mcd: 431  
+##  1st Qu.:53.00   Mcr:1419  
+##  Median :62.00   Mng:2304  
+##  Mean   :61.28   Oth: 526  
+##  3rd Qu.:71.00   Uni: 168  
+##  Max.   :80.00   Unk: 152</code></pre>
+<pre class="r"><code>ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;))
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+#Set CRS
+ca_pts_crs &lt;- st_set_crs(ca_pts, ca_proj)</code></pre>
+<p><br />
+</p>
+<p>This time, we will map those points with <strong>ggplot</strong>.</p>
+<pre class="r"><code>ggplot(data = ca_pts_crs) +
+  geom_sf(fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-22-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We can overlay the points over Sacramento tracts to give the
+locations some perspective. Here, you add two <code>geom_sf()</code>
+arguments for the tracts and the cancer cases.</p>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-23-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Hmmm. That doesn’t look great. We have lots of cases outside of
+Sacramento. Let’s filter out to just pick cases within the Sacramento
+area.</p>
+<pre class="r"><code>ca_pts_crs.w &lt;- st_join(ca_pts_crs, sac.metro.tracts.w, join = st_within, left=FALSE)</code></pre>
+<p><br />
+</p>
+<p>Ooof. That doesn’t work. It says our
+<code>st_crs(x) == st_crs(y) is not TRUE</code>. That means our
+Coordinate Reference Systems are not matching! Let’s transform our
+cancer dataset <em>ca_pts_crs.w</em> to match the CRS for
+<em>sac.metro.tracts.w</em> with one easy step using
+<code>st_transform</code>:</p>
+<pre class="r"><code>#check crs of each dataset
+st_crs(ca_pts_crs)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(sac.metro.tracts.w)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: NAD83 
+##   wkt:
+## GEOGCRS[&quot;NAD83&quot;,
+##     DATUM[&quot;North American Datum 1983&quot;,
+##         ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##             LENGTHUNIT[&quot;metre&quot;,1]]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;latitude&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;longitude&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     ID[&quot;EPSG&quot;,4269]]</code></pre>
+<pre class="r"><code>#create new dataset with transformed CRS
+ca_pts_crs.transformed &lt;- st_transform(ca_pts_crs,st_crs(sac.metro.tracts.w))
+
+st_crs(ca_pts_crs.transformed )</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: NAD83 
+##   wkt:
+## GEOGCRS[&quot;NAD83&quot;,
+##     DATUM[&quot;North American Datum 1983&quot;,
+##         ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##             LENGTHUNIT[&quot;metre&quot;,1]]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;latitude&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;longitude&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     ID[&quot;EPSG&quot;,4269]]</code></pre>
+<p><br />
+</p>
+<p>OK, let’s try this again!</p>
+<pre class="r"><code>ca_pts_crs.w &lt;- st_join(ca_pts_crs.transformed, sac.metro.tracts.w, join = st_within, left=FALSE)</code></pre>
+<p>It worked! OK, now let’s try our map again.</p>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = sac.metro.tracts.w) +
+  geom_sf(data = ca_pts_crs.w, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants&quot;,
+       caption = &quot;Source: Ovarian Cancer Cases&quot;) +  
+  theme_bw()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-27-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Alright, who’s ready for a challenge? Let’s put it all together in
+one nice map.</p>
+<pre class="r"><code>ggplot() + 
+  geom_sf(data = sac.metro.tracts.w, aes(fill = medincE), color = NA) +
+    scale_fill_gradient(low= &quot;white&quot;, high = &quot;red&quot;, na.value =&quot;gray&quot;, name = &quot;Median Income&quot;) +  
+  geom_sf(data = ca_pts_crs.w, fill = &quot;black&quot;) +
+  labs(title = &quot;Study Participants Overlaid with Median Income of Sacramento Tracts&quot;,
+       caption = &quot;Source: American Community Survey and Ovarian Cancer Cases&quot;) +
+  theme_bw()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-28-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Can I just say, you’re very impressive. Well done!</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="tmap" class="section level2">
+<h2>tmap</h2>
+<p>Whether you prefer <strong>tmap</strong> or <strong>ggplot</strong>
+is up to you, but I find that <strong>tmap</strong> has some benefits,
+so let’s focus on its mapping functions next.</p>
+<p><strong>tmap</strong> uses the same layered logic as
+<strong>ggplot</strong>. As we saw last week, the initial command is
+<code>tm_shape()</code>, which specifies the geography to which the
+mapping is applied. You then build on <code>tm_shape()</code> by adding
+one or more elements such as <code>tm_polygons()</code> for polygons,
+<code>tm_borders()</code> for lines, and <code>tm_dots()</code> for
+points. All additional functions take on the form of <code>tm_</code>.
+Check the full list of <code>tm_</code> elements <a
+href="https://www.rdocumentation.org/packages/tmap/versions/2.0/topics/tmap-element">here</a>.</p>
+<div id="choropleth-maps-in-tmap" class="section level3">
+<h3>Choropleth maps in tmap</h3>
+<p>Let’s make a static choropleth map of median household income in
+Sacramento MSA just like we did above, but this time in
+<strong>tmap</strong>.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-29-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We first put the dataset <em>sac.metro.tracts.w</em> inside
+<code>tm_shape()</code>. Because you are plotting polygons, you use
+<code>tm_polygons()</code> next. The argument
+<code>fill = "medincE"</code> tells R to shade (or color) the tracts by
+the variable <em>medincE.</em> The argument
+<code>fill.scale = tm_scale_intervals(style = "quantile")"</code> tells
+R to break up the shading into quantiles, or equal groups of 5 as a
+default. I find that this is where <strong>tmap</strong> offers a
+distinct advantage over <strong>ggplot</strong> in that users have
+greater control over the legend and bin breaks. <strong>tmap</strong>
+allows users to specify algorithms to automatically create breaks with
+the style argument. You can also change the number of breaks by setting
+<code>n=</code>. The default is <code>n=5</code>. Rather than quintiles,
+you can show quartiles using <code>n=4</code>. I’m feeling crazy. Let’s
+do it.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;, n=4))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-30-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Check out <a
+href="https://geocompr.robinlovelace.net/adv-map.html#color-settings">this
+link</a> for more on available classification styles in
+<strong>tmap</strong>.</p>
+<p><br />
+</p>
+<p>The <code>tm_polygons()</code> command is a wrapper around two other
+functions, <code>tm_fill()</code> and <code>tm_borders()</code>.
+<code>tm_fill()</code> controls the contents of the polygons (color,
+classification, etc.), while <code>tm_borders()</code> does the same for
+the polygon outlines.</p>
+<p>For example, using the same shape (but no variable), we obtain the
+outlines of the neighborhoods from the <code>tm_borders()</code>
+command.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_borders()</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-31-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Similarly, we obtain a choropleth map without the polygon outlines
+when we just use the <code>tm_fill()</code> command.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) + 
+  tm_fill(&quot;medincE&quot;)</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-32-1.png" alt="" width="672" /></p>
+<p>When we combine the two commands, we obtain the same map as with
+tm_polygons() (this illustrates how in R one can often obtain the same
+result in a number of different ways). Try this on your own.</p>
+<p><br />
+</p>
+</div>
+<div id="color-scheme" class="section level3">
+<h3>Color scheme</h3>
+<p>The argument <code>values =</code> defines the color ranges
+associated with the bins and determined by the <code>style</code>
+arguments. Several built-in palettes are contained in
+<strong>tmap</strong>. For example, using <code>values = "Reds"</code>
+would yield the following map for our example.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;, 
+                                              values = &quot;Reds&quot;)) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-33-1.png" alt="" width="672" /></p>
+<p>Under the hood, <code>“Reds”</code> refers to one of the color
+schemes supported by the <strong>RColorBrewer</strong> package (see
+below).</p>
+<p><br />
+</p>
+<p>In addition to the built-in palettes, customized color ranges can be
+created by specifying a vector with the desired colors as anchors. This
+will create a spectrum of colors in the map that range between the
+colors specified in the vector. For instance, if we used
+<code>c(“red”, “blue”)</code>, the color spectrum would move from red to
+purple, then to blue, with in between shades. In our example:</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;, 
+                                              values = c(&quot;red&quot;,&quot;blue&quot;))) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-34-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Not exactly a pretty picture. In order to capture a diverging scale,
+we insert <code>“white”</code> in between red and blue.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;, 
+                                              values = c(&quot;red&quot;,&quot;white&quot;, &quot;blue&quot;))) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-35-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>A preferred approach to select a color palette is to chose one of the
+schemes contained in the <strong>RColorBrewer</strong> package. These
+are based on the research of cartographer Cynthia Brewer (see the
+colorbrewer2 <a
+href="https://colorbrewer2.org/#type=sequential&amp;scheme=BuGn&amp;n=3">website</a>
+for details). ColorBrewer makes a distinction between sequential scales
+(for a scale that goes from low to high), diverging scales (to highlight
+how values differ from a central tendency), and qualitative scales (for
+categorical variables). For each scale, a series of single hue and
+multi-hue scales are suggested. In the <strong>RColorBrewer</strong>
+package, these are referred to by a name (e.g., the “Reds” palette we
+used above is an example). The full list is contained in the
+<strong>RColorBrewer</strong> documentation.</p>
+<p>There are two very useful commands in this package. One sets a color
+palette by specifying its name and the number of desired categories. The
+result is a character vector with the hex codes of the corresponding
+colors.</p>
+<p>For example, we select a sequential color scheme going from blue to
+green, as <em>BuGn</em>, by means of the command
+<code>brewer.pal</code>, with the number of categories (6) and the
+scheme as arguments. The resulting vector contains the HEX codes for the
+colors.</p>
+<pre class="r"><code>brewer.pal(6,&quot;BuGn&quot;)</code></pre>
+<pre><code>## [1] &quot;#EDF8FB&quot; &quot;#CCECE6&quot; &quot;#99D8C9&quot; &quot;#66C2A4&quot; &quot;#2CA25F&quot; &quot;#006D2C&quot;</code></pre>
+<p><br />
+</p>
+<p>Using this palette in our map yields the following result.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values=&quot;brewer.bu_gn&quot;)) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-37-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>The command <code>display.brewer.pal()</code> allows us to explore
+different color schemes before applying them to a map. For example:</p>
+<pre class="r"><code>display.brewer.pal(6,&quot;BuGn&quot;)</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-38-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="legend" class="section level3">
+<h3>Legend</h3>
+<p>There are many options to change the formatting of the legend. The
+automatic title for the legend is not that attractive, since it is
+simply the variable name. This can be customized by setting the
+<code>title</code> argument in <code>tm_legend()</code>.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;), 
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-39-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Another important aspect of the legend is its positioning. This is
+handled through the <code>tm_layout()</code> function. This function has
+a vast number of options, as detailed in the <a
+href="https://www.rdocumentation.org/packages/tmap/versions/2.1-1/topics/tm_layout">documentation</a>.
+There are also specialized subsets of layout functions, focused on
+specific aspects of the map, such as <code>tm_legend()</code>,
+<code>tm_style()</code> and <code>tm_format()</code>. We illustrate the
+positioning of the legend.</p>
+<p>Often, the default location of the legend is appropriate, but
+sometimes further control is needed. The <code>legend.position</code>
+argument to the <code>tm_layout</code> function moves the legend around
+the map, and it takes a vector of two string variables that determine
+both the horizontal position (“left”, “right”, or “center”) and the
+vertical position (“top”, “bottom”, or “center”).</p>
+<p>For example, if we would want to move the legend to the bottom-right
+position, we would use the following set of commands.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(legend.position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-40-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>There is also the option to position the legend outside the frame of
+the map. This is accomplished by setting <code>legend.outside</code> to
+TRUE, and optionally also specify its position by means of
+<code>legend.outside.position()</code>. The latter can take the values
+“top”, “bottom”, “right”, and “left”.</p>
+<p>For example, to position the legend outside and on the right, would
+be accomplished by the following commands.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+ tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;)</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-41-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We can also customize the size of the legend, its alignment, font,
+etc. Check out the <a
+href="https://r-tmap.github.io/tmap/articles/basics_legends">documentation</a>
+for more!</p>
+<p><br />
+</p>
+</div>
+<div id="title" class="section level3">
+<h3>Title</h3>
+<p>The <code>tm_title()</code> function can be used to set a title for
+the map, and specify its position, size, etc. For example, we can set
+the <code>text</code>, the <code>size</code> and the
+<code>position</code> as in the example below. We made the font size a
+bit smaller (0.8) in order not to overwhelm the map, and positioned it
+in the top left-hand corner.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) + 
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;) +
+  tm_title(text = &quot;Median Income of Sacramento Tracts&quot;,
+           size = 0.8, 
+           position = c(&quot;left&quot;,&quot;top&quot;))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-42-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>To have a title appear on top (or on the bottom) of the map, we need
+to set the <code>position</code> argument of the <code>tm_title()</code>
+function with the associated <code>tm_pos_out()</code>, as illustrated
+below (with title.size set to 1.25 to have a larger font).</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;) +
+  tm_title(text = &quot;Median Income of Sacramento Tracts&quot;,
+           size = 1.25,
+           position = tm_pos_out(&quot;center&quot;, &quot;top&quot;))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-43-1.png" alt="" width="672" /></p>
+<p>A shortcut to achieve this title position is to use
+<code>tm_title_out()</code> instead of <code>tm_title()</code>.</p>
+<p><br />
+</p>
+</div>
+<div id="scale-bar-and-arrow" class="section level3">
+<h3>Scale bar and arrow</h3>
+<p>OK this really wouldn’t be a GIS class without talking about one of
+the core elements of a map–the good ole scale bar and arrow. Let’s add
+these to our map. First, we add the scale bar with
+<code>tm_scalebar()</code>.</p>
+<p>The argument <code>breaks</code> tells R the distances to break up
+and end the bar. The argument <code>position</code> places the scale bar
+on the bottom left part of the map. Note that the <code>scale</code> is
+in miles (we’re in Amurica!). The default is in kilometers (the rest of
+the world!), but you can specify the units within
+<code>tm_shape()</code> using the argument <code>unit</code>.
+<code>text.size</code> scales the size of the bar smaller (below 1) or
+larger (above 1).</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;) +
+  tm_title_out(text = &quot;Median Income of Sacramento Tracts&quot;,
+               size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c(&quot;left&quot;, &quot;bottom&quot;)) </code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-44-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Next let’s spice things up by adding a north arrow, which we can do
+using the function <code>tm_compass()</code>. You can control for the
+type, size and location of the arrow within this function. I place a
+4-star arrow on the bottom right of the map.</p>
+<pre class="r"><code>tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(legend.outside = TRUE, legend.outside.position = &quot;right&quot;) +
+  tm_title_out(text = &quot;Median Income of Sacramento Tracts&quot;,
+               size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, 
+               position = c(&quot;left&quot;, &quot;bottom&quot;)) +
+  tm_compass(type = &quot;4star&quot;, position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-45-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>We can also eliminate the frame around the map using the argument
+<code>frame = FALSE</code> in <code>tm_layout()</code>.</p>
+<pre class="r"><code>sac.map &lt;- tm_shape(sac.metro.tracts.w, unit = &quot;mi&quot;) +
+  tm_polygons(fill = &quot;medincE&quot;, 
+              fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                              values = &quot;brewer.reds&quot;),
+              fill.legend = tm_legend(title = &quot;Median Income&quot;)) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE, legend.outside.position = &quot;right&quot;) +
+  tm_title(text = &quot;Median Income of Sacramento Tracts&quot;,
+           size = 1.25) +
+  tm_scalebar(breaks = c(0, 5, 10, 20), text.size = 0.75, position = c(&quot;left&quot;, &quot;bottom&quot;)) +
+  tm_compass(type = &quot;4star&quot;, position = c(&quot;right&quot;, &quot;bottom&quot;)) 
+  
+sac.map</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-46-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Note that I saved the map into an object called <em>sac.map</em>. R
+is an object-oriented program, so everything you make in R are objects
+that can be saved for future manipulation. This includes maps. And
+future manipulations of a saved map includes adding more
+<code>tm_*</code> functions to the saved object, such as
+<code>sac.map + tm_layout(your changes here)</code>. Check the help
+documentation for <code>tm_layout()</code> to see the complete list of
+settings.</p>
+<p><br />
+</p>
+</div>
+</div>
+<div id="saving-maps" class="section level2">
+<h2>Saving maps</h2>
+<p>You can save your maps a few ways. 1. On the plotting screen where
+the map is shown, click on Export and save it as either an image or pdf
+file. 2. Use the function <code>tmap_save()</code></p>
+<p>For option 2, we can save the map object <em>sac.map</em> as
+such:</p>
+<pre class="r"><code>tmap_save(sac.map, &quot;sac_city_inc.jpg&quot;)</code></pre>
+<p>Specify the <strong>tmap</strong> object and a filename with an
+extension. It supports .pdf, .eps, .svg, .wmf, .png, .jpg, .bmp and
+.tiff. The default is .png. Also make sure you’ve set your working
+directory to the folder that you want your map to be saved in.</p>
+<p><br />
+</p>
+</div>
+<div id="making-a-map-with-cdc-places-data" class="section level2">
+<h2>Making a map with CDC Places data</h2>
+<p>OK, do we have energy for one more example? Let’s bring in data from
+the <a href="https://www.cdc.gov/places/tools/data-portal.html">CDC
+Places dataset</a>. This is an incredible resource to access data on the
+CDC’s <a href="https://www.cdc.gov/brfss/index.html">Behavioral Risk
+Factor and Surveillance System (BRFSS)</a>, as well as social
+determinants of health data from American Community Survey. I’ve already
+downloaded California Census tract data on the “% of adults reporting no
+leisure-time physical activity”. Let’s bring this in and take a look at
+it!</p>
+<pre class="r"><code>places_ca_lpa &lt;- read_csv(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/places_ca_lpa.csv&quot;)</code></pre>
+<pre><code>## Rows: 9070 Columns: 24
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (16): StateAbbr, StateDesc, CountyName, CountyFIPS, LocationName, DataSo...
+## dbl  (6): Year, Data_Value, Low_Confidence_Limit, High_Confidence_Limit, Tot...
+## lgl  (2): Data_Value_Footnote_Symbol, Data_Value_Footnote
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>glimpse(places_ca_lpa)</code></pre>
+<pre><code>## Rows: 9,070
+## Columns: 24
+## $ Year                       &lt;dbl&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2…
+## $ StateAbbr                  &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;…
+## $ StateDesc                  &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;…
+## $ CountyName                 &lt;chr&gt; &quot;Orange&quot;, &quot;Riverside&quot;, &quot;Riverside&quot;, &quot;Sacram…
+## $ CountyFIPS                 &lt;chr&gt; &quot;06059&quot;, &quot;06065&quot;, &quot;06065&quot;, &quot;06067&quot;, &quot;06073&quot;…
+## $ LocationName               &lt;chr&gt; &quot;06059063010&quot;, &quot;06065042509&quot;, &quot;06065042519&quot;…
+## $ DataSource                 &lt;chr&gt; &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;…
+## $ Category                   &lt;chr&gt; &quot;Health Risk Behaviors&quot;, &quot;Health Risk Behav…
+## $ Measure                    &lt;chr&gt; &quot;No leisure-time physical activity among ad…
+## $ Data_Value_Unit            &lt;chr&gt; &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;…
+## $ Data_Value_Type            &lt;chr&gt; &quot;Crude prevalence&quot;, &quot;Crude prevalence&quot;, &quot;Cr…
+## $ Data_Value                 &lt;dbl&gt; 13.1, 33.6, 40.2, 26.6, 32.9, 12.9, 18.7, 2…
+## $ Data_Value_Footnote_Symbol &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Data_Value_Footnote        &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Low_Confidence_Limit       &lt;dbl&gt; 11.3, 30.0, 36.3, 23.4, 29.6, 11.2, 16.4, 1…
+## $ High_Confidence_Limit      &lt;dbl&gt; 15.0, 37.4, 44.2, 29.9, 36.3, 14.7, 21.1, 2…
+## $ TotalPopulation            &lt;dbl&gt; 6698, 3460, 1887, 7420, 3601, 4831, 4778, 3…
+## $ TotalPop18plus             &lt;dbl&gt; 5354, 2491, 1297, 5680, 2534, 4017, 3684, 2…
+## $ Geolocation                &lt;chr&gt; &quot;POINT (-117.8983938 33.6281163)&quot;, &quot;POINT (…
+## $ LocationID                 &lt;chr&gt; &quot;06059063010&quot;, &quot;06065042509&quot;, &quot;06065042519&quot;…
+## $ CategoryID                 &lt;chr&gt; &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;,…
+## $ MeasureId                  &lt;chr&gt; &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;…
+## $ DataValueTypeID            &lt;chr&gt; &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;Cr…
+## $ Short_Question_Text        &lt;chr&gt; &quot;Physical Inactivity&quot;, &quot;Physical Inactivity…</code></pre>
+<p><br />
+</p>
+<p>Interesting stuff. Looks like the values we care about are stores in
+a column called <em>Data_Value</em> and the FIPS code seems to be in
+<em>LocationName</em>. Let’s go ahead and rename <em>LocationName</em>
+and then see if we can join this data with our Census tract data
+<em>ca.tracts</em>.</p>
+<pre class="r"><code>places_ca_lpa&lt;-rename(places_ca_lpa, GEOID = LocationName)
+glimpse(places_ca_lpa)</code></pre>
+<pre><code>## Rows: 9,070
+## Columns: 24
+## $ Year                       &lt;dbl&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2…
+## $ StateAbbr                  &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;…
+## $ StateDesc                  &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;…
+## $ CountyName                 &lt;chr&gt; &quot;Orange&quot;, &quot;Riverside&quot;, &quot;Riverside&quot;, &quot;Sacram…
+## $ CountyFIPS                 &lt;chr&gt; &quot;06059&quot;, &quot;06065&quot;, &quot;06065&quot;, &quot;06067&quot;, &quot;06073&quot;…
+## $ GEOID                      &lt;chr&gt; &quot;06059063010&quot;, &quot;06065042509&quot;, &quot;06065042519&quot;…
+## $ DataSource                 &lt;chr&gt; &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;…
+## $ Category                   &lt;chr&gt; &quot;Health Risk Behaviors&quot;, &quot;Health Risk Behav…
+## $ Measure                    &lt;chr&gt; &quot;No leisure-time physical activity among ad…
+## $ Data_Value_Unit            &lt;chr&gt; &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;…
+## $ Data_Value_Type            &lt;chr&gt; &quot;Crude prevalence&quot;, &quot;Crude prevalence&quot;, &quot;Cr…
+## $ Data_Value                 &lt;dbl&gt; 13.1, 33.6, 40.2, 26.6, 32.9, 12.9, 18.7, 2…
+## $ Data_Value_Footnote_Symbol &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Data_Value_Footnote        &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Low_Confidence_Limit       &lt;dbl&gt; 11.3, 30.0, 36.3, 23.4, 29.6, 11.2, 16.4, 1…
+## $ High_Confidence_Limit      &lt;dbl&gt; 15.0, 37.4, 44.2, 29.9, 36.3, 14.7, 21.1, 2…
+## $ TotalPopulation            &lt;dbl&gt; 6698, 3460, 1887, 7420, 3601, 4831, 4778, 3…
+## $ TotalPop18plus             &lt;dbl&gt; 5354, 2491, 1297, 5680, 2534, 4017, 3684, 2…
+## $ Geolocation                &lt;chr&gt; &quot;POINT (-117.8983938 33.6281163)&quot;, &quot;POINT (…
+## $ LocationID                 &lt;chr&gt; &quot;06059063010&quot;, &quot;06065042509&quot;, &quot;06065042519&quot;…
+## $ CategoryID                 &lt;chr&gt; &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;,…
+## $ MeasureId                  &lt;chr&gt; &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;…
+## $ DataValueTypeID            &lt;chr&gt; &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;Cr…
+## $ Short_Question_Text        &lt;chr&gt; &quot;Physical Inactivity&quot;, &quot;Physical Inactivity…</code></pre>
+<pre class="r"><code>ca.tracts.lpa &lt;- ca.tracts %&gt;%
+  left_join(places_ca_lpa, by = &quot;GEOID&quot;)
+glimpse(ca.tracts.lpa)</code></pre>
+<pre><code>## Rows: 9,129
+## Columns: 41
+## $ GEOID                      &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;…
+## $ Tract                      &lt;chr&gt; &quot;Census Tract 4427&quot;, &quot;Census Tract 4428&quot;, &quot;…
+## $ County                     &lt;chr&gt; &quot;Alameda County&quot;, &quot;Alameda County&quot;, &quot;Los An…
+## $ State                      &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;…
+## $ tpoprE                     &lt;dbl&gt; 2998, 3087, 2459, 3690, 3402, 3409, 3490, 8…
+## $ tpoprM                     &lt;dbl&gt; 475, 386, 387, 446, 438, 624, 605, 350, 509…
+## $ nhwhiteE                   &lt;dbl&gt; 921, 779, 68, 14, 236, 15, 500, 1379, 138, …
+## $ nhwhiteM                   &lt;dbl&gt; 168, 183, 33, 14, 131, 24, 264, 165, 49, 83…
+## $ nhblkE                     &lt;dbl&gt; 119, 12, 49, 8, 65, 8, 17, 2633, 18, 18, 93…
+## $ nhblkM                     &lt;dbl&gt; 115, 49, 51, 12, 93, 10, 75, 344, 22, 19, 9…
+## $ nhasnE                     &lt;dbl&gt; 1577, 1671, 0, 0, 123, 70, 1030, 238, 151, …
+## $ nhasnM                     &lt;dbl&gt; 469, 356, 14, 14, 164, 104, 235, 76, 82, 56…
+## $ hispE                      &lt;dbl&gt; 308, 561, 2331, 3642, 2978, 3303, 1919, 354…
+## $ hispM                      &lt;dbl&gt; 81, 181, 387, 446, 481, 628, 519, 285, 519,…
+## $ NAME                       &lt;chr&gt; &quot;Census Tract 4427; Alameda County; Califor…
+## $ medincE                    &lt;dbl&gt; 199154, 180800, 70500, 52262, 110967, 28516…
+## $ medincM                    &lt;dbl&gt; 30525, 28293, 15698, 5659, 22149, 3246, 285…
+## $ Year                       &lt;dbl&gt; 2022, 2022, 2022, 2022, 2022, 2022, 2022, 2…
+## $ StateAbbr                  &lt;chr&gt; &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;CA&quot;, &quot;…
+## $ StateDesc                  &lt;chr&gt; &quot;California&quot;, &quot;California&quot;, &quot;California&quot;, &quot;…
+## $ CountyName                 &lt;chr&gt; &quot;Alameda&quot;, &quot;Alameda&quot;, &quot;Los Angeles&quot;, &quot;Los A…
+## $ CountyFIPS                 &lt;chr&gt; &quot;06001&quot;, &quot;06001&quot;, &quot;06037&quot;, &quot;06037&quot;, &quot;06037&quot;…
+## $ DataSource                 &lt;chr&gt; &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;, &quot;BRFSS&quot;…
+## $ Category                   &lt;chr&gt; &quot;Health Risk Behaviors&quot;, &quot;Health Risk Behav…
+## $ Measure                    &lt;chr&gt; &quot;No leisure-time physical activity among ad…
+## $ Data_Value_Unit            &lt;chr&gt; &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;, &quot;%&quot;…
+## $ Data_Value_Type            &lt;chr&gt; &quot;Crude prevalence&quot;, &quot;Crude prevalence&quot;, &quot;Cr…
+## $ Data_Value                 &lt;dbl&gt; 14.2, 18.8, 38.2, 38.7, 25.3, 40.2, 30.7, 2…
+## $ Data_Value_Footnote_Symbol &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Data_Value_Footnote        &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+## $ Low_Confidence_Limit       &lt;dbl&gt; 12.2, 16.3, 35.2, 35.7, 22.9, 37.3, 28.1, 2…
+## $ High_Confidence_Limit      &lt;dbl&gt; 16.6, 21.6, 41.1, 41.7, 27.5, 43.1, 33.2, 2…
+## $ TotalPopulation            &lt;dbl&gt; 3141, 2959, 2537, 3850, 3632, 3858, 3335, 5…
+## $ TotalPop18plus             &lt;dbl&gt; 2432, 2359, 1903, 2599, 2822, 2783, 2695, 5…
+## $ Geolocation                &lt;chr&gt; &quot;POINT (-122.0081094 37.5371514)&quot;, &quot;POINT (…
+## $ LocationID                 &lt;chr&gt; &quot;06001442700&quot;, &quot;06001442800&quot;, &quot;06037204920&quot;…
+## $ CategoryID                 &lt;chr&gt; &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;, &quot;RISKBEH&quot;,…
+## $ MeasureId                  &lt;chr&gt; &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;LPA&quot;, &quot;…
+## $ DataValueTypeID            &lt;chr&gt; &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;CrdPrv&quot;, &quot;Cr…
+## $ Short_Question_Text        &lt;chr&gt; &quot;Physical Inactivity&quot;, &quot;Physical Inactivity…
+## $ geometry                   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-122.0172 3...…</code></pre>
+<p><br />
+</p>
+<p>It worked! OK, now let’s make a map of % of adults reporting no
+leisure-time physical activity. We will build on what we’ve learned
+above! I’ve also used <code>tm_fill()</code> instead of
+<code>tm_polygons()</code> to make it so there are no borders and we can
+easily see polygon values in denser concentrations of Census tracts
+(e.g., around Sacramento, San Francisco, LA, etc.)</p>
+<pre class="r"><code>tm_shape(ca.tracts.lpa, unit = &quot;mi&quot;) +
+  tm_fill(fill = &quot;Data_Value&quot;, 
+          fill.scale = tm_scale_intervals(style = &quot;quantile&quot;,
+                                          values = &quot;brewer.reds&quot;),
+          fill.legend = tm_legend(title = &quot;% Adults No Physical Activity&quot;)) +
+  tm_title_out(text = &quot;% of Adults Reporting No Leisure Time Physical Activity&quot;)</code></pre>
+<pre><code>## [plot mode] fit legend/component: Some legend items or map compoments do not
+## fit well, and are therefore rescaled.
+## ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-50-1.png" alt="" width="672" /><br />
+</p>
+<p>Oooooooo that is one goooood looking map!</p>
+<p><br />
+</p>
+<p>You’ve completed your introduction to <strong>sf</strong>. Whew!
+Badge? Yes, please, you earned it! Time to <a
+href="https://www.youtube.com/watch?v=3GwjfUFyY6M">celebrate</a>!</p>
+<p><br />
+</p>
+<div class="float">
+<img src="sf.gif" alt="sf Badge" />
+<div class="figcaption">sf Badge</div>
+</div>
+<p><br />
+</p>
+</div>
+</div>
+<div id="rasters" class="section level1">
+<h1>Rasters</h1>
+<p>Raster datasets are simply an array of pixels/cells organized into
+rows and columns (or a grid) where each cell contains a value
+representing information, such as temperature, vegetation, land use, air
+pollution, etc. Raster maps usually represent continuous phenomena such
+as elevation, temperature, or population density. Discrete features such
+as soil type or land-cover classes can also be represented in the raster
+data model. Rasters are aerial photographs, imagery from satellites,
+Google Street View images, etc. A few things to note.</p>
+<ul>
+<li>Raster datasets are always rectangular (rows x col) similar to
+matrices. Irregular boundaries are created by using
+<code>NAs</code>.</li>
+<li>Rasters have to contain values of the same type (int, float,
+boolean) throughout the raster, just like matrices and unlike data
+frames.</li>
+<li>The size of the raster depends on the <strong>resolution</strong>
+and the <strong>extent</strong> of the raster. As such many rasters are
+large and often cannot be held in memory completely.</li>
+</ul>
+<p>The workhorse package for working with rasters in R is the
+<strong>terra</strong> package by Robert Hijmans. <strong>terra</strong>
+has functions for creating, reading, manipulating, and writing raster
+data. The package also implements raster algebra and many other
+functions for raster data manipulation. The package works with
+<code>SpatRaster</code> objects. The <code>rast()</code> function is
+used to create these objects.</p>
+<p>Typically you will bring in a raster dataset directly from a file.
+These files come in many different forms, typically .tif, .img, and
+.grd.</p>
+<p><br />
+</p>
+<p>We’ll bring in the file NDVI_rast.tif. The file contains normalized
+difference vegetation index (NDVI) data for the Bay Area. These data are
+taken from Landsat satellite data that I downloaded from Google Earth
+Engine. We use the function <code>rast()</code> to bring in data in
+raster form, then take a look at the dataset.</p>
+<pre class="r"><code>url &lt;- &quot;https://github.com/pjames-ucdavis/SPH215/raw/main/NDVI_rast2.tif&quot;
+download.file(url, destfile = &quot;NDVI_rast2.tif&quot;, mode = &quot;wb&quot;)
+NDVI_raster = rast(&quot;NDVI_rast2.tif&quot;)
+
+## Get summary of raster data
+NDVI_raster</code></pre>
+<pre><code>## class       : SpatRaster
+## size        : 1856, 1485, 1  (nrow, ncol, nlyr)
+## resolution  : 0.0002694946, 0.0002694946  (x, y)
+## extent      : -122.6001, -122.1999, 37.59988, 38.10007  (xmin, xmax, ymin, ymax)
+## coord. ref. : lon/lat WGS 84 (EPSG:4326)
+## source      : NDVI_rast2.tif
+## name        : NDVI_BayArea
+## min value   :           -1
+## max value   :     0.853357</code></pre>
+<p><br />
+</p>
+<p>Does it have a CRS?</p>
+<pre class="r"><code>## Check CRS
+st_crs(NDVI_raster)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>OK we have what looks like a raster. We see our resolution and our
+extent, and we have a CRS. Nice! Shall we plot this?</p>
+<pre class="r"><code>## Plot the raster on a map
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
+<pre class="r"><code>NDVI_map &lt;-  tm_shape(NDVI_raster) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(outside = TRUE))
+NDVI_map</code></pre>
+<pre><code>## [`tm_scale_continous()`] Variable(s) &quot;col&quot; contains positive and negative
+## values, so midpoint is set to 0. Set midpoint = NA to show the full range of
+## visual values.
+## This message is displayed once per session.</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-53-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Looks pretty cool! Seems to be the Bay Area, and we have some nice
+variability. But we let’s see if we can make this fancier.</p>
+<pre class="r"><code># palette for plotting
+breaks_ndvi &lt;- c(-1,-0.2,-0.1,0,0.025 ,0.05,0.075,0.1,0.125,0.15,0.175,0.2 ,0.25 ,0.3 ,0.35,0.4,0.45,0.5,0.55,0.6,1)
+palette_ndvi &lt;- c(&quot;#BFBFBF&quot;,&quot;#DBDBDB&quot;,&quot;#FFFFE0&quot;,&quot;#FFFACC&quot;,&quot;#EDE8B5&quot;,&quot;#DED99C&quot;,&quot;#CCC782&quot;,&quot;#BDB86B&quot;,&quot;#B0C261&quot;,&quot;#A3CC59&quot;,&quot;#91BF52&quot;,&quot;#80B347&quot;,&quot;#70A340&quot;,&quot;#619636&quot;,&quot;#4F8A2E&quot;,&quot;#407D24&quot;,&quot;#306E1C&quot;,&quot;#216112&quot;,&quot;#0F540A&quot;,&quot;#004500&quot;)
+
+NDVI_map &lt;-  tm_shape(NDVI_raster) +
+  tm_raster(col.scale = tm_scale_continuous(values = palette_ndvi),
+            col.legend = tm_legend(title = &quot;NDVI&quot;, outside = TRUE))
+NDVI_map</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-54-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<div id="crop" class="section level2">
+<h2>Crop</h2>
+<p>OK, let’s see if we can crop this to focus on San Francisco. I’ve
+googled the lat and long for the area around San Francisco, and I’ll put
+these right into my <code>crop()</code> function. I can use the
+<code>tmap_mode("view")</code> now because the raster is small enough
+for R to make interactive.</p>
+<pre class="r"><code>sf_rast&lt;-crop(NDVI_raster, ext(-122.55, -122.35, 37.7, 37.83))
+
+tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
+<pre class="r"><code>NDVI_sf_map &lt;- tm_shape(sf_rast) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = &quot;NDVI&quot;, outside = TRUE))
+
+NDVI_sf_map</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-55-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+</div>
+<div id="classify" class="section level2">
+<h2>Classify</h2>
+<p>So negative values of NDVI represent water. Let’s set all negative
+values to -1, and that will help us to distinguish water from land
+easier.</p>
+<pre class="r"><code>sf_rast_neg &lt;- app(sf_rast, fun=function(x){ x[x &lt;= 0] &lt;- -1; return(x)} )
+
+NDVI_sf_map_neg &lt;- tm_shape(sf_rast_neg) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = &quot;NDVI&quot;, outside = TRUE))
+
+NDVI_sf_map_neg</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-56-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>Nice. What do we notice? The coast of San Francisco might have some
+cloud cover errors! Satellite data isn’t perfect! But the good news is,
+we’ve learned how to bring in raster data! I think we need a
+badge!!!!</p>
+<p><br />
+</p>
+<div class="float">
+<img src="terra.png" alt="terra Badge" />
+<div class="figcaption">terra Badge</div>
+</div>
+<p><br />
+</p>
+<p>One last step. Let’s put all our knowledge together and map our old
+friend CAdata on top of the NDVI data in San Francisco. First, let’s
+bring in the CAdata dataset on ovarian cancer cases again.</p>
+<pre class="r"><code>data(CAdata)
+ca_pts &lt;- CAdata
+ca_proj &lt;- &quot;+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs&quot;
+
+ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;), crs=ca_proj)</code></pre>
+<p><br />
+</p>
+<p>Let’s check the CRS and compare it to our NDVI dataset.</p>
+<pre class="r"><code>st_crs(ca_pts)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: +proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+##              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+##              +y_0=500000.0000000002 +ellps=GRS80 
+##              +datum=NAD83 +units=m +no_defs 
+##   wkt:
+## PROJCRS[&quot;unknown&quot;,
+##     BASEGEOGCRS[&quot;unknown&quot;,
+##         DATUM[&quot;North American Datum 1983&quot;,
+##             ELLIPSOID[&quot;GRS 1980&quot;,6378137,298.257222101,
+##                 LENGTHUNIT[&quot;metre&quot;,1]],
+##             ID[&quot;EPSG&quot;,6269]],
+##         PRIMEM[&quot;Greenwich&quot;,0,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8901]]],
+##     CONVERSION[&quot;unknown&quot;,
+##         METHOD[&quot;Lambert Conic Conformal (2SP)&quot;,
+##             ID[&quot;EPSG&quot;,9802]],
+##         PARAMETER[&quot;Latitude of false origin&quot;,39.3333333333333,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8821]],
+##         PARAMETER[&quot;Longitude of false origin&quot;,-122,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8822]],
+##         PARAMETER[&quot;Latitude of 1st standard parallel&quot;,40,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8823]],
+##         PARAMETER[&quot;Latitude of 2nd standard parallel&quot;,41.6666666666667,
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433],
+##             ID[&quot;EPSG&quot;,8824]],
+##         PARAMETER[&quot;Easting at false origin&quot;,2000000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8826]],
+##         PARAMETER[&quot;Northing at false origin&quot;,500000,
+##             LENGTHUNIT[&quot;metre&quot;,1],
+##             ID[&quot;EPSG&quot;,8827]]],
+##     CS[Cartesian,2],
+##         AXIS[&quot;(E)&quot;,east,
+##             ORDER[1],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]],
+##         AXIS[&quot;(N)&quot;,north,
+##             ORDER[2],
+##             LENGTHUNIT[&quot;metre&quot;,1,
+##                 ID[&quot;EPSG&quot;,9001]]]]</code></pre>
+<pre class="r"><code>st_crs(sf_rast_neg)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>Hmmm, let’s make sure they are the same projection.</p>
+<pre class="r"><code>ca_pts_proj &lt;- st_transform(ca_pts,st_crs(sf_rast_neg))
+st_crs(ca_pts_proj)</code></pre>
+<pre><code>## Coordinate Reference System:
+##   User input: WGS 84 
+##   wkt:
+## GEOGCRS[&quot;WGS 84&quot;,
+##     ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,
+##         MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],
+##         MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],
+##         ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,
+##             LENGTHUNIT[&quot;metre&quot;,1]],
+##         ENSEMBLEACCURACY[2.0]],
+##     PRIMEM[&quot;Greenwich&quot;,0,
+##         ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     CS[ellipsoidal,2],
+##         AXIS[&quot;geodetic latitude (Lat)&quot;,north,
+##             ORDER[1],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##         AXIS[&quot;geodetic longitude (Lon)&quot;,east,
+##             ORDER[2],
+##             ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],
+##     USAGE[
+##         SCOPE[&quot;Horizontal component of 3D system.&quot;],
+##         AREA[&quot;World.&quot;],
+##         BBOX[-90,-180,90,180]],
+##     ID[&quot;EPSG&quot;,4326]]</code></pre>
+<p><br />
+</p>
+<p>They should be good to go now. Let’s map these addresses on top of
+the raster data!</p>
+<pre class="r"><code>tmap_mode(&quot;plot&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
+<pre class="r"><code>NDVI_cancer_map &lt;-  tm_shape(sf_rast_neg) +
+  tm_raster(col.scale = tm_scale_continuous(),
+            col.legend = tm_legend(title = &quot;NDVI&quot;, outside = TRUE)) +
+  tm_shape(ca_pts_proj) +
+  tm_dots(fill = &quot;blue&quot;, fill_alpha = 0.5, size = 0.3)
+
+NDVI_cancer_map</code></pre>
+<p><img src="Lab3_FALL2026_files/figure-html/unnamed-chunk-60-1.png" alt="" width="672" /></p>
+<p><br />
+</p>
+<p>That is one fine looking map. You deserve a break–get outside and
+enjoy some greenspace.</p>
+</div>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDM6IE1vcmUgd2l0aCBWZWN0b3IgRGF0YSBhbmQgVmlzdWFsaXppbmcgUmFzdGVyIERhdGEnCi0tLQoKSW4gdGhpcyBsYWIsIHdlIGFyZSBnb2luZyB0byB3b3JrIHdpdGggdmVjdG9yIGFuZCByYXN0ZXIgZGF0YSwgc3BhdGlhbGx5IGpvaW5pbmcgcG9pbnQgZGF0YSB0byB2ZWN0b3IgZGF0YS4gV2Ugd2lsbCBsZWFybiBob3cgdG8gdmlzdWFsaXplIENlbnN1cyBkYXRhLCB3ZSB3aWxsIHRhbGsgYWJvdXQgaG93IHRvIHdyYW5nbGUgc3BhdGlhbCBkYXRhLCBhbmQgd2Ugd2lsbCBnZXQgaW50byBzb21lIHJlYWxseSBjb29sIHdheXMgdG8gY3JlYXRlIGNob3JvcGxldGggbWFwcyAobWFwcyBjb2xvciBjb2RlZCBieSBhdHRyaWJ1dGVzKS4gRmluYWxseSwgd2Ugd2lsbCB0YWtlIGEgZGVlcCBkaXZlIGludG8gcmFzdGVyIGRhdGEuCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3UgaG93IHRvOgoKICAgMS4gV3JhbmdsZSB2ZWN0b3IgZGF0YQogICAxLiBDcmVhdGUgUHVibGljYXRpb24tUmVhZHkgTWFwcyB3aXRoIHZlY3RvciBkYXRhCiAgIDEuIEludHJvZHVjZSByYXN0ZXIgZGF0YSAKICAgMi4gSW1wb3J0IG91ciBkYXRhc2V0IHdpdGggc2ltdWxhdGVkIGdlb2NvZGVkIGFkZHJlc3NlcyBhbmQgbW9ydGFsaXR5IGRhdGEgZnJvbSBhbiBvdmFyaWFuIGNhbmNlciBjb2hvcnQKICAgMy4gSW1wb3J0IGEgZGF0YXNldCB3aXRoIGdyZWVuc3BhY2UgYWNyb3NzIHRoZSBCYXkgQXJlYQogICA0LiBDb21wYXJlIHByb2plY3Rpb25zIG9mIGRhdGFzZXRzIGFuZCByZS1wcm9qZWN0IGlmIG5lZWRlZAogICA1LiBNYWtlIG1hcHMKICAgNi4gU3BhdGlhbGx5IGpvaW4gdGhlIHR3byBkYXRhc2V0cwogICA3LiBSdW4gYSBxdWljayBzdGF0aXN0aWNhbCBhbmFseXNpcyBvbiB0aGUgdHdvIGRhdGFzZXRzIGNvbWJpbmVkCgpMZXQncyBnZXQgY3JhY2tpbmchCgpGaXJzdCwgbGV0J3MgaW5zdGFsbCBvdXIgcGFja2FnZXMuCgpcCgojIExvYWQgcGFja2FnZXMKYGBge3IsIG1lc3NhZ2UgPSBGQUxTRX0KbGlicmFyeShzZikKbGlicmFyeShNYXBHQU0pCmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRpZHljZW5zdXMpCmxpYnJhcnkoZmxleHRhYmxlKQpsaWJyYXJ5KFJDb2xvckJyZXdlcikKbGlicmFyeSh0bWFwKQpsaWJyYXJ5KHRlcnJhKQpgYGAKClwKCkluIFtMYWIgMl0oTGFiMl9GQUxMMjAyNi5odG1sKSwgd2Ugd29ya2VkIHdpdGggdGhlIHRpZHljZW5zdXMgcGFja2FnZSBhbmQgdGhlIENlbnN1cyBBUEkgdG8gYnJpbmcgaW4gQ2Vuc3VzIGRhdGEgaW50byBSLiBXZSBjYW4gdXNlIHRoZSBzYW1lIGNvbW1hbmRzIHRvIGJyaW5nIGluIENlbnN1cyBnZW9ncmFwaHkuIElmIHlvdSBoYXZlbuKAmXQgYWxyZWFkeSwgbWFrZSBzdXJlIHRvIFtzaWduIHVwIGZvciBhbmQgaW5zdGFsbCB5b3VyIENlbnN1cyBBUEkga2V5XShodHRwczovL2FwaS5jZW5zdXMuZ292L2RhdGEva2V5X3NpZ251cC5odG1sKS4gSWYgeW91IGNvdWxkIG5vdCBpbnN0YWxsIHlvdXIgQVBJIGtleSwgeW914oCZbGwgbmVlZCB0byB1c2UgYGNlbnN1c19hcGlfa2V5KClgIHRvIGFjdGl2YXRlIGl0IHdpdGggdGhlIGZvbGxvd2luZyBjb2RlOgoKYGBge3IsIGV2YWwgPSBGQUxTRX0KY2Vuc3VzX2FwaV9rZXkoIllPVVIgQVBJIEtFWSBHT0VTIEhFUkUiLCBpbnN0YWxsID0gVFJVRSkKYGBgCgpgYGB7ciwgZWNobz1GQUxTRSwgZXZhbD1GQUxTRX0KY2Vuc3VzX2FwaV9rZXkoIjVkNjg5MzVjOTZjMjZlZTY3Y2E1MmViOTczZDcxZTRhN2I4NDkwYWQiLCBpbnN0YWxsID0gVFJVRSwgb3ZlcndyaXRlPVRSVUUpCmBgYApcCgpVc2UgdGhlIGBnZXRfYWNzKClgIGNvbW1hbmQgdG8gYnJpbmcgaW4gQ2FsaWZvcm5pYSB0cmFjdC1sZXZlbCByYWNlL2V0aG5pY2l0eSBjb3VudHMsIHRvdGFsIHBvcHVsYXRpb24sIGFuZCB0b3RhbCBudW1iZXIgb2YgaG91c2Vob2xkcy4gSG93IGRpZCBJIGZpbmQgdGhlIHZhcmlhYmxlIElEcz8gQ2hlY2sgW0xhYiAyXShMYWIyX0ZBTEwyMDI2Lmh0bWwpLiBTaW5jZSB3ZSB3YW50IHRyYWN0cywgd2XigJlsbCB1c2UgdGhlIGBnZW9ncmFwaHkgPSAidHJhY3QiYCBhcmd1bWVudC4KYGBge3IsIHJlc3VsdHM9RkFMU0V9CmNhLnRyYWN0cyA8LSBnZXRfYWNzKGdlb2dyYXBoeSA9ICJ0cmFjdCIsIAogICAgICAgICAgICAgIHllYXIgPSAyMDIzLAogICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGModHBvcHIgPSAiQjAzMDAyXzAwMSIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbmh3aGl0ZSA9ICJCMDMwMDJfMDAzIiwgbmhibGsgPSAiQjAzMDAyXzAwNCIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgbmhhc24gPSAiQjAzMDAyXzAwNiIsIGhpc3AgPSAiQjAzMDAyXzAxMiIpLCAKICAgICAgICAgICAgICBzdGF0ZSA9ICJDQSIsCiAgICAgICAgICAgICAgb3V0cHV0ID0gIndpZGUiLAogICAgICAgICAgICAgIHN1cnZleSA9ICJhY3M1IiwKICAgICAgICAgICAgICBnZW9tZXRyeSA9IFRSVUUsCiAgICAgICAgICAgICAgY2IgPSBGQUxTRSkKYGBgCgpcCgpUaGUgb25seSBkaWZmZXJlbmNlIGJldHdlZW4gdGhlIGNvZGUgYWJvdmUgYW5kIHdoYXQgd2UgdXNlZCBpbiBbTGFiIDJdKExhYjJfRkFMTDIwMjYuaHRtbCkgaXMgd2UgaGF2ZSBvbmUgYWRkaXRpb25hbCBhcmd1bWVudCBhZGRlZCB0byB0aGUgYGdldF9hY3MoKWAgY29tbWFuZDogYGdlb21ldHJ5ID0gVFJVRWAuIFRoaXMgdGVsbHMgUiB0byBicmluZyBpbiB0aGUgc3BhdGlhbCBmZWF0dXJlcyBhc3NvY2lhdGVkIHdpdGggdGhlIGdlb2dyYXBoeSB5b3Ugc3BlY2lmaWVkIGluIHRoZSBjb21tYW5kLCBpbiB0aGUgYWJvdmUgY2FzZSBDYWxpZm9ybmlhIHRyYWN0cy4gWW91IGNhbiBzZXQgYGNhY2hlX3RhYmxlID0gVFJVRWAgc28gdGhhdCB5b3UgZG9u4oCZdCBoYXZlIHRvIHJlLWRvd25sb2FkIGFmdGVyIHlvdeKAmXZlIGRvd25sb2FkZWQgc3VjY2Vzc2Z1bGx5IHRoZSBmaXJzdCB0aW1lLiBUaGlzIGlzIGltcG9ydGFudCBiZWNhdXNlIHlvdSBtaWdodCBiZSBkb3dubG9hZGluZyBhIHJlYWxseSBsYXJnZSBmaWxlLCBvciBtYXkgZW5jb3VudGVyIENlbnN1cyBGVFAgaXNzdWVzIHdoZW4gdHJ5aW5nIHRvIGNvbGxlY3QgZGF0YS4gCgpcCgpOb3RlOiBXZSBjYW4gYWxzbyBkb3dubG9hZCB0aGUgZGF0YSBhbm90aGVyIHdheS4gV2UgY2FuIGdvIHRvIHRoZSBbQ2Vuc3VzIFNoYXBlZmlsZXMgd2Vic2l0ZV0oaHR0cHM6Ly93d3cuY2Vuc3VzLmdvdi9jZ2ktYmluL2dlby9zaGFwZWZpbGVzL2luZGV4LnBocCkgYW5kIG5hdmlnYXRlIHRvIDIwMjMsIENlbnN1cyBUcmFjdHMsIHRoZW4gQ2FsaWZvcm5pYS4gV2UgY2FuIHRoZW4gZG93bmxvYWQgYSAuemlwIGZpbGUgdGhhdCBjb250YWlucyBhbiBFU1JJIHNoYXBlZmlsZSBvZiB0aGUgQ2Vuc3VzIHRyYWN0cyBmb3IgQ2FsaWZvcm5pYS4gV2hlbiB3ZSB1bnppcCB0aGUgZmlsZSwgd2Ugc2VlIGEgc2VyaWVzIG9mIGZpbGVzLiBUaGFua2Z1bGx5LCB0aGUgKipzZioqIHBhY2thZ2UgaGFzIGFuIGBzdF9yZWFkKClgIGZ1bmN0aW9uIHRoYXQgY2FuIHRhY2tsZSB0aGlzISBGb3IgbW9yZSBkZXRhaWxlZCBkYXRhIGRvd25sb2FkcywgeW91IGNhbiB1c2UgW05hdGlvbmFsIEhpc3RvcmljYWwgR2VvZ3JhcGhpYyBJbmZvcm1hdGlvbiBTeXN0ZW0gKE5IR0lTKV0oaHR0cHM6Ly93d3cubmhnaXMub3JnLykuIFRoZSBjb2RlIGJlbG93IGlzIGV4YW1wbGUgb2YgaG93IHdlIG1pZ2h0IGJyaW5nIGluIGEgc2hhcGVmaWxlLCBqdXN0IGZvciBmdXR1cmUgcmVmZXJlbmNlIQoKYGBge3IgZXZhbD1GQUxTRX0KY2EudHJhY3RzIDwtIHN0X3JlYWQoIi9Vc2Vycy9wamFtZXMxL0Rvd25sb2Fkcy90bF8yMDI0XzA2X3RyYWN0L3RsXzIwMjRfMDZfdHJhY3Quc2hwIikKYGBgCgoKT0ssIGxldCdzIGdvIGJhY2sgdG8gdGhlIGRhdGEgd2UgZ290IGZyb20gKip0aWR5Y2Vuc3VzKiouIExldHMgdGFrZSBhIGxvb2sgYXQgb3VyIGRhdGEuCgpcCgpgYGB7cn0KY2EudHJhY3RzCmBgYAoKXAoKVGhlIG9iamVjdCBsb29rcyBtdWNoIGxpa2UgYSBiYXNpYyB0aWJibGUsIGJ1dCB3aXRoIGEgZmV3IGRpZmZlcmVuY2VzLgoKICAtIFlvdeKAmWxsIGZpbmQgdGhhdCB0aGUgZGVzY3JpcHRpb24gb2YgdGhlIG9iamVjdCBub3cgaW5kaWNhdGVzIHRoYXQgaXQgaXMgYSBzaW1wbGUgZmVhdHVyZSBjb2xsZWN0aW9uIHdpdGggOSwxMjkgZmVhdHVyZXMgKHRyYWN0cyBpbiBDYWxpZm9ybmlhKSB3aXRoIDEyIGZpZWxkcyAoYXR0cmlidXRlcyBvciBjb2x1bW5zIG9mIGRhdGEpLgogIC0gVGhlIGBHZW9tZXRyeSBUeXBlYCBpbmRpY2F0ZXMgdGhhdCB0aGUgc3BhdGlhbCBkYXRhIGFyZSBpbiBgTVVMVElQT0xZR09OYCBmb3JtIChhcyBvcHBvc2VkIHRvIHBvaW50cyBvciBsaW5lcywgdGhlIG90aGVyIGJhc2ljIHZlY3RvciBkYXRhIGZvcm1zKS4KICAtIGBCb3VuZGluZyBib3hgIGluZGljYXRlcyB0aGUgc3BhdGlhbCBleHRlbnQgb2YgdGhlIGZlYXR1cmVzIChmcm9tIGxlZnQgdG8gcmlnaHQsIGZvciBleGFtcGxlLCBDYWxpZm9ybmlhIHRyYWN0cyBnbyBmcm9tIGEgbG9uZ2l0dWRlIG9mIC0xMjQuNDgyIHRvIC0xMTQuMTMxMikuCiAgLSBgR2VvZGV0aWMgQ1JTYCB0ZWxscyB1cyB0aGUgY29vcmRpbmF0ZSByZWZlcmVuY2Ugc3lzdGVtLgogIC0gVGhlIGZpbmFsIGRpZmZlcmVuY2UgaXMgdGhhdCB0aGUgZGF0YSBmcmFtZSBjb250YWlucyB0aGUgY29sdW1uIGdlb21ldHJ5LiBUaGlzIGNvbHVtbiAoYSBsaXN0LWNvbHVtbikgY29udGFpbnMgdGhlIGdlb21ldHJ5IGZvciBlYWNoIG9ic2VydmF0aW9uLiBUaGlzIGxvb2tzIGZhbWlsaWFyIQogIApBdCBpdHMgbW9zdCBiYXNpYywgYW4gKipzZioqIG9iamVjdCBpcyBhIGNvbGxlY3Rpb24gb2Ygc2ltcGxlIGZlYXR1cmVzIHRoYXQgaW5jbHVkZXMgYXR0cmlidXRlcyBhbmQgZ2VvbWV0cmllcyBpbiB0aGUgZm9ybSBvZiBhIGRhdGEgZnJhbWUuIEluIG90aGVyIHdvcmRzLCBpdCBpcyBhIGRhdGEgZnJhbWUgKG9yIHRpYmJsZSkgd2l0aCByb3dzIG9mIGZlYXR1cmVzLCBjb2x1bW5zIG9mIGF0dHJpYnV0ZXMsIGFuZCBhIHNwZWNpYWwgY29sdW1uIGFsd2F5cyBuYW1lZCBnZW9tZXRyeSB0aGF0IGNvbnRhaW5zIHRoZSBzcGF0aWFsIGFzcGVjdHMgb2YgdGhlIGZlYXR1cmVzLgoKSWYgeW91IHdhbnQgdG8gcGVlayBiZWhpbmQgdGhlIGN1cnRhaW4gYW5kIGxlYXJuIG1vcmUgYWJvdXQgdGhlIG5pdHR5IGdyaXR0eSBkZXRhaWxzIGFib3V0IHNpbXBsZSBmZWF0dXJlcywgY2hlY2sgb3V0IHRoZSBvZmZpY2lhbCAqKnNmKiogW3ZpZ25ldHRlLl0oaHR0cHM6Ly9yLXNwYXRpYWwuZ2l0aHViLmlvL3NmL2FydGljbGVzL3NmMS5odG1sKQoKXAoKIyBEYXRhIFdyYW5nbGluZwoKVGhlcmUgaXMgYSBsb3Qgb2Ygc3R1ZmYgW2JlaGluZCB0aGUgY3VydGFpbl0oaHR0cHM6Ly93d3cuamVzc2VzYWRsZXIuY29tL3Bvc3Qvc2ltcGxlLWZlYXR1cmUtb2JqZWN0cy8pIG9mIGhvdyBSIGhhbmRsZXMgc3BhdGlhbCBkYXRhIGFzIHNpbXBsZSBmZWF0dXJlcywgYnV0IHRoZSBtYWluIHRha2Vhd2F5IGlzIHRoYXQgKipzZioqIG9iamVjdHMgYXJlIGRhdGEgZnJhbWVzLiBUaGlzIG1lYW5zIHlvdSBjYW4gdXNlIG1hbnkgb2YgdGhlICoqdGlkeXZlcnNlKiogZnVuY3Rpb25zIHdl4oCZdmUgbGVhcm5lZCBpbiB0aGUgcGFzdCBjb3VwbGUgbGFicyB0byBtYW5pcHVsYXRlICoqc2YqKiBvYmplY3RzLCBpbmNsdWRpbmcgdGhlIHBpcGUgYCU+JWAgb3BlcmF0b3IuIEZvciBleGFtcGxlLCBsZXTigJlzIGJyZWFrIHVwIHRoZSBjb2x1bW4gKk5BTUUqIGludG8gc2VwYXJhdGUgdHJhY3QsIGNvdW50eSBhbmQgc3RhdGUgdmFyaWFibGVzIHVzaW5nIHRoZSBgc2VwYXJhdGUoKWAgZnVuY3Rpb24KCldlIGRvIGFsbCBvZiB0aGlzIGluIG9uZSBsaW5lIG9mIGNvbnRpbnVvdXMgY29kZSB1c2luZyB0aGUgcGlwZSBvcGVyYXRvciBgJT4lYAoKYGBge3J9CmNhLnRyYWN0cyA8LSBjYS50cmFjdHMgJT4lCiAgICAgICAgICAgICAgc2VwYXJhdGUoTkFNRSwgYygiVHJhY3QiLCAiQ291bnR5IiwgIlN0YXRlIiksIHNlcCA9ICI7ICIpCmdsaW1wc2UoY2EudHJhY3RzKQpgYGAKClwKCkFub3RoZXIgaW1wb3J0YW50IGRhdGEgd3JhbmdsaW5nIG9wZXJhdGlvbiBpcyB0byBqb2luIGF0dHJpYnV0ZSBkYXRhIHRvIGFuIHNmIG9iamVjdC4gRm9yIGV4YW1wbGUsIGxldOKAmXMgc2F5IHlvdSB3YW50ZWQgdG8gYWRkIHRyYWN0IGxldmVsIG1lZGlhbiBob3VzZWhvbGQgaW5jb21lLCB3aGljaCB3ZSBjYW4gZ2V0IHVzaW5nIGBnZXRfYWNzKClgLiBXZSBjb3VsZCBoYXZlIHNlYXJjaGVkIG9ubGluZSBmb3IgdGhlIHZhcmlhYmxlIG5hbWUsIGJ1dCBpdCdzICpCMTkwMTNfMDAxKi4gUmVhZCB0aGUgZmlsZSBpbiBhbmQgc2F2ZSBpdCBhcyBhbiBvYmplY3QgY2FsbCAqY2EuaW5jKi4KCmBgYHtyfQpjYS5pbmMgPC0gZ2V0X2FjcyhnZW9ncmFwaHkgPSAidHJhY3QiLCAKICAgICAgICAgICAgICB5ZWFyID0gMjAyMywKICAgICAgICAgICAgICB2YXJpYWJsZXMgPSBjKG1lZGluYyA9ICJCMTkwMTNfMDAxIiksIAogICAgICAgICAgICAgIHN0YXRlID0gIkNBIiwKICAgICAgICAgICAgICBzdXJ2ZXkgPSAiYWNzNSIsCiAgICAgICAgICAgICAgb3V0cHV0ID0gIndpZGUiKQpgYGAKClwKClVubGlrZSBiZWZvcmUsIHdlIGJyb3VnaHQgdGhlc2UgZGF0YSBpbiB3aXRob3V0IHRoZSBgZ2VvbWV0cnkgPSBUUlVFYCBvcHRpb24uIFNvIHRoaXMgaXMganVzdCBhIHRhYmxlLiBCdXQgcmVtZW1iZXIsIGFuICoqc2YqKiBvYmplY3QgaXMgYSBkYXRhIGZyYW1lLCBzbyB3ZSBjYW4gdXNlIGBsZWZ0X2pvaW4oKWAsIHdoaWNoIHdlIGNvdmVyZWQgaW4gW0xhYiAxXShMYWIxX0ZBTEwyMDI2Lmh0bWwpLCB0byBqb2luIHRoZSBmaWxlcyAqY2EuaW5jKiBhbmQgKmNhLnRyYWN0cyouCgpgYGB7cn0KY2EudHJhY3RzIDwtIGNhLnRyYWN0cyAlPiUKICBsZWZ0X2pvaW4oY2EuaW5jLCBieSA9ICJHRU9JRCIpCgojdGFrZSBhIGxvb2sgdG8gbWFrZSBzdXJlIHRoZSBqb2luIHdvcmtlZApnbGltcHNlKGNhLnRyYWN0cykKYGBgCgpcCgpOb3RlIHRoYXQgd2UgY2Fu4oCZdCB1c2UgYGxlZnRfam9pbigpYCB0byBqb2luIHRoZSBhdHRyaWJ1dGUgdGFibGVzIG9mIHR3byAqKnNmKiogZmlsZXMuIFlvdSB3aWxsIG5lZWQgdG8gZWl0aGVyIG1ha2Ugb25lIG9mIHRoZW0gbm90IHNwYXRpYWwgYnkgdXNpbmcgdGhlIGBzdF9kcm9wX2dlb21ldHJ5KClgIGZ1bmN0aW9uIG9yIHVzZSB0aGUgYHN0X2pvaW4oKWAgZnVuY3Rpb24gdG8gc3BhdGlhbGx5IGpvaW4gdGhlbS4KCldlIHVzZSB0aGUgZnVuY3Rpb24gYHRtX3NoYXBlKClgIGZyb20gdGhlICoqdG1hcCoqIHBhY2thZ2UgdG8gbWFwIHRoZSBkYXRhLiAKCmBgYHtyfQp0bWFwX21vZGUoInBsb3QiKQp0cmFjdF9tYXAgPC0gdG1fc2hhcGUoY2EudHJhY3RzKSArICAgdG1fcG9seWdvbnMoKQp0cmFjdF9tYXAKYGBgCgpcCgojIFNwYXRpYWwgRGF0YSBXcmFuZ2xpbmcKClRoZXJlIGlzIERhdGEgV3JhbmdsaW5nIGFuZCB0aGVuIHRoZXJlIGlzIFNwYXRpYWwgRGF0YSBXcmFuZ2xpbmcuIEN1ZSBkYW5nZXJvdXMgc291bmRpbmcgbXVzaWMuIFdlbGwsIGl04oCZcyBub3QgdGhhdCBkYW5nZXJvdXMgb3Igc2NhcnkuIFNwYXRpYWwgRGF0YSBXcmFuZ2xpbmcgaW52b2x2ZXMgY2xlYW5pbmcgb3IgYWx0ZXJpbmcgeW91ciBkYXRhIHNldCBiYXNlZCBvbiB0aGUgZ2VvZ3JhcGhpYyBsb2NhdGlvbiBvZiBmZWF0dXJlcy4gVGhlICoqc2YqKiBwYWNrYWdlIG9mZmVycyBhIHN1aXRlIG9mIGZ1bmN0aW9ucyB1bmlxdWUgdG8gd3JhbmdsaW5nIHNwYXRpYWwgZGF0YS4gTW9zdCBvZiB0aGVzZSBmdW5jdGlvbnMgc3RhcnQgb3V0IHdpdGggdGhlIHByZWZpeCBgc3RfYC4gVG8gc2VlIGFsbCBvZiB0aGUgZnVuY3Rpb25zLCB0eXBlIGluCgpgYGB7ciwgZXZhbD1GQUxTRX0KbWV0aG9kcyhjbGFzcyA9ICJzZiIpCmBgYAoKXAoKV2Ugd29u4oCZdCBnbyB0aHJvdWdoIGFsbCBvZiB0aGVzZSBmdW5jdGlvbnMgYXMgdGhlIGxpc3QgaXMgcXVpdGUgZXh0ZW5zaXZlLiBCdXQsIHdl4oCZbGwgZ28gdGhyb3VnaCBhIGZldyByZWxldmFudCBzcGF0aWFsIG9wZXJhdGlvbnMgZm9yIHRoaXMgY2xhc3MgYmVsb3cuIFRoZSBmdW5jdGlvbiB3ZSB3aWxsIGJlIHByaW1hcmlseSB1c2luZyBpcyBgc3Rfam9pbigpYC4KClwKCiMjIEludGVyc2VjdAoKQSBjb21tb24gc3BhdGlhbCBkYXRhIHdyYW5nbGluZyBpc3N1ZSBpcyB0byBzdWJzZXQgYSBzZXQgb2Ygc3BhdGlhbCBvYmplY3RzIGJhc2VkIG9uIHRoZWlyIGxvY2F0aW9uIHJlbGF0aXZlIHRvIGFub3RoZXIgc3BhdGlhbCBvYmplY3QuIEluIG91ciBjYXNlLCB3ZSB3YW50IHRvIGtlZXAgQ2FsaWZvcm5pYSB0cmFjdHMgdGhhdCBhcmUgaW4gdGhlIFNhY3JhbWVudG8gbWV0cm8gYXJlYS4gV2UgY2FuIGRvIHRoaXMgdXNpbmcgdGhlIGBzdF9qb2luKClgIGZ1bmN0aW9uLiBXZeKAmWxsIG5lZWQgdG8gc3BlY2lmeSBhIHR5cGUgb2Ygam9pbi4gTGV04oCZcyBmaXJzdCB0cnkgYGpvaW4gPSBzdF9pbnRlcnNlY3RzYC4gRmlyc3QsIGxldCdzIGJyaW5nIGluIGEgcG9seWdvbiBvZiB0aGUgU2FjcmFtZW50byBtZXRybyBhcmVhIGZyb20gR2l0aHViLgoKYGBge3J9CnVybCA8LSAiaHR0cHM6Ly9naXRodWIuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yYXcvbWFpbi9zYWMubWV0cm8ucmRzIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAic2FjLm1ldHJvLnJkcyIsIG1vZGUgPSAid2IiKQpzYWMubWV0cm8gPC0gcmVhZFJEUygic2FjLm1ldHJvLnJkcyIpCmBgYAoKXAoKTGV0J3MgdGFrZSBhIGxvb2sgYXQgKnNhYy5tZXRybyogYW5kIHVuZGVyc3RhbmQgd2hhdCBmaWxlIGl0IGlzLgoKYGBge3J9CmdsaW1wc2Uoc2FjLm1ldHJvKQpgYGAKClwKCk9LLCB0aGF0IGdlb21ldHJ5IGxvb2tzIGdvb2QuIEFuZCBpdCdzIGEgcG9seWdvbiwgc28gdGhhdCdzIGdvb2QuIExldCdzIG5vdyB0cnkgdG8gaW50ZXJzZWN0IG91ciAqc2FjLm1ldHJvKiBkYXRhc2V0IHdpdGggb3VyICpjYS50cmFjdHMqIGRhdGFzZXQuIAoKYGBge3J9CnNhYy5tZXRyby50cmFjdHMuaW50IDwtIHN0X2pvaW4oY2EudHJhY3RzLCBzYWMubWV0cm8sIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGpvaW4gPSBzdF9pbnRlcnNlY3RzLCBsZWZ0PUZBTFNFKQpgYGAKClwKClRoZSBhYm92ZSBjb2RlIHRlbGxzIFIgdG8gaWRlbnRpZnkgdGhlIHBvbHlnb25zIGluICpjYS50cmFjdHMqIHRoYXQgaW50ZXJzZWN0IHdpdGggdGhlIHBvbHlnb24gKnNhYy5tZXRybyouIFdlIGluZGljYXRlIHdlIHdhbnQgYSBwb2x5Z29uIGludGVyc2VjdGlvbiBieSBzcGVjaWZ5aW5nIGBqb2luID0gc3RfaW50ZXJzZWN0c2AuIFRoZSBvcHRpb24gYGxlZnQ9RkFMU0VgIHRlbGxzIFIgdG8gcmVtb3ZlIHRoZSBwb2x5Z29ucyBmcm9tICpjYS50cmFjdHMqIHRoYXQgZG8gbm90IGludGVyc2VjdCAobWFrZSBpdCBUUlVFIGFuZCBzZWUgd2hhdCBoYXBwZW5zKSB3aXRoICpzYWMubWV0cm8qLiBQbG90dGluZyBvdXIgdHJhY3RzLCB3ZSBnZXQ6CmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLmludCkgKwogIHRtX3BvbHlnb25zKGNvbCA9ICJibHVlIikgKwp0bV9zaGFwZShzYWMubWV0cm8pICsgIAogIHRtX2JvcmRlcnMoY29sID0gInJlZCIpCmBgYAoKXAoKIyMgV2l0aGluCgpXZSBoYXZlIG9uZSBzbWFsbCBpc3N1ZS4gVXNpbmcgYGpvaW4gPSBzdF9pbnRlcnNlY3RzYCByZXR1cm5zIGFsbCB0cmFjdHMgdGhhdCBpbnRlcnNlY3QgKnNhYy5tZXRybyosIHdoaWNoIGluY2x1ZGUgdGhvc2UgdGhhdCB0b3VjaCB0aGUgbWV0cm/igJlzIGJvdW5kYXJ5LiBObyBidWVuby4gV2UgY2FuIGluc3RlYWQgdXNlIHRoZSBhcmd1bWVudCBgam9pbiA9IHN0X3dpdGhpbmAgdG8gcmV0dXJuIHRyYWN0cyB0aGF0IGFyZSAqY29tcGxldGVseSB3aXRoaW4qIHRoZSBtZXRybyBhcmVhLgoKYGBge3J9CnNhYy5tZXRyby50cmFjdHMudyA8LSBzdF9qb2luKGNhLnRyYWN0cywgc2FjLm1ldHJvLCBqb2luID0gc3Rfd2l0aGluLCBsZWZ0PUZBTFNFKQoKdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgdG1fcG9seWdvbnMoY29sID0gImJsdWUiKSArCnRtX3NoYXBlKHNhYy5tZXRybykgKwogIHRtX2JvcmRlcnMoY29sID0gInJlZCIpCmBgYAoKXAoKTG9va2luZyBtdWNoIGJldHRlciEgTm93LCBpZiB3ZSBsb29rIGF0ICpzYWMubWV0cm8udHJhY3RzLncq4oCZcyBhdHRyaWJ1dGUgdGFibGUsIHlvdeKAmWxsIHNlZSBpdCBpbmNsdWRlcyBhbGwgdGhlIHZhcmlhYmxlcyBmcm9tIGJvdGggKmNhLnRyYWN0cyogYW5kICpzYWMubWV0cm8qLiBXZSBkb27igJl0IG5lZWQgdGhlc2UgdmFyaWFibGVzLCBzbyB1c2UgYHNlbGVjdCgpYCB0byBlbGltaW5hdGUgdGhlbS4gWW914oCZbGwgYWxzbyBub3RpY2UgdGhhdCBpZiB2YXJpYWJsZXMgZnJvbSB0d28gZGF0YSBzZXRzIHNoYXJlIHRoZSBzYW1lIG5hbWUsIFIgd2lsbCBrZWVwIGJvdGggYW5kIGF0dGFjaCBhICoueCogYW5kICoueSogdG8gdGhlIGVuZC4gRm9yIGV4YW1wbGUsICpHRU9JRCogd2FzIGZvdW5kIGluIGJvdGggKmNhLnRyYWN0cyogYW5kICpzYWMubWV0cm8qLCBzbyBSIG5hbWVkIG9uZSAqR0VPSUQueCogYW5kIHRoZSBvdGhlciB0aGF0IHdhcyBtZXJnZWQgaW4gd2FzIG5hbWVkICpHRU9JRC55Ki4KClwKCiMgTWFwcGluZyBpbiBSCgojIyBnZ3Bsb3QKCk9LLCBzbyBub3cgd2UndmUgdGFsa2VkIGEgbGl0dGxlIGFib3V0IGhvdyB0byBicmluZyBpbiBhbmQgbWFuaXB1bGF0ZSB2ZWN0b3IgcG9seWdvbiBkYXRhLCBsZXQncyBkbyBzb21lIG1hcHBpbmcgYW5kIGNyZWF0ZSBzb21lIGNob3JvcGxldGggbWFwcy4gV2UgY2FuIGRvIHRoaXMgd2l0aCB0aGUgKipnZ3Bsb3QqKiBwYWNrYWdlLCB0aGUgKip0bWFwKiogcGFja2FnZSwgYW5kIHRoZSAqKmxlYWZsZXQqKiBwYWNrYWdlICh3aGljaCB3ZSB3b24ndCBjb3ZlciBub3csIGJ1dCBpdCdzIHZlcnkgY29vbCBmb3IgaW50ZXJhY3RpdmUgbWFwcykuIExldCdzIHN0YXJ0IHdpdGggKipnZ3Bsb3QqKi4KClwKCiMjIyBnZ3Bsb3QKCkJlY2F1c2UgKipzZioqIGlzIHRpZHkgZnJpZW5kbHksIGl0IGlzIG5vIHN1cnByaXNlIHdlIGNhbiB1c2UgdGhlICoqdGlkeXZlcnNlKiogcGxvdHRpbmcgZnVuY3Rpb24gYGdncGxvdCgpYCB0byBtYWtlIG1hcHMuIFdlIGFscmVhZHkgcmVjZWl2ZWQgYW4gaW50cm9kdWN0aW9uIHRvIGBnZ3Bsb3QoKWAgaW4gW0xhYiAyXShMYWIyX0ZBTEwyMDI2Lmh0bWwpLiBSZWNhbGwgaXRzIGJhc2ljIHN0cnVjdHVyZToKCmBgYHtyLCBldmFsPUZBTFNFfQpnZ3Bsb3QoZGF0YSA9IDxEQVRBPikgKwogICAgICA8R0VPTV9GVU5DVElPTj4obWFwcGluZyA9IGFlcyh4LCB5KSkgKwogICAgICA8T1BUSU9OUz4oKQpgYGAKClwKCkluIG1hcHBpbmcsIGBnZW9tX3NmKClgIGlzIGA8R0VPTV9GVU5DVElPTj4oKWAuIFVubGlrZSB3aXRoIGZ1bmN0aW9ucyBsaWtlIGBnZW9tX2hpc3RvZ3JhbSgpYCBhbmQgYGdlb21fYm94cGxvdCgpYCwgd2UgZG9u4oCZdCBzcGVjaWZ5IGFuIHggYW5kIHkgYXhpcy4gSW5zdGVhZCB5b3UgdXNlIGBmaWxsYCBpZiB5b3Ugd2FudCB0byBtYXAgYSB2YXJpYWJsZSBvciBjb2xvciB0byBqdXN0IG1hcCBib3VuZGFyaWVzLgoKTGV04oCZcyB1c2UgYGdncGxvdCgpYCB0byBtYWtlIGEgY2hvcm9wbGV0aCBtYXAuIFdlIG5lZWQgdG8gc3BlY2lmeSBhIG51bWVyaWMgdmFyaWFibGUgaW4gdGhlIGBmaWxsID1gIGFyZ3VtZW50IHdpdGhpbiBgZ2VvbV9zZigpYC4gSGVyZSB3ZSBtYXAgdHJhY3QtbGV2ZWwgbWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUgaW4gdGhlIFNhY3JhbWVudG8gbWV0cm8gYXJlYS4KCmBgYHtyfQpnZ3Bsb3QoZGF0YSA9IHNhYy5tZXRyby50cmFjdHMudykgKwogIGdlb21fc2YoYWVzKGZpbGwgPSBtZWRpbmNFKSkKYGBgCgpcCgpXZSBjYW4gYWxzbyBzcGVjaWZ5IGEgdGl0bGUgKGFzIHdlbGwgYXMgc3VidGl0bGVzIGFuZCBjYXB0aW9ucykgdXNpbmcgdGhlIGBsYWJzKClgIGZ1bmN0aW9uLgoKCmBgYHtyfQpnZ3Bsb3QoZGF0YSA9IHNhYy5tZXRyby50cmFjdHMudykgKwogIGdlb21fc2YoYWVzKGZpbGwgPSBtZWRpbmNFKSkgKwogICAgbGFicyh0aXRsZSA9ICJNZWRpYW4gSW5jb21lIFNhY3JhbWVudG8gTVNBIFRyYWN0cyIpIApgYGAKClwKCldlIGNhbiBtYWtlIGZ1cnRoZXIgbGF5b3V0IGFkanVzdG1lbnRzIHRvIHRoZSBtYXAuIERvbuKAmXQgbGlrZSBhIGJsdWUgc2NhbGUgb24gdGhlIGxlZ2VuZD8gWW91IGNhbiBjaGFuZ2UgaXQgdXNpbmcgdGhlIGBzY2FsZV9maWxlX2dyYWRpZW50KClgIGZ1bmN0aW9uLiBMZXTigJlzIGNoYW5nZSBpdCB0byBhIHdoaXRlIHRvIHJlZCBncmFkaWVudC4gV2UgY2FuIGFsc28gZWxpbWluYXRlIHRoZSBncmF5IHRyYWN0IGJvcmRlciBjb2xvcnMgdG8gbWFrZSB0aGUgZmlsbCBjb2xvciBkaXN0aW5jdGlvbiBjbGVhcmVyLiBXZSBkbyB0aGlzIGJ5IHNwZWNpZnlpbmcgYGNvbG9yID0gTkFgIGluc2lkZSBgZ2VvbV9zZigpYC4gV2UgY2FuIGFsc28gZ2V0IHJpZCBvZiB0aGUgZ3JheSBiYWNrZ3JvdW5kIGJ5IHNwZWNpZnlpbmcgYSBiYXNpYyBibGFjayBhbmQgd2hpdGUgdGhlbWUgdXNpbmcgYHRoZW1lX2J3KClgLiBXZSBhbHNvIGFkZGVkIGEgY2FwdGlvbiBpbmRpY2F0aW5nIHRoZSBzb3VyY2Ugb2YgdGhlIGRhdGEgdXNpbmcgdGhlIGBjYXB0aW9ucyA9YCBwYXJhbWV0ZXIgd2l0aGluIGBsYWJzKClgLiBXZSB0aGVuIGNoYW5nZWQgdGhlIGNvbG9yIHRvIHJlZCB1c2luZyBsYWJlbHMgZm9yIGBsb3c9YCBhbmQgYGhpZ2g9YCwgYW5kIHdlIGFkZGVkIGEgbmFtZSB0byBvdXIgbGVnZW5kIHdpdGggYG5hbWU9Jy4KCmBgYHtyfQpnZ3Bsb3QoZGF0YSA9IHNhYy5tZXRyby50cmFjdHMudykgKwogIGdlb21fc2YoYWVzKGZpbGwgPSBtZWRpbmNFKSwgY29sb3IgPSBOQSkgKwogICAgc2NhbGVfZmlsbF9ncmFkaWVudChsb3c9ICJ3aGl0ZSIsIGhpZ2ggPSAicmVkIiwgbmEudmFsdWUgPSJncmF5IiwgbmFtZSA9ICJNZWRpYW4gSW5jb21lIikgKyAgCiAgICBsYWJzKHRpdGxlID0gIk1lZGlhbiBJbmNvbWUgU2FjcmFtZW50byBNU0EgVHJhY3RzIiwKICAgICAgICAgY2FwdGlvbiA9ICJTb3VyY2U6IEFtZXJpY2FuIENvbW11bml0eSBTdXJ2ZXkiKSArICAKICB0aGVtZV9idygpCmBgYAoKXAoKRGFyZSBJIHNheSwgd2UgYXJlIHJlYWR5IGZvciB0aGUgTmV3IFlvcmsgVGltZXMgd2l0aCB0aGlzIG1hcCEKClwKCiMjIyBQb2ludHMgb24gdG9wIG9mIHBvbHlnb25zCgpPSywgbm93IHRoYXQgd2UgaGF2ZSBtYXBwZWQgcG9pbnRzIGFuZCBtYXBwZWQgcG9seWdvbnMsIGxldCdzIHB1dCB0aGVtIGJvdGggdG9nZXRoZXIhIEZpcnN0LCB3ZSBhcmUgZ29pbmcgdG8gYnJpbmcgaW4gb3VyIG9sZCBmcmllbmQgKkNBZGF0YSogZnJvbSBsYXN0IHdlZWsncyBsYWIuCgpgYGB7cn0KZGF0YShDQWRhdGEpCmNhX3B0cyA8LSBDQWRhdGEKc3VtbWFyeShjYV9wdHMpCmNhX3B0cyA8LSBzdF9hc19zZihDQWRhdGEsIGNvb3Jkcz1jKCJYIiwiWSIpKQpjYV9wcm9qIDwtICIrcHJvaj1sY2MgK2xhdF8xPTQwICtsYXRfMj00MS42NjY2NjY2NjY2NjY2NiAKICAgICAgICAgICAgICtsYXRfMD0zOS4zMzMzMzMzMzMzMzMzNCArbG9uXzA9LTEyMiAreF8wPTIwMDAwMDAgCiAgICAgICAgICAgICAreV8wPTUwMDAwMC4wMDAwMDAwMDAyICtlbGxwcz1HUlM4MCAKICAgICAgICAgICAgICtkYXR1bT1OQUQ4MyArdW5pdHM9bSArbm9fZGVmcyIKCiNTZXQgQ1JTCmNhX3B0c19jcnMgPC0gc3Rfc2V0X2NycyhjYV9wdHMsIGNhX3Byb2opCmBgYAoKXAoKVGhpcyB0aW1lLCB3ZSB3aWxsIG1hcCB0aG9zZSBwb2ludHMgd2l0aCAqKmdncGxvdCoqLgoKYGBge3J9CmdncGxvdChkYXRhID0gY2FfcHRzX2NycykgKwogIGdlb21fc2YoZmlsbCA9ICJibGFjayIpICsKICBsYWJzKHRpdGxlID0gIlN0dWR5IFBhcnRpY2lwYW50cyIsCiAgICAgICBjYXB0aW9uID0gIlNvdXJjZTogT3ZhcmlhbiBDYW5jZXIgQ2FzZXMiKSArICAKICB0aGVtZV9idygpCgpgYGAKClwKCldlIGNhbiBvdmVybGF5IHRoZSBwb2ludHMgb3ZlciBTYWNyYW1lbnRvIHRyYWN0cyB0byBnaXZlIHRoZSBsb2NhdGlvbnMgc29tZSBwZXJzcGVjdGl2ZS4gSGVyZSwgeW91IGFkZCB0d28gYGdlb21fc2YoKWAgYXJndW1lbnRzIGZvciB0aGUgdHJhY3RzIGFuZCB0aGUgY2FuY2VyIGNhc2VzLgoKYGBge3J9CmdncGxvdCgpICsKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncpICsKICBnZW9tX3NmKGRhdGEgPSBjYV9wdHNfY3JzLCBmaWxsID0gImJsYWNrIikgKwogIGxhYnModGl0bGUgPSAiU3R1ZHkgUGFydGljaXBhbnRzIiwKICAgICAgIGNhcHRpb24gPSAiU291cmNlOiBPdmFyaWFuIENhbmNlciBDYXNlcyIpICsgIAogIHRoZW1lX2J3KCkKYGBgCgpcCgpIbW1tLiBUaGF0IGRvZXNuJ3QgbG9vayBncmVhdC4gV2UgaGF2ZSBsb3RzIG9mIGNhc2VzIG91dHNpZGUgb2YgU2FjcmFtZW50by4gTGV0J3MgZmlsdGVyIG91dCB0byBqdXN0IHBpY2sgY2FzZXMgd2l0aGluIHRoZSBTYWNyYW1lbnRvIGFyZWEuIAoKYGBge3IsIGV2YWw9RkFMU0V9CmNhX3B0c19jcnMudyA8LSBzdF9qb2luKGNhX3B0c19jcnMsIHNhYy5tZXRyby50cmFjdHMudywgam9pbiA9IHN0X3dpdGhpbiwgbGVmdD1GQUxTRSkKYGBgCgpcCgpPb29mLiBUaGF0IGRvZXNuJ3Qgd29yay4gSXQgc2F5cyBvdXIgIGBzdF9jcnMoeCkgPT0gc3RfY3JzKHkpIGlzIG5vdCBUUlVFYC4gVGhhdCBtZWFucyBvdXIgQ29vcmRpbmF0ZSBSZWZlcmVuY2UgU3lzdGVtcyBhcmUgbm90IG1hdGNoaW5nISBMZXQncyB0cmFuc2Zvcm0gb3VyIGNhbmNlciBkYXRhc2V0ICpjYV9wdHNfY3JzLncqIHRvIG1hdGNoIHRoZSBDUlMgZm9yICpzYWMubWV0cm8udHJhY3RzLncqIHdpdGggb25lIGVhc3kgc3RlcCB1c2luZyBgc3RfdHJhbnNmb3JtYDoKYGBge3J9CiNjaGVjayBjcnMgb2YgZWFjaCBkYXRhc2V0CnN0X2NycyhjYV9wdHNfY3JzKQpzdF9jcnMoc2FjLm1ldHJvLnRyYWN0cy53KQoKI2NyZWF0ZSBuZXcgZGF0YXNldCB3aXRoIHRyYW5zZm9ybWVkIENSUwpjYV9wdHNfY3JzLnRyYW5zZm9ybWVkIDwtIHN0X3RyYW5zZm9ybShjYV9wdHNfY3JzLHN0X2NycyhzYWMubWV0cm8udHJhY3RzLncpKQoKc3RfY3JzKGNhX3B0c19jcnMudHJhbnNmb3JtZWQgKQpgYGAKClwKCk9LLCBsZXQncyB0cnkgdGhpcyBhZ2FpbiEKCmBgYHtyfQpjYV9wdHNfY3JzLncgPC0gc3Rfam9pbihjYV9wdHNfY3JzLnRyYW5zZm9ybWVkLCBzYWMubWV0cm8udHJhY3RzLncsIGpvaW4gPSBzdF93aXRoaW4sIGxlZnQ9RkFMU0UpCmBgYAoKSXQgd29ya2VkISBPSywgbm93IGxldCdzIHRyeSBvdXIgbWFwIGFnYWluLgoKYGBge3J9CmdncGxvdCgpICsKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncpICsKICBnZW9tX3NmKGRhdGEgPSBjYV9wdHNfY3JzLncsIGZpbGwgPSAiYmxhY2siKSArCiAgbGFicyh0aXRsZSA9ICJTdHVkeSBQYXJ0aWNpcGFudHMiLAogICAgICAgY2FwdGlvbiA9ICJTb3VyY2U6IE92YXJpYW4gQ2FuY2VyIENhc2VzIikgKyAgCiAgdGhlbWVfYncoKQpgYGAKClwKCkFscmlnaHQsIHdobydzIHJlYWR5IGZvciBhIGNoYWxsZW5nZT8gTGV0J3MgcHV0IGl0IGFsbCB0b2dldGhlciBpbiBvbmUgbmljZSBtYXAuCgpgYGB7cn0KZ2dwbG90KCkgKyAKICBnZW9tX3NmKGRhdGEgPSBzYWMubWV0cm8udHJhY3RzLncsIGFlcyhmaWxsID0gbWVkaW5jRSksIGNvbG9yID0gTkEpICsKICAgIHNjYWxlX2ZpbGxfZ3JhZGllbnQobG93PSAid2hpdGUiLCBoaWdoID0gInJlZCIsIG5hLnZhbHVlID0iZ3JheSIsIG5hbWUgPSAiTWVkaWFuIEluY29tZSIpICsgIAogIGdlb21fc2YoZGF0YSA9IGNhX3B0c19jcnMudywgZmlsbCA9ICJibGFjayIpICsKICBsYWJzKHRpdGxlID0gIlN0dWR5IFBhcnRpY2lwYW50cyBPdmVybGFpZCB3aXRoIE1lZGlhbiBJbmNvbWUgb2YgU2FjcmFtZW50byBUcmFjdHMiLAogICAgICAgY2FwdGlvbiA9ICJTb3VyY2U6IEFtZXJpY2FuIENvbW11bml0eSBTdXJ2ZXkgYW5kIE92YXJpYW4gQ2FuY2VyIENhc2VzIikgKwogIHRoZW1lX2J3KCkKICAKYGBgCgpcCgpDYW4gSSBqdXN0IHNheSwgeW91J3JlIHZlcnkgaW1wcmVzc2l2ZS4gV2VsbCBkb25lIQoKXAoKIyMgdG1hcAoKV2hldGhlciB5b3UgcHJlZmVyICoqdG1hcCoqIG9yICoqZ2dwbG90KiogaXMgdXAgdG8geW91LCBidXQgSSBmaW5kIHRoYXQgKip0bWFwKiogaGFzIHNvbWUgYmVuZWZpdHMsIHNvIGxldOKAmXMgZm9jdXMgb24gaXRzIG1hcHBpbmcgZnVuY3Rpb25zIG5leHQuCgoqKnRtYXAqKiB1c2VzIHRoZSBzYW1lIGxheWVyZWQgbG9naWMgYXMgKipnZ3Bsb3QqKi4gQXMgd2Ugc2F3IGxhc3Qgd2VlaywgdGhlIGluaXRpYWwgY29tbWFuZCBpcyBgdG1fc2hhcGUoKWAsIHdoaWNoIHNwZWNpZmllcyB0aGUgZ2VvZ3JhcGh5IHRvIHdoaWNoIHRoZSBtYXBwaW5nIGlzIGFwcGxpZWQuIFlvdSB0aGVuIGJ1aWxkIG9uIGB0bV9zaGFwZSgpYCBieSBhZGRpbmcgb25lIG9yIG1vcmUgZWxlbWVudHMgc3VjaCBhcyBgdG1fcG9seWdvbnMoKWAgZm9yIHBvbHlnb25zLCBgdG1fYm9yZGVycygpYCBmb3IgbGluZXMsIGFuZCBgdG1fZG90cygpYCBmb3IgcG9pbnRzLiBBbGwgYWRkaXRpb25hbCBmdW5jdGlvbnMgdGFrZSBvbiB0aGUgZm9ybSBvZiBgdG1fYC4gQ2hlY2sgdGhlIGZ1bGwgbGlzdCBvZiBgdG1fYCBlbGVtZW50cyBbaGVyZV0oaHR0cHM6Ly93d3cucmRvY3VtZW50YXRpb24ub3JnL3BhY2thZ2VzL3RtYXAvdmVyc2lvbnMvMi4wL3RvcGljcy90bWFwLWVsZW1lbnQpLgoKIyMjIENob3JvcGxldGggbWFwcyBpbiB0bWFwCgpMZXTigJlzIG1ha2UgYSBzdGF0aWMgY2hvcm9wbGV0aCBtYXAgb2YgbWVkaWFuIGhvdXNlaG9sZCBpbmNvbWUgaW4gU2FjcmFtZW50byBNU0EganVzdCBsaWtlIHdlIGRpZCBhYm92ZSwgYnV0IHRoaXMgdGltZSBpbiAqKnRtYXAqKi4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhmaWxsID0gIm1lZGluY0UiLCAKICAgICAgICAgICAgICBmaWxsLnNjYWxlID0gdG1fc2NhbGVfaW50ZXJ2YWxzKHN0eWxlID0gInF1YW50aWxlIikpCmBgYAoKXAoKV2UgZmlyc3QgcHV0IHRoZSBkYXRhc2V0ICpzYWMubWV0cm8udHJhY3RzLncqIGluc2lkZSBgdG1fc2hhcGUoKWAuIEJlY2F1c2UgeW91IGFyZSBwbG90dGluZyBwb2x5Z29ucywgeW91IHVzZSBgdG1fcG9seWdvbnMoKWAgbmV4dC4gVGhlIGFyZ3VtZW50IGBmaWxsID0gIm1lZGluY0UiYCB0ZWxscyBSIHRvIHNoYWRlIChvciBjb2xvcikgdGhlIHRyYWN0cyBieSB0aGUgdmFyaWFibGUgKm1lZGluY0UuKiBUaGUgYXJndW1lbnQgYGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiKSJgIHRlbGxzIFIgdG8gYnJlYWsgdXAgdGhlIHNoYWRpbmcgaW50byBxdWFudGlsZXMsIG9yIGVxdWFsIGdyb3VwcyBvZiA1IGFzIGEgZGVmYXVsdC4gSSBmaW5kIHRoYXQgdGhpcyBpcyB3aGVyZSAqKnRtYXAqKiBvZmZlcnMgYSBkaXN0aW5jdCBhZHZhbnRhZ2Ugb3ZlciAqKmdncGxvdCoqIGluIHRoYXQgdXNlcnMgaGF2ZSBncmVhdGVyIGNvbnRyb2wgb3ZlciB0aGUgbGVnZW5kIGFuZCBiaW4gYnJlYWtzLiAqKnRtYXAqKiBhbGxvd3MgdXNlcnMgdG8gc3BlY2lmeSBhbGdvcml0aG1zIHRvIGF1dG9tYXRpY2FsbHkgY3JlYXRlIGJyZWFrcyB3aXRoIHRoZSBzdHlsZSBhcmd1bWVudC4gWW91IGNhbiBhbHNvIGNoYW5nZSB0aGUgbnVtYmVyIG9mIGJyZWFrcyBieSBzZXR0aW5nIGBuPWAuIFRoZSBkZWZhdWx0IGlzIGBuPTVgLiBSYXRoZXIgdGhhbiBxdWludGlsZXMsIHlvdSBjYW4gc2hvdyBxdWFydGlsZXMgdXNpbmcgYG49NGAuIEknbSBmZWVsaW5nIGNyYXp5LiBMZXQncyBkbyBpdC4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhmaWxsID0gIm1lZGluY0UiLCAKICAgICAgICAgICAgICBmaWxsLnNjYWxlID0gdG1fc2NhbGVfaW50ZXJ2YWxzKHN0eWxlID0gInF1YW50aWxlIiwgbj00KSkKYGBgCgpcCgpDaGVjayBvdXQgW3RoaXMgbGlua10oaHR0cHM6Ly9nZW9jb21wci5yb2JpbmxvdmVsYWNlLm5ldC9hZHYtbWFwLmh0bWwjY29sb3Itc2V0dGluZ3MpIGZvciBtb3JlIG9uICBhdmFpbGFibGUgY2xhc3NpZmljYXRpb24gc3R5bGVzIGluICoqdG1hcCoqLgoKXAoKVGhlIGB0bV9wb2x5Z29ucygpYCBjb21tYW5kIGlzIGEgd3JhcHBlciBhcm91bmQgdHdvIG90aGVyIGZ1bmN0aW9ucywgYHRtX2ZpbGwoKWAgYW5kIGB0bV9ib3JkZXJzKClgLiBgdG1fZmlsbCgpYCBjb250cm9scyB0aGUgY29udGVudHMgb2YgdGhlIHBvbHlnb25zIChjb2xvciwgY2xhc3NpZmljYXRpb24sIGV0Yy4pLCB3aGlsZSBgdG1fYm9yZGVycygpYCBkb2VzIHRoZSBzYW1lIGZvciB0aGUgcG9seWdvbiBvdXRsaW5lcy4KCkZvciBleGFtcGxlLCB1c2luZyB0aGUgc2FtZSBzaGFwZSAoYnV0IG5vIHZhcmlhYmxlKSwgd2Ugb2J0YWluIHRoZSBvdXRsaW5lcyBvZiB0aGUgbmVpZ2hib3Job29kcyBmcm9tIHRoZSBgdG1fYm9yZGVycygpYCBjb21tYW5kLgpgYGB7cn0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgdG1fYm9yZGVycygpCmBgYAoKXAoKU2ltaWxhcmx5LCB3ZSBvYnRhaW4gYSBjaG9yb3BsZXRoIG1hcCB3aXRob3V0IHRoZSBwb2x5Z29uIG91dGxpbmVzIHdoZW4gd2UganVzdCB1c2UgdGhlIGB0bV9maWxsKClgIGNvbW1hbmQuCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsgCiAgdG1fZmlsbCgibWVkaW5jRSIpCmBgYAoKV2hlbiB3ZSBjb21iaW5lIHRoZSB0d28gY29tbWFuZHMsIHdlIG9idGFpbiB0aGUgc2FtZSBtYXAgYXMgd2l0aCB0bV9wb2x5Z29ucygpICh0aGlzIGlsbHVzdHJhdGVzIGhvdyBpbiBSIG9uZSBjYW4gb2Z0ZW4gb2J0YWluIHRoZSBzYW1lIHJlc3VsdCBpbiBhIG51bWJlciBvZiBkaWZmZXJlbnQgd2F5cykuIFRyeSB0aGlzIG9uIHlvdXIgb3duLgoKXAoKIyMjIENvbG9yIHNjaGVtZQoKVGhlIGFyZ3VtZW50IGB2YWx1ZXMgPWAgZGVmaW5lcyB0aGUgY29sb3IgcmFuZ2VzIGFzc29jaWF0ZWQgd2l0aCB0aGUgYmlucyBhbmQgZGV0ZXJtaW5lZCBieSB0aGUgYHN0eWxlYCBhcmd1bWVudHMuIFNldmVyYWwgYnVpbHQtaW4gcGFsZXR0ZXMgYXJlIGNvbnRhaW5lZCBpbiAqKnRtYXAqKi4gRm9yIGV4YW1wbGUsIHVzaW5nIGB2YWx1ZXMgPSAiUmVkcyJgIHdvdWxkIHlpZWxkIHRoZSBmb2xsb3dpbmcgbWFwIGZvciBvdXIgZXhhbXBsZS4KYGBge3IsIG1lc3NhZ2UgPSBGQUxTRX0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53KSArCiAgdG1fcG9seWdvbnMoZmlsbCA9ICJtZWRpbmNFIiwgCiAgICAgICAgICAgICAgZmlsbC5zY2FsZSA9IHRtX3NjYWxlX2ludGVydmFscyhzdHlsZSA9ICJxdWFudGlsZSIsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gIlJlZHMiKSkgCmBgYAoKVW5kZXIgdGhlIGhvb2QsIGDigJxSZWRz4oCdYCByZWZlcnMgdG8gb25lIG9mIHRoZSBjb2xvciBzY2hlbWVzIHN1cHBvcnRlZCBieSB0aGUgKipSQ29sb3JCcmV3ZXIqKiBwYWNrYWdlIChzZWUgYmVsb3cpLgoKXAoKSW4gYWRkaXRpb24gdG8gdGhlIGJ1aWx0LWluIHBhbGV0dGVzLCBjdXN0b21pemVkIGNvbG9yIHJhbmdlcyBjYW4gYmUgY3JlYXRlZCBieSBzcGVjaWZ5aW5nIGEgdmVjdG9yIHdpdGggdGhlIGRlc2lyZWQgY29sb3JzIGFzIGFuY2hvcnMuIFRoaXMgd2lsbCBjcmVhdGUgYSBzcGVjdHJ1bSBvZiBjb2xvcnMgaW4gdGhlIG1hcCB0aGF0IHJhbmdlIGJldHdlZW4gdGhlIGNvbG9ycyBzcGVjaWZpZWQgaW4gdGhlIHZlY3Rvci4gRm9yIGluc3RhbmNlLCBpZiB3ZSB1c2VkIGBjKOKAnHJlZOKAnSwg4oCcYmx1ZeKAnSlgLCB0aGUgY29sb3Igc3BlY3RydW0gd291bGQgbW92ZSBmcm9tIHJlZCB0byBwdXJwbGUsIHRoZW4gdG8gYmx1ZSwgd2l0aCBpbiBiZXR3ZWVuIHNoYWRlcy4gSW4gb3VyIGV4YW1wbGU6CmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncpICsKICB0bV9wb2x5Z29ucyhmaWxsID0gIm1lZGluY0UiLCAKICAgICAgICAgICAgICBmaWxsLnNjYWxlID0gdG1fc2NhbGVfaW50ZXJ2YWxzKHN0eWxlID0gInF1YW50aWxlIiwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSBjKCJyZWQiLCJibHVlIikpKSAKYGBgCgpcCgpOb3QgZXhhY3RseSBhIHByZXR0eSBwaWN0dXJlLiBJbiBvcmRlciB0byBjYXB0dXJlIGEgZGl2ZXJnaW5nIHNjYWxlLCB3ZSBpbnNlcnQgYOKAnHdoaXRl4oCdYCBpbiBiZXR3ZWVuIHJlZCBhbmQgYmx1ZS4KYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9IGMoInJlZCIsIndoaXRlIiwgImJsdWUiKSkpIApgYGAKClwKCkEgcHJlZmVycmVkIGFwcHJvYWNoIHRvIHNlbGVjdCBhIGNvbG9yIHBhbGV0dGUgaXMgdG8gY2hvc2Ugb25lIG9mIHRoZSBzY2hlbWVzIGNvbnRhaW5lZCBpbiB0aGUgKipSQ29sb3JCcmV3ZXIqKiBwYWNrYWdlLiBUaGVzZSBhcmUgYmFzZWQgb24gdGhlIHJlc2VhcmNoIG9mIGNhcnRvZ3JhcGhlciBDeW50aGlhIEJyZXdlciAoc2VlIHRoZSBjb2xvcmJyZXdlcjIgW3dlYnNpdGVdKGh0dHBzOi8vY29sb3JicmV3ZXIyLm9yZy8jdHlwZT1zZXF1ZW50aWFsJnNjaGVtZT1CdUduJm49MykgZm9yIGRldGFpbHMpLiBDb2xvckJyZXdlciBtYWtlcyBhIGRpc3RpbmN0aW9uIGJldHdlZW4gc2VxdWVudGlhbCBzY2FsZXMgKGZvciBhIHNjYWxlIHRoYXQgZ29lcyBmcm9tIGxvdyB0byBoaWdoKSwgZGl2ZXJnaW5nIHNjYWxlcyAodG8gaGlnaGxpZ2h0IGhvdyB2YWx1ZXMgZGlmZmVyIGZyb20gYSBjZW50cmFsIHRlbmRlbmN5KSwgYW5kIHF1YWxpdGF0aXZlIHNjYWxlcyAoZm9yIGNhdGVnb3JpY2FsIHZhcmlhYmxlcykuIEZvciBlYWNoIHNjYWxlLCBhIHNlcmllcyBvZiBzaW5nbGUgaHVlIGFuZCBtdWx0aS1odWUgc2NhbGVzIGFyZSBzdWdnZXN0ZWQuIEluIHRoZSAqKlJDb2xvckJyZXdlcioqIHBhY2thZ2UsIHRoZXNlIGFyZSByZWZlcnJlZCB0byBieSBhIG5hbWUgKGUuZy4sIHRoZSDigJxSZWRz4oCdIHBhbGV0dGUgd2UgdXNlZCBhYm92ZSBpcyBhbiBleGFtcGxlKS4gVGhlIGZ1bGwgbGlzdCBpcyBjb250YWluZWQgaW4gdGhlICoqUkNvbG9yQnJld2VyKiogZG9jdW1lbnRhdGlvbi4KClRoZXJlIGFyZSB0d28gdmVyeSB1c2VmdWwgY29tbWFuZHMgaW4gdGhpcyBwYWNrYWdlLiBPbmUgc2V0cyBhIGNvbG9yIHBhbGV0dGUgYnkgc3BlY2lmeWluZyBpdHMgbmFtZSBhbmQgdGhlIG51bWJlciBvZiBkZXNpcmVkIGNhdGVnb3JpZXMuIFRoZSByZXN1bHQgaXMgYSBjaGFyYWN0ZXIgdmVjdG9yIHdpdGggdGhlIGhleCBjb2RlcyBvZiB0aGUgY29ycmVzcG9uZGluZyBjb2xvcnMuCgpGb3IgZXhhbXBsZSwgd2Ugc2VsZWN0IGEgc2VxdWVudGlhbCBjb2xvciBzY2hlbWUgZ29pbmcgZnJvbSBibHVlIHRvIGdyZWVuLCBhcyAqQnVHbiosIGJ5IG1lYW5zIG9mIHRoZSBjb21tYW5kIGBicmV3ZXIucGFsYCwgd2l0aCB0aGUgbnVtYmVyIG9mIGNhdGVnb3JpZXMgKDYpIGFuZCB0aGUgc2NoZW1lIGFzIGFyZ3VtZW50cy4gVGhlIHJlc3VsdGluZyB2ZWN0b3IgY29udGFpbnMgdGhlIEhFWCBjb2RlcyBmb3IgdGhlIGNvbG9ycy4KCmBgYHtyfQpicmV3ZXIucGFsKDYsIkJ1R24iKQpgYGAKClwKClVzaW5nIHRoaXMgcGFsZXR0ZSBpbiBvdXIgbWFwIHlpZWxkcyB0aGUgZm9sbG93aW5nIHJlc3VsdC4KYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzPSJicmV3ZXIuYnVfZ24iKSkgCmBgYAoKXAoKVGhlIGNvbW1hbmQgYGRpc3BsYXkuYnJld2VyLnBhbCgpYCBhbGxvd3MgdXMgdG8gZXhwbG9yZSBkaWZmZXJlbnQgY29sb3Igc2NoZW1lcyBiZWZvcmUgYXBwbHlpbmcgdGhlbSB0byBhIG1hcC4gRm9yIGV4YW1wbGU6CmBgYHtyfQpkaXNwbGF5LmJyZXdlci5wYWwoNiwiQnVHbiIpCmBgYAoKXAoKIyMjIExlZ2VuZAoKVGhlcmUgYXJlIG1hbnkgb3B0aW9ucyB0byBjaGFuZ2UgdGhlIGZvcm1hdHRpbmcgb2YgdGhlIGxlZ2VuZC4gVGhlIGF1dG9tYXRpYyB0aXRsZSBmb3IgdGhlIGxlZ2VuZCBpcyBub3QgdGhhdCBhdHRyYWN0aXZlLCBzaW5jZSBpdCBpcyBzaW1wbHkgdGhlIHZhcmlhYmxlIG5hbWUuIFRoaXMgY2FuIGJlIGN1c3RvbWl6ZWQgYnkgc2V0dGluZyB0aGUgYHRpdGxlYCBhcmd1bWVudCBpbiBgdG1fbGVnZW5kKClgLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gImJyZXdlci5yZWRzIiksIAogICAgICAgICAgICAgIGZpbGwubGVnZW5kID0gdG1fbGVnZW5kKHRpdGxlID0gIk1lZGlhbiBJbmNvbWUiKSkgCmBgYAoKXAoKQW5vdGhlciBpbXBvcnRhbnQgYXNwZWN0IG9mIHRoZSBsZWdlbmQgaXMgaXRzIHBvc2l0aW9uaW5nLiBUaGlzIGlzIGhhbmRsZWQgdGhyb3VnaCB0aGUgYHRtX2xheW91dCgpYCBmdW5jdGlvbi4gVGhpcyBmdW5jdGlvbiBoYXMgYSB2YXN0IG51bWJlciBvZiBvcHRpb25zLCBhcyBkZXRhaWxlZCBpbiB0aGUgW2RvY3VtZW50YXRpb25dKGh0dHBzOi8vd3d3LnJkb2N1bWVudGF0aW9uLm9yZy9wYWNrYWdlcy90bWFwL3ZlcnNpb25zLzIuMS0xL3RvcGljcy90bV9sYXlvdXQpLiBUaGVyZSBhcmUgYWxzbyBzcGVjaWFsaXplZCBzdWJzZXRzIG9mIGxheW91dCBmdW5jdGlvbnMsIGZvY3VzZWQgb24gc3BlY2lmaWMgYXNwZWN0cyBvZiB0aGUgbWFwLCBzdWNoIGFzIGB0bV9sZWdlbmQoKWAsIGB0bV9zdHlsZSgpYCBhbmQgYHRtX2Zvcm1hdCgpYC4gV2UgaWxsdXN0cmF0ZSB0aGUgcG9zaXRpb25pbmcgb2YgdGhlIGxlZ2VuZC4KCk9mdGVuLCB0aGUgZGVmYXVsdCBsb2NhdGlvbiBvZiB0aGUgbGVnZW5kIGlzIGFwcHJvcHJpYXRlLCBidXQgc29tZXRpbWVzIGZ1cnRoZXIgY29udHJvbCBpcyBuZWVkZWQuIFRoZSBgbGVnZW5kLnBvc2l0aW9uYCBhcmd1bWVudCB0byB0aGUgYHRtX2xheW91dGAgZnVuY3Rpb24gbW92ZXMgdGhlIGxlZ2VuZCBhcm91bmQgdGhlIG1hcCwgYW5kIGl0IHRha2VzIGEgdmVjdG9yIG9mIHR3byBzdHJpbmcgdmFyaWFibGVzIHRoYXQgZGV0ZXJtaW5lIGJvdGggdGhlIGhvcml6b250YWwgcG9zaXRpb24gKOKAnGxlZnTigJ0sIOKAnHJpZ2h04oCdLCBvciDigJxjZW50ZXLigJ0pIGFuZCB0aGUgdmVydGljYWwgcG9zaXRpb24gKOKAnHRvcOKAnSwg4oCcYm90dG9t4oCdLCBvciDigJxjZW50ZXLigJ0pLgoKRm9yIGV4YW1wbGUsIGlmIHdlIHdvdWxkIHdhbnQgdG8gbW92ZSB0aGUgbGVnZW5kIHRvIHRoZSBib3R0b20tcmlnaHQgcG9zaXRpb24sIHdlIHdvdWxkIHVzZSB0aGUgZm9sbG93aW5nIHNldCBvZiBjb21tYW5kcy4KYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gImJyZXdlci5yZWRzIiksCiAgICAgICAgICAgICAgZmlsbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiTWVkaWFuIEluY29tZSIpKSArCiAgdG1fbGF5b3V0KGxlZ2VuZC5wb3NpdGlvbiA9IGMoInJpZ2h0IiwgImJvdHRvbSIpKQpgYGAKClwKClRoZXJlIGlzIGFsc28gdGhlIG9wdGlvbiB0byBwb3NpdGlvbiB0aGUgbGVnZW5kIG91dHNpZGUgdGhlIGZyYW1lIG9mIHRoZSBtYXAuIFRoaXMgaXMgYWNjb21wbGlzaGVkIGJ5IHNldHRpbmcgYGxlZ2VuZC5vdXRzaWRlYCB0byBUUlVFLCBhbmQgb3B0aW9uYWxseSBhbHNvIHNwZWNpZnkgaXRzIHBvc2l0aW9uIGJ5IG1lYW5zIG9mIGBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbigpYC4gVGhlIGxhdHRlciBjYW4gdGFrZSB0aGUgdmFsdWVzIOKAnHRvcOKAnSwg4oCcYm90dG9t4oCdLCDigJxyaWdodOKAnSwgYW5kIOKAnGxlZnTigJ0uCgpGb3IgZXhhbXBsZSwgdG8gcG9zaXRpb24gdGhlIGxlZ2VuZCBvdXRzaWRlIGFuZCBvbiB0aGUgcmlnaHQsIHdvdWxkIGJlIGFjY29tcGxpc2hlZCBieSB0aGUgZm9sbG93aW5nIGNvbW1hbmRzLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogdG1fcG9seWdvbnMoZmlsbCA9ICJtZWRpbmNFIiwgCiAgICAgICAgICAgICAgZmlsbC5zY2FsZSA9IHRtX3NjYWxlX2ludGVydmFscyhzdHlsZSA9ICJxdWFudGlsZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSAiYnJld2VyLnJlZHMiKSwKICAgICAgICAgICAgICBmaWxsLmxlZ2VuZCA9IHRtX2xlZ2VuZCh0aXRsZSA9ICJNZWRpYW4gSW5jb21lIikpICsKICB0bV9sYXlvdXQobGVnZW5kLm91dHNpZGUgPSBUUlVFLCBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbiA9ICJyaWdodCIpCmBgYAoKXAoKV2UgY2FuIGFsc28gY3VzdG9taXplIHRoZSBzaXplIG9mIHRoZSBsZWdlbmQsIGl0cyBhbGlnbm1lbnQsIGZvbnQsIGV0Yy4gQ2hlY2sgb3V0IHRoZSBbZG9jdW1lbnRhdGlvbl0oaHR0cHM6Ly9yLXRtYXAuZ2l0aHViLmlvL3RtYXAvYXJ0aWNsZXMvYmFzaWNzX2xlZ2VuZHMpIGZvciBtb3JlIQoKXAoKIyMjIFRpdGxlCgpUaGUgYHRtX3RpdGxlKClgIGZ1bmN0aW9uIGNhbiBiZSB1c2VkIHRvIHNldCBhIHRpdGxlIGZvciB0aGUgbWFwLCBhbmQgc3BlY2lmeSBpdHMgcG9zaXRpb24sIHNpemUsIGV0Yy4gRm9yIGV4YW1wbGUsIHdlIGNhbiBzZXQgdGhlIGB0ZXh0YCwgdGhlIGBzaXplYCBhbmQgdGhlIGBwb3NpdGlvbmAgYXMgaW4gdGhlIGV4YW1wbGUgYmVsb3cuIFdlIG1hZGUgdGhlIGZvbnQgc2l6ZSBhIGJpdCBzbWFsbGVyICgwLjgpIGluIG9yZGVyIG5vdCB0byBvdmVyd2hlbG0gdGhlIG1hcCwgYW5kIHBvc2l0aW9uZWQgaXQgaW4gdGhlIHRvcCBsZWZ0LWhhbmQgY29ybmVyLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gImJyZXdlci5yZWRzIiksCiAgICAgICAgICAgICAgZmlsbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiTWVkaWFuIEluY29tZSIpKSArIAogIHRtX2xheW91dChsZWdlbmQub3V0c2lkZSA9IFRSVUUsIGxlZ2VuZC5vdXRzaWRlLnBvc2l0aW9uID0gInJpZ2h0IikgKwogIHRtX3RpdGxlKHRleHQgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsCiAgICAgICAgICAgc2l6ZSA9IDAuOCwgCiAgICAgICAgICAgcG9zaXRpb24gPSBjKCJsZWZ0IiwidG9wIikpCmBgYAoKXAoKVG8gaGF2ZSBhIHRpdGxlIGFwcGVhciBvbiB0b3AgKG9yIG9uIHRoZSBib3R0b20pIG9mIHRoZSBtYXAsIHdlIG5lZWQgdG8gc2V0IHRoZSBgcG9zaXRpb25gIGFyZ3VtZW50IG9mIHRoZSBgdG1fdGl0bGUoKWAgZnVuY3Rpb24gd2l0aCB0aGUgYXNzb2NpYXRlZCBgdG1fcG9zX291dCgpYCwgYXMgaWxsdXN0cmF0ZWQgYmVsb3cgKHdpdGggdGl0bGUuc2l6ZSBzZXQgdG8gMS4yNSB0byBoYXZlIGEgbGFyZ2VyIGZvbnQpLgoKYGBge3J9CnRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gImJyZXdlci5yZWRzIiksCiAgICAgICAgICAgICAgZmlsbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiTWVkaWFuIEluY29tZSIpKSArCiAgdG1fbGF5b3V0KGxlZ2VuZC5vdXRzaWRlID0gVFJVRSwgbGVnZW5kLm91dHNpZGUucG9zaXRpb24gPSAicmlnaHQiKSArCiAgdG1fdGl0bGUodGV4dCA9ICJNZWRpYW4gSW5jb21lIG9mIFNhY3JhbWVudG8gVHJhY3RzIiwKICAgICAgICAgICBzaXplID0gMS4yNSwKICAgICAgICAgICBwb3NpdGlvbiA9IHRtX3Bvc19vdXQoImNlbnRlciIsICJ0b3AiKSkKYGBgCgpBIHNob3J0Y3V0IHRvIGFjaGlldmUgdGhpcyB0aXRsZSBwb3NpdGlvbiBpcyB0byB1c2UgYHRtX3RpdGxlX291dCgpYCBpbnN0ZWFkIG9mIGB0bV90aXRsZSgpYC4KClwKCiMjIyBTY2FsZSBiYXIgYW5kIGFycm93CgpPSyB0aGlzIHJlYWxseSB3b3VsZG4ndCBiZSBhIEdJUyBjbGFzcyB3aXRob3V0IHRhbGtpbmcgYWJvdXQgb25lIG9mIHRoZSBjb3JlIGVsZW1lbnRzIG9mIGEgbWFwLS10aGUgZ29vZCBvbGUgc2NhbGUgYmFyIGFuZCBhcnJvdy4gTGV0J3MgYWRkIHRoZXNlIHRvIG91ciBtYXAuIEZpcnN0LCB3ZSBhZGQgdGhlIHNjYWxlIGJhciB3aXRoIGB0bV9zY2FsZWJhcigpYC4KClRoZSBhcmd1bWVudCBgYnJlYWtzYCB0ZWxscyBSIHRoZSBkaXN0YW5jZXMgdG8gYnJlYWsgdXAgYW5kIGVuZCB0aGUgYmFyLiBUaGUgYXJndW1lbnQgYHBvc2l0aW9uYCBwbGFjZXMgdGhlIHNjYWxlIGJhciBvbiB0aGUgYm90dG9tIGxlZnQgcGFydCBvZiB0aGUgbWFwLiBOb3RlIHRoYXQgdGhlIGBzY2FsZWAgaXMgaW4gbWlsZXMgKHdlJ3JlIGluIEFtdXJpY2EhKS4gVGhlIGRlZmF1bHQgaXMgaW4ga2lsb21ldGVycyAodGhlIHJlc3Qgb2YgdGhlIHdvcmxkISksIGJ1dCB5b3UgY2FuIHNwZWNpZnkgdGhlIHVuaXRzIHdpdGhpbiBgdG1fc2hhcGUoKWAgdXNpbmcgdGhlIGFyZ3VtZW50IGB1bml0YC4gYHRleHQuc2l6ZWAgc2NhbGVzIHRoZSBzaXplIG9mIHRoZSBiYXIgc21hbGxlciAoYmVsb3cgMSkgb3IgbGFyZ2VyIChhYm92ZSAxKS4KCmBgYHtyfQp0bV9zaGFwZShzYWMubWV0cm8udHJhY3RzLncsIHVuaXQgPSAibWkiKSArCiAgdG1fcG9seWdvbnMoZmlsbCA9ICJtZWRpbmNFIiwgCiAgICAgICAgICAgICAgZmlsbC5zY2FsZSA9IHRtX3NjYWxlX2ludGVydmFscyhzdHlsZSA9ICJxdWFudGlsZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YWx1ZXMgPSAiYnJld2VyLnJlZHMiKSwKICAgICAgICAgICAgICBmaWxsLmxlZ2VuZCA9IHRtX2xlZ2VuZCh0aXRsZSA9ICJNZWRpYW4gSW5jb21lIikpICsKICB0bV9sYXlvdXQobGVnZW5kLm91dHNpZGUgPSBUUlVFLCBsZWdlbmQub3V0c2lkZS5wb3NpdGlvbiA9ICJyaWdodCIpICsKICB0bV90aXRsZV9vdXQodGV4dCA9ICJNZWRpYW4gSW5jb21lIG9mIFNhY3JhbWVudG8gVHJhY3RzIiwKICAgICAgICAgICAgICAgc2l6ZSA9IDEuMjUpICsKICB0bV9zY2FsZWJhcihicmVha3MgPSBjKDAsIDUsIDEwLCAyMCksIHRleHQuc2l6ZSA9IDAuNzUsIHBvc2l0aW9uID0gYygibGVmdCIsICJib3R0b20iKSkgCmBgYAoKXAoKTmV4dCBsZXQncyBzcGljZSB0aGluZ3MgdXAgYnkgYWRkaW5nIGEgbm9ydGggYXJyb3csIHdoaWNoIHdlIGNhbiBkbyB1c2luZyB0aGUgZnVuY3Rpb24gYHRtX2NvbXBhc3MoKWAuIFlvdSBjYW4gY29udHJvbCBmb3IgdGhlIHR5cGUsIHNpemUgYW5kIGxvY2F0aW9uIG9mIHRoZSBhcnJvdyB3aXRoaW4gdGhpcyBmdW5jdGlvbi4gSSBwbGFjZSBhIDQtc3RhciBhcnJvdyBvbiB0aGUgYm90dG9tIHJpZ2h0IG9mIHRoZSBtYXAuCgpgYGB7cn0KdG1fc2hhcGUoc2FjLm1ldHJvLnRyYWN0cy53LCB1bml0ID0gIm1pIikgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAibWVkaW5jRSIsIAogICAgICAgICAgICAgIGZpbGwuc2NhbGUgPSB0bV9zY2FsZV9pbnRlcnZhbHMoc3R5bGUgPSAicXVhbnRpbGUiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsdWVzID0gImJyZXdlci5yZWRzIiksCiAgICAgICAgICAgICAgZmlsbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiTWVkaWFuIEluY29tZSIpKSArCiAgdG1fbGF5b3V0KGxlZ2VuZC5vdXRzaWRlID0gVFJVRSwgbGVnZW5kLm91dHNpZGUucG9zaXRpb24gPSAicmlnaHQiKSArCiAgdG1fdGl0bGVfb3V0KHRleHQgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsCiAgICAgICAgICAgICAgIHNpemUgPSAxLjI1KSArCiAgdG1fc2NhbGViYXIoYnJlYWtzID0gYygwLCA1LCAxMCwgMjApLCB0ZXh0LnNpemUgPSAwLjc1LCAKICAgICAgICAgICAgICAgcG9zaXRpb24gPSBjKCJsZWZ0IiwgImJvdHRvbSIpKSArCiAgdG1fY29tcGFzcyh0eXBlID0gIjRzdGFyIiwgcG9zaXRpb24gPSBjKCJyaWdodCIsICJib3R0b20iKSkKYGBgCgpcCgpXZSBjYW4gYWxzbyBlbGltaW5hdGUgdGhlIGZyYW1lIGFyb3VuZCB0aGUgbWFwIHVzaW5nIHRoZSBhcmd1bWVudCBgZnJhbWUgPSBGQUxTRWAgaW4gYHRtX2xheW91dCgpYC4KCmBgYHtyfQpzYWMubWFwIDwtIHRtX3NoYXBlKHNhYy5tZXRyby50cmFjdHMudywgdW5pdCA9ICJtaSIpICsKICB0bV9wb2x5Z29ucyhmaWxsID0gIm1lZGluY0UiLCAKICAgICAgICAgICAgICBmaWxsLnNjYWxlID0gdG1fc2NhbGVfaW50ZXJ2YWxzKHN0eWxlID0gInF1YW50aWxlIiwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9ICJicmV3ZXIucmVkcyIpLAogICAgICAgICAgICAgIGZpbGwubGVnZW5kID0gdG1fbGVnZW5kKHRpdGxlID0gIk1lZGlhbiBJbmNvbWUiKSkgKwogIHRtX2xheW91dChmcmFtZSA9IEZBTFNFLAogICAgICAgICAgICBsZWdlbmQub3V0c2lkZSA9IFRSVUUsIGxlZ2VuZC5vdXRzaWRlLnBvc2l0aW9uID0gInJpZ2h0IikgKwogIHRtX3RpdGxlKHRleHQgPSAiTWVkaWFuIEluY29tZSBvZiBTYWNyYW1lbnRvIFRyYWN0cyIsCiAgICAgICAgICAgc2l6ZSA9IDEuMjUpICsKICB0bV9zY2FsZWJhcihicmVha3MgPSBjKDAsIDUsIDEwLCAyMCksIHRleHQuc2l6ZSA9IDAuNzUsIHBvc2l0aW9uID0gYygibGVmdCIsICJib3R0b20iKSkgKwogIHRtX2NvbXBhc3ModHlwZSA9ICI0c3RhciIsIHBvc2l0aW9uID0gYygicmlnaHQiLCAiYm90dG9tIikpIAogIApzYWMubWFwCmBgYAoKXAoKTm90ZSB0aGF0IEkgc2F2ZWQgdGhlIG1hcCBpbnRvIGFuIG9iamVjdCBjYWxsZWQgKnNhYy5tYXAqLiBSIGlzIGFuIG9iamVjdC1vcmllbnRlZCBwcm9ncmFtLCBzbyBldmVyeXRoaW5nIHlvdSBtYWtlIGluIFIgYXJlIG9iamVjdHMgdGhhdCBjYW4gYmUgc2F2ZWQgZm9yIGZ1dHVyZSBtYW5pcHVsYXRpb24uIFRoaXMgaW5jbHVkZXMgbWFwcy4gQW5kIGZ1dHVyZSBtYW5pcHVsYXRpb25zIG9mIGEgc2F2ZWQgbWFwIGluY2x1ZGVzIGFkZGluZyBtb3JlIGB0bV8qYCBmdW5jdGlvbnMgdG8gdGhlIHNhdmVkIG9iamVjdCwgc3VjaCBhcyBgc2FjLm1hcCArIHRtX2xheW91dCh5b3VyIGNoYW5nZXMgaGVyZSlgLiBDaGVjayB0aGUgaGVscCBkb2N1bWVudGF0aW9uIGZvciBgdG1fbGF5b3V0KClgIHRvIHNlZSB0aGUgY29tcGxldGUgbGlzdCBvZiBzZXR0aW5ncy4gCgpcCgojIyBTYXZpbmcgbWFwcwoKWW91IGNhbiBzYXZlIHlvdXIgbWFwcyBhIGZldyB3YXlzLiAKMS4gT24gdGhlIHBsb3R0aW5nIHNjcmVlbiB3aGVyZSB0aGUgbWFwIGlzIHNob3duLCBjbGljayBvbiBFeHBvcnQgYW5kIHNhdmUgaXQgYXMgZWl0aGVyIGFuIGltYWdlIG9yIHBkZiBmaWxlLgoyLiBVc2UgdGhlIGZ1bmN0aW9uIGB0bWFwX3NhdmUoKWAKCkZvciBvcHRpb24gMiwgd2UgY2FuIHNhdmUgdGhlIG1hcCBvYmplY3QgKnNhYy5tYXAqIGFzIHN1Y2g6CmBgYHtyLCBtZXNzYWdlID0gRkFMU0V9CnRtYXBfc2F2ZShzYWMubWFwLCAic2FjX2NpdHlfaW5jLmpwZyIpCmBgYApTcGVjaWZ5IHRoZSAqKnRtYXAqKiBvYmplY3QgYW5kIGEgZmlsZW5hbWUgd2l0aCBhbiBleHRlbnNpb24uIEl0IHN1cHBvcnRzIC5wZGYsIC5lcHMsIC5zdmcsIC53bWYsIC5wbmcsIC5qcGcsIC5ibXAgYW5kIC50aWZmLiBUaGUgZGVmYXVsdCBpcyAucG5nLiBBbHNvIG1ha2Ugc3VyZSB5b3XigJl2ZSBzZXQgeW91ciB3b3JraW5nIGRpcmVjdG9yeSB0byB0aGUgZm9sZGVyIHRoYXQgeW91IHdhbnQgeW91ciBtYXAgdG8gYmUgc2F2ZWQgaW4uCgpcCgojIyBNYWtpbmcgYSBtYXAgd2l0aCBDREMgUGxhY2VzIGRhdGEgCgpPSywgZG8gd2UgaGF2ZSBlbmVyZ3kgZm9yIG9uZSBtb3JlIGV4YW1wbGU/IExldCdzIGJyaW5nIGluIGRhdGEgZnJvbSB0aGUgW0NEQyBQbGFjZXMgZGF0YXNldF0oaHR0cHM6Ly93d3cuY2RjLmdvdi9wbGFjZXMvdG9vbHMvZGF0YS1wb3J0YWwuaHRtbCkuIFRoaXMgaXMgYW4gaW5jcmVkaWJsZSByZXNvdXJjZSB0byBhY2Nlc3MgZGF0YSBvbiB0aGUgQ0RDJ3MgW0JlaGF2aW9yYWwgUmlzayBGYWN0b3IgYW5kIFN1cnZlaWxsYW5jZSBTeXN0ZW0gKEJSRlNTKV0oaHR0cHM6Ly93d3cuY2RjLmdvdi9icmZzcy9pbmRleC5odG1sKSwgYXMgd2VsbCBhcyBzb2NpYWwgZGV0ZXJtaW5hbnRzIG9mIGhlYWx0aCBkYXRhIGZyb20gQW1lcmljYW4gQ29tbXVuaXR5IFN1cnZleS4gSSd2ZSBhbHJlYWR5IGRvd25sb2FkZWQgQ2FsaWZvcm5pYSBDZW5zdXMgdHJhY3QgZGF0YSBvbiB0aGUgIiUgb2YgYWR1bHRzIHJlcG9ydGluZyBubyBsZWlzdXJlLXRpbWUgcGh5c2ljYWwgYWN0aXZpdHkiLiBMZXQncyBicmluZyB0aGlzIGluIGFuZCB0YWtlIGEgbG9vayBhdCBpdCEKCmBgYHtyfQpwbGFjZXNfY2FfbHBhIDwtIHJlYWRfY3N2KCJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3JlZnMvaGVhZHMvbWFpbi9wbGFjZXNfY2FfbHBhLmNzdiIpCmdsaW1wc2UocGxhY2VzX2NhX2xwYSkKYGBgCgpcCgpJbnRlcmVzdGluZyBzdHVmZi4gTG9va3MgbGlrZSB0aGUgdmFsdWVzIHdlIGNhcmUgYWJvdXQgYXJlIHN0b3JlcyBpbiBhIGNvbHVtbiBjYWxsZWQgKkRhdGFfVmFsdWUqIGFuZCB0aGUgRklQUyBjb2RlIHNlZW1zIHRvIGJlIGluICpMb2NhdGlvbk5hbWUqLiBMZXQncyBnbyBhaGVhZCBhbmQgcmVuYW1lICpMb2NhdGlvbk5hbWUqIGFuZCB0aGVuIHNlZSBpZiB3ZSBjYW4gam9pbiB0aGlzIGRhdGEgd2l0aCBvdXIgQ2Vuc3VzIHRyYWN0IGRhdGEgKmNhLnRyYWN0cyouCgpgYGB7cn0KcGxhY2VzX2NhX2xwYTwtcmVuYW1lKHBsYWNlc19jYV9scGEsIEdFT0lEID0gTG9jYXRpb25OYW1lKQpnbGltcHNlKHBsYWNlc19jYV9scGEpCgpjYS50cmFjdHMubHBhIDwtIGNhLnRyYWN0cyAlPiUKICBsZWZ0X2pvaW4ocGxhY2VzX2NhX2xwYSwgYnkgPSAiR0VPSUQiKQpnbGltcHNlKGNhLnRyYWN0cy5scGEpCmBgYAoKXAoKSXQgd29ya2VkISBPSywgbm93IGxldCdzIG1ha2UgYSBtYXAgb2YgJSBvZiBhZHVsdHMgcmVwb3J0aW5nIG5vIGxlaXN1cmUtdGltZSBwaHlzaWNhbCBhY3Rpdml0eS4gV2Ugd2lsbCBidWlsZCBvbiB3aGF0IHdlJ3ZlIGxlYXJuZWQgYWJvdmUhIEkndmUgYWxzbyB1c2VkIGB0bV9maWxsKClgIGluc3RlYWQgb2YgYHRtX3BvbHlnb25zKClgIHRvIG1ha2UgaXQgc28gdGhlcmUgYXJlIG5vIGJvcmRlcnMgYW5kIHdlIGNhbiBlYXNpbHkgc2VlIHBvbHlnb24gdmFsdWVzIGluIGRlbnNlciBjb25jZW50cmF0aW9ucyBvZiBDZW5zdXMgdHJhY3RzIChlLmcuLCBhcm91bmQgU2FjcmFtZW50bywgU2FuIEZyYW5jaXNjbywgTEEsIGV0Yy4pCgpgYGB7cn0KdG1fc2hhcGUoY2EudHJhY3RzLmxwYSwgdW5pdCA9ICJtaSIpICsKICB0bV9maWxsKGZpbGwgPSAiRGF0YV9WYWx1ZSIsIAogICAgICAgICAgZmlsbC5zY2FsZSA9IHRtX3NjYWxlX2ludGVydmFscyhzdHlsZSA9ICJxdWFudGlsZSIsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHZhbHVlcyA9ICJicmV3ZXIucmVkcyIpLAogICAgICAgICAgZmlsbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiJSBBZHVsdHMgTm8gUGh5c2ljYWwgQWN0aXZpdHkiKSkgKwogIHRtX3RpdGxlX291dCh0ZXh0ID0gIiUgb2YgQWR1bHRzIFJlcG9ydGluZyBObyBMZWlzdXJlIFRpbWUgUGh5c2ljYWwgQWN0aXZpdHkiKQpgYGAKXAoKT29vb29vb28gdGhhdCBpcyBvbmUgZ29vb29vZCBsb29raW5nIG1hcCEKClwKCllvdeKAmXZlIGNvbXBsZXRlZCB5b3VyIGludHJvZHVjdGlvbiB0byAqKnNmKiouIFdoZXchIEJhZGdlPyBZZXMsIHBsZWFzZSwgeW91IGVhcm5lZCBpdCEgVGltZSB0byBbY2VsZWJyYXRlXShodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PTNHd2pmVUZ5WTZNKSEKClwKCiFbc2YgQmFkZ2VdKHNmLmdpZikKClwKCiMgUmFzdGVycwoKUmFzdGVyIGRhdGFzZXRzIGFyZSBzaW1wbHkgYW4gYXJyYXkgb2YgcGl4ZWxzL2NlbGxzIG9yZ2FuaXplZCBpbnRvIHJvd3MgYW5kIGNvbHVtbnMgKG9yIGEgZ3JpZCkgd2hlcmUgZWFjaCBjZWxsIGNvbnRhaW5zIGEgdmFsdWUgcmVwcmVzZW50aW5nIGluZm9ybWF0aW9uLCBzdWNoIGFzIHRlbXBlcmF0dXJlLCB2ZWdldGF0aW9uLCBsYW5kIHVzZSwgYWlyIHBvbGx1dGlvbiwgZXRjLiBSYXN0ZXIgbWFwcyB1c3VhbGx5IHJlcHJlc2VudCBjb250aW51b3VzIHBoZW5vbWVuYSBzdWNoIGFzIGVsZXZhdGlvbiwgdGVtcGVyYXR1cmUsIG9yIHBvcHVsYXRpb24gZGVuc2l0eS4gRGlzY3JldGUgZmVhdHVyZXMgc3VjaCBhcyBzb2lsIHR5cGUgb3IgbGFuZC1jb3ZlciBjbGFzc2VzIGNhbiBhbHNvIGJlIHJlcHJlc2VudGVkIGluIHRoZSByYXN0ZXIgZGF0YSBtb2RlbC4gUmFzdGVycyBhcmUgYWVyaWFsIHBob3RvZ3JhcGhzLCBpbWFnZXJ5IGZyb20gc2F0ZWxsaXRlcywgR29vZ2xlIFN0cmVldCBWaWV3IGltYWdlcywgZXRjLiBBIGZldyB0aGluZ3MgdG8gbm90ZS4KCiAtIFJhc3RlciBkYXRhc2V0cyBhcmUgYWx3YXlzIHJlY3Rhbmd1bGFyIChyb3dzIHggY29sKSBzaW1pbGFyIHRvIG1hdHJpY2VzLiBJcnJlZ3VsYXIgYm91bmRhcmllcyBhcmUgY3JlYXRlZCBieSB1c2luZyBgTkFzYC4KIC0gUmFzdGVycyBoYXZlIHRvIGNvbnRhaW4gdmFsdWVzIG9mIHRoZSBzYW1lIHR5cGUgKGludCwgZmxvYXQsIGJvb2xlYW4pIHRocm91Z2hvdXQgdGhlIHJhc3RlciwganVzdCBsaWtlIG1hdHJpY2VzIGFuZCB1bmxpa2UgZGF0YSBmcmFtZXMuCiAtIFRoZSBzaXplIG9mIHRoZSByYXN0ZXIgZGVwZW5kcyBvbiB0aGUgKipyZXNvbHV0aW9uKiogYW5kIHRoZSAqKmV4dGVudCoqIG9mIHRoZSByYXN0ZXIuIEFzIHN1Y2ggbWFueSByYXN0ZXJzIGFyZSBsYXJnZSBhbmQgb2Z0ZW4gY2Fubm90IGJlIGhlbGQgaW4gbWVtb3J5IGNvbXBsZXRlbHkuCiAKIApUaGUgd29ya2hvcnNlIHBhY2thZ2UgZm9yIHdvcmtpbmcgd2l0aCByYXN0ZXJzIGluIFIgaXMgdGhlICoqdGVycmEqKiBwYWNrYWdlIGJ5IFJvYmVydCBIaWptYW5zLiAqKnRlcnJhKiogaGFzIGZ1bmN0aW9ucyBmb3IgY3JlYXRpbmcsIHJlYWRpbmcsIG1hbmlwdWxhdGluZywgYW5kIHdyaXRpbmcgcmFzdGVyIGRhdGEuIFRoZSBwYWNrYWdlIGFsc28gaW1wbGVtZW50cyByYXN0ZXIgYWxnZWJyYSBhbmQgbWFueSBvdGhlciBmdW5jdGlvbnMgZm9yIHJhc3RlciBkYXRhIG1hbmlwdWxhdGlvbi4gVGhlIHBhY2thZ2Ugd29ya3Mgd2l0aCBgU3BhdFJhc3RlcmAgb2JqZWN0cy4gVGhlIGByYXN0KClgIGZ1bmN0aW9uIGlzIHVzZWQgdG8gY3JlYXRlIHRoZXNlIG9iamVjdHMuIAoKVHlwaWNhbGx5IHlvdSB3aWxsIGJyaW5nIGluIGEgcmFzdGVyIGRhdGFzZXQgZGlyZWN0bHkgZnJvbSBhIGZpbGUuIFRoZXNlIGZpbGVzIGNvbWUgaW4gbWFueSBkaWZmZXJlbnQgZm9ybXMsIHR5cGljYWxseSAudGlmLCAuaW1nLCBhbmQgLmdyZC4KClwKCldl4oCZbGwgYnJpbmcgaW4gdGhlIGZpbGUgTkRWSV9yYXN0LnRpZi4gVGhlIGZpbGUgY29udGFpbnMgbm9ybWFsaXplZCBkaWZmZXJlbmNlIHZlZ2V0YXRpb24gaW5kZXggKE5EVkkpIGRhdGEgZm9yIHRoZSBCYXkgQXJlYS4gVGhlc2UgZGF0YSBhcmUgdGFrZW4gZnJvbSBMYW5kc2F0IHNhdGVsbGl0ZSBkYXRhIHRoYXQgSSBkb3dubG9hZGVkIGZyb20gR29vZ2xlIEVhcnRoIEVuZ2luZS4gV2UgdXNlIHRoZSBmdW5jdGlvbiBgcmFzdCgpYCB0byBicmluZyBpbiBkYXRhIGluIHJhc3RlciBmb3JtLCB0aGVuIHRha2UgYSBsb29rIGF0IHRoZSBkYXRhc2V0LgoKYGBge3J9CgoKdXJsIDwtICJodHRwczovL2dpdGh1Yi5jb20vcGphbWVzLXVjZGF2aXMvU1BIMjE1L3Jhdy9tYWluL05EVklfcmFzdDIudGlmIgpkb3dubG9hZC5maWxlKHVybCwgZGVzdGZpbGUgPSAiTkRWSV9yYXN0Mi50aWYiLCBtb2RlID0gIndiIikKTkRWSV9yYXN0ZXIgPSByYXN0KCJORFZJX3Jhc3QyLnRpZiIpCgojIyBHZXQgc3VtbWFyeSBvZiByYXN0ZXIgZGF0YQpORFZJX3Jhc3RlcgpgYGAKClwKCkRvZXMgaXQgaGF2ZSBhIENSUz8KYGBge3J9CgojIyBDaGVjayBDUlMKc3RfY3JzKE5EVklfcmFzdGVyKQoKYGBgCgpcCgpPSyB3ZSBoYXZlIHdoYXQgbG9va3MgbGlrZSBhIHJhc3Rlci4gV2Ugc2VlIG91ciByZXNvbHV0aW9uIGFuZCBvdXIgZXh0ZW50LCBhbmQgd2UgaGF2ZSBhIENSUy4gTmljZSEgU2hhbGwgd2UgcGxvdCB0aGlzPwoKYGBge3J9CiMjIFBsb3QgdGhlIHJhc3RlciBvbiBhIG1hcAp0bWFwX21vZGUoInBsb3QiKQpORFZJX21hcCA8LSAgdG1fc2hhcGUoTkRWSV9yYXN0ZXIpICsKICB0bV9yYXN0ZXIoY29sLnNjYWxlID0gdG1fc2NhbGVfY29udGludW91cygpLAogICAgICAgICAgICBjb2wubGVnZW5kID0gdG1fbGVnZW5kKG91dHNpZGUgPSBUUlVFKSkKTkRWSV9tYXAKYGBgCgpcCgpMb29rcyBwcmV0dHkgY29vbCEgU2VlbXMgdG8gYmUgdGhlIEJheSBBcmVhLCBhbmQgd2UgaGF2ZSBzb21lIG5pY2UgdmFyaWFiaWxpdHkuIEJ1dCB3ZSBsZXQncyBzZWUgaWYgd2UgY2FuIG1ha2UgdGhpcyBmYW5jaWVyLgoKYGBge3J9CiMgcGFsZXR0ZSBmb3IgcGxvdHRpbmcKYnJlYWtzX25kdmkgPC0gYygtMSwtMC4yLC0wLjEsMCwwLjAyNSAsMC4wNSwwLjA3NSwwLjEsMC4xMjUsMC4xNSwwLjE3NSwwLjIgLDAuMjUgLDAuMyAsMC4zNSwwLjQsMC40NSwwLjUsMC41NSwwLjYsMSkKcGFsZXR0ZV9uZHZpIDwtIGMoIiNCRkJGQkYiLCIjREJEQkRCIiwiI0ZGRkZFMCIsIiNGRkZBQ0MiLCIjRURFOEI1IiwiI0RFRDk5QyIsIiNDQ0M3ODIiLCIjQkRCODZCIiwiI0IwQzI2MSIsIiNBM0NDNTkiLCIjOTFCRjUyIiwiIzgwQjM0NyIsIiM3MEEzNDAiLCIjNjE5NjM2IiwiIzRGOEEyRSIsIiM0MDdEMjQiLCIjMzA2RTFDIiwiIzIxNjExMiIsIiMwRjU0MEEiLCIjMDA0NTAwIikKCk5EVklfbWFwIDwtICB0bV9zaGFwZShORFZJX3Jhc3RlcikgKwogIHRtX3Jhc3Rlcihjb2wuc2NhbGUgPSB0bV9zY2FsZV9jb250aW51b3VzKHZhbHVlcyA9IHBhbGV0dGVfbmR2aSksCiAgICAgICAgICAgIGNvbC5sZWdlbmQgPSB0bV9sZWdlbmQodGl0bGUgPSAiTkRWSSIsIG91dHNpZGUgPSBUUlVFKSkKTkRWSV9tYXAKYGBgCgpcCgojIyBDcm9wCgpPSywgbGV0J3Mgc2VlIGlmIHdlIGNhbiBjcm9wIHRoaXMgdG8gZm9jdXMgb24gU2FuIEZyYW5jaXNjby4gSSd2ZSBnb29nbGVkIHRoZSBsYXQgYW5kIGxvbmcgZm9yIHRoZSBhcmVhIGFyb3VuZCBTYW4gRnJhbmNpc2NvLCBhbmQgSSdsbCBwdXQgdGhlc2UgcmlnaHQgaW50byBteSBgY3JvcCgpYCBmdW5jdGlvbi4gSSBjYW4gdXNlIHRoZSBgdG1hcF9tb2RlKCJ2aWV3IilgIG5vdyBiZWNhdXNlIHRoZSByYXN0ZXIgaXMgc21hbGwgZW5vdWdoIGZvciBSIHRvIG1ha2UgaW50ZXJhY3RpdmUuCgpgYGB7cn0Kc2ZfcmFzdDwtY3JvcChORFZJX3Jhc3RlciwgZXh0KC0xMjIuNTUsIC0xMjIuMzUsIDM3LjcsIDM3LjgzKSkKCnRtYXBfbW9kZSgicGxvdCIpCk5EVklfc2ZfbWFwIDwtIHRtX3NoYXBlKHNmX3Jhc3QpICsKICB0bV9yYXN0ZXIoY29sLnNjYWxlID0gdG1fc2NhbGVfY29udGludW91cygpLAogICAgICAgICAgICBjb2wubGVnZW5kID0gdG1fbGVnZW5kKHRpdGxlID0gIk5EVkkiLCBvdXRzaWRlID0gVFJVRSkpCgpORFZJX3NmX21hcApgYGAKClwKCiMjIENsYXNzaWZ5CgpTbyBuZWdhdGl2ZSB2YWx1ZXMgb2YgTkRWSSByZXByZXNlbnQgd2F0ZXIuIExldCdzIHNldCBhbGwgbmVnYXRpdmUgdmFsdWVzIHRvIC0xLCBhbmQgdGhhdCB3aWxsIGhlbHAgdXMgdG8gZGlzdGluZ3Vpc2ggd2F0ZXIgZnJvbSBsYW5kIGVhc2llci4KCmBgYHtyfQpzZl9yYXN0X25lZyA8LSBhcHAoc2ZfcmFzdCwgZnVuPWZ1bmN0aW9uKHgpeyB4W3ggPD0gMF0gPC0gLTE7IHJldHVybih4KX0gKQoKTkRWSV9zZl9tYXBfbmVnIDwtIHRtX3NoYXBlKHNmX3Jhc3RfbmVnKSArCiAgdG1fcmFzdGVyKGNvbC5zY2FsZSA9IHRtX3NjYWxlX2NvbnRpbnVvdXMoKSwKICAgICAgICAgICAgY29sLmxlZ2VuZCA9IHRtX2xlZ2VuZCh0aXRsZSA9ICJORFZJIiwgb3V0c2lkZSA9IFRSVUUpKQoKTkRWSV9zZl9tYXBfbmVnCmBgYAoKXAoKTmljZS4gV2hhdCBkbyB3ZSBub3RpY2U/IFRoZSBjb2FzdCBvZiBTYW4gRnJhbmNpc2NvIG1pZ2h0IGhhdmUgc29tZSBjbG91ZCBjb3ZlciBlcnJvcnMhIFNhdGVsbGl0ZSBkYXRhIGlzbid0IHBlcmZlY3QhIEJ1dCB0aGUgZ29vZCBuZXdzIGlzLCB3ZSd2ZSBsZWFybmVkIGhvdyB0byBicmluZyBpbiByYXN0ZXIgZGF0YSEgSSB0aGluayB3ZSBuZWVkIGEgYmFkZ2UhISEhCgpcCgohW3RlcnJhIEJhZGdlXSh0ZXJyYS5wbmcpCgpcCgpPbmUgbGFzdCBzdGVwLiBMZXQncyBwdXQgYWxsIG91ciBrbm93bGVkZ2UgdG9nZXRoZXIgYW5kIG1hcCBvdXIgb2xkIGZyaWVuZCBDQWRhdGEgb24gdG9wIG9mIHRoZSBORFZJIGRhdGEgaW4gU2FuIEZyYW5jaXNjby4gRmlyc3QsIGxldCdzIGJyaW5nIGluIHRoZSBDQWRhdGEgZGF0YXNldCBvbiBvdmFyaWFuIGNhbmNlciBjYXNlcyBhZ2Fpbi4gCgpgYGB7cn0KCmRhdGEoQ0FkYXRhKQpjYV9wdHMgPC0gQ0FkYXRhCmNhX3Byb2ogPC0gIitwcm9qPWxjYyArbGF0XzE9NDAgK2xhdF8yPTQxLjY2NjY2NjY2NjY2NjY2IAogICAgICAgICAgICAgK2xhdF8wPTM5LjMzMzMzMzMzMzMzMzM0ICtsb25fMD0tMTIyICt4XzA9MjAwMDAwMCAKICAgICAgICAgICAgICt5XzA9NTAwMDAwLjAwMDAwMDAwMDIgK2VsbHBzPUdSUzgwIAogICAgICAgICAgICAgK2RhdHVtPU5BRDgzICt1bml0cz1tICtub19kZWZzIgoKY2FfcHRzIDwtIHN0X2FzX3NmKENBZGF0YSwgY29vcmRzPWMoIlgiLCJZIiksIGNycz1jYV9wcm9qKQpgYGAKClwKCkxldCdzIGNoZWNrIHRoZSBDUlMgYW5kIGNvbXBhcmUgaXQgdG8gb3VyIE5EVkkgZGF0YXNldC4KCmBgYHtyfQpzdF9jcnMoY2FfcHRzKQpzdF9jcnMoc2ZfcmFzdF9uZWcpCmBgYAoKXAoKSG1tbSwgbGV0J3MgbWFrZSBzdXJlIHRoZXkgYXJlIHRoZSBzYW1lIHByb2plY3Rpb24uCgpgYGB7cn0KY2FfcHRzX3Byb2ogPC0gc3RfdHJhbnNmb3JtKGNhX3B0cyxzdF9jcnMoc2ZfcmFzdF9uZWcpKQpzdF9jcnMoY2FfcHRzX3Byb2opCmBgYAoKXAoKVGhleSBzaG91bGQgYmUgZ29vZCB0byBnbyBub3cuIExldCdzIG1hcCB0aGVzZSBhZGRyZXNzZXMgb24gdG9wIG9mIHRoZSByYXN0ZXIgZGF0YSEKCmBgYHtyfQp0bWFwX21vZGUoInBsb3QiKQpORFZJX2NhbmNlcl9tYXAgPC0gIHRtX3NoYXBlKHNmX3Jhc3RfbmVnKSArCiAgdG1fcmFzdGVyKGNvbC5zY2FsZSA9IHRtX3NjYWxlX2NvbnRpbnVvdXMoKSwKICAgICAgICAgICAgY29sLmxlZ2VuZCA9IHRtX2xlZ2VuZCh0aXRsZSA9ICJORFZJIiwgb3V0c2lkZSA9IFRSVUUpKSArCiAgdG1fc2hhcGUoY2FfcHRzX3Byb2opICsKICB0bV9kb3RzKGZpbGwgPSAiYmx1ZSIsIGZpbGxfYWxwaGEgPSAwLjUsIHNpemUgPSAwLjMpCgpORFZJX2NhbmNlcl9tYXAKYGBgCgpcCgpUaGF0IGlzIG9uZSBmaW5lIGxvb2tpbmcgbWFwLiBZb3UgZGVzZXJ2ZSBhIGJyZWFrLS1nZXQgb3V0c2lkZSBhbmQgZW5qb3kgc29tZSBncmVlbnNwYWNlLiAKCgoK</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab3_FALL2026.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

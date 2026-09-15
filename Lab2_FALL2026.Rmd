@@ -181,7 +181,7 @@ download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/head
 cancer <- readRDS("CAdata.rds")
 
 summary(cancer)
-### MUST UPDATE TO USE THE RAW VERSION OF MAPGAMS CANCER DATA
+
 ```
 
 \
