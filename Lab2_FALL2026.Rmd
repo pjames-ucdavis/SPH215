@@ -29,7 +29,7 @@ Let's load some packages that we will need this week. We need to load any packag
 
 ...but here's a shortcut way to check and install packages you don't have, then load them up!
 ```{r, message=FALSE}
-packages <- c("tidygeocoder", "sf", "terra", ]"tidyverse", "tidycensus", "flextable", "tmap")
+packages <- c("tidygeocoder", "sf", "terra", "tidyverse", "tidycensus", "flextable", "tmap")
 
 installed <- packages %in% rownames(installed.packages())
 
@@ -175,12 +175,13 @@ So let's bring in the *CAdata* dataset and have a look at it.
 
 ```{r}
 # Download Cancer Dataset
-download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CAdata.rds", "CAdata.rds", mode = "wb")
 
 # Read in Cancer Dataset
-cancer <- readRDS("ca_cancer.rds")
+cancer <- readRDS("CAdata.rds")
 
 summary(cancer)
+### MUST UPDATE TO USE THE RAW VERSION OF MAPGAMS CANCER DATA
 ```
 
 \
@@ -190,7 +191,7 @@ OK, so the variables look great. Is it a spatial dataset that can be recognized 
 \
 
 ```{r}
-cancer_pts <- st_as_sf(cancer, coords=c("X","Y"))
+cancer_points <- st_as_sf(cancer, coords=c("X","Y"))
 ```
 
 \
@@ -198,7 +199,7 @@ cancer_pts <- st_as_sf(cancer, coords=c("X","Y"))
 Let's check the coordinate reference system (CRS) using the `st_crs` command in the **sf** package.
 
 ```{r}
-st_crs(cancer_pts)
+st_crs(cancer_points)
 ```
 
 Hmmm, NA. That still doesn't look good. So how do we make this a spatial file? We will need to add a CRS. 
@@ -212,19 +213,19 @@ Let's add a CRS by using `st_set_sf` from the **sf** package. We get the CRS for
 ```{r}
 #Load the projection into an object called ca_proj
 
-ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+ca_projection <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
              +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
              +y_0=500000.0000000002 +ellps=GRS80 
              +datum=NAD83 +units=m +no_defs"
 
 #Set CRS
-ca_pts_crs <- st_set_crs(cancer_pts, ca_proj)
+cancer_points_crs <- st_set_crs(cancer_points, ca_projection)
 
 #Look at dataset
-summary(ca_pts_crs) 
+summary(cancer_points_crs) 
 
 #Check the CRS
-st_crs(ca_pts_crs)
+st_crs(cancer_points_crs)
 ```
 
 \
@@ -234,7 +235,7 @@ st_crs(ca_pts_crs)
 Nice! We have a spatial dataset. That *geometry* column is how **sf** stores the geographic data, and latitude and longitude there are looking a bit more like we would expect. And we definitely have a full CRS with all sorts of info. OK, let's plot our data to make sure they look spatial! We will use the **tmap** package to plot the points. We will first specify the `tmap_mode` of "view" which is interactive. There's also a "plot" option which is nice for making exportable figures. We will then create an object called *cancer_map* and then add a layer with `tm_shape()`. This allows us to combine several maps into one, or to add layers on top of each other. Then we have to specify a level of that layer to display. Here we will use `tm_dots()` to to plot the points. In our options, we specify the size with `size=`. 
 ```{r}
 tmap_mode("view")
-cancer_map = tm_shape(ca_pts_crs) + tm_dots(size=0.5)
+cancer_map = tm_shape(cancer_points_crs) + tm_dots(size=0.5)
 cancer_map
 ```
 
@@ -242,7 +243,7 @@ cancer_map
 
 Let's play around with some of the options. We can change the color with the `fill=` option. We can make the dots smaller by specifying the `size=` option. And we can change the transparency of the points with the `fill_alpha=` option.
 ```{r}
-cancer_map_small = tm_shape(ca_pts_crs) + 
+cancer_map_small = tm_shape(cancer_points_crs) + 
   tm_dots(fill = "blue", size = 0.3, fill_alpha = 0.5)
 cancer_map_small
 ```
@@ -251,7 +252,7 @@ cancer_map_small
 
 Let's map the points color coded by the variable *event*, or whether or not the participant died over followup. We do that by specifying that the color (`fill=`) is based on the column *event*. We have to specify that *event* is a categorical variable with `fill.scale=tm_scale_categorical()`. 
 ```{r}
-cancer_map_events = tm_shape(ca_pts_crs) + 
+cancer_map_events = tm_shape(cancer_points_crs) + 
   tm_dots(size=0.3, fill="event", fill.scale=tm_scale_categorical())
 cancer_map_events
 ```
@@ -260,7 +261,7 @@ cancer_map_events
 
 Let's see if we can change up the color scheme.
 ```{r}
-cancer_map_events_rg = tm_shape(ca_pts_crs) + 
+cancer_map_events_rg = tm_shape(cancer_points_crs) + 
   tm_dots(fill = "event", fill.scale=tm_scale_categorical(values=c("0"="gray","1"="red")))
 cancer_map_events_rg
 ```
@@ -482,7 +483,7 @@ The functions above help us bring in and clean data. The next set of functions c
 
 When describing a distribution, your quantitative message is often best communicated by reducing data to a few summary numbers. These numbers are meant to summarize the “typical” value in the distribution (e.g., mean, median, mode) and the variation or “spread” in the distribution (e.g., minimum/maximum, interquartile range, standard deviation). These summary numbers are known as descriptive statistics.
 
-We can use the function summarize() to get descriptive statistics of our data. For example, let’s calculate the mean household income in California counties. The first argument inside summarize() is the data object cacounty and the second argument is the function calculating the specific summary statistic, in this case mean().
+We can use the function `summarize()` to get descriptive statistics of our data. For example, let’s calculate the mean household income in California counties. The first argument inside `summarize()` is the data object cacounty and the second argument is the function calculating the specific summary statistic, in this case `mean()`.
 
 ```{r}
 cacounty %>%
@@ -528,7 +529,7 @@ cacounty <- cacounty %>%
 
 \
 
-Next, we need to pair `summarize()` with the function `group_by()`. The function `group_by()` tells R to run subsequent functions on the data object by a group characteristic (such as gender, educational attainment, or in this case, region). We’ll need to use our new best friend %>% to accomplish this task.
+Next, we need to pair `summarize()` with the function `group_by()`. The function `group_by()` tells R to run subsequent functions on the data object by a group characteristic (such as gender, educational attainment, or in this case, region). We’ll need to use our new best friend `%>%` to accomplish this task.
 
 ```{r}
 cacounty %>%
@@ -536,7 +537,7 @@ cacounty %>%
   summarize(Mean = mean(mhhinc))
 ```
 
-The first pipe sends cacounty into the function `group_by()`, which tells R to group *cacounty* by the variable *region*.
+The first pipe sends *cacounty* into the function `group_by()`, which tells R to group *cacounty* by the variable *region*.
 
 How do you know the tibble is grouped? Because it tells you!
 
@@ -549,7 +550,7 @@ cacounty %>%
 
 The second pipe takes this grouped dataset and sends it into the `summarize()` command, which calculates the mean income (by region, because the dataset is grouped by region).
 
-To get the mean, median and standard deviation of median income, its correlation with percent Hispanic, and give column labels for the variables in the resulting summary table, we type in:
+To get the mean, median, and standard deviation of county median income, its correlation with percent Hispanic, and give column labels for the variables in the resulting summary table, we type in:
 
 ```{r}
 cacounty %>%
@@ -573,7 +574,7 @@ cacounty %>%
 
 \
 
-The code `group_by(mhisp)` separates the counties by the categories of mhisp (Majority, Not Majority). We then used `summarize()` to count the number of counties that are Majority and Not Majority. The function to get a count is `n()`, and we saved this count in a variable named *n*. Next, we used `mutate()` on this table to get the proportion of counties by Majority Hispanic designation. The code `sum(n)` adds the values of *n*. We then divide the value of each n by this sum. That yields the final frequency table.
+The code `group_by(mhisp)` separates the counties by the categories of *mhisp* (Majority, Not Majority). We then used `summarize()` to count the number of counties that are Majority and Not Majority. The function to get a count is `n()`, and we saved this count in a variable named *n*. Next, we used `mutate()` on this table to get the proportion of counties by Majority Hispanic designation. The code `sum(n)` adds the values of *n*. We then divide the value of each n by this sum. That yields the final frequency table.
 
 Instead of calculating descriptive statistics one at a time using `summarize()`, you can obtain a set of summary statistics for one or all the numeric variables in your dataset using the `summary()` function.
 
@@ -669,8 +670,8 @@ ggplot(data = <DATA>) +
 
 \
 
-1. `ggplot()` is the base function where you specify your dataset using the data = <DATA> argument.
-2. You then need to build on this base by using the plus operator + and <GEOM_FUNCTION>() where <GEOM_FUNCTION>() is a unique geom function indicating the type of graph you want to plot. Each unique function has its unique set of mapping arguments which you specify using the mapping = aes() argument. Charts and graphs have an x-axis, y-axis, or both. Check this ggplot cheat sheet for all possible geoms.
+1. `ggplot()` is the base function where you specify your dataset using the data = `<DATA>` argument.
+2. You then need to build on this base by using the plus operator `+` and `<GEOM_FUNCTION>()` where `<GEOM_FUNCTION>()` is a unique geom function indicating the type of graph you want to plot. Each unique function has its unique set of mapping arguments which you specify using the `mapping = aes()` argument. Charts and graphs have an x-axis, y-axis, or both. Check this ggplot cheat sheet for all possible geoms.
 3. `<OPTIONS>()` are a set of functions you can specify to change the look of the graph, for example relabeling the axes or adding a title.
 
 The basic idea is that a ggplot graphic layers geometric objects (circles, lines, etc), themes, and scales on top of data.
@@ -691,7 +692,7 @@ Let’s go through some of the more common and popular graphs for visualizing yo
 
 ### Histogram
 
-A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for <GEOM_FUNCTION()>. Let’s create a histogram of median household income. Note that we don’t need to specify the `y=` here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
+A typical visual for summarizing a single numeric variable is a histogram. To create a histogram, use `geom_histogram()` for `<GEOM_FUNCTION()>`. Let’s create a histogram of median household income. Note that we don’t need to specify the `y=` here because we are plotting only one variable. We pipe in the object *cacounty* into `ggplot()` to establish the base layer. We then use `geom_histogram()` to add the data layer on top of the base.
 
 ```{r}
 cacounty %>%
@@ -763,7 +764,7 @@ cacounty %>%
 
 ### Bar chart
 
-The primary purpose of a bar chart is to illustrate and compare the values for a categorical variable. Bar charts show either the number or frequency of each category. To create a bar chart, use `geom_bar()` for <GEOM_FUNCTION>(). Let’s show a bar chart of median household income by region. We’ll borrow from code above that generated a tibble of mean household income by region, and pipe that into `ggplot()`.
+The primary purpose of a bar chart is to illustrate and compare the values for a categorical variable. Bar charts show either the number or frequency of each category. To create a bar chart, use `geom_bar()` for `<GEOM_FUNCTION>()`. Let’s show a bar chart of median household income by region. We’ll borrow from code above that generated a tibble of mean household income by region, and pipe that into `ggplot()`.
 
 ```{r}
 cacounty %>%
