@@ -1,0 +1,17 @@
+---
+title: "Save Old MapGAM"
+author: "Peter James"
+date: "2026-09-15"
+output: html_document
+---
+# Get CAdata from old version of MapGAM
+
+```{r}
+install.packages("remotes", repos = "https://cloud.r-project.org")
+remotes::install_github("cran/MapGAM")
+library(MapGAM)
+data("CAdata")
+saveRDS(CAdata, "CAdata.rds")
+```
+
+

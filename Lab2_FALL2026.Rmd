@@ -29,7 +29,7 @@ Let's load some packages that we will need this week. We need to load any packag
 
 ...but here's a shortcut way to check and install packages you don't have, then load them up!
 ```{r, message=FALSE}
-packages <- c("tidygeocoder", "sf", "terra", "MapGAM", "tidyverse", "tidycensus", "flextable", "tmap")
+packages <- c("tidygeocoder", "sf", "terra", ]"tidyverse", "tidycensus", "flextable", "tmap")
 
 installed <- packages %in% rownames(installed.packages())
 
@@ -47,7 +47,6 @@ And here's the traditional way we would have loaded them (don't need this now th
 ```{r, message=FALSE}
 library(tidygeocoder)
 library(sf)
-library(MapGAM)
 library(tidyverse)
 library(tidycensus)
 library(flextable)
@@ -159,7 +158,7 @@ Now let's get our hands dirty working with some spatial data.
 
 # Vectors: Import Cancer Point Data
 
-For this lab, we will primarily be working with the [*MapGAM* package](https://cran.r-project.org/web/packages/MapGAM/index.html). If you go to the link, you can read the reference manual on the various datasets available in the package. For this lab, we will mainly be working with the *CAdata* dataset. While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. This is a cohort with **time to mortality** measured, but for the purposes of our class, we will conduct simple tabular analyses looking at associations between spatial exposures with mortality at end of follow-up.
+For this lab, we will primarily be working with a fake cancer dataset from the now-defunct MapGAM package (read more [here](https://rdrr.io/cran/MapGAM/) if you're interested in reading the reference manual on the various datasets available in the package). For this lab, we will mainly be working with the *CAdata* dataset. While they are based on real patterns expected in observational epidemiologic studies, these data have been simulated and are for teaching purposes only. The data contain 5000 simulated ovarian cancer cases. This is a cohort with **time to mortality** measured, but for the purposes of our class, we will conduct simple tabular analyses looking at associations between spatial exposures with mortality at end of follow-up.
 
 The *CAdata* dataset contains the following variables
 
@@ -172,12 +171,16 @@ The *CAdata* dataset contains the following variables
 
 \
 
-So let's bring in the *CAdata* dataset and have a look at it. We don't have to do much because it's part of the **MapGAM** package and quickly loads in with the `data()` command.
+So let's bring in the *CAdata* dataset and have a look at it. 
 
 ```{r}
-data(CAdata)
-ca_pts <- CAdata
-summary(ca_pts)
+# Download Cancer Dataset
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CA_Cancer_Data.rds", "ca_cancer.rds", mode = "wb")
+
+# Read in Cancer Dataset
+cancer <- readRDS("ca_cancer.rds")
+
+summary(cancer)
 ```
 
 \
@@ -187,7 +190,7 @@ OK, so the variables look great. Is it a spatial dataset that can be recognized 
 \
 
 ```{r}
-ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
+cancer_pts <- st_as_sf(cancer, coords=c("X","Y"))
 ```
 
 \
@@ -195,7 +198,7 @@ ca_pts <- st_as_sf(CAdata, coords=c("X","Y"))
 Let's check the coordinate reference system (CRS) using the `st_crs` command in the **sf** package.
 
 ```{r}
-st_crs(ca_pts)
+st_crs(cancer_pts)
 ```
 
 Hmmm, NA. That still doesn't look good. So how do we make this a spatial file? We will need to add a CRS. 
@@ -215,7 +218,7 @@ ca_proj <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666
              +datum=NAD83 +units=m +no_defs"
 
 #Set CRS
-ca_pts_crs <- st_set_crs(ca_pts, ca_proj)
+ca_pts_crs <- st_set_crs(cancer_pts, ca_proj)
 
 #Look at dataset
 summary(ca_pts_crs) 
