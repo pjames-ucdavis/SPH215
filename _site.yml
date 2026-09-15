@@ -8,23 +8,21 @@ navbar:
       href: Labs_2026.html
       menu:
         - text: "Lab 1: Intro to R"
-          href: Lab1_2026.html
-        - text: "Lab 2: Understanding Packages and Wrangling Data in R"
-          href: Lab2_2026.html
-        - text: "Lab 3: Geocoding, Vector Data, and Census Data"
+          href: Lab1_FALL2026.html
+        - text: "Lab 2: Geocoding, Vector Data, and Census Data"
+          href: Lab2_FALL2026.html
+        - text: "Lab 3: More with Vector Data and Visualizing Raster Data"
           href: Lab3_2026.html
-        - text: "Lab 4: More with Vector Data and Visualizing Raster Data"
+        - text: "Lab 4: Spatial Data Processing with Vector Data"
           href: Lab4_2026.html
-        - text: "Lab 5: Spatial Data Processing with Vector Data"
+        - text: "Lab 5: Working with Raster and Vector Data Together"
           href: Lab5_2026.html
-        - text: "Lab 6: Working with Raster and Vector Data Together"
+        - text: "Lab 6: Network Analysis"
           href: Lab6_2026.html
-        - text: "Lab 7: Network Analysis"
+        - text: "Lab 7: Spatial Statistics and Geographically Weighted Regression"
           href: Lab7_2026.html
-        - text: "Lab 8: Spatial Statistics and Geographically Weighted Regression"
+        - text: "Lab 8: Future Directions in GIS and Public Health"
           href: Lab8_2026.html
-        - text: "Lab 9: Future Directions in GIS and Public Health"
-          href: Lab9_2026.html
     - text: "Assignment Guide"
       href: Assignments_2026.html
     - text: "Data Sources"

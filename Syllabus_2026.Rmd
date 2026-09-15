@@ -12,13 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \
 
-The following is an abridged version of the course syllabus. A full course syllabus can be found on the [Canvas class website](https://canvas.ucdavis.edu/courses/1064227).
+The following is an abridged version of the course syllabus. A full course syllabus can be found on the [Canvas class website](https://canvas.ucdavis.edu/courses/1125608).
 
 # Lecture and Lab
 
-**Lecture:** Mondays 3:50p-5:20p
+**Lecture:** Mondays 3:10p-4:30p
 
-**Lab:** Wednesdays 3:50p-5:20p
+**Lab:** Wednesdays 3:10p-4:30p
 
 Lecture and Lab are held in person.
 
@@ -29,7 +29,7 @@ Lecture and Lab are held in person.
 **Instructor**
 Dr. Peter James
 
-Associate Professor in the Department of Public Health Sciences
+Professor in the Department of Public Health Sciences
 
 Contact: pjames.at.health.ucdavis.edu
 
