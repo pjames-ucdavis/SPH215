@@ -1,0 +1,363 @@
+---
+title: 'Lab 7: Spatial Statistics and Geographically Weighted Regression in Public
+  Health'
+---
+
+\
+
+# Introduction
+
+Welcome to your crash course in spatial statistics for public health! We're going to cover a lot today in terms of analysis of spatial data. We'll explore mapping, clustering, and how relationships between variables vary across geography. Buckle up!
+
+The objectives of this guide are to teach you to:
+
+1. Use multiple methods to identify spatial autocorrelation
+2. Account for spatial autcorrelation in regression using spatial lag models
+3. Conduct geographically weighted regression to model how associations vary across space
+
+\
+
+# Load packages
+
+As always, we need to load our packages. We have a few new friends joining us this week.
+
+- **`spdep`**: This package handles spatial dependence — creating neighborhood structures and calculating statistics like Moran's I and Local Indicators of Spatial Association (LISA). Think of it as your go-to for spatial autocorrelation.
+- **`spatialreg`**: This package builds on **spdep** and provides maximum likelihood estimation for spatial regression models like spatial lag and spatial error models. It's your go-to tool for formal spatial regressions in R.
+- **`spgwr`**: This package provides tools for Geographically Weighted Regression (GWR). In this tutorial, we use `gwr.sel()` to select an adaptive bandwidth and `gwr()` to estimate local regression coefficients.
+
+Together, these packages help us detect patterns, clusters, account for spatial dependence, and explore relationships that change across space — essential for spatial health analysis.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+library(tidyverse)
+library(tidycensus)
+library(sf)
+library(tmap)
+library(spdep)
+library(spatialreg)
+library(spgwr)
+```
+
+
+\
+
+# Data Collection and Preparation
+
+First, we need data. We'll grab county-level diabetes prevalence for 2021 from the CDC and merge it with county geometries and median household income from the American Community Survey 2021. For the diabetes data, I downloaded this from the [CDC US Diabetes Surveillance System](https://gis.cdc.gov/grasp/diabetes/diabetesatlas-surveillance.html#). It comes in a little ugly, so we will have to clean up the column names, reformat the FIPS codes, and filter to just California counties.
+
+```{r load-data}
+# Load and clean CDC diabetes CSV
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/DiabetesAtlas_CountyData.csv", destfile = "DiabetesAtlas_CountyData.csv", mode = "wb")
+diab_raw <- read_csv("DiabetesAtlas_CountyData.csv", skip = 2) |> 
+  slice(1:(n() - 1))  # remove last row
+
+# Clean column names
+names(diab_raw) <- str_trim(names(diab_raw))
+
+# Format FIPS codes with leading zeros
+diab_raw <- diab_raw |> 
+  mutate(CountyFIPS = str_pad(as.character(as.integer(CountyFIPS)), 5, pad = "0"))
+
+# Filter for California counties only
+ca_diabetes <- diab_raw |> 
+  filter(str_starts(CountyFIPS, "06")) |> 
+  mutate(Percentage = as.numeric(Percentage)) |> 
+  select(FIPS = CountyFIPS, County, Diabetes = Percentage)
+```
+
+\
+
+Now lets get our good ole median income data from the US Census. Because it's 2021 Diabetes data, we will pull the 2017-2021 five year estimates from the ACS.
+```{r get-acs, results=FALSE}
+# Download median income and geometries for California counties
+ca_geo <- get_acs(
+  geography = "county",
+  variables = c(income = "B19013_001"),  # Median household income
+  state = "CA",
+  geometry = TRUE,
+  year = 2021
+) %>%
+  rename(income = estimate) %>%
+  select(GEOID, NAME, income, geometry)
+```
+
+\
+
+Now let's join our diabetes dataset with our income dataset at the county level. Then we will take a quick look at our data.
+```{r}
+# Merge diabetes and ACS income data
+ca_diab_data <- ca_geo |> 
+  left_join(ca_diabetes, by = c("GEOID" = "FIPS")) |>
+  mutate(income_10k = income / 10000)
+
+glimpse(ca_diab_data)
+summary(ca_diab_data$Diabetes)
+summary(ca_diab_data$income_10k)
+```
+
+\
+
+# Exploratory Mapping
+
+Let's make a map and see what diabetes prevalence looks like across counties in California. 
+
+```{r exploratory-mapping}
+
+tmap_mode("view")
+tm_shape(ca_diab_data) +
+  tm_polygons(fill = "Diabetes", 
+              fill.scale = tm_scale_intervals(style = "quantile",
+                                              values = "brewer.reds"),
+              fill.legend = tm_legend(title = "% Diagnosed Diabetes"))
+```
+
+\
+
+# Methods to Identify Spatial Autocorrelation
+
+Now let’s ask: are diabetes rates clustered in space, or scattered randomly like confetti in a strong breeze? This is where spatial autocorrelation steps in. We'll start with Moran’s I — the granddaddy of spatial pattern detection.
+
+\
+
+## Global Moran’s I
+
+Moran’s I is a measure of overall spatial autocorrelation — that is, how similar or dissimilar values (like diabetes prevalence) are in nearby areas (i.e., in nearby counties). 
+
+- Values close to **+1** mean strong positive spatial autocorrelation — high values cluster with other high values, and low with low (think: like attracts like).
+- Values near **0** mean no spatial pattern — just noise.
+- Values near **-1** mean high and low values are actively repelling each other (rare in public health).
+
+Let's calculate Moran’s I and find out if diabetes prevalence in California follows any spatial logic. First, we use `poly2nb()` in the **spdep** package to figure out which polygons are neighbors--that is which counties are adjacent to each other. Next, we use `nb2listw()` from **spdep** to create a spatial weights object. We are basically giving weights to each neighbor. Then we run the Moran's I test using `moran.test()` and the weights we just created. 
+
+```{r morans-i}
+nb <- poly2nb(ca_diab_data) 
+lw <- nb2listw(nb, style = "W")
+moran.test(ca_diab_data$Diabetes, lw)
+```
+
+### Interpreting Moran's I
+
+- A **Moran’s I value of ~0.3** means moderate positive spatial autocorrelation — counties with similar diabetes rates are near each other.
+- A **p-value < 0.001** tells us this clustering is **statistically significant** — not random.
+
+**Take home:** Diabetes rates aren’t randomly distributed across California. There are clusters of high and low values, and we’ve got statistical proof! This result tells us that there is statistically significant spatial clustering of diabetes prevalence across California counties. Counties with high diabetes rates tend to be near other high-rate counties, and the same is true for low-rate counties. The Moran’s I value of ~0.3 indicates moderate positive spatial autocorrelation, and the tiny p-value confirms that this pattern is not due to chance.
+
+\
+
+## Local Moran’s I (LISA)
+
+While Moran’s I tells us whether there's spatial autocorrelation in general, LISA zooms in and tells us **where** it's happening. 
+
+LISA stands for Local Indicators of Spatial Association, and it helps us detect:
+
+- **High-High clusters**: High diabetes rates surrounded by other high-rate counties (hot clusters).
+- **Low-Low clusters**: Healthy zones with low diabetes prevalence.
+- **High-Low or Low-High outliers**: Counties that buck the trend — like a donut hole in a cake.
+
+Mapping LISA helps target interventions more precisely, and explain those spatial oddballs.
+
+To run LISA, we use the weights we just created, but now use the function `localmoran()`. We will then pull out *Ii*, which is the local Moran's I statistic for each county — a measure of local spatial autocorrelation. A high positive value indicates strong clustering with neighbors (e.g., a high-rate county surrounded by other high-rate counties). We also pull out *Pval*, which gives the p-value for that local statistic, testing whether the observed local clustering is statistically significant. Small p-values suggest that the clustering is unlikely due to random chance.
+
+```{r lisa}
+local_moran <- localmoran(ca_diab_data$Diabetes, lw)
+ca_diab_data$Ii <- local_moran[, "Ii"]
+ca_diab_data$Pval <- local_moran[, "Pr(z != E(Ii))"]
+
+# Map LISA
+tm_shape(ca_diab_data) +
+  tm_polygons(fill = "Ii", 
+              fill.scale = tm_scale_intervals(style = "quantile", 
+                                              values = "brewer.pu_or"), 
+              fill.legend = tm_legend(title = "Local Moran's I")) +
+  tm_title_out(text = "Local Spatial Clustering of Diabetes")
+```
+
+\
+
+### Interpreting the LISA Map
+
+This map shows where spatial clustering of diabetes is strongest — not just overall, but **locally**. Here's how to read it:
+
+- **Positive Local Moran's I values** indicate that a county tends to have a value similar to its neighbors, consistent with local clustering.
+- **Negative values** indicate local spatial dissimilarity, where a county differs from its neighbors.
+- The Local Moran's I statistic alone does not tell us whether a positive cluster is **high-high** or **low-low**, and the mapped statistic alone should not be interpreted as statistical significance. To classify cluster types, we would also compare each county's diabetes value with the values of its neighbors; statistical significance should be assessed using the local p-values.
+
+**Take home:** Local Moran's I helps identify where spatial clustering or spatial outliers may occur. A fuller LISA cluster map would combine the sign and magnitude of the local statistic with the underlying diabetes values and statistical significance.
+
+\
+
+## Hot Spot Analysis (Gi*)
+
+Now we spice things up with the Getis-Ord Gi* statistic — pronounced "gee-eye-star." This method identifies **statistically significant hot and cold spots** in the data.
+
+- A **hot spot** is a county with a high value (e.g., diabetes rate) surrounded by other high-value neighbors.
+- A **cold spot** is the opposite: a low-value county in a sea of low values.
+
+Gi* doesn't just look at one value — it considers the neighborhood around each observation too. This is powerful for public health mapping, especially when prioritizing interventions or allocating resources. **Hot** and **cold** spots are areas with **statistically significantly** higher or lower rates than expected.
+
+We run Gi* by using the function `localG()` from the **spdep** package and using the same weights as before. We can then map the *gi_star* values by county.
+
+```{r gi-star}
+gi_star <- localG(ca_diab_data$Diabetes, lw)
+ca_diab_data$Gi_star <- as.numeric(gi_star)
+
+tm_shape(ca_diab_data) +
+  tm_polygons(fill = "Gi_star", 
+              fill.scale = tm_scale_intervals(style = "pretty",
+                                              values = "-brewer.rd_bu"),
+              fill.legend = tm_legend(title = "Gi* Hot Spots"))
+```
+
+### Interpreting the Gi* Map
+
+This map shows the local Getis-Ord statistic for diabetes prevalence. Large positive values indicate areas where high diabetes values tend to occur near other high values, while large negative values indicate areas where low values tend to occur near other low values.
+
+Values around **+2 or greater** provide evidence consistent with local hot spots, while values around **-2 or lower** provide evidence consistent with local cold spots. Values closer to zero provide less evidence of local concentration of unusually high or low values.
+
+**Take home:** Gi* helps us identify locations where high or low diabetes prevalence is spatially concentrated. These patterns can generate hypotheses about regional processes, but the map by itself does not tell us why those clusters occur.
+
+\
+
+# Spatial Lag Model
+
+Now that we've explored autocorrelation and hot spots, let’s try a classic spatial regression: the **Spatial Lag Model**. This model is useful when the outcome in one location might be influenced by nearby locations — like diabetes in one county being affected by its neighbors, which we have seen above!
+
+Based on the exploratory mapping and global Moran’s I, there appears to be spatial autocorrelation in diabetes. A standard regression assumes that observations are independent. When spatial dependence is present, that assumption may be violated, which can affect model estimates, standard errors, and inference depending on the underlying spatial process. Spatial regression models allow us to explicitly represent that dependence.
+
+In a spatial lag model, we include a **spatially lagged dependent variable** as a predictor:
+- It captures the "spillover" effect of nearby values.
+- It helps address spatial dependence that ordinary regression would miss.
+
+We'll use the `lagsarlm()` function from the `spatialreg` package and will use the same spatial weights as before.
+
+```{r spatial-lag-model}
+# Define neighbors and spatial weights
+nb <- poly2nb(ca_diab_data)
+lw <- nb2listw(nb, style = "W")
+
+# Run spatial lag model
+lag_model <- lagsarlm(Diabetes ~ income_10k, data = ca_diab_data, listw = lw)
+summary(lag_model)
+```
+
+## Interpreting the Spatial Lag Model
+
+Let’s break down the results of our spatial lag model:
+
+- The **spatial lag coefficient (rho)** is about **0.48** and statistically significant (*p < 0.002*). That means diabetes rates in a county are **strongly influenced by neighboring counties** — there's real spatial autocorrelation.
+- The **income coefficient** is **negative**, suggesting that higher median household income is associated with lower diabetes prevalence. Because income is expressed in $10,000 units, the coefficient represents the expected difference in diabetes prevalence associated with a $10,000 difference in median household income, holding the spatial lag term constant. Examine the model output to determine the magnitude and statistical uncertainty of this association.
+- The **AIC (Akaike Information Criterion)** is lower for the spatial lag model than for the regular OLS model (176 vs. 184), suggesting that the spatial lag model is a better fit---this means we really should be accounting for spatial autocorrelation!
+- The **residual autocorrelation test** is not significant (*p = 0.85*), which means the model has successfully addressed spatial dependence in the residuals.
+
+**Take home:** There is strong spatial dependence in diabetes rates, and including spatial effects accounts for this spatial autocorrelation. However, income may not be a key driver of diabetes once those spatial influences are considered.
+
+\
+
+# Geographically Weighted Regression (GWR)
+
+GWR — Geographically Weighted Regression — is like regular regression but with a twist: the coefficients can change depending on **where** you are.
+
+Traditional regression assumes one-size-fits-all relationships. But in public health, the impact of income on diabetes may differ from San Francisco to Fresno.
+
+GWR fits local regression models, allowing the estimated relationship between income and diabetes to vary across California rather than assuming one relationship is constant everywhere.
+
+Before fitting the GWR, let's fit a standard global regression model. This gives us one statewide income coefficient that we can later compare with the range of local coefficients estimated by GWR.
+
+```{r global-model}
+global_model <- lm(Diabetes ~ income_10k, data = ca_diab_data)
+summary(global_model)
+```
+
+Because `income_10k` is median household income measured in units of $10,000, its coefficient is much easier to interpret than a coefficient for a one-dollar increase in income.
+
+Next, we will create a point location for each county using its geometric centroid with `st_centroid()` from the **sf** package. We then use `gwr.sel()` from **spgwr** to choose an adaptive bandwidth using cross-validation. Finally, `gwr()` fits the local regressions using that bandwidth.
+
+```{r gwr}
+# Create county centroid coordinates
+coords <- st_coordinates(st_centroid(ca_diab_data))
+ca_diab_data$X <- coords[, 1]
+ca_diab_data$Y <- coords[, 2]
+
+# Select the optimal adaptive bandwidth
+bw <- spgwr::gwr.sel(
+  Diabetes ~ income_10k,
+  data = st_drop_geometry(ca_diab_data),
+  coords = coords,
+  adapt = TRUE
+)
+
+# Run GWR using the adaptive bandwidth
+gwr_model <- spgwr::gwr(
+  Diabetes ~ income_10k,
+  data = st_drop_geometry(ca_diab_data),
+  coords = coords,
+  adapt = bw,
+  hatmatrix = TRUE
+)
+
+# Store the local income coefficients
+ca_diab_data$gwr_income <- gwr_model$SDF$income_10k
+
+# Compare the statewide coefficient with the local GWR coefficients
+coef(global_model)["income_10k"]
+summary(ca_diab_data$gwr_income)
+```
+
+\
+
+## Interpreting the GWR results
+
+The bandwidth-selection output shows the model testing different **adaptive q** values. These represent the proportion of observations receiving non-zero weight in each local regression. The value that minimizes the cross-validation (CV) score is selected. Because the bandwidth is adaptive, the geographic distance covered by the local neighborhood can vary: it may be smaller where counties are geographically concentrated and larger where counties are more dispersed.
+
+After fitting the model, compare the single statewide income coefficient from `global_model` with the distribution of local GWR coefficients. The global model summarizes California with one association; GWR shows how the estimated association varies geographically.
+
+\
+
+## Map Local GWR Coefficients
+
+Let’s map those locally varying regression coefficients and see where income matters more (or less) for diabetes.
+
+```{r gwr-map}
+tm_shape(ca_diab_data) +
+  tm_polygons(
+    fill = "gwr_income",
+    fill.scale = tm_scale_intervals(
+      style = "pretty",
+      values = "brewer.rd_yl_gn"
+    ),
+    fill.legend = tm_legend(
+      title = "Change in diabetes prevalence\nper $10,000 higher income"
+    )
+  ) +
+  tm_title_out(text = "Local Income-Diabetes Associations")
+```
+
+\
+
+### Interpreting the GWR Map
+
+This map shows how the estimated relationship between median household income and diabetes prevalence **varies across California**.
+
+Each county is assigned a locally estimated regression coefficient. Because income is measured in $10,000 units, a local coefficient of **-0.30**, for example, means that a $10,000 higher median household income is associated with approximately **0.30 percentage points lower diabetes prevalence** in that local area.
+
+- **More negative coefficients** indicate a stronger inverse association between income and diabetes prevalence.
+- **Coefficients closer to zero** indicate a weaker local association.
+- Compare the range of local coefficients with the single statewide coefficient from the global regression. This illustrates what can be hidden when we assume that one association applies everywhere.
+
+**Take home:** GWR suggests that the income-diabetes association may exhibit **spatial heterogeneity** across California. However, these are descriptive associations, not estimates of the causal effect of changing income. Differences in local coefficients could reflect confounding, differences in population composition, or instability in local estimates.
+
+**Think about it:** How does the statewide income coefficient compare with the range of local GWR coefficients? What information about the income-diabetes relationship is lost when we report only the statewide estimate?
+
+\
+
+# Overall take home
+
+- **Moran's I**: Measures overall spatial autocorrelation (is there a pattern?).
+- **LISA/Gi**: Reveal local clusters and hot/cold spots (where’s the action?).
+- **Spatial Lag Model**: Quantifies spatial autocorrelation and adjusts for spatial autocorrelation in regression models.
+- **GWR**: Shows where exposure-outcome relationships are strong, weak, or flipping direction.
+
+# Summary
+
+Boom! You just crunched real public health data using cutting-edge spatial tools to look at spatial clustering / autocorrelation. And we even learned some regression approaches to account for spatial autocorrelation. Well done! We've just scratched the surface on these spatial statistics approaches, but this is complicated stuff. We've come so far from Week 1! I'm proud of you!

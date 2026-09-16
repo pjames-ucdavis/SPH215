@@ -14,15 +14,15 @@ navbar:
         - text: "Lab 3: More with Vector Data and Visualizing Raster Data"
           href: Lab3_FALL2026.html
         - text: "Lab 4: Spatial Data Processing with Vector Data"
-          href: Lab4_2026.html
+          href: Lab4_FALL2026.html
         - text: "Lab 5: Working with Raster and Vector Data Together"
-          href: Lab5_2026.html
+          href: Lab5_FALL2026.html
         - text: "Lab 6: Network Analysis"
-          href: Lab6_2026.html
+          href: Lab6_FALL2026.html
         - text: "Lab 7: Spatial Statistics and Geographically Weighted Regression"
-          href: Lab7_2026.html
+          href: Lab7_FALL2026.html
         - text: "Lab 8: Future Directions in GIS and Public Health"
-          href: Lab8_2026.html
+          href: Lab8_FALL2026.html
     - text: "Assignment Guide"
       href: Assignments_2026.html
     - text: "Data Sources"

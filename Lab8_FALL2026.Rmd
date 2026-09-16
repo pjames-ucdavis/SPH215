@@ -1,0 +1,665 @@
+---
+title: 'Lab 8: GPS, Activity Spaces, and Momentary Environmental Exposure'
+---
+
+In this final lab, we bring together everything we've learned this quarter:  
+vector data, raster data, coordinate systems, interactive maps, and exposure science. In this lab, we're diving into the wonderful world of **GPS data**, our old friend **NDVI rasters**, and some fun **interactive mapping**. We will also finish with a real example of **ecological momentary assessment (EMA)** data from the Dartmouth StudentLife study.
+
+The objectives of this guide are to teach you to:
+
+1. Understand how to load and preprocess GPS tracking data in R
+2. Calculate movement metrics (distance + speed)  
+3. Create interactive mobility maps with **leaflet**  
+4. Compare spatial patterns across time of day using **tmap**  
+5. Integrate NDVI rasters as environmental exposure  
+6. Extract momentary exposure values  
+7. Visualize exposure over time
+8. Understand how GPS can be linked with momentary health data
+9. Map and interpret geolocated EMA responses
+10. Examine the relationship between momentary greenness exposure and EMA stress
+
+Let's do this, one last time!
+
+\
+
+---
+
+# Load our packages
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(readr)
+library(terra)
+library(sf)
+library(tmap)
+
+# New packages this week!
+library(lubridate)
+library(leaflet)
+library(geosphere)
+library(ggplot2)
+```
+
+\
+
+# Import and Prepare Our GPS Data
+
+Here we read in our GPS dataset, parse the timestamp, and create friendly time labels. This is where **readr**, **dplyr**, and **lubridate** come together to tackle this task.
+
+```{r, message=FALSE}
+download.file(
+  "https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/gps_apr25_30.csv",
+  destfile = "gps_apr25_30.csv",
+  mode = "wb"
+)
+
+gps_data_raw <- read_csv("gps_apr25_30.csv")
+
+gps_data <- gps_data_raw %>%
+  mutate(
+    time = ymd_hms(`UTC time`),
+    time_label = format(time, "%Y-%m-%d %H:%M:%S")
+  ) %>%
+  arrange(time)
+
+glimpse(gps_data)
+```
+
+We now have minute-level GPS points over multiple days. GPS data let us move beyond a person's residential address and begin to characterize the environments they actually encounter as they move through daily life.
+
+\
+
+# Movement Analytics
+
+Now we will calculate:
+
+- Distance between consecutive points  
+- Time difference  
+- Speed 
+
+This helps us get an idea of how fast we are moving at any point!
+
+```{r}
+gps_data <- gps_data %>%
+  mutate(
+    lon2 = lead(longitude),
+    lat2 = lead(latitude),
+    t2   = lead(time),
+    dt_s = as.numeric(difftime(t2, time, units = "secs")),
+    step_m = distHaversine(
+      cbind(longitude, latitude),
+      cbind(lon2, lat2)
+    ),
+    speed_mps = step_m / dt_s
+  ) %>%
+  filter(dt_s > 0) %>%
+  mutate(speed_mps = ifelse(is.infinite(speed_mps), NA, speed_mps))
+
+summary(gps_data$speed_mps)
+```
+
+That is a dynamic view of human mobility in meters per second. Some of those numbers are a little high though! GPS error, long gaps between observations, and other measurement issues can create unrealistic apparent speeds. Sensor data almost always require quality control.
+
+\
+
+# Mapping with Leaflet: Interactive Map Colored by Speed (mph)
+
+Now let’s use the **leaflet** package to make an interactive map of our GPS data. Let's start by converting speed to miles per hour and removing unrealistic values (>90 mph).
+
+```{r}
+gps_speed_clean <- gps_data %>%
+  mutate(speed_mph = speed_mps * 2.23694) %>%
+  filter(
+    !is.na(speed_mph),
+    speed_mph > 0,
+    speed_mph < 90
+  )
+```
+
+Now let's map points by speed!
+
+```{r}
+pal_speed <- colorNumeric(
+  palette = "viridis",
+  domain = range(gps_speed_clean$speed_mph, na.rm = TRUE)
+)
+
+leaflet(gps_speed_clean) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas)%>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 3,
+    color = ~pal_speed(speed_mph),
+    stroke = FALSE,
+    fillOpacity = 0.85,
+    popup = ~paste(
+      "Time:", time_label,
+      "<br>Speed (mph):", round(speed_mph, 1)
+    )
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = pal_speed,
+    values = ~speed_mph,
+    title = "Speed (mph)"
+  )
+```
+
+This map shows where movement is slow versus fast. Slow movement could represent stationary time or walking; faster movement could represent biking, driving, or transit. **What do you see?**
+
+---
+
+# Time-of-Day Maps
+
+Let's compare spatial behavior across time of day.
+
+```{r}
+gps_data <- gps_data %>%
+  mutate(
+    hour = hour(time),
+    tod = cut(
+      hour,
+      breaks = c(-1, 5, 11, 17, 23),
+      labels = c("Night", "Morning", "Afternoon", "Evening")
+    )
+  )
+
+gps_sf <- st_as_sf(gps_data, coords = c("longitude", "latitude"), crs = 4326)
+
+tmap_mode("plot")
+
+tm_shape(gps_sf) +
+  tm_symbols(
+    fill = "steelblue",
+    col = NA,
+    size = 0.2,
+    fill_alpha = 0.6
+  ) +
+  tm_facets(by = "tod", ncol = 2, free.coords = FALSE) +
+  tm_title(
+    text = "Activity Space by Time of Day",
+    size = 1.2
+  ) +
+  tm_basemap()
+```
+
+Interesting. I like the nightlife. I like to boogie.
+
+\
+
+# Add Nature: Load an NDVI Raster
+
+Let's make this richer by adding an environmental exposure that we can link to our GPS data. Our old friend NDVI (Normalized Difference Vegetation Index) from Landsat (30 m resolution) helps us characterize greenness and vegetation density.
+
+```{r}
+download.file(
+  "https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/NDVI_rast_boston.tif",
+  destfile = "NDVI_rast_boston.tif",
+  mode = "wb"
+)
+
+ndvi_raster <- rast("NDVI_rast_boston.tif")
+ndvi_raster
+
+tm_shape(ndvi_raster) +
+  tm_raster(
+    col.scale = tm_scale_continuous(values = "brewer.yl_gn"),
+    col.legend = tm_legend(title = "NDVI")
+  )
+```
+
+Looks quite green!
+
+\
+
+# Make It Beautiful with tmap
+
+We reproject the GPS points to match the raster and then layer the two datasets together.
+
+```{r}
+tmap_mode("view")
+
+gps_sf <- st_as_sf(gps_data, coords = c("longitude", "latitude"), crs = 4326)
+gps_proj <- st_transform(gps_sf, crs = crs(ndvi_raster))
+
+tm_shape(ndvi_raster) +
+  tm_raster(
+    col.scale = tm_scale_continuous(values = "brewer.yl_gn"),
+    col_alpha = 0.55,
+    col.legend = tm_legend(title = "NDVI")
+  ) +
+  tm_shape(gps_proj) +
+  tm_symbols(
+    fill = "blue",
+    size = 0.5,
+    col = NA,
+    fill_alpha = 0.1
+  ) +
+  tm_title_out(title = "Where We've Been with a Little Green")
+```
+
+Now we can visually inspect where the participant has been relative to greenness. This can characterize environmental exposures across a person's **activity space**, rather than assigning exposure only at their home address.
+
+But remember: GPS-based exposure is not automatically a perfect measure of "true exposure." People choose where they go, GPS accuracy varies, indoor locations can be difficult to measure, and the timing and resolution of our environmental data matter.
+
+\
+
+# Extract NDVI Values to GPS Data
+
+Let's extract NDVI values at each GPS location using `extract()` from the **terra** package.
+
+```{r}
+ndvi_values <- data.frame(
+  gps_data,
+  terra::extract(ndvi_raster, terra::vect(gps_proj))
+)
+
+glimpse(ndvi_values)
+```
+
+\
+
+# Look at the Data
+
+Now we have minute-to-minute estimates of greenness encountered as this participant moves through daily life.
+
+```{r}
+summary(ndvi_values$NDVI_mean)
+
+hist(
+  ndvi_values$NDVI_mean,
+  main = "Distribution of NDVI Exposure",
+  xlab = "NDVI"
+)
+```
+
+\
+
+# Exposure Over Time
+
+```{r}
+plot(
+  ndvi_values$time,
+  ndvi_values$NDVI_mean,
+  type = "l",
+  xlab = "Time",
+  ylab = "NDVI",
+  main = "Momentary Greenness Exposure"
+)
+```
+
+Kinda like an EKG of greenness! Interesting!
+
+\
+
+---
+
+# Going Beyond GPS: What Is EMA?
+
+So far, GPS has told us **where someone was**, and NDVI has told us something about **the environment they encountered**.
+
+But what if we also knew how the person was feeling at that moment?
+
+**Ecological Momentary Assessment (EMA)** involves asking participants brief questions repeatedly during their normal daily lives. A smartphone might ask:
+
+- How stressed are you right now?
+- How happy are you?
+- Who are you with?
+- What are you doing?
+- How physically active have you been?
+
+This creates an exciting type of intensive longitudinal data:
+
+**PLACE → EXPOSURE → EXPERIENCE**
+
+Instead of asking whether people who live in greener neighborhoods have lower stress, we can begin asking questions such as:
+
+> *When a person is in a greener place than usual, do they report lower stress?*
+
+That is a very different spatial epidemiologic question!
+
+\
+
+# A Real Public EMA Dataset: StudentLife
+
+For this example, we will use a small subset of the **Dartmouth StudentLife study**, a publicly available study that collected smartphone sensing and EMA data from college students.
+
+Our teaching file contains geolocated stress EMA responses from one participant. Each observation represents a moment when the participant answered a stress question.
+
+Source: Dartmouth StudentLife public test dataset, participant u00, EMA/response/Stress/Stress_u00.json, as distributed in the `studentlife` R package GitHub repository.
+
+Variables in the dataset:
+
+- participant: StudentLife participant identifier
+- timestamp_unix: original Unix response timestamp
+- time_utc: timestamp converted to UTC for convenient teaching use
+- stress_level: EMA stress response (1–5), where 5 is the most stressed and 1 is the least stressed
+- latitude / longitude: geolocation attached to the EMA response
+- source: provenance label
+
+Let's load it directly:
+
+```{r}
+download.file(
+  "https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/studentlife_stress_u00_subset.csv",
+  destfile = "studentlife_stress_u00_subset.csv",
+  mode = "wb"
+)
+
+ema <- read_csv("studentlife_stress_u00_subset.csv")
+```
+
+Let's inspect the data:
+
+```{r}
+glimpse(ema)
+table(ema$stress_level)
+```
+
+The `stress_level` variable ranges from 1 to 5. We also have latitude, longitude, and the time of each EMA response.
+
+\
+
+# Turn EMA Responses into Spatial Data
+
+Just like our GPS data, EMA responses with latitude and longitude can become an `sf` object.
+
+```{r}
+ema_sf <- st_as_sf(
+  ema,
+  coords = c("longitude", "latitude"),
+  crs = 4326
+)
+
+ema_sf
+```
+
+Now each survey response is also a spatial observation.
+
+\
+
+# Map Momentary Stress
+
+Let's make an interactive map where each point is an EMA response and color represents reported stress.
+
+```{r}
+pal_stress <- colorNumeric(
+  palette = "YlOrRd",
+  domain = c(1, 5)
+)
+
+leaflet(ema) %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = 5,
+    color = ~pal_stress(stress_level),
+    stroke = TRUE,
+    weight = 1,
+    fillOpacity = 0.8,
+    popup = ~paste(
+      "Time:", time_utc,
+      "<br>Stress level:", stress_level
+    )
+  ) %>%
+  addLegend(
+    "bottomright",
+    pal = pal_stress,
+    values = ~stress_level,
+    title = "Momentary stress"
+  )
+```
+
+Now we're mapping something quite different from a disease rate or census characteristic. We are mapping **a person's experience in place and time**.
+
+What patterns do you see? Does stress appear higher in some locations than others?
+
+\
+
+# Add Greenness to the EMA Data
+
+Now let's bring the pieces of this lab together.
+
+Earlier, we used GPS locations to estimate momentary exposure to greenness. We can do the same thing for each EMA response: use the participant's location at the time of the survey and extract NDVI at that location.
+
+**Important:** these StudentLife observations are from Dartmouth College in New Hampshire, so we need an NDVI raster covering the Dartmouth/Hanover area. We should not use the Boston NDVI raster from the earlier part of the lab.
+
+```{r}
+download.file(
+  "https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/NDVI_rast_dartmouth.tif",
+  destfile = "NDVI_rast_dartmouth.tif",
+  mode = "wb"
+)
+
+dartmouth_ndvi <- rast("NDVI_rast_dartmouth.tif")
+
+# Give the raster layer a simple, predictable name
+names(dartmouth_ndvi) <- "NDVI_mean"
+
+dartmouth_ndvi
+```
+
+Let's take a look at our Dartmouth NDVI raster.
+
+```{r}
+tm_shape(dartmouth_ndvi) +
+  tm_raster(
+    col.scale = tm_scale_continuous(values = "brewer.yl_gn"),
+    col.legend = tm_legend(title = "NDVI")
+  )
+```
+
+\
+
+# Extract NDVI at Each EMA Location
+
+To extract NDVI, the EMA points need to use the same coordinate reference system as the raster.
+
+```{r}
+# Transform EMA locations to match the NDVI raster
+ema_proj <- st_transform(ema_sf, crs = crs(dartmouth_ndvi))
+
+# Extract NDVI at each EMA location
+ema_ndvi_extract <- terra::extract(
+  dartmouth_ndvi,
+  terra::vect(ema_proj)
+)
+
+# Add the extracted NDVI values back to the EMA dataset
+ema_ndvi <- bind_cols(
+  ema,
+  ema_ndvi_extract %>% select(-ID)
+)
+
+glimpse(ema_ndvi)
+```
+
+Now every EMA response has both:
+
+- a **momentary stress response**
+- an estimate of **Landsat NDVI at the participant's location**
+
+This lets us ask a classic momentary exposure question:
+
+> **When this participant is in a greener location, do they report less stress?**
+
+\
+
+# Map Stress and Greenness Together
+
+First, let's look at the EMA responses on top of the NDVI raster.
+
+```{r}
+tmap_mode("view")
+
+tm_shape(dartmouth_ndvi) +
+  tm_raster(
+    col.scale = tm_scale_continuous(values = "brewer.yl_gn"),
+    col_alpha = 0.65,
+    col.legend = tm_legend(title = "NDVI")
+  ) +
+  tm_shape(ema_proj) +
+  tm_symbols(
+    fill = "stress_level",
+    fill.scale = tm_scale_continuous(values = "brewer.yl_or_rd"),
+    size = 0.7,
+    col = "black",
+    lwd = 0.5,
+    fill.legend = tm_legend(title = "Stress level")
+  ) +
+  tm_title_out(title = "Momentary Stress and Greenness")
+```
+
+Do higher-stress responses appear to occur in less-green locations? Or is there no obvious pattern?
+
+\
+
+# Examine the NDVI-Stress Relationship
+
+Let's start by looking at the distribution of NDVI across the five stress-response categories.
+
+```{r}
+ggplot(
+  ema_ndvi,
+  aes(x = factor(stress_level), y = NDVI_mean)
+) +
+  geom_boxplot() +
+  geom_jitter(width = 0.12, alpha = 0.6) +
+  labs(
+    x = "Momentary stress level",
+    y = "GPS-based NDVI",
+    title = "Greenness Exposure and Momentary Stress"
+  ) +
+  theme_minimal()
+```
+
+Because stress is measured on an ordered 1-to-5 scale, a **Spearman correlation** is a useful simple way to summarize whether higher stress tends to occur at higher or lower NDVI values.
+
+```{r}
+cor.test(
+  ema_ndvi$NDVI_mean,
+  ema_ndvi$stress_level,
+  method = "spearman",
+  exact = FALSE
+)
+```
+
+A **negative correlation** would mean that higher NDVI tends to occur with lower stress. A **positive correlation** would mean that higher NDVI tends to occur with higher stress.
+
+We can also fit a very simple regression as a descriptive exercise:
+
+```{r}
+stress_model <- lm(stress_level ~ NDVI_mean, data = ema_ndvi)
+summary(stress_model)
+```
+
+And visualize the overall trend:
+
+```{r}
+ggplot(
+  ema_ndvi,
+  aes(x = NDVI_mean, y = stress_level)
+) +
+  geom_jitter(height = 0.08, width = 0, alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    x = "GPS-based NDVI",
+    y = "Momentary stress level",
+    title = "Momentary Greenness Exposure and Stress"
+  ) +
+  theme_minimal()
+```
+
+\
+
+# Interpreting This Analysis
+
+This is a deliberately simple analysis, but it demonstrates something powerful: **GIS allows us to connect a person's momentary environment with a momentary health or behavioral response.**
+
+There are also some important limitations:
+
+- We are looking at **one participant** with a relatively small number of EMA responses.
+- The same person contributes repeated observations, so these observations are **not statistically independent**.
+- Stress is measured on an **ordinal 1-to-5 scale**, so a simple linear regression is only an introductory descriptive model.
+- People **select the places they visit**. If someone goes to a park when they want to relax, for example, the association between NDVI and stress does not necessarily represent a causal effect of greenness.
+- NDVI at one point represents the environment at the participant's location, but it does not necessarily capture what they could see, how long they were there, or how they experienced that environment.
+
+**Take home:** A momentary association between NDVI and stress can generate interesting hypotheses, but it is not automatically evidence that greenness causes lower stress.
+
+A more advanced study with many participants could use repeated-measures or multilevel models to separate **within-person** differences ("Am I less stressed when I am somewhere greener than usual?") from **between-person** differences ("Are people who spend more time in green places less stressed overall?").
+
+\
+
+# Space AND Time
+
+EMA data are powerful because every observation has both a **where** and a **when**.
+
+Let's see whether stress varies by time of day. Because the stored timestamps are in UTC, we first convert them to local New Hampshire time.
+
+```{r}
+ema_ndvi <- ema_ndvi %>%
+  mutate(
+    time_utc = ymd_hms(time_utc, tz = "UTC"),
+    time_local = with_tz(time_utc, "America/New_York"),
+    hour = hour(time_local),
+    tod = cut(
+      hour,
+      breaks = c(-1, 5, 11, 17, 23),
+      labels = c("Night", "Morning", "Afternoon", "Evening")
+    )
+  )
+
+ema_ndvi %>%
+  group_by(tod) %>%
+  summarize(
+    n = n(),
+    mean_stress = mean(stress_level, na.rm = TRUE),
+    mean_ndvi = mean(NDVI_mean, na.rm = TRUE)
+  )
+```
+
+And visualize stress across the day:
+
+```{r}
+ggplot(ema_ndvi, aes(x = tod, y = stress_level)) +
+  geom_jitter(width = 0.15, height = 0.05, alpha = 0.5) +
+  stat_summary(fun = mean, geom = "point", size = 4) +
+  labs(
+    x = "Time of day",
+    y = "Stress level",
+    title = "Momentary Stress Across the Day"
+  ) +
+  theme_minimal()
+```
+
+This raises another important epidemiologic question: if both **where we go** and **how stressed we feel** vary by time of day, could time of day confound the apparent relationship between greenness and stress?
+
+\
+
+# The Bigger Idea: Activity Spaces
+
+Traditional environmental epidemiology often assigns exposure based on a residential address:
+
+**HOME → BUFFER → EXPOSURE**
+
+GPS-enabled studies allow us to characterize an individual's **activity space**:
+
+**HOME + WORK + SCHOOL + TRAVEL + RECREATION → EXPOSURE**
+
+That can reduce some forms of exposure misclassification, but it also creates new challenges. People select the places they visit, GPS observations may be missing non-randomly, and the places someone visits may themselves be consequences of health, behavior, or socioeconomic conditions.
+
+This is sometimes discussed as part of the **uncertain geographic context problem**: the geographic area that actually matters for an exposure-health relationship may not be the administrative boundary or residential buffer we happened to choose.
+
+\
+
+# You Did It!
+
+You loaded real-world GPS data, estimated movement speed, mapped mobility, linked locations to a vegetation raster, and created estimates of momentary environmental exposure.
+
+Then you went one step further and worked with **geolocated ecological momentary assessment data**, connecting place and time with a momentary measure of human experience.
+
+Over this quarter, we've taken our GIS data from the macro to the micro-scale. We started with places and populations and ended with individuals moving through environments in real time.
+
+You've learned a **TON** of R. It has been a mapping whirlwind, and I'm so proud of all of you!

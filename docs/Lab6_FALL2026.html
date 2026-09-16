@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Lab 6: Network Analysis</title>
+
+<script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet" />
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="site_libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-binding-2.2.3/leaflet.js"></script>
+<script src="site_libs/leaflet-providers-3.0.0/leaflet-providers.js"></script>
+<script src="site_libs/leaflet-providers-plugin-2.2.3/leaflet-providers-plugin.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Fall 2026</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="Syllabus_2026.html">Syllabus</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Labs
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Lab1_FALL2026.html">Lab 1: Intro to R</a>
+    </li>
+    <li>
+      <a href="Lab2_FALL2026.html">Lab 2: Geocoding, Vector Data, and Census Data</a>
+    </li>
+    <li>
+      <a href="Lab3_FALL2026.html">Lab 3: More with Vector Data and Visualizing Raster Data</a>
+    </li>
+    <li>
+      <a href="Lab4_FALL2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
+    </li>
+    <li>
+      <a href="Lab5_2026.html">Lab 5: Working with Raster and Vector Data Together</a>
+    </li>
+    <li>
+      <a href="Lab6_2026.html">Lab 6: Network Analysis</a>
+    </li>
+    <li>
+      <a href="Lab7_2026.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
+    </li>
+    <li>
+      <a href="Lab8_2026.html">Lab 8: Future Directions in GIS and Public Health</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="Assignments_2026.html">Assignment Guide</a>
+</li>
+<li>
+  <a href="Other_2026.html">Data Sources</a>
+</li>
+<li>
+  <a href="R_help_2026.html">Help with R</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Lab 6: Network Analysis</h1>
+
+</div>
+
+
+<p>In this lab, we will be using spatial data to run a network analysis.
+We will be playing around with data from Davis, including geocoding fast
+food restaurants in our fair city, then mapping the most efficient route
+to bike between all fast food establishments. Next, we will estimate the
+travel time between all fast food establishments in Davis. Finally, we
+are going to create a cool visualization of the travel times from the
+building that we are sitting in! This is all intended to explain how you
+can use spatial data to understand how different spatial features relate
+using the road networks that we travel on.</p>
+<p>The objectives of this guide are to teach you to:</p>
+<ol style="list-style-type: decimal">
+<li>Use the <strong>osrm</strong> package to map the optimal trip
+between multiple points</li>
+<li>Get a matrix of travel times between multiple points</li>
+<li>Create an isochrone to map travel times from one location</li>
+</ol>
+<p>Let’s get rollin…</p>
+<p><br />
+</p>
+<div id="load-packages" class="section level1">
+<h1>Load Packages</h1>
+<p>First, we always gotta remember to load our packages.</p>
+<pre class="r"><code>library(tidygeocoder)
+library(sf)
+library(tmap)
+library(osrm)
+library(tidyverse)</code></pre>
+<p><br />
+</p>
+</div>
+<div id="osrm-package-for-network-analysis-in-r" class="section level1">
+<h1>osrm package for network analysis in R</h1>
+<p>R offers a few packages for network analysis. We will be using the
+<strong>osrm</strong> package because it is fast and open source. It is
+an interface between R and the Open Street Map-Based Routing Service. It
+has a number of options, including:</p>
+<ul>
+<li><code>osrmTrip</code>: Build and send an OSRM API query to get the
+shortest travel geometry between multiple unordered points. This
+function interfaces the trip OSRM service. Use this function to resolve
+the travelling salesman problem.</li>
+<li><code>osrmTable</code>: Build and send OSRM API queries to get
+travel time matrices between points. This function interfaces the table
+OSRM service.</li>
+<li><code>osrmIsochrone</code>: This function computes areas that are
+reachable within a given time span from a point and returns the
+reachable regions as polygons. These areas of equal travel time are
+called isochrones.</li>
+<li><code>osrmRoute</code>: Build and send an OSRM API query to get the
+travel geometry between two points. This function interfaces with the
+route OSRM service.</li>
+<li><code>osrmNearest</code>: Build and send an OSRM API query to get
+the nearest point on the street network. This function interfaces the
+nearest OSRM service.</li>
+<li><code>osrmIsodistance</code>: This function computes areas that are
+reachable within a given road distance from a point and returns the
+reachable regions as polygons. These areas of equal travel distance are
+called isodistances.</li>
+</ul>
+<p><br />
+</p>
+<p>Note that there are other options for network analyses in R,
+including <strong>gmapsdistance</strong>, which uses the Google Maps
+API, <strong>stplanr</strong>, and others. But many of these require an
+API key and may even cost money if you use them too much! So for now, we
+will stick to <strong>osrm</strong>.</p>
+<p><br />
+</p>
+</div>
+<div id="bring-in-fast-food-establishments-in-davis-ca"
+class="section level1">
+<h1>Bring in fast food establishments in Davis, CA</h1>
+<p>Similar to what we did in one of our first labs, let’s bring in the
+addresses of all fast food establishments in Davis and geocode them! We
+will first read in the .csv from the website using <code>read_csv</code>
+from the <strong>tidyverse</strong> package.</p>
+<pre class="r"><code>download.file(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/fast_food_davis_ca.csv&quot;, 
+              destfile = &quot;fast_food_davis_ca.csv&quot;, 
+              mode = &quot;wb&quot;)
+ff &lt;- read_csv(&quot;fast_food_davis_ca.csv&quot;)
+
+glimpse(ff)</code></pre>
+<pre><code>## Rows: 25
+## Columns: 2
+## $ `Restaurant Name` &lt;chr&gt; &quot;In-N-Out Burger&quot;, &quot;Dairy Queen&quot;, &quot;Carl&#39;s Jr.&quot;, &quot;Chi…
+## $ Address           &lt;chr&gt; &quot;1020 Olive Dr, Davis, CA 95616&quot;, &quot;909 5th St, Davis…</code></pre>
+<p><br />
+</p>
+<p>OK, so looks like <em>Address</em> is the variable we want to focus
+on. Let’s geocode the Davis fast food data using the the
+<code>geocode()</code> function in <strong>tidygeocoder</strong>. And
+let’s specify that we want to use the “arcgis” geocoder.</p>
+<pre class="r"><code>ff_geo &lt;- geocode(ff, address = &quot;Address&quot;,
+                      method = &quot;arcgis&quot;)</code></pre>
+<pre><code>## Passing 25 addresses to the ArcGIS single address geocoder</code></pre>
+<pre><code>## Query completed in: 13.5 seconds</code></pre>
+<p><br />
+</p>
+<p>Alrighty that ran! Now let’s check our data and make sure there’s no
+missingness in our <em>lat</em> and <em>long</em> fields.</p>
+<pre class="r"><code>summary(ff_geo$lat)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   38.54   38.54   38.55   38.55   38.55   38.56</code></pre>
+<pre class="r"><code>summary(ff_geo$long)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  -121.8  -121.7  -121.7  -121.7  -121.7  -121.7</code></pre>
+<p><br />
+</p>
+<p>Looks like there’s no missingness! No NAs! OK, now we use
+<code>st_as_sf</code> from the <strong>sf</strong> package to make the
+dataset spatial and we use the CRS of 4326 because we have longitude and
+latitude.</p>
+<pre class="r"><code>ff_pts &lt;- st_as_sf(ff_geo, coords=c(&quot;long&quot;,&quot;lat&quot;), crs=4326)</code></pre>
+<p><br />
+</p>
+</div>
+<div
+id="osrmtrip-to-map-the-optimal-trip-between-all-fast-food-establishments"
+class="section level1">
+<h1>osrmTrip to map the optimal trip between all fast food
+establishments</h1>
+<p>Now let’s use the <strong>osrm</strong> package to calculate an
+optimal trip between all fast food establishments in Davis, then let’s
+take a look at the output. This means we are estimating the shortest
+travel geometry between all fast food establishments in Davis. And we
+are in Davis, so of course we will estimate this on bike! Maybe useful
+for an SPH 215 pub crawl in the future?</p>
+<pre class="r"><code>trip &lt;- osrmTrip(ff_pts, osrm.profile = &quot;bike&quot;)
+glimpse(trip)</code></pre>
+<pre><code>## List of 1
+##  $ :List of 2
+##   ..$ trip   :Classes &#39;sf&#39; and &#39;data.frame&#39;: 25 obs. of  5 variables:
+##   .. ..$ start   : chr [1:25] &quot;1&quot; &quot;7&quot; &quot;9&quot; &quot;10&quot; ...
+##   .. ..$ end     : chr [1:25] &quot;7&quot; &quot;9&quot; &quot;10&quot; &quot;18&quot; ...
+##   .. ..$ duration: num [1:25] 5.51 1.16 4.51 0.1 12.74 ...
+##   .. ..$ distance: num [1:25] 1.049 0.155 0.859 0.01 2.996 ...
+##   .. ..$ geometry:sfc_LINESTRING of length 25; first list element:  &#39;XY&#39; num [1:10, 1:2] -122 -122 -122 -122 -122 ...
+##   .. ..- attr(*, &quot;sf_column&quot;)= chr &quot;geometry&quot;
+##   .. ..- attr(*, &quot;agr&quot;)= Factor w/ 3 levels &quot;constant&quot;,&quot;aggregate&quot;,..: NA NA NA NA
+##   .. .. ..- attr(*, &quot;names&quot;)= chr [1:4] &quot;start&quot; &quot;end&quot; &quot;duration&quot; &quot;distance&quot;
+##   ..$ summary:List of 2
+##   .. ..$ duration: num 99.3
+##   .. ..$ distance: num 21.1</code></pre>
+<p><br />
+</p>
+<p>OK, it ran! Some good info in there. Looks like we have a
+<em>List</em> with an sf dataset, a data.frame, and a list of duration
+and distance. Now, let’s visualize what this path might look like using
+the <strong>tmap</strong> package. We will pull out the route as an
+<strong>sf</strong> object and store it as <em>trip_sf</em>. Then we
+will map that and specify that we want the lines to be the route in
+blue, and then we want to see the location of our fast food
+establishments <em>ff_pts</em> in red bubbles. We also can label the
+restaurants using <code>tm_text</code> and set an offset with
+<code>xmod</code> and <code>ymod</code> options.</p>
+<pre class="r"><code># Extract the linestring route (as an sf object)
+trip_sf &lt;- trip[[1]]$trip
+
+# Set tmap to interactive mode
+tmap_mode(&quot;view&quot;)</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
+## ℹ toggle with `tmap::ttm()`</code></pre>
+<pre class="r"><code># Plot with tmap
+tm &lt;- tm_shape(trip_sf) +
+  tm_lines(lwd = 3, col = &quot;blue&quot;) +
+  tm_shape(ff_pts) +
+  tm_bubbles(size = 0.25, col = &quot;red&quot;) + 
+  tm_text(&quot;Restaurant Name&quot;, size=1, xmod = 0.25, ymod=0.25) 
+
+tm</code></pre>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-30e73e59f86f93035a61" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-30e73e59f86f93035a61">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"attributionControl":true},"calls":[{"method":"createMapPane","args":["tmap401",401]},{"method":"createMapPane","args":["tmap402",402]},{"method":"createMapPane","args":["tmap403",403]},{"method":"addLayersControl","args":[["Esri.WorldGrayCanvas","OpenStreetMap","Esri.WorldTopoMap"],["trip_sf","ff_pts"],{"collapsed":true,"autoZIndex":true,"position":"topleft"}]},{"method":"addProviderTiles","args":["Esri.WorldGrayCanvas",null,"Esri.WorldGrayCanvas",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenStreetMap",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["Esri.WorldTopoMap",null,"Esri.WorldTopoMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addPolylines","args":[[[[{"lng":[-121.737079,-121.737686,-121.738603,-121.73456,-121.731475,-121.732146,-121.732275,-121.732916,-121.732968,-121.732574],"lat":[38.54099,38.54143,38.54082,38.539808,38.539856,38.539909,38.540278,38.540267,38.540074,38.540019]}]],[[{"lng":[-121.732574,-121.73241,-121.731948,-121.731851],"lat":[38.540019,38.54026,38.540172,38.540513]}]],[[{"lng":[-121.731851,-121.731471,-121.731475,-121.725973,-121.725442,-121.725487,-121.724626,-121.723915],"lat":[38.540513,38.540422,38.539856,38.539841,38.539886,38.540253,38.540361,38.540953]}]],[[{"lng":[-121.723915,-121.723836],"lat":[38.540953,38.541018]}]],[[{"lng":[-121.723836,-121.722777,-121.721644,-121.719951,-121.715009,-121.713743,-121.712914,-121.712473,-121.711442,-121.70011,-121.697071,-121.697356],"lat":[38.541018,38.541497,38.545549,38.546742,38.547866,38.547812,38.547471,38.54819,38.548724,38.551283,38.550835,38.550691]}]],[[{"lng":[-121.697356,-121.694704,-121.693875,-121.69345],"lat":[38.550691,38.550469,38.550683,38.550197]}]],[[{"lng":[-121.69345,-121.694311,-121.694668,-121.697283,-121.69988,-121.702235,-121.704499,-121.706909,-121.708732,-121.708963,-121.710043,-121.710256,-121.716443,-121.718228,-121.727698,-121.730594,-121.731686],"lat":[38.550197,38.550013,38.548915,38.547913,38.547887,38.548253,38.54752,38.547797,38.55234,38.556052,38.556679,38.557106,38.557271,38.557918,38.557494,38.559845,38.561878]}]],[[{"lng":[-121.731686,-121.732525,-121.733446,-121.733836,-121.736039,-121.737231,-121.763251,-121.763693,-121.764224,-121.7649,-121.765097],"lat":[38.561878,38.561892,38.561512,38.561732,38.560849,38.560662,38.5609,38.561019,38.562042,38.562511,38.562329]}]],[[{"lng":[-121.765097,-121.765331],"lat":[38.562329,38.561237]}]],[[{"lng":[-121.765331,-121.765336,-121.770445,-121.770302,-121.769053],"lat":[38.561237,38.56106,38.561102,38.561873,38.562019]}]],[[{"lng":[-121.769053,-121.769161,-121.769632,-121.770302,-121.770445,-121.759055,-121.75855,-121.758569,-121.756898],"lat":[38.562019,38.56234,38.561883,38.561873,38.561102,38.560771,38.560455,38.559953,38.559985]}]],[[{"lng":[-121.756898,-121.756311,-121.756311,-121.755806,-121.745047,-121.742764,-121.742093,-121.741148,-121.740345],"lat":[38.559985,38.559981,38.56049,38.560738,38.560545,38.555103,38.551387,38.551552,38.549618]}]],[[{"lng":[-121.740345,-121.74002,-121.738658],"lat":[38.549618,38.547585,38.547831]}]],[[{"lng":[-121.738658,-121.74002,-121.739867,-121.740265],"lat":[38.547831,38.547585,38.547026,38.546824]}]],[[{"lng":[-121.740265,-121.739867,-121.73973],"lat":[38.546824,38.547026,38.546547]}]],[[{"lng":[-121.73973,-121.739586,-121.739808],"lat":[38.546547,38.546011,38.545968]}]],[[{"lng":[-121.739808,-121.740104,-121.739944,-121.740222],"lat":[38.545968,38.545833,38.545289,38.54524]}]],[[{"lng":[-121.740222,-121.739944,-121.739814,-121.74345],"lat":[38.54524,38.545289,38.544826,38.544288]}]],[[{"lng":[-121.74345,-121.74258,-121.74248,-121.742754],"lat":[38.544288,38.544445,38.544111,38.54406]}]],[[{"lng":[-121.742754,-121.741961,-121.741857],"lat":[38.54406,38.544342,38.54398]}]],[[{"lng":[-121.741857,-121.741391,-121.741283],"lat":[38.54398,38.5439,38.543506]}]],[[{"lng":[-121.741283,-121.741203,-121.742177,-121.742292],"lat":[38.543506,38.543236,38.543062,38.543462]}]],[[{"lng":[-121.742292,-121.742005,-121.741502],"lat":[38.543462,38.542495,38.542586]}]],[[{"lng":[-121.741502,-121.742005,-121.742177,-121.739999,-121.73971],"lat":[38.542586,38.542495,38.543062,38.54344,38.54242]}]],[[{"lng":[-121.73971,-121.739635,-121.740709,-121.738603,-121.738231,-121.737328,-121.737079],"lat":[38.54242,38.542154,38.54196,38.54082,38.541051,38.540704,38.54099]}]]],["X1","X2","X3","X4","X5","X6","X7","X8","X9","X10","X11","X12","X13","X14","X15","X16","X17","X18","X19","X20","X21","X22","X23","X24","X25"],"trip_sf",{"lineCap":"round","lineJoin":"round","interactive":false,"className":"","pane":"tmap401","stroke":true,"color":["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"],"weight":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],"opacity":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"fill":false,"fillColor":["#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF","#0000FF"],"fillOpacity":0.2,"dashArray":["","","","","","","","","","","","","","","","","","","","","","","","",""],"smoothFactor":1,"noClip":false},null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addPolylines","args":[[[[{"lng":[-121.737079,-121.737686,-121.738603,-121.73456,-121.731475,-121.732146,-121.732275,-121.732916,-121.732968,-121.732574],"lat":[38.54099,38.54143,38.54082,38.539808,38.539856,38.539909,38.540278,38.540267,38.540074,38.540019]}]],[[{"lng":[-121.732574,-121.73241,-121.731948,-121.731851],"lat":[38.540019,38.54026,38.540172,38.540513]}]],[[{"lng":[-121.731851,-121.731471,-121.731475,-121.725973,-121.725442,-121.725487,-121.724626,-121.723915],"lat":[38.540513,38.540422,38.539856,38.539841,38.539886,38.540253,38.540361,38.540953]}]],[[{"lng":[-121.723915,-121.723836],"lat":[38.540953,38.541018]}]],[[{"lng":[-121.723836,-121.722777,-121.721644,-121.719951,-121.715009,-121.713743,-121.712914,-121.712473,-121.711442,-121.70011,-121.697071,-121.697356],"lat":[38.541018,38.541497,38.545549,38.546742,38.547866,38.547812,38.547471,38.54819,38.548724,38.551283,38.550835,38.550691]}]],[[{"lng":[-121.697356,-121.694704,-121.693875,-121.69345],"lat":[38.550691,38.550469,38.550683,38.550197]}]],[[{"lng":[-121.69345,-121.694311,-121.694668,-121.697283,-121.69988,-121.702235,-121.704499,-121.706909,-121.708732,-121.708963,-121.710043,-121.710256,-121.716443,-121.718228,-121.727698,-121.730594,-121.731686],"lat":[38.550197,38.550013,38.548915,38.547913,38.547887,38.548253,38.54752,38.547797,38.55234,38.556052,38.556679,38.557106,38.557271,38.557918,38.557494,38.559845,38.561878]}]],[[{"lng":[-121.731686,-121.732525,-121.733446,-121.733836,-121.736039,-121.737231,-121.763251,-121.763693,-121.764224,-121.7649,-121.765097],"lat":[38.561878,38.561892,38.561512,38.561732,38.560849,38.560662,38.5609,38.561019,38.562042,38.562511,38.562329]}]],[[{"lng":[-121.765097,-121.765331],"lat":[38.562329,38.561237]}]],[[{"lng":[-121.765331,-121.765336,-121.770445,-121.770302,-121.769053],"lat":[38.561237,38.56106,38.561102,38.561873,38.562019]}]],[[{"lng":[-121.769053,-121.769161,-121.769632,-121.770302,-121.770445,-121.759055,-121.75855,-121.758569,-121.756898],"lat":[38.562019,38.56234,38.561883,38.561873,38.561102,38.560771,38.560455,38.559953,38.559985]}]],[[{"lng":[-121.756898,-121.756311,-121.756311,-121.755806,-121.745047,-121.742764,-121.742093,-121.741148,-121.740345],"lat":[38.559985,38.559981,38.56049,38.560738,38.560545,38.555103,38.551387,38.551552,38.549618]}]],[[{"lng":[-121.740345,-121.74002,-121.738658],"lat":[38.549618,38.547585,38.547831]}]],[[{"lng":[-121.738658,-121.74002,-121.739867,-121.740265],"lat":[38.547831,38.547585,38.547026,38.546824]}]],[[{"lng":[-121.740265,-121.739867,-121.73973],"lat":[38.546824,38.547026,38.546547]}]],[[{"lng":[-121.73973,-121.739586,-121.739808],"lat":[38.546547,38.546011,38.545968]}]],[[{"lng":[-121.739808,-121.740104,-121.739944,-121.740222],"lat":[38.545968,38.545833,38.545289,38.54524]}]],[[{"lng":[-121.740222,-121.739944,-121.739814,-121.74345],"lat":[38.54524,38.545289,38.544826,38.544288]}]],[[{"lng":[-121.74345,-121.74258,-121.74248,-121.742754],"lat":[38.544288,38.544445,38.544111,38.54406]}]],[[{"lng":[-121.742754,-121.741961,-121.741857],"lat":[38.54406,38.544342,38.54398]}]],[[{"lng":[-121.741857,-121.741391,-121.741283],"lat":[38.54398,38.5439,38.543506]}]],[[{"lng":[-121.741283,-121.741203,-121.742177,-121.742292],"lat":[38.543506,38.543236,38.543062,38.543462]}]],[[{"lng":[-121.742292,-121.742005,-121.741502],"lat":[38.543462,38.542495,38.542586]}]],[[{"lng":[-121.741502,-121.742005,-121.742177,-121.739999,-121.73971],"lat":[38.542586,38.542495,38.543062,38.54344,38.54242]}]],[[{"lng":[-121.73971,-121.739635,-121.740709,-121.738603,-121.738231,-121.737328,-121.737079],"lat":[38.54242,38.542154,38.54196,38.54082,38.541051,38.540704,38.54099]}]]],["X1_1","X2_1","X3_1","X4_1","X5_1","X6_1","X7_1","X8_1","X9_1","X10_1","X11_1","X12_1","X13_1","X14_1","X15_1","X16_1","X17_1","X18_1","X19_1","X20_1","X21_1","X22_1","X23_1","X24_1","X25_1"],"trip_sf",{"lineCap":"round","lineJoin":"round","interactive":true,"className":"","pane":"tmap401","stroke":true,"color":"#03F","weight":[8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],"opacity":0,"fill":false,"fillColor":"#03F","fillOpacity":0.2,"smoothFactor":1,"noClip":false},["<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>7<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5.51<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.0489<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>7<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>9<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.16<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1551<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>9<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4.51<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.8586<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>18<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.0100<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>18<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>14<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>12.74<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.9957<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>14<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.21<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.4157<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>3<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>19.88<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4.6937<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>3<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>25<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>12.76<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>3.0743<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>25<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>12<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.74<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1301<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>12<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>13<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>3.23<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.6837<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>13<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>11<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>7.27<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.5495<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>11<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>22<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10.43<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.4894<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>22<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.56<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.3688<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>6<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.93<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.2375<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>6<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>21<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.49<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1067<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>21<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>8<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.39<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.0808<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>8<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>23<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1230<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>23<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>17<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.22<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.4328<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>17<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>15<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.17<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1405<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>15<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.35<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1306<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>20<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.21<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1000<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>20<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>19<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.96<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1634<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>19<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>24<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.76<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.1552<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>24<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>16<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1.81<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.4203<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>start<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>16<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>end<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>duration<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2.75<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>distance<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0.5396<\/nobr><\/td><\/tr><\/table><\/div>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[38.540942607699,38.547967019746,38.562044970953,38.54399491965,38.550139986235,38.546854154461,38.540129437363,38.545910561711,38.54058331742,38.540889298795,38.55987929672,38.561242655181,38.562036211864,38.55061134256,38.544080959886,38.542459732174,38.544393311508,38.540941015138,38.543421471744,38.543493472293,38.546598380686,38.549606981012,38.545351824046,38.542672506786,38.562406272889],[-121.737151891802,-121.738700029319,-121.731657805728,-121.74179814837,-121.693387963666,-121.740106428852,-121.732568667146,-121.739787245979,-121.731846901463,-121.723830197809,-121.756904433368,-121.765521448928,-121.769127008398,-121.697378755406,-121.742760977588,-121.739478205209,-121.743477378852,-121.723730034066,-121.74253055907,-121.741380645773,-121.739432104742,-121.740392000294,-121.74024858593,-121.741275871983,-121.765216431471],[1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75,1.75],["X0000001","X0000002","X0000003","X0000004","X0000005","X0000006","X0000007","X0000008","X0000009","X0000010","X0000011","X0000012","X0000013","X0000014","X0000015","X0000016","X0000017","X0000018","X0000019","X0000020","X0000021","X0000022","X0000023","X0000024","X0000025"],"ff_pts",{"interactive":false,"className":"","pane":"tmap402","stroke":true,"color":["#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000","#FF0000"],"weight":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"opacity":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"fill":true,"fillColor":["#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999","#999999"],"fillOpacity":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[[38.540942607699,38.547967019746,38.562044970953,38.54399491965,38.550139986235,38.546854154461,38.540129437363,38.545910561711,38.54058331742,38.540889298795,38.55987929672,38.561242655181,38.562036211864,38.55061134256,38.544080959886,38.542459732174,38.544393311508,38.540941015138,38.543421471744,38.543493472293,38.546598380686,38.549606981012,38.545351824046,38.542672506786,38.562406272889],[-121.737151891802,-121.738700029319,-121.731657805728,-121.74179814837,-121.693387963666,-121.740106428852,-121.732568667146,-121.739787245979,-121.731846901463,-121.723830197809,-121.756904433368,-121.765521448928,-121.769127008398,-121.697378755406,-121.742760977588,-121.739478205209,-121.743477378852,-121.723730034066,-121.74253055907,-121.741380645773,-121.739432104742,-121.740392000294,-121.74024858593,-121.741275871983,-121.765216431471],[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],["X0000001_1","X0000002_1","X0000003_1","X0000004_1","X0000005_1","X0000006_1","X0000007_1","X0000008_1","X0000009_1","X0000010_1","X0000011_1","X0000012_1","X0000013_1","X0000014_1","X0000015_1","X0000016_1","X0000017_1","X0000018_1","X0000019_1","X0000020_1","X0000021_1","X0000022_1","X0000023_1","X0000024_1","X0000025_1"],"ff_pts",{"interactive":true,"className":"","pane":"tmap402","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0},null,null,["<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>In-N-Out Burger<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1020 Olive Dr, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Dairy Queen<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>909 5th St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Carl's Jr.<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1616 E Covell Blvd, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Chipotle Mexican Grill<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>227 E St Ste 1, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Subway<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4748 Chiles Rd, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Taco Bell<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>425 G St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>KFC<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1617 Research Park Dr, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Jack in the Box<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>337 G St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Del Taco<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1649 Research Park Dr, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Mr. Pickle's Sandwich Shop<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2191 Cowell Blvd. Suite F, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>ChickPeas<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>640 W Covell Blvd, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Panda Express<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1491 W Covell Blvd, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Burger King<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2026 Lyndell Ter, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>McDonald's<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4444 Chiles Rd, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Baja Fresh<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>237 D St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Teaspoon<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>110 F St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Burgers &amp; Brew<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>403 3rd St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Teabo Cafe<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2191 Cowell Blvd, Davis, CA 95618<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Hunan Bar &amp; Restaurant<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>207 D St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Raising Cane's Chicken Fingers<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>207 E St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Wingstop<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>408 G St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Domino's Pizza<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>658 G St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Steve's Pizza<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>314 F St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>The Hotdogger<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>129 E St, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Restaurant Name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Togo's Eatery<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>Address<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1411 W Covell Blvd, Davis, CA 95616<\/nobr><\/td><\/tr><\/table><\/div>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addMarkers","args":[[38.541237746699,38.548262158746,38.56234010995301,38.54429005865,38.550435125235,38.547149293461,38.540424576363,38.546205700711,38.54087845642,38.541184437795,38.56017443572,38.561537794181,38.562331350864,38.55090648156001,38.544376098886,38.542754871174,38.544688450508,38.54123615413801,38.543716610744,38.543788611293,38.546893519686,38.549902120012,38.545646963046,38.542967645786,38.562701411889],[-121.736856752802,-121.738404890319,-121.731362666728,-121.74150300937,-121.693092824666,-121.739811289852,-121.732273528146,-121.739492106979,-121.731551762463,-121.723535058809,-121.756609294368,-121.765226309928,-121.768831869398,-121.697083616406,-121.742465838588,-121.739183066209,-121.743182239852,-121.723434895066,-121.74223542007,-121.741085506773,-121.739136965742,-121.740096861294,-121.73995344693,-121.740980732983,-121.764921292471],{"iconUrl":{"data":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEAAAAASUVORK5CYII=","index":0},"iconWidth":1,"iconHeight":1},["X1_2","X2_2","X3_2","X4_2","X5_2","X6_2","X7_2","X8_2","X9_2","X10_2","X11_2","X12_2","X13_2","X14_2","X15_2","X16_2","X17_2","X18_2","X19_2","X20_2","X21_2","X22_2","X23_2","X24_2","X25_2"],"ff_pts",{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250,"pane":"tmap403"},null,null,null,null,["In-N-Out Burger","Dairy Queen","Carl's Jr.","Chipotle Mexican Grill","Subway","Taco Bell","KFC","Jack in the Box","Del Taco","Mr. Pickle's Sandwich Shop","ChickPeas","Panda Express","Burger King","McDonald's","Baja Fresh","Teaspoon","Burgers &amp; Brew","Teabo Cafe","Hunan Bar &amp; Restaurant","Raising Cane's Chicken Fingers","Wingstop","Domino's Pizza","Steve's Pizza","The Hotdogger","Togo's Eatery"],{"interactive":false,"permanent":true,"direction":"right","opacity":1,"offset":[0,0],"textsize":"12px","textOnly":true,"style":{"color":"#000000","background-color":null,"border":null,"line-height":"12px","text-shadow":null,"padding":"3px"},"className":"","sticky":true,"pane":"tmap403"},null]}],"fitBounds":[38.53935394,-121.7719849,38.56296506,-121.6919101,[]],"limits":{"lat":[38.539808,38.562701411889],"lng":[-121.770445,-121.693092824666]}},"evals":[],"jsHooks":[]}</script>
+<p><br />
+</p>
+<p>Spectacular! Let’s now get some summary stats for each leg of our
+fast food extravaganza. We can use the <code>mutate()</code> function
+from <strong>tidyverse</strong> to get this info.</p>
+<pre class="r"><code>leg_summary &lt;- trip_sf %&gt;%
+  mutate(duration = round(duration, 1),
+         distance = round(distance, 1))
+
+leg_summary</code></pre>
+<pre><code>## Simple feature collection with 25 features and 4 fields
+## Geometry type: LINESTRING
+## Dimension:     XY
+## Bounding box:  xmin: -121.7704 ymin: 38.53981 xmax: -121.6934 ymax: 38.56251
+## Geodetic CRS:  WGS 84
+## First 10 features:
+##    start end duration distance                       geometry
+## 1      1   7      5.5      1.0 LINESTRING (-121.7371 38.54...
+## 2      7   9      1.2      0.2 LINESTRING (-121.7326 38.54...
+## 3      9  10      4.5      0.9 LINESTRING (-121.7319 38.54...
+## 4     10  18      0.1      0.0 LINESTRING (-121.7239 38.54...
+## 5     18  14     12.7      3.0 LINESTRING (-121.7238 38.54...
+## 6     14   5      2.2      0.4 LINESTRING (-121.6974 38.55...
+## 7      5   3     19.9      4.7 LINESTRING (-121.6934 38.55...
+## 8      3  25     12.8      3.1 LINESTRING (-121.7317 38.56...
+## 9     25  12      0.7      0.1 LINESTRING (-121.7651 38.56...
+## 10    12  13      3.2      0.7 LINESTRING (-121.7653 38.56...</code></pre>
+<p><br />
+</p>
+<p>OK, we we have the duration and distance for each trip. Let’s get the
+summary of the whole trip in minutes and kilometers.</p>
+<pre class="r"><code>trip_summary &lt;- trip[[1]]$summary
+trip_summary</code></pre>
+<pre><code>## $duration
+## [1] 99.26333
+## 
+## $distance
+## [1] 21.1039</code></pre>
+<p><br />
+</p>
+</div>
+<div
+id="osrmtable-to-get-a-matrix-of-travel-times-between-all-fast-food-establishments-in-davis"
+class="section level1">
+<h1>osrmTable to get a matrix of travel times between all fast food
+establishments in Davis</h1>
+<p>So it was nice to get an optimal route, but what if I wanted the
+travel times between all of the fast food establishments in Davis? You
+could imagine doing this with addresses of geocoded participants and
+fast food establishments to create a dataset with distance to the
+closest fast food establishment.</p>
+<pre class="r"><code>ff_table &lt;- osrmTable(ff_pts,
+                      osrm.profile = &quot;bike&quot;)
+glimpse(ff_table)</code></pre>
+<pre><code>## List of 3
+##  $ durations   : num [1:25, 1:25] 0 6.7 13.5 4 19.5 5.4 3.7 4.8 3.9 7 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. ..$ : chr [1:25] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+##   .. ..$ : chr [1:25] &quot;1&quot; &quot;2&quot; &quot;3&quot; &quot;4&quot; ...
+##  $ sources     :&#39;data.frame&#39;:    25 obs. of  2 variables:
+##   ..$ lon: num [1:25] -122 -122 -122 -122 -122 ...
+##   ..$ lat: num [1:25] 38.5 38.5 38.6 38.5 38.6 ...
+##  $ destinations:&#39;data.frame&#39;:    25 obs. of  2 variables:
+##   ..$ lon: num [1:25] -122 -122 -122 -122 -122 ...
+##   ..$ lat: num [1:25] 38.5 38.5 38.6 38.5 38.6 ...</code></pre>
+<p><br />
+</p>
+<p>Great. Now let’s look at the <em>duration</em> matrix.</p>
+<pre class="r"><code>ff_table$duration</code></pre>
+<pre><code>##       1    2    3    4    5    6    7    8    9   10   11   12   13   14   15
+## 1   0.0  6.3 13.4  3.9 18.1  5.1  5.5  4.4  5.5  7.6 14.8 18.4 21.1 18.3  3.7
+## 2   6.7  0.0  9.3  4.8 20.6  1.9 10.1  2.3 10.1  8.9 12.7 15.9 18.6 19.8  4.2
+## 3  13.5  9.4  0.0 13.3 19.9 10.7 14.2 11.0 14.1 11.1 10.0 12.9 15.7 19.4 12.8
+## 4   4.0  4.7 13.2  0.0 21.2  3.4  7.4  2.7  7.3  9.4 12.6 16.5 18.9 20.7  1.4
+## 5  19.5 20.8 19.9 22.0  0.0 22.2 16.9 21.9 16.5 14.0 29.4 32.3 35.0  2.2 21.8
+## 6   5.4  1.9 10.7  3.4 22.0  0.0  8.8  0.9  8.7 10.3 12.0 15.2 17.9 21.2  2.9
+## 7   3.7  8.6 14.7  6.2 16.8  7.4  0.0  6.7  1.2  5.0 17.1 20.6 23.4 15.5  6.0
+## 8   4.8  2.2 11.0  2.8 21.6  1.0  8.2  0.0  8.1 10.2 12.1 15.3 18.0 21.1  2.3
+## 9   3.9  8.8 14.2  6.4 16.5  7.6  1.1  6.9  0.0  4.5 17.3 20.9 23.6 15.2  6.2
+## 10  7.0  9.0 10.9  9.5 14.1 10.3  4.8 10.0  4.8  0.0 20.4 23.3 26.0 12.8  9.4
+## 11 15.1 12.4  9.7 12.7 28.9 11.6 18.5 11.8 18.5 20.1  0.0  4.2  6.9 28.4 11.8
+## 12 18.3 15.5 12.8 16.2 32.0 14.7 21.7 14.8 21.7 23.2  3.9  0.0  3.2 31.5 15.3
+## 13 21.6 18.8 16.1 19.5 35.3 18.0 25.1 18.2 25.0 26.5  7.3  4.0  0.0 34.8 18.6
+## 14 17.9 19.6 19.1 20.4  2.2 20.9 15.2 20.9 14.8 12.4 28.7 31.6 34.3  0.0 20.2
+## 15  3.8  4.2 12.8  1.4 21.0  3.0  7.2  2.3  7.1  9.3 11.7 15.7 18.1 20.6  0.0
+## 16  2.8  4.1 12.6  2.4 20.0  2.9  6.2  2.1  6.1  8.2 12.9 16.1 18.8 19.5  2.1
+## 17  4.4  4.5 13.0  2.1 21.7  3.3  7.8  2.7  7.8  9.9 11.3 15.2 17.6 21.2  1.2
+## 18  7.1  9.1 11.0  9.6 14.0 10.4  4.9 10.1  4.9  0.1 20.5 23.4 26.1 12.7  9.5
+## 19  3.3  4.3 12.8  1.4 20.5  3.1  6.7  2.4  6.7  8.8 11.8 15.7 18.1 20.1  0.5
+## 20  3.1  4.5 13.0  1.2 20.4  3.3  6.5  2.5  6.5  8.6 12.7 16.7 19.1 19.9  1.5
+## 21  4.9  1.8 10.5  2.9 21.7  0.6  8.3  0.4  8.2 10.1 11.8 15.1 17.8 21.0  2.4
+## 22  6.5  2.6  9.6  4.6 22.7  1.8  9.9  2.1  9.9 11.0 10.8 14.0 16.7 21.9  4.1
+## 23  4.4  2.9 11.5  2.4 21.6  1.7  7.8  0.8  7.7  9.8 12.2 15.4 18.1 21.1  1.9
+## 24  3.2  5.0 13.4  2.1 20.4  3.8  6.6  3.0  6.6  8.7 12.5 16.4 18.8 20.0  1.2
+## 25 18.6 15.8 13.1 16.5 32.3 15.0 22.0 15.2 22.0 23.5  4.3  0.7  4.0 31.8 15.6
+##      16   17   18   19   20   21   22   23   24   25
+## 1   2.3  4.3  7.7  3.1  3.0  4.5  6.2  3.6  2.9 18.2
+## 2   4.1  4.6  9.0  4.4  4.6  1.9  2.5  3.2  5.1 15.7
+## 3  12.6 13.1 11.2 12.9 12.9 10.7  9.7 11.7 13.6 12.8
+## 4   2.4  2.0  9.5  1.5  1.2  2.9  4.6  2.1  2.1 16.3
+## 5  20.4 22.4 14.0 21.3 21.1 21.9 22.8 21.7 21.1 32.1
+## 6   2.8  3.2 10.4  3.0  3.2  0.5  1.8  1.8  3.8 15.0
+## 7   4.5  6.5  5.1  5.5  5.3  6.8  8.4  5.9  5.3 20.4
+## 8   2.2  2.6 10.3  2.4  2.5  0.4  2.1  1.1  3.1 15.1
+## 9   4.8  6.8  4.6  5.7  5.5  7.0  8.7  6.1  5.5 20.7
+## 10  7.9  9.9  0.1  8.8  8.6 10.2 11.0  9.3  8.7 23.1
+## 11 12.5 11.5 20.2 12.0 12.9 11.5 10.4 11.6 12.7  4.0
+## 12 15.6 15.0 23.3 15.4 16.0 14.6 13.5 14.7 16.2  1.2
+## 13 18.9 18.3 26.6 18.7 19.4 17.9 16.9 18.0 19.5  4.8
+## 14 18.7 20.8 12.4 19.7 19.5 20.8 21.6 20.1 19.5 31.4
+## 15  2.0  1.2  9.4  0.5  1.6  2.5  4.1  1.7  1.2 15.5
+## 16  0.0  2.6  8.3  1.5  1.3  2.3  3.9  1.4  1.7 15.9
+## 17  2.7  0.0 10.0  1.3  2.3  2.8  4.4  2.1  2.1 15.0
+## 18  8.0 10.0  0.0  8.9  8.7 10.3 11.1  9.4  8.8 23.2
+## 19  1.6  1.2  8.9  0.0  1.1  2.5  4.2  1.8  0.8 15.5
+## 20  1.3  2.1  8.7  1.0  0.0  2.7  4.4  1.9  1.4 16.5
+## 21  2.3  2.7 10.2  2.5  2.7  0.0  1.7  1.3  3.3 14.9
+## 22  3.9  4.4 11.1  4.2  4.3  1.7  0.0  3.0  5.0 13.8
+## 23  1.7  2.2  9.9  2.1  2.1  1.1  2.8  0.0  2.8 15.2
+## 24  1.8  1.9  8.8  0.7  1.4  3.2  4.9  2.4  0.0 16.2
+## 25 15.9 15.3 23.6 15.8 16.4 14.9 13.8 15.0 16.5  0.0</code></pre>
+<p><br />
+</p>
+<p>That’s a little confusing. Let’s keep the restaurant names and take a
+look at this again. We will print it as a massive table.</p>
+<pre class="r"><code># Extract restaurant names
+rest_names &lt;- ff_pts[[&quot;Restaurant Name&quot;]]  # or ff_pts$`Restaurant Name`
+
+# Assign names to rows and columns of distance and duration matrices
+rownames(ff_table$duration) &lt;- rest_names
+colnames(ff_table$duration) &lt;- rest_names
+
+# Travel times in minutes
+ff_table$duration</code></pre>
+<pre><code>##                                In-N-Out Burger Dairy Queen Carl&#39;s Jr.
+## In-N-Out Burger                            0.0         6.3       13.4
+## Dairy Queen                                6.7         0.0        9.3
+## Carl&#39;s Jr.                                13.5         9.4        0.0
+## Chipotle Mexican Grill                     4.0         4.7       13.2
+## Subway                                    19.5        20.8       19.9
+## Taco Bell                                  5.4         1.9       10.7
+## KFC                                        3.7         8.6       14.7
+## Jack in the Box                            4.8         2.2       11.0
+## Del Taco                                   3.9         8.8       14.2
+## Mr. Pickle&#39;s Sandwich Shop                 7.0         9.0       10.9
+## ChickPeas                                 15.1        12.4        9.7
+## Panda Express                             18.3        15.5       12.8
+## Burger King                               21.6        18.8       16.1
+## McDonald&#39;s                                17.9        19.6       19.1
+## Baja Fresh                                 3.8         4.2       12.8
+## Teaspoon                                   2.8         4.1       12.6
+## Burgers &amp; Brew                             4.4         4.5       13.0
+## Teabo Cafe                                 7.1         9.1       11.0
+## Hunan Bar &amp; Restaurant                     3.3         4.3       12.8
+## Raising Cane&#39;s Chicken Fingers             3.1         4.5       13.0
+## Wingstop                                   4.9         1.8       10.5
+## Domino&#39;s Pizza                             6.5         2.6        9.6
+## Steve&#39;s Pizza                              4.4         2.9       11.5
+## The Hotdogger                              3.2         5.0       13.4
+## Togo&#39;s Eatery                             18.6        15.8       13.1
+##                                Chipotle Mexican Grill Subway Taco Bell  KFC
+## In-N-Out Burger                                   3.9   18.1       5.1  5.5
+## Dairy Queen                                       4.8   20.6       1.9 10.1
+## Carl&#39;s Jr.                                       13.3   19.9      10.7 14.2
+## Chipotle Mexican Grill                            0.0   21.2       3.4  7.4
+## Subway                                           22.0    0.0      22.2 16.9
+## Taco Bell                                         3.4   22.0       0.0  8.8
+## KFC                                               6.2   16.8       7.4  0.0
+## Jack in the Box                                   2.8   21.6       1.0  8.2
+## Del Taco                                          6.4   16.5       7.6  1.1
+## Mr. Pickle&#39;s Sandwich Shop                        9.5   14.1      10.3  4.8
+## ChickPeas                                        12.7   28.9      11.6 18.5
+## Panda Express                                    16.2   32.0      14.7 21.7
+## Burger King                                      19.5   35.3      18.0 25.1
+## McDonald&#39;s                                       20.4    2.2      20.9 15.2
+## Baja Fresh                                        1.4   21.0       3.0  7.2
+## Teaspoon                                          2.4   20.0       2.9  6.2
+## Burgers &amp; Brew                                    2.1   21.7       3.3  7.8
+## Teabo Cafe                                        9.6   14.0      10.4  4.9
+## Hunan Bar &amp; Restaurant                            1.4   20.5       3.1  6.7
+## Raising Cane&#39;s Chicken Fingers                    1.2   20.4       3.3  6.5
+## Wingstop                                          2.9   21.7       0.6  8.3
+## Domino&#39;s Pizza                                    4.6   22.7       1.8  9.9
+## Steve&#39;s Pizza                                     2.4   21.6       1.7  7.8
+## The Hotdogger                                     2.1   20.4       3.8  6.6
+## Togo&#39;s Eatery                                    16.5   32.3      15.0 22.0
+##                                Jack in the Box Del Taco
+## In-N-Out Burger                            4.4      5.5
+## Dairy Queen                                2.3     10.1
+## Carl&#39;s Jr.                                11.0     14.1
+## Chipotle Mexican Grill                     2.7      7.3
+## Subway                                    21.9     16.5
+## Taco Bell                                  0.9      8.7
+## KFC                                        6.7      1.2
+## Jack in the Box                            0.0      8.1
+## Del Taco                                   6.9      0.0
+## Mr. Pickle&#39;s Sandwich Shop                10.0      4.8
+## ChickPeas                                 11.8     18.5
+## Panda Express                             14.8     21.7
+## Burger King                               18.2     25.0
+## McDonald&#39;s                                20.9     14.8
+## Baja Fresh                                 2.3      7.1
+## Teaspoon                                   2.1      6.1
+## Burgers &amp; Brew                             2.7      7.8
+## Teabo Cafe                                10.1      4.9
+## Hunan Bar &amp; Restaurant                     2.4      6.7
+## Raising Cane&#39;s Chicken Fingers             2.5      6.5
+## Wingstop                                   0.4      8.2
+## Domino&#39;s Pizza                             2.1      9.9
+## Steve&#39;s Pizza                              0.8      7.7
+## The Hotdogger                              3.0      6.6
+## Togo&#39;s Eatery                             15.2     22.0
+##                                Mr. Pickle&#39;s Sandwich Shop ChickPeas
+## In-N-Out Burger                                       7.6      14.8
+## Dairy Queen                                           8.9      12.7
+## Carl&#39;s Jr.                                           11.1      10.0
+## Chipotle Mexican Grill                                9.4      12.6
+## Subway                                               14.0      29.4
+## Taco Bell                                            10.3      12.0
+## KFC                                                   5.0      17.1
+## Jack in the Box                                      10.2      12.1
+## Del Taco                                              4.5      17.3
+## Mr. Pickle&#39;s Sandwich Shop                            0.0      20.4
+## ChickPeas                                            20.1       0.0
+## Panda Express                                        23.2       3.9
+## Burger King                                          26.5       7.3
+## McDonald&#39;s                                           12.4      28.7
+## Baja Fresh                                            9.3      11.7
+## Teaspoon                                              8.2      12.9
+## Burgers &amp; Brew                                        9.9      11.3
+## Teabo Cafe                                            0.1      20.5
+## Hunan Bar &amp; Restaurant                                8.8      11.8
+## Raising Cane&#39;s Chicken Fingers                        8.6      12.7
+## Wingstop                                             10.1      11.8
+## Domino&#39;s Pizza                                       11.0      10.8
+## Steve&#39;s Pizza                                         9.8      12.2
+## The Hotdogger                                         8.7      12.5
+## Togo&#39;s Eatery                                        23.5       4.3
+##                                Panda Express Burger King McDonald&#39;s Baja Fresh
+## In-N-Out Burger                         18.4        21.1       18.3        3.7
+## Dairy Queen                             15.9        18.6       19.8        4.2
+## Carl&#39;s Jr.                              12.9        15.7       19.4       12.8
+## Chipotle Mexican Grill                  16.5        18.9       20.7        1.4
+## Subway                                  32.3        35.0        2.2       21.8
+## Taco Bell                               15.2        17.9       21.2        2.9
+## KFC                                     20.6        23.4       15.5        6.0
+## Jack in the Box                         15.3        18.0       21.1        2.3
+## Del Taco                                20.9        23.6       15.2        6.2
+## Mr. Pickle&#39;s Sandwich Shop              23.3        26.0       12.8        9.4
+## ChickPeas                                4.2         6.9       28.4       11.8
+## Panda Express                            0.0         3.2       31.5       15.3
+## Burger King                              4.0         0.0       34.8       18.6
+## McDonald&#39;s                              31.6        34.3        0.0       20.2
+## Baja Fresh                              15.7        18.1       20.6        0.0
+## Teaspoon                                16.1        18.8       19.5        2.1
+## Burgers &amp; Brew                          15.2        17.6       21.2        1.2
+## Teabo Cafe                              23.4        26.1       12.7        9.5
+## Hunan Bar &amp; Restaurant                  15.7        18.1       20.1        0.5
+## Raising Cane&#39;s Chicken Fingers          16.7        19.1       19.9        1.5
+## Wingstop                                15.1        17.8       21.0        2.4
+## Domino&#39;s Pizza                          14.0        16.7       21.9        4.1
+## Steve&#39;s Pizza                           15.4        18.1       21.1        1.9
+## The Hotdogger                           16.4        18.8       20.0        1.2
+## Togo&#39;s Eatery                            0.7         4.0       31.8       15.6
+##                                Teaspoon Burgers &amp; Brew Teabo Cafe
+## In-N-Out Burger                     2.3            4.3        7.7
+## Dairy Queen                         4.1            4.6        9.0
+## Carl&#39;s Jr.                         12.6           13.1       11.2
+## Chipotle Mexican Grill              2.4            2.0        9.5
+## Subway                             20.4           22.4       14.0
+## Taco Bell                           2.8            3.2       10.4
+## KFC                                 4.5            6.5        5.1
+## Jack in the Box                     2.2            2.6       10.3
+## Del Taco                            4.8            6.8        4.6
+## Mr. Pickle&#39;s Sandwich Shop          7.9            9.9        0.1
+## ChickPeas                          12.5           11.5       20.2
+## Panda Express                      15.6           15.0       23.3
+## Burger King                        18.9           18.3       26.6
+## McDonald&#39;s                         18.7           20.8       12.4
+## Baja Fresh                          2.0            1.2        9.4
+## Teaspoon                            0.0            2.6        8.3
+## Burgers &amp; Brew                      2.7            0.0       10.0
+## Teabo Cafe                          8.0           10.0        0.0
+## Hunan Bar &amp; Restaurant              1.6            1.2        8.9
+## Raising Cane&#39;s Chicken Fingers      1.3            2.1        8.7
+## Wingstop                            2.3            2.7       10.2
+## Domino&#39;s Pizza                      3.9            4.4       11.1
+## Steve&#39;s Pizza                       1.7            2.2        9.9
+## The Hotdogger                       1.8            1.9        8.8
+## Togo&#39;s Eatery                      15.9           15.3       23.6
+##                                Hunan Bar &amp; Restaurant
+## In-N-Out Burger                                   3.1
+## Dairy Queen                                       4.4
+## Carl&#39;s Jr.                                       12.9
+## Chipotle Mexican Grill                            1.5
+## Subway                                           21.3
+## Taco Bell                                         3.0
+## KFC                                               5.5
+## Jack in the Box                                   2.4
+## Del Taco                                          5.7
+## Mr. Pickle&#39;s Sandwich Shop                        8.8
+## ChickPeas                                        12.0
+## Panda Express                                    15.4
+## Burger King                                      18.7
+## McDonald&#39;s                                       19.7
+## Baja Fresh                                        0.5
+## Teaspoon                                          1.5
+## Burgers &amp; Brew                                    1.3
+## Teabo Cafe                                        8.9
+## Hunan Bar &amp; Restaurant                            0.0
+## Raising Cane&#39;s Chicken Fingers                    1.0
+## Wingstop                                          2.5
+## Domino&#39;s Pizza                                    4.2
+## Steve&#39;s Pizza                                     2.1
+## The Hotdogger                                     0.7
+## Togo&#39;s Eatery                                    15.8
+##                                Raising Cane&#39;s Chicken Fingers Wingstop
+## In-N-Out Burger                                           3.0      4.5
+## Dairy Queen                                               4.6      1.9
+## Carl&#39;s Jr.                                               12.9     10.7
+## Chipotle Mexican Grill                                    1.2      2.9
+## Subway                                                   21.1     21.9
+## Taco Bell                                                 3.2      0.5
+## KFC                                                       5.3      6.8
+## Jack in the Box                                           2.5      0.4
+## Del Taco                                                  5.5      7.0
+## Mr. Pickle&#39;s Sandwich Shop                                8.6     10.2
+## ChickPeas                                                12.9     11.5
+## Panda Express                                            16.0     14.6
+## Burger King                                              19.4     17.9
+## McDonald&#39;s                                               19.5     20.8
+## Baja Fresh                                                1.6      2.5
+## Teaspoon                                                  1.3      2.3
+## Burgers &amp; Brew                                            2.3      2.8
+## Teabo Cafe                                                8.7     10.3
+## Hunan Bar &amp; Restaurant                                    1.1      2.5
+## Raising Cane&#39;s Chicken Fingers                            0.0      2.7
+## Wingstop                                                  2.7      0.0
+## Domino&#39;s Pizza                                            4.3      1.7
+## Steve&#39;s Pizza                                             2.1      1.1
+## The Hotdogger                                             1.4      3.2
+## Togo&#39;s Eatery                                            16.4     14.9
+##                                Domino&#39;s Pizza Steve&#39;s Pizza The Hotdogger
+## In-N-Out Burger                           6.2           3.6           2.9
+## Dairy Queen                               2.5           3.2           5.1
+## Carl&#39;s Jr.                                9.7          11.7          13.6
+## Chipotle Mexican Grill                    4.6           2.1           2.1
+## Subway                                   22.8          21.7          21.1
+## Taco Bell                                 1.8           1.8           3.8
+## KFC                                       8.4           5.9           5.3
+## Jack in the Box                           2.1           1.1           3.1
+## Del Taco                                  8.7           6.1           5.5
+## Mr. Pickle&#39;s Sandwich Shop               11.0           9.3           8.7
+## ChickPeas                                10.4          11.6          12.7
+## Panda Express                            13.5          14.7          16.2
+## Burger King                              16.9          18.0          19.5
+## McDonald&#39;s                               21.6          20.1          19.5
+## Baja Fresh                                4.1           1.7           1.2
+## Teaspoon                                  3.9           1.4           1.7
+## Burgers &amp; Brew                            4.4           2.1           2.1
+## Teabo Cafe                               11.1           9.4           8.8
+## Hunan Bar &amp; Restaurant                    4.2           1.8           0.8
+## Raising Cane&#39;s Chicken Fingers            4.4           1.9           1.4
+## Wingstop                                  1.7           1.3           3.3
+## Domino&#39;s Pizza                            0.0           3.0           5.0
+## Steve&#39;s Pizza                             2.8           0.0           2.8
+## The Hotdogger                             4.9           2.4           0.0
+## Togo&#39;s Eatery                            13.8          15.0          16.5
+##                                Togo&#39;s Eatery
+## In-N-Out Burger                         18.2
+## Dairy Queen                             15.7
+## Carl&#39;s Jr.                              12.8
+## Chipotle Mexican Grill                  16.3
+## Subway                                  32.1
+## Taco Bell                               15.0
+## KFC                                     20.4
+## Jack in the Box                         15.1
+## Del Taco                                20.7
+## Mr. Pickle&#39;s Sandwich Shop              23.1
+## ChickPeas                                4.0
+## Panda Express                            1.2
+## Burger King                              4.8
+## McDonald&#39;s                              31.4
+## Baja Fresh                              15.5
+## Teaspoon                                15.9
+## Burgers &amp; Brew                          15.0
+## Teabo Cafe                              23.2
+## Hunan Bar &amp; Restaurant                  15.5
+## Raising Cane&#39;s Chicken Fingers          16.5
+## Wingstop                                14.9
+## Domino&#39;s Pizza                          13.8
+## Steve&#39;s Pizza                           15.2
+## The Hotdogger                           16.2
+## Togo&#39;s Eatery                            0.0</code></pre>
+</div>
+<div id="osrmisochrone-to-create-isochrones" class="section level1">
+<h1>osrmIsochrone to create isochrones</h1>
+<p>So let’s try something different with network analyses. What if I
+wanted to create a map that would show me all the locations I could
+reach within a given number of minutes of biking? This is called an
+<strong>isochrone</strong> and you betcha the <strong>osrm</strong>
+package can do this!</p>
+<p>First, let’s set this up to be centered around the building we all
+know and love, the one that we are in right now. That’s right–Giedt
+Hall. I’ve clearly memorized the longitude and latitude for this
+building, which we paste in below, and then store as an
+<strong>sf</strong> object.</p>
+<pre class="r"><code>loc &lt;- c(&quot;lon&quot; = -121.75584, &quot;lat&quot; = 38.53766)
+loc_sf &lt;- st_sf(name = &quot;Giedt Hall&quot;,
+                geometry = st_sfc(st_point(loc), crs = 4326))</code></pre>
+<p><br />
+</p>
+<p>Next, we use the <code>osrmIsochrone()</code> function to create the
+isochrones. We will specify the <em>loc</em> to be <em>loc_sf</em>, the
+<em>breaks</em> (in minutes) will be 0 to 30 minutes by 5 minute
+intervals, and the <em>osrm.profile</em>, or the mode, will be “bike”.
+Let’s run it!</p>
+<pre class="r"><code>iso &lt;- osrmIsochrone(loc = loc_sf,
+                     breaks = seq(0, 30, by = 5),  # 0–30 mins in 5 min intervals
+                     osrm.profile = &quot;bike&quot;)  # mode bicycle
+
+glimpse(iso)</code></pre>
+<pre><code>## Rows: 6
+## Columns: 4
+## $ id       &lt;int&gt; 1, 2, 3, 4, 5, 6
+## $ isomin   &lt;dbl&gt; 0, 5, 10, 15, 20, 25
+## $ isomax   &lt;dbl&gt; 5, 10, 15, 20, 25, 30
+## $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((-121.7489 3..., MULTIPOLYGON (((-121.7628 3..…</code></pre>
+<p><br />
+</p>
+<p>OK, so now we can see we have <em>isomin</em> and <em>isomax</em> as
+our columns for our time bins. And our dataset is a
+<em>MULTIPOLYGON</em>, so it’s spatial. Let’s map this! First, we will
+create a categorical variable called <em>run_times</em>. Then we will
+use <strong>tmap</strong> to plot our isochrones. We will use a palette
+of heat colors for our ischrones, and we will also plot Giedt Hall in
+there just so we never forget our beautiful home base.</p>
+<pre class="r"><code># Create factor column for time intervals
+iso$run_times &lt;- factor(
+  paste(iso$isomin, &quot;to&quot;, iso$isomax, &quot;min&quot;),
+  levels = c(&quot;0 to 5 min&quot;, &quot;5 to 10 min&quot;, &quot;10 to 15 min&quot;, 
+             &quot;15 to 20 min&quot;, &quot;20 to 25 min&quot;, &quot;25 to 30 min&quot;)
+)
+
+
+# Plot using tmap
+tm &lt;- tm_shape(iso) +
+  tm_polygons(fill = &quot;run_times&quot;,
+              fill.scale = tm_scale(values = rev(heat.colors(6))),  # reverse for same effect
+              col = &quot;black&quot;,
+              lwd = 0.5,
+              fill_alpha = 0.3,
+              fill.legend = tm_legend(title = &quot;Biking Duration&quot;)) +
+  tm_shape(loc_sf) +
+  tm_bubbles(size = 0.3, col = &quot;blue&quot;) +
+  tm_text(&quot;name&quot;, size = 1, ymod = -0.5) 
+
+tm</code></pre>
+<style>#legend01 { background: #FFFFFF; opacity: 1}</style>
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-0e66e5810e335c92ca48" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-0e66e5810e335c92ca48">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}},"attributionControl":true},"calls":[{"method":"createMapPane","args":["tmap401",401]},{"method":"createMapPane","args":["tmap402",402]},{"method":"createMapPane","args":["tmap403",403]},{"method":"addLayersControl","args":[["Esri.WorldGrayCanvas","OpenStreetMap","Esri.WorldTopoMap"],["iso","loc_sf"],{"collapsed":true,"autoZIndex":true,"position":"topleft"}]},{"method":"addProviderTiles","args":["Esri.WorldGrayCanvas",null,"Esri.WorldGrayCanvas",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["OpenStreetMap",null,"OpenStreetMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addProviderTiles","args":["Esri.WorldTopoMap",null,"Esri.WorldTopoMap",{"minZoom":0,"maxZoom":18,"maxNativeZoom":17,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"pane":"tilePane"}]},{"method":"addPolygons","args":[[[[{"lng":[-121.7489298824302,-121.7558400000001,-121.7624843438173,-121.7558400000001,-121.7489298824302,-121.7474751208364,-121.7489298824302],"lat":[38.54020352480437,38.54257354651022,38.53765999999998,38.53256068175117,38.5353841384109,38.53765999999998,38.54020352480437]}]],[[{"lng":[-121.76275011757,-121.7657445018506,-121.7696602351407,-121.7715029331594,-121.7739126151837,-121.77389546849,-121.7696602351407,-121.76275011757,-121.7600923800431,-121.7561404398944,-121.7558400000001,-121.7548528403472,-121.7551029207926,-121.7489298824302,-121.7445119384096,-121.7420197648594,-121.7364916708035,-121.7351096472895,-121.7343585475537,-121.7351096472895,-121.7420197648594,-121.7446775023867,-121.7489298824302,-121.7558400000001,-121.76275011757],"lat":[38.550891923778,38.54846935924429,38.54479435938467,38.54306488269991,38.53765999999998,38.53225471116209,38.53123782926203,38.52817832310917,38.52684901620383,38.52144291514281,38.52050268220051,38.52144291514281,38.52684901620383,38.53137631336613,38.53225471116209,38.53508610358537,38.53765999999998,38.5403624921183,38.54306488269991,38.5438596841353,38.54750430393605,38.54846935924429,38.55019870595557,38.55041487137002,38.550891923778]},{"lng":[-121.7489298824302,-121.7558400000001,-121.7624843438173,-121.7558400000001,-121.7489298824302,-121.7474751208364,-121.7489298824302],"lat":[38.54020352480437,38.54257354651022,38.53765999999998,38.53256068175117,38.5353841384109,38.53765999999998,38.54020352480437]}]],[[{"lng":[-121.7489298824302,-121.7558400000001,-121.76275011757,-121.7696602351407,-121.7698576670713,-121.7728011976725,-121.7765703527106,-121.7828522777741,-121.7819448885983,-121.7833119308276,-121.7834804702805,-121.7840685653928,-121.7842482611216,-121.7834804702805,-121.7803395077487,-121.7765703527106,-121.7696602351407,-121.7663598804801,-121.76275011757,-121.7598959385737,-121.76275011757,-121.7633382126823,-121.76275011757,-121.7565020471924,-121.7558400000001,-121.7534876195508,-121.7497196101525,-121.7489298824302,-121.7462483442684,-121.7489298824302,-121.7535673391104,-121.7489298824302,-121.7420197648594,-121.7351096472895,-121.7328062747663,-121.7281995297197,-121.7262252104138,-121.7247444709343,-121.727653994122,-121.7281995297197,-121.7351096472895,-121.7360968069424,-121.7420197648594,-121.7474491429508,-121.7489298824302],"lat":[38.5609834296724,38.56262201567791,38.56139146051069,38.55942718978066,38.55927709379628,38.55387342961558,38.55262637250475,38.54846935924429,38.54306488269991,38.53765999999998,38.53657897472289,38.53225471116209,38.52684901620383,38.52549752901002,38.52684901620383,38.52758618033888,38.52856175558733,38.52684901620383,38.52425710061772,38.52144291514281,38.51697669927881,38.51603640799664,38.51576437175018,38.51062949478298,38.50730196174985,38.51062949478298,38.51603640799664,38.51675729907819,38.52144291514281,38.52223705712758,38.52684901620383,38.53025014665798,38.5299956641573,38.53169552017169,38.53225471116209,38.53495740634718,38.53765999999998,38.54306488269991,38.54846935924429,38.54906983156602,38.55319794303235,38.55387342961558,38.55630512876402,38.55927709379628,38.5609834296724]},{"lng":[-121.7558400000001,-121.76275011757,-121.7657445018506,-121.7696602351407,-121.7715029331594,-121.7739126151837,-121.77389546849,-121.7696602351407,-121.76275011757,-121.7600923800431,-121.7561404398944,-121.7558400000001,-121.7548528403472,-121.7551029207926,-121.7489298824302,-121.7445119384096,-121.7420197648594,-121.7364916708035,-121.7351096472895,-121.7343585475537,-121.7351096472895,-121.7420197648594,-121.7446775023867,-121.7489298824302,-121.7558400000001],"lat":[38.55041487137002,38.550891923778,38.54846935924429,38.54479435938467,38.54306488269991,38.53765999999998,38.53225471116209,38.53123782926203,38.52817832310917,38.52684901620383,38.52144291514281,38.52050268220051,38.52144291514281,38.52684901620383,38.53137631336613,38.53225471116209,38.53508610358537,38.53765999999998,38.5403624921183,38.54306488269991,38.5438596841353,38.54750430393605,38.54846935924429,38.55019870595557,38.55041487137002]}]],[[{"lng":[-121.7489298824302,-121.7558400000001,-121.76275011757,-121.7655141645983,-121.7696602351407,-121.7765703527106,-121.7765703527106,-121.7834804702805,-121.7869355290654,-121.7903905878503,-121.7905247648905,-121.7970703681688,-121.7903905878503,-121.785510015301,-121.7903905878503,-121.7973007054211,-121.7993737406921,-121.7973007054211,-121.7920029486169,-121.7914874319092,-121.7903905878503,-121.7848392012633,-121.7834804702805,-121.7798160139934,-121.7765703527106,-121.7696602351407,-121.7662051763554,-121.7670138071349,-121.76275011757,-121.7585709446684,-121.76275011757,-121.7684262855745,-121.7635381134333,-121.76275011757,-121.7577594771028,-121.7558400000001,-121.7498312021133,-121.7489298824302,-121.7448270001226,-121.7420197648594,-121.7375775464217,-121.7363660323023,-121.7351096472895,-121.7281995297197,-121.7276341564639,-121.7212894121489,-121.7179458068732,-121.7143792945791,-121.7097725495325,-121.7074691770092,-121.7070956571405,-121.7074691770092,-121.7110289345452,-121.7143792945791,-121.7172585102332,-121.7212894121489,-121.72725724096,-121.7281995297197,-121.7351096472895,-121.7420197648594,-121.7428423979036,-121.7471007336615,-121.7489298824302],"lat":[38.57116372511624,38.57048045599291,38.57136953691209,38.57008320351551,38.56738182842143,38.56468035176874,38.56468035176874,38.56084582344215,38.55927709379628,38.5548559442251,38.55387342961558,38.54846935924429,38.54726378044298,38.54306488269991,38.53924749019171,38.54126330026079,38.53765999999998,38.53654169769944,38.53225471116209,38.52684901620383,38.52649568866893,38.52144291514281,38.52093561940404,38.52144291514281,38.52367748615127,38.52360540429842,38.52144291514281,38.51603640799664,38.51406412191982,38.51062949478298,38.50622517670013,38.50522217551946,38.49981445022378,38.49721058582962,38.49981445022378,38.50041532864039,38.50522217551946,38.5065199691735,38.51062949478298,38.51289695943845,38.51603640799664,38.52144291514281,38.52185878348803,38.52453216547494,38.52684901620383,38.53101680160411,38.53225471116209,38.53571414280452,38.53765999999998,38.54208220696388,38.54306488269991,38.54336514205229,38.54846935924429,38.55314317357178,38.55387342961558,38.55532830223844,38.55927709379628,38.5598774758532,38.56371551406649,38.56386170242978,38.56468035176874,38.57008320351551,38.57116372511624]},{"lng":[-121.7489298824302,-121.7558400000001,-121.76275011757,-121.7696602351407,-121.7698576670713,-121.7728011976725,-121.7765703527106,-121.7828522777741,-121.7819448885983,-121.7833119308276,-121.7834804702805,-121.7840685653928,-121.7842482611216,-121.7834804702805,-121.7803395077487,-121.7765703527106,-121.7696602351407,-121.7663598804801,-121.76275011757,-121.7598959385737,-121.76275011757,-121.7633382126823,-121.76275011757,-121.7565020471924,-121.7558400000001,-121.7534876195508,-121.7497196101525,-121.7489298824302,-121.7462483442684,-121.7489298824302,-121.7535673391104,-121.7489298824302,-121.7420197648594,-121.7351096472895,-121.7328062747663,-121.7281995297197,-121.7262252104138,-121.7247444709343,-121.727653994122,-121.7281995297197,-121.7351096472895,-121.7360968069424,-121.7420197648594,-121.7474491429508,-121.7489298824302],"lat":[38.5609834296724,38.56262201567791,38.56139146051069,38.55942718978066,38.55927709379628,38.55387342961558,38.55262637250475,38.54846935924429,38.54306488269991,38.53765999999998,38.53657897472289,38.53225471116209,38.52684901620383,38.52549752901002,38.52684901620383,38.52758618033888,38.52856175558733,38.52684901620383,38.52425710061772,38.52144291514281,38.51697669927881,38.51603640799664,38.51576437175018,38.51062949478298,38.50730196174985,38.51062949478298,38.51603640799664,38.51675729907819,38.52144291514281,38.52223705712758,38.52684901620383,38.53025014665798,38.5299956641573,38.53169552017169,38.53225471116209,38.53495740634718,38.53765999999998,38.54306488269991,38.54846935924429,38.54906983156602,38.55319794303235,38.55387342961558,38.55630512876402,38.55927709379628,38.5609834296724]},{"lng":[-121.7489298824302,-121.7426984371209,-121.7489298824302,-121.7520317574283,-121.7489298824302],"lat":[38.52376422862424,38.52684901620383,38.52912396232337,38.52684901620383,38.52376422862424]}]],[[{"lng":[-121.7420197648594,-121.7489298824302,-121.7500047896077,-121.7558400000001,-121.7614269035672,-121.760702675327,-121.76275011757,-121.7677756576214,-121.7696602351407,-121.7707851380009,-121.7765703527106,-121.7834804702805,-121.7835482165312,-121.7859296258749,-121.7903905878503,-121.7973007054211,-121.7981866179301,-121.7973007054211,-121.7938791908958,-121.7973007054211,-121.8026403417251,-121.804210822991,-121.8065665448898,-121.8111209405609,-121.8163726299147,-121.8111209405609,-121.8068749647047,-121.8070701819854,-121.8047668094621,-121.804210822991,-121.7973007054211,-121.7969716522035,-121.7903905878503,-121.7867802455245,-121.7834804702805,-121.7765703527106,-121.7700772249941,-121.7696602351407,-121.76275011757,-121.7606398421444,-121.76275011757,-121.7696602351407,-121.7727088164215,-121.7696602351407,-121.7665688667538,-121.7696602351407,-121.7727313985051,-121.7696602351407,-121.7655141645983,-121.76275011757,-121.7558400000001,-121.7543592605208,-121.7489298824302,-121.7451607273916,-121.7420197648594,-121.740292235467,-121.7420197648594,-121.7456605794935,-121.7420197648594,-121.7362808536573,-121.7351096472895,-121.7343745283991,-121.733318135327,-121.7281995297197,-121.725686759694,-121.7252491424423,-121.7244931939317,-121.7212894121489,-121.7143792945791,-121.7074691770092,-121.7060655593776,-121.7005590594384,-121.6960409056427,-121.6940808242166,-121.698046289413,-121.7005590594384,-121.7030543796723,-121.7051658044856,-121.7074691770092,-121.7143792945791,-121.7193150928432,-121.7212894121489,-121.7279231250169,-121.7281995297197,-121.7351096472895,-121.7415739508227,-121.7420197648594],"lat":[38.57577766152699,38.57926711914754,38.57548564901909,38.57246668543392,38.57548564901909,38.580887688262,38.58304839020226,38.580887688262,38.57993441674056,38.57548564901909,38.57079921362143,38.57029930913564,38.57008320351551,38.56468035176874,38.56168511763508,38.55975954405925,38.55927709379628,38.55879464029505,38.55387342961558,38.55111740447864,38.55387342961558,38.55552765566863,38.55387342961558,38.5506085190019,38.54846935924429,38.54700247005719,38.54306488269991,38.53765999999998,38.53225471116209,38.53064454662135,38.52738960397457,38.52684901620383,38.52472902497241,38.52144291514281,38.52021090500347,38.52100949705293,38.51603640799664,38.5148718763846,38.51236383193468,38.51062949478298,38.50840556585633,38.50775690698108,38.50522217551946,38.5026873548418,38.49981445022378,38.49513964864735,38.49440631891362,38.49252513459387,38.48899778160668,38.48740695807665,38.4882602223367,38.48899778160668,38.49158452401472,38.49440631891362,38.49826931127873,38.49981445022378,38.50022259459998,38.50522217551946,38.50830313975054,38.50522217551946,38.50276416890039,38.50522217551946,38.51062949478298,38.5140088631266,38.51603640799664,38.52144291514281,38.52684901620383,38.52895357167743,38.5308445690213,38.52974497472216,38.53225471116209,38.53630871586526,38.53765999999998,38.54306488269991,38.54846935924429,38.55052810061344,38.55387342961558,38.55927709379628,38.55985192778272,38.56350576502584,38.56468035176874,38.5650959701717,38.57008320351551,38.57035333543911,38.57207980678805,38.57548564901909,38.57577766152699]},{"lng":[-121.76275011757,-121.7655141645983,-121.7696602351407,-121.7765703527106,-121.7765703527106,-121.7834804702805,-121.7869355290654,-121.7903905878503,-121.7905247648905,-121.7970703681688,-121.7903905878503,-121.785510015301,-121.7903905878503,-121.7973007054211,-121.7993737406921,-121.7973007054211,-121.7920029486169,-121.7914874319092,-121.7903905878503,-121.7848392012633,-121.7834804702805,-121.7798160139934,-121.7765703527106,-121.7696602351407,-121.7662051763554,-121.7670138071349,-121.76275011757,-121.7585709446684,-121.76275011757,-121.7684262855745,-121.7635381134333,-121.76275011757,-121.7577594771028,-121.7558400000001,-121.7498312021133,-121.7489298824302,-121.7448270001226,-121.7420197648594,-121.7375775464217,-121.7363660323023,-121.7351096472895,-121.7281995297197,-121.7276341564639,-121.7212894121489,-121.7179458068732,-121.7143792945791,-121.7097725495325,-121.7074691770092,-121.7070956571405,-121.7074691770092,-121.7110289345452,-121.7143792945791,-121.7172585102332,-121.7212894121489,-121.72725724096,-121.7281995297197,-121.7351096472895,-121.7420197648594,-121.7428423979036,-121.7471007336615,-121.7489298824302,-121.7558400000001,-121.76275011757],"lat":[38.57136953691209,38.57008320351551,38.56738182842143,38.56468035176874,38.56468035176874,38.56084582344215,38.55927709379628,38.5548559442251,38.55387342961558,38.54846935924429,38.54726378044298,38.54306488269991,38.53924749019171,38.54126330026079,38.53765999999998,38.53654169769944,38.53225471116209,38.52684901620383,38.52649568866893,38.52144291514281,38.52093561940404,38.52144291514281,38.52367748615127,38.52360540429842,38.52144291514281,38.51603640799664,38.51406412191982,38.51062949478298,38.50622517670013,38.50522217551946,38.49981445022378,38.49721058582962,38.49981445022378,38.50041532864039,38.50522217551946,38.5065199691735,38.51062949478298,38.51289695943845,38.51603640799664,38.52144291514281,38.52185878348803,38.52453216547494,38.52684901620383,38.53101680160411,38.53225471116209,38.53571414280452,38.53765999999998,38.54208220696388,38.54306488269991,38.54336514205229,38.54846935924429,38.55314317357178,38.55387342961558,38.55532830223844,38.55927709379628,38.5598774758532,38.56371551406649,38.56386170242978,38.56468035176874,38.57008320351551,38.57116372511624,38.57048045599291,38.57136953691209]},{"lng":[-121.7903905878503,-121.7939866694433,-121.7903905878503,-121.7879261403254,-121.7903905878503],"lat":[38.54518514883635,38.54306488269991,38.5411373137866,38.54306488269991,38.54518514883635]}],[{"lng":[-121.6919965224497,-121.6936489418685,-121.6968160790881,-121.6936489418685,-121.6919965224497],"lat":[38.55387342961558,38.55535947775814,38.55387342961558,38.55149568869386,38.55387342961558]}],[{"lng":[-121.7489298824302,-121.7520317574283,-121.7489298824302,-121.7426984371209,-121.7489298824302],"lat":[38.52912396232337,38.52684901620383,38.52376422862424,38.52684901620383,38.52912396232337]},{"lng":[-121.7489298824302,-121.7504961757461,-121.7489298824302,-121.7457833110364,-121.7489298824302],"lat":[38.52799776036244,38.52684901620383,38.5252913677154,38.52684901620383,38.52799776036244]}]],[[{"lng":[-121.76275011757,-121.7684262855745,-121.7648177118037,-121.7696602351407,-121.7725343548379,-121.774802648216,-121.7765703527106,-121.7797374899301,-121.7825712442845,-121.7834804702805,-121.789762395344,-121.7853519604557,-121.7869355290654,-121.7903031180077,-121.7903905878503,-121.7973007054211,-121.7976297586387,-121.804210822991,-121.8107918873433,-121.8111209405609,-121.8135244597159,-121.8177169618784,-121.8180310581316,-121.8214861169166,-121.8249411757015,-121.8251331234118,-121.8295479207481,-121.831357713445,-121.8249411757015,-121.8180310581316,-121.811527418065,-121.8111209405609,-121.8110376861323,-121.8110415139221,-121.8067524754305,-121.8053974088363,-121.8048841164978,-121.804210822991,-121.8004596163102,-121.7973007054211,-121.7903905878503,-121.7887212897857,-121.7834804702805,-121.7765703527106,-121.7715664744704,-121.7696602351407,-121.76275011757,-121.7627087396204,-121.76275011757,-121.7696602351407,-121.7760961289558,-121.7765703527106,-121.7786965427321,-121.7834804702805,-121.7862445173084,-121.7834804702805,-121.7772284591458,-121.7765703527106,-121.7716564913276,-121.7696602351407,-121.76275011757,-121.7558400000001,-121.7489298824302,-121.7480192467814,-121.7473810629747,-121.7420197648594,-121.7351096472895,-121.7281995297197,-121.7271630120841,-121.7281995297197,-121.7300599459885,-121.7306989339471,-121.7281995297197,-121.7212894121489,-121.7209625822639,-121.7143792945791,-121.7140651983259,-121.7123638436211,-121.7074691770092,-121.7007510071487,-121.7006670300254,-121.7005590594384,-121.7002300062208,-121.6936489418685,-121.6915862202059,-121.6867388242986,-121.6809803929904,-121.6851441817825,-121.6836676609343,-121.6849203723066,-121.6867388242986,-121.6901096133571,-121.6936489418685,-121.6948006281302,-121.7005590594384,-121.7074691770092,-121.7137394688781,-121.7143792945791,-121.7205490424093,-121.7212894121489,-121.7281995297197,-121.7351096472895,-121.7375131664443,-121.7420197648594,-121.7450141491401,-121.7479875936706,-121.7489298824302,-121.7558400000001,-121.76275011757],"lat":[38.59464819032532,38.59169054789595,38.58628932122677,38.58275447500821,38.580887688262,38.57548564901909,38.57405371508187,38.57548564901909,38.580887688262,38.58334302633936,38.580887688262,38.57548564901909,38.57008320351551,38.56468035176874,38.56462162288755,38.56458386858143,38.56468035176874,38.56937850676044,38.56468035176874,38.56408000983201,38.55927709379628,38.55387342961558,38.55375334357576,38.55387342961558,38.55401947993421,38.55387342961558,38.54846935924429,38.54306488269991,38.53893177364487,38.5379779455192,38.54306488269991,38.54314209236739,38.54306488269991,38.53765999999998,38.53225471116209,38.52684901620383,38.52144291514281,38.51697669927881,38.52144291514281,38.52281593166089,38.52296231790626,38.52144291514281,38.51948618330605,38.51986891066105,38.51603640799664,38.51071268113864,38.51066350179533,38.51062949478298,38.51058588899362,38.51057317063342,38.50522217551946,38.50357638906345,38.49981445022378,38.49620907446197,38.49440631891362,38.49177518931356,38.48899778160668,38.4886796197102,38.4835888383206,38.48053142993106,38.48007280748681,38.47928913227054,38.47959066279658,38.4835888383206,38.48899778160668,38.49317011760826,38.4933372216408,38.49427956096669,38.49440631891362,38.49536072452918,38.49981445022378,38.50522217551946,38.50809486443509,38.50589811263265,38.51062949478298,38.51599833256275,38.51603640799664,38.52144291514281,38.52321033901507,38.52684901620383,38.53225471116209,38.53233420364613,38.53225471116209,38.52684901620383,38.53225471116209,38.5360465234659,38.53765999999998,38.54306488269991,38.54846935924429,38.55387342961558,38.55618933543168,38.55927709379628,38.56381585779106,38.56468035176874,38.56664507213344,38.56508812833729,38.57008320351551,38.57162680082783,38.57548564901909,38.57582328837412,38.57755314412611,38.57939751111858,38.580887688262,38.58378147073418,38.58628932122677,38.59169054789595,38.59194372042685,38.59241068075301,38.59464819032532]},{"lng":[-121.7420197648594,-121.7489298824302,-121.7500047896077,-121.7558400000001,-121.7614269035672,-121.760702675327,-121.76275011757,-121.7677756576214,-121.7696602351407,-121.7707851380009,-121.7765703527106,-121.7834804702805,-121.7835482165312,-121.7859296258749,-121.7903905878503,-121.7973007054211,-121.7981866179301,-121.7973007054211,-121.7938791908958,-121.7973007054211,-121.8026403417251,-121.804210822991,-121.8065665448898,-121.8111209405609,-121.8163726299147,-121.8111209405609,-121.8068749647047,-121.8070701819854,-121.8047668094621,-121.804210822991,-121.7973007054211,-121.7969716522035,-121.7903905878503,-121.7867802455245,-121.7834804702805,-121.7765703527106,-121.7700772249941,-121.7696602351407,-121.76275011757,-121.7606398421444,-121.76275011757,-121.7696602351407,-121.7727088164215,-121.7696602351407,-121.7665688667538,-121.7696602351407,-121.7727313985051,-121.7696602351407,-121.7655141645983,-121.76275011757,-121.7558400000001,-121.7543592605208,-121.7489298824302,-121.7451607273916,-121.7420197648594,-121.740292235467,-121.7420197648594,-121.7456605794935,-121.7420197648594,-121.7362808536573,-121.7351096472895,-121.7343745283991,-121.733318135327,-121.7281995297197,-121.725686759694,-121.7252491424423,-121.7244931939317,-121.7212894121489,-121.7143792945791,-121.7074691770092,-121.7060655593776,-121.7005590594384,-121.6960409056427,-121.6940808242166,-121.698046289413,-121.7005590594384,-121.7030543796723,-121.7051658044856,-121.7074691770092,-121.7143792945791,-121.7193150928432,-121.7212894121489,-121.7279231250169,-121.7281995297197,-121.7351096472895,-121.7415739508227,-121.7420197648594],"lat":[38.57577766152699,38.57926711914754,38.57548564901909,38.57246668543392,38.57548564901909,38.580887688262,38.58304839020226,38.580887688262,38.57993441674056,38.57548564901909,38.57079921362143,38.57029930913564,38.57008320351551,38.56468035176874,38.56168511763508,38.55975954405925,38.55927709379628,38.55879464029505,38.55387342961558,38.55111740447864,38.55387342961558,38.55552765566863,38.55387342961558,38.5506085190019,38.54846935924429,38.54700247005719,38.54306488269991,38.53765999999998,38.53225471116209,38.53064454662135,38.52738960397457,38.52684901620383,38.52472902497241,38.52144291514281,38.52021090500347,38.52100949705293,38.51603640799664,38.5148718763846,38.51236383193468,38.51062949478298,38.50840556585633,38.50775690698108,38.50522217551946,38.5026873548418,38.49981445022378,38.49513964864735,38.49440631891362,38.49252513459387,38.48899778160668,38.48740695807665,38.4882602223367,38.48899778160668,38.49158452401472,38.49440631891362,38.49826931127873,38.49981445022378,38.50022259459998,38.50522217551946,38.50830313975054,38.50522217551946,38.50276416890039,38.50522217551946,38.51062949478298,38.5140088631266,38.51603640799664,38.52144291514281,38.52684901620383,38.52895357167743,38.5308445690213,38.52974497472216,38.53225471116209,38.53630871586526,38.53765999999998,38.54306488269991,38.54846935924429,38.55052810061344,38.55387342961558,38.55927709379628,38.55985192778272,38.56350576502584,38.56468035176874,38.5650959701717,38.57008320351551,38.57035333543911,38.57207980678805,38.57548564901909,38.57577766152699]},{"lng":[-121.7558400000001,-121.7577513091151,-121.7558400000001,-121.7538437438132,-121.7558400000001],"lat":[38.57794978748768,38.57548564901909,38.57445285996427,38.57548564901909,38.57794978748768]},{"lng":[-121.6936489418685,-121.6968160790881,-121.6936489418685,-121.6919965224497,-121.6936489418685],"lat":[38.55535947775814,38.55387342961558,38.55149568869386,38.55387342961558,38.55535947775814]},{"lng":[-121.7973007054211,-121.7974054041722,-121.7973007054211,-121.797233616901,-121.7973007054211],"lat":[38.55396992718079,38.55387342961558,38.55381939092248,38.55387342961558,38.55396992718079]},{"lng":[-121.7141873468688,-121.7143792945791,-121.7212894121489,-121.7213522313996,-121.7213670539194,-121.7212894121489,-121.7204256474527,-121.7143792945791,-121.7141873468688],"lat":[38.52684901620383,38.52692736250919,38.52689028258904,38.52684901620383,38.52144291514281,38.52126270478031,38.52144291514281,38.52617327577958,38.52684901620383]},{"lng":[-121.7696602351407,-121.7700667126448,-121.7696602351407,-121.7695996200743,-121.7696602351407],"lat":[38.49987078278828,38.49981445022378,38.49972279036368,38.49981445022378,38.49987078278828]}],[{"lng":[-121.7903905878503,-121.7879261403254,-121.7903905878503,-121.7939866694433,-121.7903905878503],"lat":[38.5411373137866,38.54306488269991,38.54518514883635,38.54306488269991,38.5411373137866]},{"lng":[-121.7903905878503,-121.7903422653498,-121.7903905878503,-121.7904610992541,-121.7903905878503],"lat":[38.54302708772756,38.54306488269991,38.54310645714655,38.54306488269991,38.54302708772756]}],[{"lng":[-121.7457833110364,-121.7489298824302,-121.7504961757461,-121.7489298824302,-121.7457833110364],"lat":[38.52684901620383,38.52799776036244,38.52684901620383,38.5252913677154,38.52684901620383]},{"lng":[-121.7488681849519,-121.7489298824302,-121.7489605940638,-121.7489298824302,-121.7488681849519],"lat":[38.52684901620383,38.52687154077536,38.52684901620383,38.52681847440067,38.52684901620383]}]]],["X0000001","X0000002","X0000003","X0000004","X0000005","X0000006"],"iso",{"interactive":true,"className":"","pane":"tmap401","stroke":true,"color":["#000000","#000000","#000000","#000000","#000000","#000000"],"weight":[0.5,0.5,0.5,0.5,0.5,0.5],"opacity":[1,1,1,1,1,1],"fill":true,"fillColor":["#FFFF80","#FFFF00","#FFBF00","#FF8000","#FF4000","#FF0000"],"fillOpacity":[0.3,0.3,0.3,0.3,0.3,0.3],"dashArray":["","","","","",""],"smoothFactor":1,"noClip":false},["<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>1<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>0 to 5 min<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>2<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5 to 10 min<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>3<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>15<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>10 to 15 min<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>4<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>15<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>20<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>15 to 20 min<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>5<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>20<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>25<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>20 to 25 min<\/nobr><\/td><\/tr><\/table><\/div>","<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>id<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>6<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomin<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>25<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>isomax<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>30<\/nobr><\/td><\/tr><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>run_times<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>25 to 30 min<\/nobr><\/td><\/tr><\/table><\/div>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[38.53766,-121.75584,2.1,"X0000001_1","loc_sf",{"interactive":false,"className":"","pane":"tmap402","stroke":true,"color":"#0000FF","weight":1,"opacity":1,"fill":true,"fillColor":"#999999","fillOpacity":1},null,null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addCircleMarkers","args":[38.53766,-121.75584,6,"X0000001_2","loc_sf",{"interactive":true,"className":"","pane":"tmap402","stroke":false,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0},null,null,"<style> div.leaflet-popup-content {width:auto !important;}<\/style><div class=\"tmap-popup\" style=\"max-height:25em;overflow-y:auto;overflow-x:hidden;padding-right:0px;\"><table class=\"tmap-popup-table\"><thead><tr><th class=\"tmap-popup-title\" colspan=\"2\" style=\"text-align:left;\"><\/th><\/tr><\/thead><tr><td class=\"tmap-popup-label\" style=\"text-align:left; color:#888888;\"><nobr>name<\/nobr><\/td><td class=\"tmap-popup-value\" style=\"text-align:right;\"><nobr>Giedt Hall<\/nobr><\/td><\/tr><\/table><\/div>",null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addMarkers","args":[38.53466066449058,-121.75584,{"iconUrl":{"data":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP6zwAAAgcBApocMXEAAAAASUVORK5CYII=","index":0},"iconWidth":1,"iconHeight":1},"X1","loc_sf",{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250,"pane":"tmap403"},null,null,null,null,"Giedt Hall",{"interactive":false,"permanent":true,"direction":"right","opacity":1,"offset":[0,0],"textsize":"12px","textOnly":true,"style":{"color":"#000000","background-color":null,"border":null,"line-height":"12px","text-shadow":null,"padding":"3px"},"className":"","sticky":true,"pane":"tmap403"},null]},{"method":"addControl","args":["<div>\n  <div style=\"font-size: 14px; text-align: left; margin-bottom: 5px; color: #000000;\">Biking Duration<\/div>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FFFF80%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">0 to 5 min<\/span>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FFFF00%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">5 to 10 min<\/span>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FFBF00%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">10 to 15 min<\/span>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FF8000%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">15 to 20 min<\/span>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FF4000%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">20 to 25 min<\/span>\n<\/div>\n<div>\n  <img src=\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20version%3D%221.1%22%20width%3D%2215%22%20height%3D%2215%22%3E%0A%20%20%3Crect%20id%3D%22stadium%22%20x%3D%220.5%22%20y%3D%220.5%22%20height%3D%2214%22%20width%3D%2214%22%20rx%3D%2225%25%22%20stroke%3D%22%23000000%22%20fill%3D%22%23FF0000%22%20stroke-opacity%3D%221%22%20fill-opacity%3D%220.3%22%20stroke-width%3D%220.5%22%20stroke-dasharray%3D%22%22%20baseSize%3D%2220%22%3E%3C%2Frect%3E%0A%3C%2Fsvg%3E\" style=\"vertical-align: middle; margin: 5px; margin-right: 0px; margin-left: 0px\" height=\"15\" width=\"15\"/>\n  <span style=\"font-size: 14px; vertical-align: middle; margin: 0px;\">25 to 30 min<\/span>\n<\/div>","bottomright","legend01","info legend iso leaflegend-group-iso"]}],"fitBounds":[38.47698195110944,-121.8343652598541,38.59695537148642,-121.6779728465813,[]],"limits":{"lat":[38.47928913227054,38.59464819032532],"lng":[-121.831357713445,-121.6809803929904]}},"evals":[],"jsHooks":{"render":[{"code":"function(el, x, data) {\n  return (\nfunction(el, x) {\n  var updateLeafLegend = function() {\n    var controlGroups = el.querySelectorAll(\n      'input.leaflet-control-layers-selector');\n    controlGroups.forEach(g => {\n      var groupName = g.nextSibling.innerText.substr(1);\n      var className = 'leaflegend-group-' +\n        groupName.replace(/[^a-zA-Z0-9]/g, '');\n      var checked = g.checked;\n      el.querySelectorAll('.legend.' + className).forEach(l => {\n        l.hidden = !checked;\n      })\n    })\n  }\n\n  updateLeafLegend();\n  this.on('baselayerchange', el => updateLeafLegend())\n  this.on('overlayadd', el => updateLeafLegend());\n  this.on('overlayremove', el => updateLeafLegend());\n}\n                        ).call(this.getMap(), el, x, data);\n}","data":null}]}}</script>
+<p><br />
+</p>
+<p>Would you look at that! It’s like a work of art. Georgia O’Keefe, eat
+your heart out. Click around and explore where you could bike to in 10
+minutes once class gets out! And you’ve earned that
+<strong>osrm</strong> badge! Get biking somewhere–you know the route
+now!</p>
+<p><br />
+</p>
+<p><img src="osrm.png" alt="Your osrm Badge!!" />—</p>
+</div>
+
+<div id="rmd-source-code">LS0tCnRpdGxlOiAnTGFiIDY6IE5ldHdvcmsgQW5hbHlzaXMnCi0tLQoKSW4gdGhpcyBsYWIsIHdlIHdpbGwgYmUgdXNpbmcgc3BhdGlhbCBkYXRhIHRvIHJ1biBhIG5ldHdvcmsgYW5hbHlzaXMuIFdlIHdpbGwgYmUgcGxheWluZyBhcm91bmQgd2l0aCBkYXRhIGZyb20gRGF2aXMsIGluY2x1ZGluZyBnZW9jb2RpbmcgZmFzdCBmb29kIHJlc3RhdXJhbnRzIGluIG91ciBmYWlyIGNpdHksIHRoZW4gbWFwcGluZyB0aGUgbW9zdCBlZmZpY2llbnQgcm91dGUgdG8gYmlrZSBiZXR3ZWVuIGFsbCBmYXN0IGZvb2QgZXN0YWJsaXNobWVudHMuIE5leHQsIHdlIHdpbGwgZXN0aW1hdGUgdGhlIHRyYXZlbCB0aW1lIGJldHdlZW4gYWxsIGZhc3QgZm9vZCBlc3RhYmxpc2htZW50cyBpbiBEYXZpcy4gRmluYWxseSwgd2UgYXJlIGdvaW5nIHRvIGNyZWF0ZSBhIGNvb2wgdmlzdWFsaXphdGlvbiBvZiB0aGUgdHJhdmVsIHRpbWVzIGZyb20gdGhlIGJ1aWxkaW5nIHRoYXQgd2UgYXJlIHNpdHRpbmcgaW4hIFRoaXMgaXMgYWxsIGludGVuZGVkIHRvIGV4cGxhaW4gaG93IHlvdSBjYW4gdXNlIHNwYXRpYWwgZGF0YSB0byB1bmRlcnN0YW5kIGhvdyBkaWZmZXJlbnQgc3BhdGlhbCBmZWF0dXJlcyByZWxhdGUgdXNpbmcgdGhlIHJvYWQgbmV0d29ya3MgdGhhdCB3ZSB0cmF2ZWwgb24uCgpUaGUgb2JqZWN0aXZlcyBvZiB0aGlzIGd1aWRlIGFyZSB0byB0ZWFjaCB5b3UgdG86CgoxLiBVc2UgdGhlICoqb3NybSoqIHBhY2thZ2UgdG8gbWFwIHRoZSBvcHRpbWFsIHRyaXAgYmV0d2VlbiBtdWx0aXBsZSBwb2ludHMKMi4gR2V0IGEgbWF0cml4IG9mIHRyYXZlbCB0aW1lcyBiZXR3ZWVuIG11bHRpcGxlIHBvaW50cwozLiBDcmVhdGUgYW4gaXNvY2hyb25lIHRvIG1hcCB0cmF2ZWwgdGltZXMgZnJvbSBvbmUgbG9jYXRpb24KCkxldCdzIGdldCByb2xsaW4uLi4KClwKCiMgTG9hZCBQYWNrYWdlcwpGaXJzdCwgd2UgYWx3YXlzIGdvdHRhIHJlbWVtYmVyIHRvIGxvYWQgb3VyIHBhY2thZ2VzLgpgYGB7ciwgbWVzc2FnZT1GQUxTRX0KbGlicmFyeSh0aWR5Z2VvY29kZXIpCmxpYnJhcnkoc2YpCmxpYnJhcnkodG1hcCkKbGlicmFyeShvc3JtKQpsaWJyYXJ5KHRpZHl2ZXJzZSkKYGBgCgpcCgojIG9zcm0gcGFja2FnZSBmb3IgbmV0d29yayBhbmFseXNpcyBpbiBSClIgb2ZmZXJzIGEgZmV3IHBhY2thZ2VzIGZvciBuZXR3b3JrIGFuYWx5c2lzLiBXZSB3aWxsIGJlIHVzaW5nIHRoZSAqKm9zcm0qKiBwYWNrYWdlIGJlY2F1c2UgaXQgaXMgZmFzdCBhbmQgb3BlbiBzb3VyY2UuIEl0IGlzIGFuIGludGVyZmFjZSBiZXR3ZWVuIFIgYW5kIHRoZSBPcGVuIFN0cmVldCBNYXAtQmFzZWQgUm91dGluZyBTZXJ2aWNlLiBJdCBoYXMgYSBudW1iZXIgb2Ygb3B0aW9ucywgaW5jbHVkaW5nOgoKLSBgb3NybVRyaXBgOiBCdWlsZCBhbmQgc2VuZCBhbiBPU1JNIEFQSSBxdWVyeSB0byBnZXQgdGhlIHNob3J0ZXN0IHRyYXZlbCBnZW9tZXRyeSBiZXR3ZWVuIG11bHRpcGxlIHVub3JkZXJlZCBwb2ludHMuIFRoaXMgZnVuY3Rpb24gaW50ZXJmYWNlcyB0aGUgdHJpcCBPU1JNIHNlcnZpY2UuIFVzZSB0aGlzIGZ1bmN0aW9uIHRvIHJlc29sdmUgdGhlIHRyYXZlbGxpbmcgc2FsZXNtYW4gcHJvYmxlbS4KLSBgb3NybVRhYmxlYDogQnVpbGQgYW5kIHNlbmQgT1NSTSBBUEkgcXVlcmllcyB0byBnZXQgdHJhdmVsIHRpbWUgbWF0cmljZXMgYmV0d2VlbiBwb2ludHMuIFRoaXMgZnVuY3Rpb24gaW50ZXJmYWNlcyB0aGUgdGFibGUgT1NSTSBzZXJ2aWNlLgotIGBvc3JtSXNvY2hyb25lYDogVGhpcyBmdW5jdGlvbiBjb21wdXRlcyBhcmVhcyB0aGF0IGFyZSByZWFjaGFibGUgd2l0aGluIGEgZ2l2ZW4gdGltZSBzcGFuIGZyb20gYSBwb2ludCBhbmQgcmV0dXJucyB0aGUgcmVhY2hhYmxlIHJlZ2lvbnMgYXMgcG9seWdvbnMuIFRoZXNlIGFyZWFzIG9mIGVxdWFsIHRyYXZlbCB0aW1lIGFyZSBjYWxsZWQgaXNvY2hyb25lcy4KLSBgb3NybVJvdXRlYDogQnVpbGQgYW5kIHNlbmQgYW4gT1NSTSBBUEkgcXVlcnkgdG8gZ2V0IHRoZSB0cmF2ZWwgZ2VvbWV0cnkgYmV0d2VlbiB0d28gcG9pbnRzLiBUaGlzIGZ1bmN0aW9uIGludGVyZmFjZXMgd2l0aCB0aGUgcm91dGUgT1NSTSBzZXJ2aWNlLgotIGBvc3JtTmVhcmVzdGA6IEJ1aWxkIGFuZCBzZW5kIGFuIE9TUk0gQVBJIHF1ZXJ5IHRvIGdldCB0aGUgbmVhcmVzdCBwb2ludCBvbiB0aGUgc3RyZWV0IG5ldHdvcmsuIFRoaXMgZnVuY3Rpb24gaW50ZXJmYWNlcyB0aGUgbmVhcmVzdCBPU1JNIHNlcnZpY2UuCi0gYG9zcm1Jc29kaXN0YW5jZWA6IFRoaXMgZnVuY3Rpb24gY29tcHV0ZXMgYXJlYXMgdGhhdCBhcmUgcmVhY2hhYmxlIHdpdGhpbiBhIGdpdmVuIHJvYWQgZGlzdGFuY2UgZnJvbSBhIHBvaW50IGFuZCByZXR1cm5zIHRoZSByZWFjaGFibGUgcmVnaW9ucyBhcyBwb2x5Z29ucy4gVGhlc2UgYXJlYXMgb2YgZXF1YWwgdHJhdmVsIGRpc3RhbmNlIGFyZSBjYWxsZWQgaXNvZGlzdGFuY2VzLgoKXAoKTm90ZSB0aGF0IHRoZXJlIGFyZSBvdGhlciBvcHRpb25zIGZvciBuZXR3b3JrIGFuYWx5c2VzIGluIFIsIGluY2x1ZGluZyAqKmdtYXBzZGlzdGFuY2UqKiwgd2hpY2ggdXNlcyB0aGUgR29vZ2xlIE1hcHMgQVBJLCAqKnN0cGxhbnIqKiwgYW5kIG90aGVycy4gQnV0IG1hbnkgb2YgdGhlc2UgcmVxdWlyZSBhbiBBUEkga2V5IGFuZCBtYXkgZXZlbiBjb3N0IG1vbmV5IGlmIHlvdSB1c2UgdGhlbSB0b28gbXVjaCEgU28gZm9yIG5vdywgd2Ugd2lsbCBzdGljayB0byAqKm9zcm0qKi4KClwKCiMgQnJpbmcgaW4gZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIGluIERhdmlzLCBDQQpTaW1pbGFyIHRvIHdoYXQgd2UgZGlkIGluIG9uZSBvZiBvdXIgZmlyc3QgbGFicywgbGV0J3MgYnJpbmcgaW4gdGhlIGFkZHJlc3NlcyBvZiBhbGwgZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIGluIERhdmlzIGFuZCBnZW9jb2RlIHRoZW0hIFdlIHdpbGwgZmlyc3QgcmVhZCBpbiB0aGUgLmNzdiBmcm9tIHRoZSB3ZWJzaXRlIHVzaW5nIGByZWFkX2NzdmAgZnJvbSB0aGUgKip0aWR5dmVyc2UqKiBwYWNrYWdlLgpgYGB7ciwgbWVzc2FnZT1GQUxTRX0KZG93bmxvYWQuZmlsZSgiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL3BqYW1lcy11Y2RhdmlzL1NQSDIxNS9yZWZzL2hlYWRzL21haW4vZmFzdF9mb29kX2RhdmlzX2NhLmNzdiIsIAogICAgICAgICAgICAgIGRlc3RmaWxlID0gImZhc3RfZm9vZF9kYXZpc19jYS5jc3YiLCAKICAgICAgICAgICAgICBtb2RlID0gIndiIikKZmYgPC0gcmVhZF9jc3YoImZhc3RfZm9vZF9kYXZpc19jYS5jc3YiKQoKZ2xpbXBzZShmZikKYGBgCgpcCgpPSywgc28gbG9va3MgbGlrZSAqQWRkcmVzcyogaXMgdGhlIHZhcmlhYmxlIHdlIHdhbnQgdG8gZm9jdXMgb24uIExldCdzIGdlb2NvZGUgdGhlIERhdmlzIGZhc3QgZm9vZCBkYXRhIHVzaW5nIHRoZSB0aGUgYGdlb2NvZGUoKWAgZnVuY3Rpb24gaW4gKip0aWR5Z2VvY29kZXIqKi4gQW5kIGxldCdzIHNwZWNpZnkgdGhhdCB3ZSB3YW50IHRvIHVzZSB0aGUgImFyY2dpcyIgZ2VvY29kZXIuCmBgYHtyfQpmZl9nZW8gPC0gZ2VvY29kZShmZiwgYWRkcmVzcyA9ICJBZGRyZXNzIiwKICAgICAgICAgICAgICAgICAgICAgIG1ldGhvZCA9ICJhcmNnaXMiKQpgYGAKClwKCkFscmlnaHR5IHRoYXQgcmFuISBOb3cgbGV0J3MgY2hlY2sgb3VyIGRhdGEgYW5kIG1ha2Ugc3VyZSB0aGVyZSdzIG5vIG1pc3NpbmduZXNzIGluIG91ciAqbGF0KiBhbmQgKmxvbmcqIGZpZWxkcy4KYGBge3J9CnN1bW1hcnkoZmZfZ2VvJGxhdCkKc3VtbWFyeShmZl9nZW8kbG9uZykKYGBgCgpcCgpMb29rcyBsaWtlIHRoZXJlJ3Mgbm8gbWlzc2luZ25lc3MhIE5vIE5BcyEgT0ssIG5vdyB3ZSB1c2UgYHN0X2FzX3NmYCBmcm9tIHRoZSAqKnNmKiogcGFja2FnZSB0byBtYWtlIHRoZSBkYXRhc2V0IHNwYXRpYWwgYW5kIHdlIHVzZSB0aGUgQ1JTIG9mIDQzMjYgYmVjYXVzZSB3ZSBoYXZlIGxvbmdpdHVkZSBhbmQgbGF0aXR1ZGUuCmBgYHtyfQpmZl9wdHMgPC0gc3RfYXNfc2YoZmZfZ2VvLCBjb29yZHM9YygibG9uZyIsImxhdCIpLCBjcnM9NDMyNikKYGBgCgpcCgojIG9zcm1UcmlwIHRvIG1hcCB0aGUgb3B0aW1hbCB0cmlwIGJldHdlZW4gYWxsIGZhc3QgZm9vZCBlc3RhYmxpc2htZW50cwoKTm93IGxldCdzIHVzZSB0aGUgKipvc3JtKiogcGFja2FnZSB0byBjYWxjdWxhdGUgYW4gb3B0aW1hbCB0cmlwIGJldHdlZW4gYWxsIGZhc3QgZm9vZCBlc3RhYmxpc2htZW50cyBpbiBEYXZpcywgdGhlbiBsZXQncyB0YWtlIGEgbG9vayBhdCB0aGUgb3V0cHV0LiBUaGlzIG1lYW5zIHdlIGFyZSBlc3RpbWF0aW5nIHRoZSBzaG9ydGVzdCB0cmF2ZWwgZ2VvbWV0cnkgYmV0d2VlbiBhbGwgZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIGluIERhdmlzLiBBbmQgd2UgYXJlIGluIERhdmlzLCBzbyBvZiBjb3Vyc2Ugd2Ugd2lsbCBlc3RpbWF0ZSB0aGlzIG9uIGJpa2UhIE1heWJlIHVzZWZ1bCBmb3IgYW4gU1BIIDIxNSBwdWIgY3Jhd2wgaW4gdGhlIGZ1dHVyZT8KYGBge3J9CnRyaXAgPC0gb3NybVRyaXAoZmZfcHRzLCBvc3JtLnByb2ZpbGUgPSAiYmlrZSIpCmdsaW1wc2UodHJpcCkKYGBgCgpcCgpPSywgaXQgcmFuISBTb21lIGdvb2QgaW5mbyBpbiB0aGVyZS4gTG9va3MgbGlrZSB3ZSBoYXZlIGEgKkxpc3QqIHdpdGggYW4gc2YgZGF0YXNldCwgYSBkYXRhLmZyYW1lLCBhbmQgYSBsaXN0IG9mIGR1cmF0aW9uIGFuZCBkaXN0YW5jZS4gTm93LCBsZXQncyB2aXN1YWxpemUgd2hhdCB0aGlzIHBhdGggbWlnaHQgbG9vayBsaWtlIHVzaW5nIHRoZSAqKnRtYXAqKiBwYWNrYWdlLiBXZSB3aWxsIHB1bGwgb3V0IHRoZSByb3V0ZSBhcyBhbiAqKnNmKiogb2JqZWN0IGFuZCBzdG9yZSBpdCBhcyAqdHJpcF9zZiouIFRoZW4gd2Ugd2lsbCBtYXAgdGhhdCBhbmQgc3BlY2lmeSB0aGF0IHdlIHdhbnQgdGhlIGxpbmVzIHRvIGJlIHRoZSByb3V0ZSBpbiBibHVlLCBhbmQgdGhlbiB3ZSB3YW50IHRvIHNlZSB0aGUgbG9jYXRpb24gb2Ygb3VyIGZhc3QgZm9vZCBlc3RhYmxpc2htZW50cyAqZmZfcHRzKiBpbiByZWQgYnViYmxlcy4gV2UgYWxzbyBjYW4gbGFiZWwgdGhlIHJlc3RhdXJhbnRzIHVzaW5nIGB0bV90ZXh0YCBhbmQgc2V0IGFuIG9mZnNldCB3aXRoIGB4bW9kYCBhbmQgYHltb2RgIG9wdGlvbnMuCmBgYHtyfQojIEV4dHJhY3QgdGhlIGxpbmVzdHJpbmcgcm91dGUgKGFzIGFuIHNmIG9iamVjdCkKdHJpcF9zZiA8LSB0cmlwW1sxXV0kdHJpcAoKIyBTZXQgdG1hcCB0byBpbnRlcmFjdGl2ZSBtb2RlCnRtYXBfbW9kZSgidmlldyIpCgojIFBsb3Qgd2l0aCB0bWFwCnRtIDwtIHRtX3NoYXBlKHRyaXBfc2YpICsKICB0bV9saW5lcyhsd2QgPSAzLCBjb2wgPSAiYmx1ZSIpICsKICB0bV9zaGFwZShmZl9wdHMpICsKICB0bV9idWJibGVzKHNpemUgPSAwLjI1LCBjb2wgPSAicmVkIikgKyAKICB0bV90ZXh0KCJSZXN0YXVyYW50IE5hbWUiLCBzaXplPTEsIHhtb2QgPSAwLjI1LCB5bW9kPTAuMjUpIAoKdG0KCmBgYAoKXAoKU3BlY3RhY3VsYXIhIExldCdzIG5vdyBnZXQgc29tZSBzdW1tYXJ5IHN0YXRzIGZvciBlYWNoIGxlZyBvZiBvdXIgZmFzdCBmb29kIGV4dHJhdmFnYW56YS4gV2UgY2FuIHVzZSB0aGUgYG11dGF0ZSgpYCBmdW5jdGlvbiBmcm9tICoqdGlkeXZlcnNlKiogdG8gZ2V0IHRoaXMgaW5mby4KYGBge3J9CmxlZ19zdW1tYXJ5IDwtIHRyaXBfc2YgJT4lCiAgbXV0YXRlKGR1cmF0aW9uID0gcm91bmQoZHVyYXRpb24sIDEpLAogICAgICAgICBkaXN0YW5jZSA9IHJvdW5kKGRpc3RhbmNlLCAxKSkKCmxlZ19zdW1tYXJ5CmBgYAoKXAoKT0ssIHdlIHdlIGhhdmUgdGhlIGR1cmF0aW9uIGFuZCBkaXN0YW5jZSBmb3IgZWFjaCB0cmlwLiBMZXQncyBnZXQgdGhlIHN1bW1hcnkgb2YgdGhlIHdob2xlIHRyaXAgaW4gbWludXRlcyBhbmQga2lsb21ldGVycy4KYGBge3J9CnRyaXBfc3VtbWFyeSA8LSB0cmlwW1sxXV0kc3VtbWFyeQp0cmlwX3N1bW1hcnkKYGBgClwKCiMgb3NybVRhYmxlIHRvIGdldCBhIG1hdHJpeCBvZiB0cmF2ZWwgdGltZXMgYmV0d2VlbiBhbGwgZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIGluIERhdmlzCgpTbyBpdCB3YXMgbmljZSB0byBnZXQgYW4gb3B0aW1hbCByb3V0ZSwgYnV0IHdoYXQgaWYgSSB3YW50ZWQgdGhlIHRyYXZlbCB0aW1lcyBiZXR3ZWVuIGFsbCBvZiB0aGUgZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIGluIERhdmlzPyBZb3UgY291bGQgaW1hZ2luZSBkb2luZyB0aGlzIHdpdGggYWRkcmVzc2VzIG9mIGdlb2NvZGVkIHBhcnRpY2lwYW50cyBhbmQgZmFzdCBmb29kIGVzdGFibGlzaG1lbnRzIHRvIGNyZWF0ZSBhIGRhdGFzZXQgd2l0aCBkaXN0YW5jZSB0byB0aGUgY2xvc2VzdCBmYXN0IGZvb2QgZXN0YWJsaXNobWVudC4KCmBgYHtyfQpmZl90YWJsZSA8LSBvc3JtVGFibGUoZmZfcHRzLAogICAgICAgICAgICAgICAgICAgICAgb3NybS5wcm9maWxlID0gImJpa2UiKQpnbGltcHNlKGZmX3RhYmxlKQoKYGBgCgpcCgpHcmVhdC4gTm93IGxldCdzIGxvb2sgYXQgdGhlICpkdXJhdGlvbiogbWF0cml4LgpgYGB7cn0KZmZfdGFibGUkZHVyYXRpb24KYGBgCgpcCgpUaGF0J3MgYSBsaXR0bGUgY29uZnVzaW5nLiBMZXQncyBrZWVwIHRoZSByZXN0YXVyYW50IG5hbWVzIGFuZCB0YWtlIGEgbG9vayBhdCB0aGlzIGFnYWluLiBXZSB3aWxsIHByaW50IGl0IGFzIGEgbWFzc2l2ZSB0YWJsZS4KYGBge3J9CiMgRXh0cmFjdCByZXN0YXVyYW50IG5hbWVzCnJlc3RfbmFtZXMgPC0gZmZfcHRzW1siUmVzdGF1cmFudCBOYW1lIl1dICAjIG9yIGZmX3B0cyRgUmVzdGF1cmFudCBOYW1lYAoKIyBBc3NpZ24gbmFtZXMgdG8gcm93cyBhbmQgY29sdW1ucyBvZiBkaXN0YW5jZSBhbmQgZHVyYXRpb24gbWF0cmljZXMKcm93bmFtZXMoZmZfdGFibGUkZHVyYXRpb24pIDwtIHJlc3RfbmFtZXMKY29sbmFtZXMoZmZfdGFibGUkZHVyYXRpb24pIDwtIHJlc3RfbmFtZXMKCiMgVHJhdmVsIHRpbWVzIGluIG1pbnV0ZXMKZmZfdGFibGUkZHVyYXRpb24KYGBgCgojIG9zcm1Jc29jaHJvbmUgdG8gY3JlYXRlIGlzb2Nocm9uZXMKClNvIGxldCdzIHRyeSBzb21ldGhpbmcgZGlmZmVyZW50IHdpdGggbmV0d29yayBhbmFseXNlcy4gV2hhdCBpZiBJIHdhbnRlZCB0byBjcmVhdGUgYSBtYXAgdGhhdCB3b3VsZCBzaG93IG1lIGFsbCB0aGUgbG9jYXRpb25zIEkgY291bGQgcmVhY2ggd2l0aGluIGEgZ2l2ZW4gbnVtYmVyIG9mIG1pbnV0ZXMgb2YgYmlraW5nPyBUaGlzIGlzIGNhbGxlZCBhbiAqKmlzb2Nocm9uZSoqIGFuZCB5b3UgYmV0Y2hhIHRoZSAqKm9zcm0qKiBwYWNrYWdlIGNhbiBkbyB0aGlzIQoKRmlyc3QsIGxldCdzIHNldCB0aGlzIHVwIHRvIGJlIGNlbnRlcmVkIGFyb3VuZCB0aGUgYnVpbGRpbmcgd2UgYWxsIGtub3cgYW5kIGxvdmUsIHRoZSBvbmUgdGhhdCB3ZSBhcmUgaW4gcmlnaHQgbm93LiBUaGF0J3MgcmlnaHQtLUdpZWR0IEhhbGwuIEkndmUgY2xlYXJseSBtZW1vcml6ZWQgdGhlIGxvbmdpdHVkZSBhbmQgbGF0aXR1ZGUgZm9yIHRoaXMgYnVpbGRpbmcsIHdoaWNoIHdlIHBhc3RlIGluIGJlbG93LCBhbmQgdGhlbiBzdG9yZSBhcyBhbiAqKnNmKiogb2JqZWN0LgpgYGB7cn0KbG9jIDwtIGMoImxvbiIgPSAtMTIxLjc1NTg0LCAibGF0IiA9IDM4LjUzNzY2KQpsb2Nfc2YgPC0gc3Rfc2YobmFtZSA9ICJHaWVkdCBIYWxsIiwKICAgICAgICAgICAgICAgIGdlb21ldHJ5ID0gc3Rfc2ZjKHN0X3BvaW50KGxvYyksIGNycyA9IDQzMjYpKQpgYGAKClwKCk5leHQsIHdlIHVzZSB0aGUgYG9zcm1Jc29jaHJvbmUoKWAgZnVuY3Rpb24gdG8gY3JlYXRlIHRoZSBpc29jaHJvbmVzLiBXZSB3aWxsIHNwZWNpZnkgdGhlICpsb2MqIHRvIGJlICpsb2Nfc2YqLCB0aGUgKmJyZWFrcyogKGluIG1pbnV0ZXMpIHdpbGwgYmUgMCB0byAzMCBtaW51dGVzIGJ5IDUgbWludXRlIGludGVydmFscywgYW5kIHRoZSAqb3NybS5wcm9maWxlKiwgb3IgdGhlIG1vZGUsIHdpbGwgYmUgImJpa2UiLiBMZXQncyBydW4gaXQhCmBgYHtyfQppc28gPC0gb3NybUlzb2Nocm9uZShsb2MgPSBsb2Nfc2YsCiAgICAgICAgICAgICAgICAgICAgIGJyZWFrcyA9IHNlcSgwLCAzMCwgYnkgPSA1KSwgICMgMOKAkzMwIG1pbnMgaW4gNSBtaW4gaW50ZXJ2YWxzCiAgICAgICAgICAgICAgICAgICAgIG9zcm0ucHJvZmlsZSA9ICJiaWtlIikgICMgbW9kZSBiaWN5Y2xlCgpnbGltcHNlKGlzbykKYGBgCgpcCgpPSywgc28gbm93IHdlIGNhbiBzZWUgd2UgaGF2ZSAqaXNvbWluKiBhbmQgKmlzb21heCogYXMgb3VyIGNvbHVtbnMgZm9yIG91ciB0aW1lIGJpbnMuIEFuZCBvdXIgZGF0YXNldCBpcyBhICpNVUxUSVBPTFlHT04qLCBzbyBpdCdzIHNwYXRpYWwuIExldCdzIG1hcCB0aGlzISBGaXJzdCwgd2Ugd2lsbCBjcmVhdGUgYSBjYXRlZ29yaWNhbCB2YXJpYWJsZSBjYWxsZWQgKnJ1bl90aW1lcyouIFRoZW4gd2Ugd2lsbCB1c2UgKip0bWFwKiogdG8gcGxvdCBvdXIgaXNvY2hyb25lcy4gV2Ugd2lsbCB1c2UgYSBwYWxldHRlIG9mIGhlYXQgY29sb3JzIGZvciBvdXIgaXNjaHJvbmVzLCBhbmQgd2Ugd2lsbCBhbHNvIHBsb3QgR2llZHQgSGFsbCBpbiB0aGVyZSBqdXN0IHNvIHdlIG5ldmVyIGZvcmdldCBvdXIgYmVhdXRpZnVsIGhvbWUgYmFzZS4KYGBge3J9CiMgQ3JlYXRlIGZhY3RvciBjb2x1bW4gZm9yIHRpbWUgaW50ZXJ2YWxzCmlzbyRydW5fdGltZXMgPC0gZmFjdG9yKAogIHBhc3RlKGlzbyRpc29taW4sICJ0byIsIGlzbyRpc29tYXgsICJtaW4iKSwKICBsZXZlbHMgPSBjKCIwIHRvIDUgbWluIiwgIjUgdG8gMTAgbWluIiwgIjEwIHRvIDE1IG1pbiIsIAogICAgICAgICAgICAgIjE1IHRvIDIwIG1pbiIsICIyMCB0byAyNSBtaW4iLCAiMjUgdG8gMzAgbWluIikKKQoKCiMgUGxvdCB1c2luZyB0bWFwCnRtIDwtIHRtX3NoYXBlKGlzbykgKwogIHRtX3BvbHlnb25zKGZpbGwgPSAicnVuX3RpbWVzIiwKICAgICAgICAgICAgICBmaWxsLnNjYWxlID0gdG1fc2NhbGUodmFsdWVzID0gcmV2KGhlYXQuY29sb3JzKDYpKSksICAjIHJldmVyc2UgZm9yIHNhbWUgZWZmZWN0CiAgICAgICAgICAgICAgY29sID0gImJsYWNrIiwKICAgICAgICAgICAgICBsd2QgPSAwLjUsCiAgICAgICAgICAgICAgZmlsbF9hbHBoYSA9IDAuMywKICAgICAgICAgICAgICBmaWxsLmxlZ2VuZCA9IHRtX2xlZ2VuZCh0aXRsZSA9ICJCaWtpbmcgRHVyYXRpb24iKSkgKwogIHRtX3NoYXBlKGxvY19zZikgKwogIHRtX2J1YmJsZXMoc2l6ZSA9IDAuMywgY29sID0gImJsdWUiKSArCiAgdG1fdGV4dCgibmFtZSIsIHNpemUgPSAxLCB5bW9kID0gLTAuNSkgCgp0bQoKYGBgCgpcCgpXb3VsZCB5b3UgbG9vayBhdCB0aGF0ISBJdCdzIGxpa2UgYSB3b3JrIG9mIGFydC4gR2VvcmdpYSBPJ0tlZWZlLCBlYXQgeW91ciBoZWFydCBvdXQuIENsaWNrIGFyb3VuZCBhbmQgZXhwbG9yZSB3aGVyZSB5b3UgY291bGQgYmlrZSB0byBpbiAxMCBtaW51dGVzIG9uY2UgY2xhc3MgZ2V0cyBvdXQhIEFuZCB5b3UndmUgZWFybmVkIHRoYXQgKipvc3JtKiogYmFkZ2UhIEdldCBiaWtpbmcgc29tZXdoZXJlLS15b3Uga25vdyB0aGUgcm91dGUgbm93IQoKXAoKIVtZb3VyIG9zcm0gQmFkZ2UhIV0ob3NybS5wbmcpLS0tCg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Lab6_FALL2026.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
