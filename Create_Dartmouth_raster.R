@@ -42,3 +42,9 @@ writeRaster(
   "NDVI_rast_dartmouth.tif",
   overwrite = TRUE
 )
+
+writeRaster(
+  ndvi_dartmouth,
+  "/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/NDVI_rast_dartmouth.tif",
+  overwrite = TRUE
+)
