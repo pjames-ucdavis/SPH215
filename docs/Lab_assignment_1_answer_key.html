@@ -15,7 +15,7 @@
 
 <title>Lab 1 Assignment</title>
 
-<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -242,7 +242,7 @@ $(document).ready(function () {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Winter 2026</a>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Fall 2026</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -257,31 +257,28 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="Lab1_2026.html">Lab 1: Intro to R</a>
+      <a href="Lab1_FALL2026.html">Lab 1: Intro to R</a>
     </li>
     <li>
-      <a href="Lab2_2026.html">Lab 2: Understanding Packages and Wrangling Data in R</a>
+      <a href="Lab2_FALL2026.html">Lab 2: Geocoding, Vector Data, and Census Data</a>
     </li>
     <li>
-      <a href="Lab3_2026.html">Lab 3: Geocoding, Vector Data, and Census Data</a>
+      <a href="Lab3_FALL2026.html">Lab 3: More with Vector Data and Visualizing Raster Data</a>
     </li>
     <li>
-      <a href="Lab4_2026.html">Lab 4: More with Vector Data and Visualizing Raster Data</a>
+      <a href="Lab4_FALL2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
     </li>
     <li>
-      <a href="Lab5_2026.html">Lab 5: Spatial Data Processing with Vector Data</a>
+      <a href="Lab5_FALL2026.html">Lab 5: Working with Raster and Vector Data Together</a>
     </li>
     <li>
-      <a href="Lab6_2026.html">Lab 6: Working with Raster and Vector Data Together</a>
+      <a href="Lab6_FALL2026.html">Lab 6: Network Analysis</a>
     </li>
     <li>
-      <a href="Lab7_2026.html">Lab 7: Network Analysis</a>
+      <a href="Lab7_FALL2026.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
     </li>
     <li>
-      <a href="Lab8_2026.html">Lab 8: Spatial Statistics and Geographically Weighted Regression</a>
-    </li>
-    <li>
-      <a href="Lab9_2026.html">Lab 9: Future Directions in GIS and Public Health</a>
+      <a href="Lab8_FALL2026.html">Lab 8: Future Directions in GIS and Public Health and Fun with GPS</a>
     </li>
   </ul>
 </li>
@@ -314,44 +311,13 @@ $(document).ready(function () {
 
 
 <p>Load Packages</p>
-<pre class="r"><code>library(sf)</code></pre>
-<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
-## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-## ✔ purrr     1.0.4</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code>library(tidygeocoder)
-library(MapGAM)</code></pre>
-<pre><code>## Loading required package: sp
-## Loading required package: gam
-## Loading required package: splines
-## Loading required package: foreach
-## 
-## Attaching package: &#39;foreach&#39;
-## 
-## The following objects are masked from &#39;package:purrr&#39;:
-## 
-##     accumulate, when
-## 
-## Loaded gam 1.22-5
-## 
-## Loading required package: survival</code></pre>
-<pre class="r"><code>library(tidycensus)
-library(flextable)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;flextable&#39;
-## 
-## The following object is masked from &#39;package:purrr&#39;:
-## 
-##     compose</code></pre>
-<pre class="r"><code>library(tmap)</code></pre>
+<pre class="r"><code>library(sf)
+library(tidyverse)
+library(tidygeocoder)
+library(MapGAM)
+library(tidycensus)
+library(flextable)
+library(tmap)</code></pre>
 <p><br />
 </p>
 <div id="geocoding" class="section level1">
@@ -361,7 +327,7 @@ library(flextable)</code></pre>
 <pre class="r"><code>download.file(&quot;https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/innout_final.csv&quot;, &quot;innout_final.csv&quot;, mode = &quot;wb&quot;)
 in_n_out &lt;- read_csv(&quot;innout_final.csv&quot;)</code></pre>
 <pre><code>## Rows: 30 Columns: 2
-## ── Column specification ────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr (1): store address
 ## dbl (1): Store Number
@@ -375,15 +341,15 @@ the variable to geocode!</p>
 <pre class="r"><code>glimpse(in_n_out)</code></pre>
 <pre><code>## Rows: 30
 ## Columns: 2
-## $ `Store Number`  &lt;dbl&gt; 131, 327, 276, 217, 225, 247, 320, 319, 197, 207, 143,…
-## $ `store address` &lt;chr&gt; &quot;3501 Truxel Road Sacramento CA 95834&quot;, &quot;8200 Delta Sh…</code></pre>
+## $ `Store Number`  &lt;dbl&gt; 131, 327, 276, 217, 225, 247, 320, 319, 197, 207, 143, 180, 308, 141, 89, 135, 126, 147, 165, 16…
+## $ `store address` &lt;chr&gt; &quot;3501 Truxel Road Sacramento CA 95834&quot;, &quot;8200 Delta Shores Circle Sacramento CA 95832&quot;, &quot;2001 Al…</code></pre>
 <p><br />
 </p>
 <p>Question 3. Geocode the data using “arcgis” geocoder.</p>
 <pre class="r"><code>innout_geo      &lt;- geocode(in_n_out, address = &quot;store address&quot;,
                           method = &quot;arcgis&quot;)</code></pre>
 <pre><code>## Passing 30 addresses to the ArcGIS single address geocoder</code></pre>
-<pre><code>## Query completed in: 16.1 seconds</code></pre>
+<pre><code>## Query completed in: 12 seconds</code></pre>
 <p><br />
 </p>
 <p>Question 4. Looks like there’s no missingness! No NAs!</p>
@@ -402,13 +368,11 @@ the crs of 4326</p>
 </p>
 <p>Question 6. Map the addreses in red below!</p>
 <pre class="r"><code>tmap_mode(&quot;plot&quot;)</code></pre>
-<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;
-## ℹ toggle with `tmap::ttm()`</code></pre>
+<pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
 <pre class="r"><code>innout_map = tm_shape(innout_pts) + tm_dots(col = &quot;red&quot;, size = 0.3, alpha = 0.5) + tm_basemap()</code></pre>
 <pre><code>## 
-## ── tmap v3 code detected ───────────────────────────────────────────────────────
-## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
-## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).[v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
+## ── tmap v3 code detected ─────────────────────────────────────────────────────────────────────────────────────────────────
+## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
 <pre class="r"><code>innout_map</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-7-1.png" alt="" width="672" /></p>
 <p>Question 7. Map the addreses in blue below!</p>
@@ -416,7 +380,7 @@ the crs of 4326</p>
 <pre><code>## ℹ tmap modes &quot;plot&quot; - &quot;view&quot;</code></pre>
 <pre class="r"><code>innout_map_blue = tm_shape(innout_pts) + tm_dots(col = &quot;blue&quot;, size = 0.3, alpha = 0.5) + tm_basemap()</code></pre>
 <pre><code>## 
-## ── tmap v3 code detected ───────────────────────────────────────────────────────
+## ── tmap v3 code detected ─────────────────────────────────────────────────────────────────────────────────────────────────
 ## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
 <pre class="r"><code>innout_map_blue</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-8-1.png" alt="" width="672" /></p>
@@ -428,20 +392,13 @@ the crs of 4326</p>
 data(CAdata)
 ca_pts &lt;- CAdata
 summary(ca_pts)</code></pre>
-<pre><code>##       time               event              X                 Y          
-##  Min.   : 0.004068   Min.   :0.0000   Min.   :1811375   Min.   :-241999  
-##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:2018363   1st Qu.: -94700  
-##  Median : 4.749980   Median :1.0000   Median :2325084   Median : -60386  
-##  Mean   : 6.496130   Mean   :0.6062   Mean   :2230219   Mean   :  87591  
-##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:2380230   3rd Qu.: 318280  
-##  Max.   :24.997764   Max.   :1.0000   Max.   :2705633   Max.   : 770658  
-##       AGE         INS      
-##  Min.   :25.00   Mcd: 431  
-##  1st Qu.:53.00   Mcr:1419  
-##  Median :62.00   Mng:2304  
-##  Mean   :61.28   Oth: 526  
-##  3rd Qu.:71.00   Uni: 168  
-##  Max.   :80.00   Unk: 152</code></pre>
+<pre><code>##       time               event              X                 Y                AGE         INS      
+##  Min.   : 0.004068   Min.   :0.0000   Min.   :1811375   Min.   :-241999   Min.   :25.00   Mcd: 431  
+##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:2018363   1st Qu.: -94700   1st Qu.:53.00   Mcr:1419  
+##  Median : 4.749980   Median :1.0000   Median :2325084   Median : -60386   Median :62.00   Mng:2304  
+##  Mean   : 6.496130   Mean   :0.6062   Mean   :2230219   Mean   :  87591   Mean   :61.28   Oth: 526  
+##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:2380230   3rd Qu.: 318280   3rd Qu.:71.00   Uni: 168  
+##  Max.   :24.997764   Max.   :1.0000   Max.   :2705633   Max.   : 770658   Max.   :80.00   Unk: 152</code></pre>
 <pre class="r"><code>ca_pts &lt;- st_as_sf(CAdata, coords=c(&quot;X&quot;,&quot;Y&quot;))</code></pre>
 <p><br />
 </p>
@@ -460,9 +417,8 @@ ca_pts_crs &lt;- st_set_crs(ca_pts, ca_proj)</code></pre>
 coded by quintiles of age.</p>
 <pre class="r"><code>cancer_map_age = tm_shape(ca_pts_crs) + tm_dots(col = &quot;AGE&quot;, size = 0.3, style = &quot;quantile&quot;) + tm_basemap()</code></pre>
 <pre><code>## </code></pre>
-<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
-<pre><code>## [v3-&gt;v4] `tm_dots()`: instead of `style = &quot;quantile&quot;`, use fill.scale =
-## `tm_scale_intervals()`.
+<pre><code>## ── tmap v3 code detected ─────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_dots()`: instead of `style = &quot;quantile&quot;`, use fill.scale = `tm_scale_intervals()`.
 ## ℹ Migrate the argument(s) &#39;style&#39; to &#39;tm_scale_intervals(&lt;HERE&gt;)&#39;</code></pre>
 <pre class="r"><code>cancer_map_age</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-11-1.png" alt="" width="672" /></p>
@@ -471,9 +427,8 @@ coded by quintiles of age.</p>
 <p>Question 11. Map by insurance status</p>
 <pre class="r"><code>cancer_map_ins = tm_shape(ca_pts_crs) + tm_dots(col = &quot;INS&quot;, size = 0.3, style = &quot;cat&quot;) + tm_basemap()</code></pre>
 <pre><code>## </code></pre>
-<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
-<pre><code>## [v3-&gt;v4] `tm_dots()`: instead of `style = &quot;cat&quot;`, use fill.scale =
-## `tm_scale_categorical()`.</code></pre>
+<pre><code>## ── tmap v3 code detected ─────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_dots()`: instead of `style = &quot;cat&quot;`, use fill.scale = `tm_scale_categorical()`.</code></pre>
 <pre class="r"><code>cancer_map_ins</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-12-1.png" alt="" width="672" /></p>
 <p><br />
@@ -491,16 +446,17 @@ Census tract level for the following variable</p>
               survey = &quot;acs5&quot;,
               output = &quot;wide&quot;)</code></pre>
 <pre><code>## Getting data from the 2018-2022 5-year ACS</code></pre>
+<pre><code>## Using FIPS code &#39;06&#39; for state &#39;CA&#39;</code></pre>
 <p><br />
 </p>
 <p>Question 13. Take a glimpse at your data.</p>
 <pre class="r"><code>glimpse(ca)</code></pre>
 <pre><code>## Rows: 9,129
 ## Columns: 4
-## $ GEOID   &lt;chr&gt; &quot;06001400100&quot;, &quot;06001400200&quot;, &quot;06001400300&quot;, &quot;06001400400&quot;, &quot;0…
-## $ NAME    &lt;chr&gt; &quot;Census Tract 4001; Alameda County; California&quot;, &quot;Census Tract…
-## $ medincE &lt;dbl&gt; 234236, 225500, 164000, 158836, 95078, 155893, 110556, 97132, …
-## $ medincM &lt;dbl&gt; 42845, 29169, 44675, 9038, 34125, 33824, 12318, 37490, 31849, …</code></pre>
+## $ GEOID   &lt;chr&gt; &quot;06001400100&quot;, &quot;06001400200&quot;, &quot;06001400300&quot;, &quot;06001400400&quot;, &quot;06001400500&quot;, &quot;06001400600&quot;, &quot;06001400700&quot;,…
+## $ NAME    &lt;chr&gt; &quot;Census Tract 4001; Alameda County; California&quot;, &quot;Census Tract 4002; Alameda County; California&quot;, &quot;Censu…
+## $ medincE &lt;dbl&gt; 234236, 225500, 164000, 158836, 95078, 155893, 110556, 97132, 114583, 153654, 93121, 115045, 104226, 950…
+## $ medincM &lt;dbl&gt; 42845, 29169, 44675, 9038, 34125, 33824, 12318, 37490, 31849, 31601, 8351, 41439, 12036, 13183, 17441, 3…</code></pre>
 <p><br />
 </p>
 <p>Question 14. Give us the mean median household income across tracts
@@ -523,7 +479,7 @@ make it look fancy!</p>
             )
 my_table &lt;- flextable(summarytable)
 my_table</code></pre>
-<div class="tabwid"><style>.cl-0ec87bac{}.cl-0ec5fda0{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-0ec70358{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-0ec710c8{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0ec710d2{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-0ec87bac'><thead><tr style="overflow-wrap:break-word;"><th class="cl-0ec710c8"><p class="cl-0ec70358"><span class="cl-0ec5fda0">Mean</span></p></th><th class="cl-0ec710c8"><p class="cl-0ec70358"><span class="cl-0ec5fda0">Median</span></p></th><th class="cl-0ec710c8"><p class="cl-0ec70358"><span class="cl-0ec5fda0">SD</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-0ec710d2"><p class="cl-0ec70358"><span class="cl-0ec5fda0"></span></p></td><td class="cl-0ec710d2"><p class="cl-0ec70358"><span class="cl-0ec5fda0"></span></p></td><td class="cl-0ec710d2"><p class="cl-0ec70358"><span class="cl-0ec5fda0"></span></p></td></tr></tbody></table></div>
+<div class="tabwid"><style>.cl-57e0fea6{}.cl-57dcce12{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-57dea5c0{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-57deb6aa{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 1.5pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-57deb6ab{width:0.75in;background-color:transparent;vertical-align: middle;border-bottom: 1.5pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-57e0fea6'><thead><tr style="overflow-wrap:break-word;"><th class="cl-57deb6aa"><p class="cl-57dea5c0"><span class="cl-57dcce12">Mean</span></p></th><th class="cl-57deb6aa"><p class="cl-57dea5c0"><span class="cl-57dcce12">Median</span></p></th><th class="cl-57deb6aa"><p class="cl-57dea5c0"><span class="cl-57dcce12">SD</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-57deb6ab"><p class="cl-57dea5c0"><span class="cl-57dcce12"></span></p></td><td class="cl-57deb6ab"><p class="cl-57dea5c0"><span class="cl-57dcce12"></span></p></td><td class="cl-57deb6ab"><p class="cl-57dea5c0"><span class="cl-57dcce12"></span></p></td></tr></tbody></table></div>
 <p><br />
 </p>
 <p>Question 16. Create a histogram of median household income across
@@ -532,9 +488,8 @@ tracts in California. Make sure it has a label.</p>
   ggplot() + 
   geom_histogram(mapping = aes(x=medincE)) +
   xlab(&quot;Median household income&quot;)</code></pre>
-<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre><code>## Warning: Removed 141 rows containing non-finite outside the scale range
-## (`stat_bin()`).</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 141 rows containing non-finite outside the scale range (`stat_bin()`).</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-17-1.png" alt="" width="672" /></p>
 <p><br />
 </p>
@@ -544,24 +499,8 @@ this too!</p>
   ggplot() +
     geom_boxplot(mapping = aes(y = medincE)) +
     ylab(&quot;Median household income&quot;)</code></pre>
-<pre><code>## Warning: Removed 141 rows containing non-finite outside the scale range
-## (`stat_boxplot()`).</code></pre>
+<pre><code>## Warning: Removed 141 rows containing non-finite outside the scale range (`stat_boxplot()`).</code></pre>
 <p><img src="Lab_assignment_1_answer_key_files/figure-html/unnamed-chunk-18-1.png" alt="" width="672" /></p>
-<pre class="r"><code>ca</code></pre>
-<pre><code>## # A tibble: 9,129 × 4
-##    GEOID       NAME                                          medincE medincM
-##    &lt;chr&gt;       &lt;chr&gt;                                           &lt;dbl&gt;   &lt;dbl&gt;
-##  1 06001400100 Census Tract 4001; Alameda County; California  234236   42845
-##  2 06001400200 Census Tract 4002; Alameda County; California  225500   29169
-##  3 06001400300 Census Tract 4003; Alameda County; California  164000   44675
-##  4 06001400400 Census Tract 4004; Alameda County; California  158836    9038
-##  5 06001400500 Census Tract 4005; Alameda County; California   95078   34125
-##  6 06001400600 Census Tract 4006; Alameda County; California  155893   33824
-##  7 06001400700 Census Tract 4007; Alameda County; California  110556   12318
-##  8 06001400800 Census Tract 4008; Alameda County; California   97132   37490
-##  9 06001400900 Census Tract 4009; Alameda County; California  114583   31849
-## 10 06001401000 Census Tract 4010; Alameda County; California  153654   31601
-## # ℹ 9,119 more rows</code></pre>
 </div>
 
 

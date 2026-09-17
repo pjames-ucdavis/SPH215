@@ -15,7 +15,7 @@
 
 <title>Lab Assignment 4 Answer Key</title>
 
-<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.32/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
@@ -326,12 +326,12 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Spring 2025</a>
+      <a class="navbar-brand" href="index.html">SPH 215: GIS and Public Health Fall 2026</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="Syllabus.html">Syllabus</a>
+  <a href="Syllabus_2026.html">Syllabus</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -341,39 +341,39 @@ div.tocify {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="lab1.html">Lab 1: Intro to R</a>
+      <a href="Lab1_FALL2026.html">Lab 1: Intro to R</a>
     </li>
     <li>
-      <a href="Lab2.html">Lab 2: Geocoding, Vector Data, and Census Data </a>
+      <a href="Lab2_FALL2026.html">Lab 2: Geocoding, Vector Data, and Census Data</a>
     </li>
     <li>
-      <a href="Lab3.html">Lab 3: Polygons and Rasters</a>
+      <a href="Lab3_FALL2026.html">Lab 3: More with Vector Data and Visualizing Raster Data</a>
     </li>
     <li>
-      <a href="Lab4.html">Lab 4: Spatial Data Processing with Vector Data</a>
+      <a href="Lab4_FALL2026.html">Lab 4: Spatial Data Processing with Vector Data</a>
     </li>
     <li>
-      <a href="Lab5.html">Lab 5: Spatial Data Processing with Vector and Raster Data</a>
+      <a href="Lab5_FALL2026.html">Lab 5: Working with Raster and Vector Data Together</a>
     </li>
     <li>
-      <a href="Lab6.html">Lab 6: Network Analysis</a>
+      <a href="Lab6_FALL2026.html">Lab 6: Network Analysis</a>
     </li>
     <li>
-      <a href="Lab7.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
+      <a href="Lab7_FALL2026.html">Lab 7: Spatial Statistics and Geographically Weighted Regression</a>
     </li>
     <li>
-      <a href="Lab8.html">Lab 8: Future Directions in GIS and Public Health</a>
+      <a href="Lab8_FALL2026.html">Lab 8: Future Directions in GIS and Public Health and Fun with GPS</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="Assignments.html">Assignment Guide</a>
+  <a href="Assignments_2026.html">Assignment Guide</a>
 </li>
 <li>
-  <a href="Other.html">Data Sources</a>
+  <a href="Other_2026.html">Data Sources</a>
 </li>
 <li>
-  <a href="R_help.html">Help with R</a>
+  <a href="R_help_2026.html">Help with R</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -403,49 +403,13 @@ div.tocify {
 
 <div id="load-packages" class="section level1">
 <h1>Load Packages</h1>
-<pre class="r"><code>library(sf)</code></pre>
-<pre><code>## Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
-<pre class="r"><code>library(MapGAM)</code></pre>
-<pre><code>## Loading required package: sp</code></pre>
-<pre><code>## Loading required package: gam</code></pre>
-<pre><code>## Loading required package: splines</code></pre>
-<pre><code>## Loading required package: foreach</code></pre>
-<pre><code>## Loaded gam 1.22-5</code></pre>
-<pre><code>## Loading required package: survival</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
-## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-## ✔ purrr     1.0.4</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ purrr::accumulate() masks foreach::accumulate()
-## ✖ dplyr::filter()     masks stats::filter()
-## ✖ dplyr::lag()        masks stats::lag()
-## ✖ purrr::when()       masks foreach::when()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code>library(flextable)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;flextable&#39;
-## 
-## The following object is masked from &#39;package:purrr&#39;:
-## 
-##     compose</code></pre>
-<pre class="r"><code>library(RColorBrewer)
+<pre class="r"><code>library(sf)
+library(MapGAM)
+library(tidyverse)
+library(flextable)
+library(RColorBrewer)
 library(tmap)
 library(terra)</code></pre>
-<pre><code>## terra 1.8.29
-## 
-## Attaching package: &#39;terra&#39;
-## 
-## The following objects are masked from &#39;package:flextable&#39;:
-## 
-##     align, colorize, rotate, width
-## 
-## The following object is masked from &#39;package:tidyr&#39;:
-## 
-##     extract</code></pre>
 <p>Q1. Bring in CAdata</p>
 <pre class="r"><code>data(CAdata)
 ca_pts &lt;- CAdata
@@ -461,12 +425,12 @@ download.file(url, destfile = &quot;LST_med_ca.tif&quot;, mode = &quot;wb&quot;)
 lst_rast = rast(&quot;LST_med_ca.tif&quot;)
 
 lst_rast</code></pre>
-<pre><code>## class       : SpatRaster 
-## dimensions  : 1056, 1153, 1  (nrow, ncol, nlyr)
+<pre><code>## class       : SpatRaster
+## size        : 1056, 1153, 1  (nrow, ncol, nlyr)
 ## resolution  : 0.008983153, 0.008983153  (x, y)
 ## extent      : -124.4885, -114.131, 32.528, 42.01421  (xmin, xmax, ymin, ymax)
-## coord. ref. : lon/lat WGS 84 (EPSG:4326) 
-## source      : LST_med_ca.tif 
+## coord. ref. : lon/lat WGS 84 (EPSG:4326)
+## source      : LST_med_ca.tif
 ## name        : LST_Day_1km_median</code></pre>
 <p>Q3. Check projections</p>
 <pre class="r"><code>st_crs(ca_pts)==st_crs(lst_rast)</code></pre>
@@ -482,44 +446,33 @@ st_crs(ca_pts_proj)==st_crs(lst_rast)</code></pre>
       tm_shape(ca_pts_proj) +
         tm_dots(size=0.25, alpha=0.8, col=&quot;red&quot;)</code></pre>
 <pre><code>## </code></pre>
-<pre><code>## ── tmap v3 code detected ───────────────────────────────────────────────────────</code></pre>
-<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale =
-## `tm_scale_continuous()`.
-## [v3-&gt;v4] `tm_dots()`: use &#39;fill&#39; for the fill color of polygons/symbols
-## (instead of &#39;col&#39;), and &#39;col&#39; for the outlines (instead of &#39;border.col&#39;).
+<pre><code>## ── tmap v3 code detected ─────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+<pre><code>## [v3-&gt;v4] `tm_raster()`: instead of `style = &quot;cont&quot;`, use col.scale = `tm_scale_continuous()`.
 ## [v3-&gt;v4] `tm_dots()`: use `fill_alpha` instead of `alpha`.</code></pre>
 <pre class="r"><code>ca.lst.map</code></pre>
-<p><img src="Lab_Assignment_4_Answer_Key_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="Lab_Assignment_4_Answer_Key_files/figure-html/unnamed-chunk-6-1.png" alt="" width="672" /></p>
 <p>Q6. Extract light at night data to cancer data</p>
 <pre class="r"><code>lst_cancer = data.frame(ca_pts_proj,terra::extract(lst_rast, ca_pts_proj))
 glimpse(lst_cancer) </code></pre>
 <pre><code>## Rows: 5,000
 ## Columns: 7
-## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977…
-## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, …
-## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46,…
-## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, M…
-## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 3…
-## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
-## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40…</code></pre>
+## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977017, 4.0240033, 6.8591509, 1.2273281, 1.02…
+## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, …
+## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46, 77, 65, 70, 76, 76, 70, 69, 66, 54, 59, 7…
+## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, Mcr, Mng, Mcr, Mng, Mcr, Mcr, Unk, Mcr, Mcr…
+## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 34.14377), POINT (-117.3641 33.96979), POIN…
+## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26…
+## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40.33, 31.19, 40.75, 33.87, 44.23, 36.75, 38…</code></pre>
 <pre class="r"><code>## Take a look at a summary of the values
 summary(lst_cancer)</code></pre>
-<pre><code>##       time               event             AGE         INS      
-##  Min.   : 0.004068   Min.   :0.0000   Min.   :25.00   Mcd: 431  
-##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:53.00   Mcr:1419  
-##  Median : 4.749980   Median :1.0000   Median :62.00   Mng:2304  
-##  Mean   : 6.496130   Mean   :0.6062   Mean   :61.28   Oth: 526  
-##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:71.00   Uni: 168  
-##  Max.   :24.997764   Max.   :1.0000   Max.   :80.00   Unk: 152  
-##                                                                 
-##           geometry          ID       LST_Day_1km_median
-##  POINT        :5000   Min.   :   1   Min.   :18.41     
-##  epsg:4326    :   0   1st Qu.:1251   1st Qu.:37.35     
-##  +proj=long...:   0   Median :2500   Median :40.87     
-##                       Mean   :2500   Mean   :40.04     
-##                       3rd Qu.:3750   3rd Qu.:43.73     
-##                       Max.   :5000   Max.   :54.67     
-##                                      NA&#39;s   :64</code></pre>
+<pre><code>##       time               event             AGE         INS                geometry          ID       LST_Day_1km_median
+##  Min.   : 0.004068   Min.   :0.0000   Min.   :25.00   Mcd: 431   POINT        :5000   Min.   :   1   Min.   :18.41     
+##  1st Qu.: 1.931247   1st Qu.:0.0000   1st Qu.:53.00   Mcr:1419   epsg:4326    :   0   1st Qu.:1251   1st Qu.:37.35     
+##  Median : 4.749980   Median :1.0000   Median :62.00   Mng:2304   +proj=long...:   0   Median :2500   Median :40.87     
+##  Mean   : 6.496130   Mean   :0.6062   Mean   :61.28   Oth: 526                        Mean   :2500   Mean   :40.04     
+##  3rd Qu.: 9.609031   3rd Qu.:1.0000   3rd Qu.:71.00   Uni: 168                        3rd Qu.:3750   3rd Qu.:43.73     
+##  Max.   :24.997764   Max.   :1.0000   Max.   :80.00   Unk: 152                        Max.   :5000   Max.   :54.67     
+##                                                                                                      NAs    :64</code></pre>
 <p>Q7. Drop missing values Alternate approach lst_cancer_nomiss &lt;-
 lst_cancer %&gt;% subset(!is.na(LST_Day_1km_median))</p>
 <pre class="r"><code>lst_cancer_nomiss &lt;- lst_cancer %&gt;% drop_na(LST_Day_1km_median) 
@@ -531,19 +484,19 @@ summary(lst_cancer_nomiss$LST_Day_1km_median)</code></pre>
 <pre class="r"><code>glimpse(lst_cancer_nomiss)</code></pre>
 <pre><code>## Rows: 4,936
 ## Columns: 7
-## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977…
-## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, …
-## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46,…
-## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, M…
-## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 3…
-## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
-## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40…</code></pre>
+## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977017, 4.0240033, 6.8591509, 1.2273281, 1.02…
+## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, …
+## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46, 77, 65, 70, 76, 76, 70, 69, 66, 54, 59, 7…
+## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, Mcr, Mng, Mcr, Mng, Mcr, Mcr, Unk, Mcr, Mcr…
+## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 34.14377), POINT (-117.3641 33.96979), POIN…
+## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26…
+## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40.33, 31.19, 40.75, 33.87, 44.23, 36.75, 38…</code></pre>
 <p>Q8. Histogram</p>
 <pre class="r"><code>lst_cancer_nomiss %&gt;%
   ggplot() + 
   geom_histogram(mapping = aes(x=LST_Day_1km_median)) </code></pre>
-<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="Lab_Assignment_4_Answer_Key_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</code></pre>
+<p><img src="Lab_Assignment_4_Answer_Key_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672" /></p>
 <p>Q9. Quartiles</p>
 <pre class="r"><code>lst_cancer_nomiss &lt;- lst_cancer_nomiss %&gt;%
   mutate(lst_quartile = ntile(LST_Day_1km_median, 4))
@@ -551,14 +504,14 @@ summary(lst_cancer_nomiss$LST_Day_1km_median)</code></pre>
 glimpse(lst_cancer_nomiss)</code></pre>
 <pre><code>## Rows: 4,936
 ## Columns: 8
-## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977…
-## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, …
-## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46,…
-## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, M…
-## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 3…
-## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, …
-## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40…
-## $ lst_quartile       &lt;int&gt; 1, 3, 3, 1, 2, 3, 2, 2, 1, 2, 1, 4, 1, 2, 2, 4, 2, …</code></pre>
+## $ time               &lt;dbl&gt; 1.2759763, 4.2121775, 0.2074870, 3.5099074, 10.2977017, 4.0240033, 6.8591509, 1.2273281, 1.02…
+## $ event              &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, …
+## $ AGE                &lt;int&gt; 67, 56, 67, 69, 75, 59, 62, 39, 68, 72, 78, 79, 46, 77, 65, 70, 76, 76, 70, 69, 66, 54, 59, 7…
+## $ INS                &lt;fct&gt; Mcr, Mcd, Mng, Mcr, Mng, Mcr, Oth, Uni, Uni, Uni, Mcr, Mng, Mcr, Mng, Mcr, Mcr, Unk, Mcr, Mcr…
+## $ geometry           &lt;POINT [°]&gt; POINT (-122.3492 38.3025), POINT (-118.0174 34.14377), POINT (-117.3641 33.96979), POIN…
+## $ ID                 &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26…
+## $ LST_Day_1km_median &lt;dbl&gt; 36.49, 43.17, 43.43, 36.53, 38.25, 43.45, 39.49, 40.33, 31.19, 40.75, 33.87, 44.23, 36.75, 38…
+## $ lst_quartile       &lt;int&gt; 1, 3, 3, 1, 2, 3, 2, 2, 1, 2, 1, 4, 1, 2, 2, 4, 2, 1, 2, 4, 4, 4, 3, 3, 3, 3, 1, 2, 4, 2, 2, …</code></pre>
 <p>Q10. Tables by event</p>
 <pre class="r"><code>## Create a contingency table of event by walk_quartile
 tab &lt;- table(lst_cancer_nomiss$lst_quartile, lst_cancer_nomiss$event)
