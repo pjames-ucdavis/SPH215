@@ -1,0 +1,225 @@
+---
+title: "Lab 2 In Class"
+author: "Peter James"
+date: "2026-09-30"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r}
+packages <- c("tidygeocoder", "sf", "terra", "tidyverse", "tidycensus", "flextable", "tmap")
+
+installed <- packages %in% rownames(installed.packages())
+
+if (any(!installed)) {
+  install.packages(packages[!installed])
+}
+
+lapply(packages, library, character.only = TRUE)
+```
+
+# Geocoded marijuana dispensaries
+
+```{r}
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/san_francisco_active_marijuana_retailers.csv", "san_francisco_active_marijuana_retailers.csv", mode = "wb")
+
+sf_mj <- read_csv("san_francisco_active_marijuana_retailers.csv")
+
+```
+
+```{r}
+head(sf_mj)  
+head(sf_mj$`Premise Address`)
+```
+
+```{r}
+sf_mj$Premise_Address <- gsub(" County: SAN FRANCISCO",
+                                  "", sf_mj$`Premise Address`)
+head(sf_mj$Premise_Address)
+```
+## Tidygeocoder
+
+```{r}
+sf_mj_geo      <- geocode(sf_mj, "Premise_Address",
+                          method = "osm")
+```
+
+Let's check our data
+```{r}
+head(sf_mj_geo)
+summary(sf_mj_geo$lat)
+summary(sf_mj_geo$long)
+```
+
+Let's try the ArcGIS database
+
+```{r}
+sf_mj_geo_arc <- geocode(sf_mj, "Premise_Address",
+                         method = "arcgis")
+```
+
+Check our data
+```{r}
+head(sf_mj_geo_arc)
+summary(sf_mj_geo_arc$lat)
+summary(sf_mj_geo_arc$long)
+```
+
+Let's map our data!
+```{r}
+plot(sf_mj_geo_arc$long, sf_mj_geo_arc$lat)
+
+```
+
+# Working with cancer point data
+
+Download the cancer data
+
+```{r}
+# Download Cancer Dataset
+download.file("https://raw.githubusercontent.com/pjames-ucdavis/SPH215/refs/heads/main/CAdata.rds", "CAdata.rds", mode = "wb")
+
+# Read in Cancer Dataset
+cancer <- readRDS("CAdata.rds")
+
+summary(cancer)
+```
+
+# Make our cancer dataset spatial
+```{r}
+cancer_points <- st_as_sf(cancer, coords=c("X","Y"))
+```
+
+# CHECK THE CRS
+```{r}
+st_crs(cancer_points)
+```
+
+
+# Add coordinate reference system
+```{r}
+ca_projection <- "+proj=lcc +lat_1=40 +lat_2=41.66666666666666 
+             +lat_0=39.33333333333334 +lon_0=-122 +x_0=2000000 
+             +y_0=500000.0000000002 +ellps=GRS80 
+             +datum=NAD83 +units=m +no_defs"
+
+#Set CRS
+cancer_points_crs <- st_set_crs(cancer_points, ca_projection)
+
+#Look at dataset
+summary(cancer_points_crs) 
+```
+Check our CRS
+```{r}
+st_crs(cancer_points_crs)
+```
+
+# Start working with tmap
+```{r}
+tmap_mode("plot")
+cancer_map <- tm_shape(cancer_points_crs) + tm_dots(size=0.5)
+cancer_map
+```
+```{r}
+cancer_map_small = tm_shape(cancer_points_crs) + 
+  tm_dots(fill = "green", size = 0.3, fill_alpha = 0.5) +
+  tm_basemap("OpenStreetMap")
+cancer_map_small
+```
+
+# visualize by event status
+
+```{r}
+cancer_map_events = tm_shape(cancer_points_crs) + 
+  tm_dots(size=0.3, fill="event", fill.scale=tm_scale_categorical())
+cancer_map_events
+```
+
+change color scheme
+```{r}
+cancer_map_events_rg = tm_shape(cancer_points_crs) + 
+  tm_dots(fill = "event", fill.scale=tm_scale_categorical(values=c("0"="gray","1"="red")))
+cancer_map_events_rg
+```
+
+# Import Census data
+```{r}
+acs2023 <- load_variables(2023, "acs5", cache = TRUE)
+```
+
+```{r}
+View(acs2023)
+```
+
+
+```{r}
+ca <- get_acs(geography = "county", 
+              year = 2023,
+              variables = c(tpopr = "B03002_001", 
+                            nhwhite = "B03002_003", nhblk = "B03002_004", 
+                            nhasn = "B03002_006", hisp = "B03002_012"), 
+              state = "CA",
+              survey = "acs5",
+              output = "wide")
+```
+
+```{r}
+glimpse(ca)
+head(ca)
+```
+
+Bring in external datasets
+```{r}
+setwd("/Users/pjames1/Dropbox/UC Davis Folders/SPH 215 GIS and Public Health/Github_Website/SPH215/")
+ca.pm <- read_csv("PolicyMap Data 2025-03-27 192555 UTC.csv", skip = 1)
+
+glimpse(ca.pm)
+```
+```{r}
+cacounty <- ca %>% 
+      left_join(ca.pm, by = c("GEOID" = "GeoID")) %>%
+      mutate(pwhite = nhwhiteE/tpoprE, pasian = nhasnE/tpoprE, 
+              pblack = nhblkE/tpoprE, phisp = hispE/tpoprE,
+             mhisp = case_when(phisp > 0.5 ~ "Majority",
+                               TRUE ~ "Not Majority")) %>%
+      rename(County = GeoID_Name) %>%
+      select(GEOID, County, pwhite, pasian, pblack, phisp, mhisp, mhhinc)
+glimpse(cacounty)
+```
+```{r}
+cacounty %>%
+  summarize(Mean = mean(mhhinc))
+```
+
+```{r}
+cacounty <- cacounty %>%
+    mutate(region = case_when(County == "Sonoma" | County == "Napa" | 
+                              County == "Solano" | County == "Marin" | 
+                              County == "Contra Costa" | County == "San Francisco" |
+                              County == "San Mateo" | County == "Alameda" | 
+                              County == "Santa Clara" ~ "Bay Area",
+                              County == "Imperial" | County == "Los Angeles" | 
+                              County == "Orange" | County == "Riverside" |
+                              County == "San Diego" | County == "San Bernardino" |
+                              County == "Ventura" ~ "Southern California",
+                              County == "Fresno" | County == "Madera" | 
+                              County == "Mariposa" | County == "Merced" | 
+                              County == "Tulare" | 
+                              County == "Kings" ~ "Central Valley",
+                              County == "Alpine" | County == "Colusa" |
+                              County == "El Dorado" | County == "Glenn" |
+                              County == "Placer" | County == "Sacramento" |
+                              County == "Sutter" | County == "Yolo" |
+                              County == "Yuba" ~ "Capital Region",
+                              TRUE ~ "Rest"))
+```
+
+```{r}
+cacounty %>%
+  group_by(region) %>%
+  summarize(Mean = mean(mhhinc))
+```
+
