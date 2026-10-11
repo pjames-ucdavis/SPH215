@@ -269,10 +269,11 @@ cancer_map_events_rg
 \
 
 One quick note on **tmap** and creating static maps. I mentioned that we can use `tmap_mode("view")` for interactive maps. But often we want static maps (like for every homework in this class). In that case, we will want to use `tmap_mode("plot")`. But "plot" mode will not automatically add a basemap. So we will have to add one manually using `tm_basemap()`. There are a few options for `tm_basemap` including:
-- "Light Gray" = "Esri.WorldGrayCanvas"
-- "Street Map" = "OpenStreetMap"
-- "Topographic" = "Esri.WorldTopoMap"
-- "Satellite" = "Esri.WorldImagery"
+
+* "Light Gray" = "Esri.WorldGrayCanvas"
+* "Street Map" = "OpenStreetMap"
+* "Topographic" = "Esri.WorldTopoMap"
+* "Satellite" = "Esri.WorldImagery"
 
 Pick the one that's the best fit for your data! Here's an example:
 
